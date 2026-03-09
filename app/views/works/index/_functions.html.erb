@@ -1,0 +1,138 @@
+<style>
+    #table_attend_teacher_wrapper .top {
+        display: none !important;
+    }
+</style>
+<div class="mt-2">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="col-md-6">
+                <%= form_tag works_index_path(tab: @tab_names[:functions], lang: session[:lang]), method: :post do %>
+                    <div class="input-group">
+                        <%= text_field_tag :search, params[:search], class: "form-control", id: "function_search", placeholder: "Tìm kiếm" %>
+                        <span class="input-group-text bg-white">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                        </svg>
+                        </span>
+                    </div>
+                <% end %>
+            </div>
+        </div>
+        <div class="col-md-6 d-flex justify-content-end">
+            <%= link_to new_tfunction_path, class: "btn btn-primary", id: "btn-add-function", onclick: "showLoadding(true);", remote: true do %>
+                <i class="fas fa-plus"></i> Thêm chức năng
+            <% end %>
+        </div>
+    </div>
+</div>
+<table id="table_functions" class="table table-customs table-bordered fs--1 mb-0" style="margin-top: 15px !important; margin-bottom: 0px !important">
+    <thead>
+        <tr style="background-color: #EFF2F1;">
+            <th class="no-sort" style="width: 10%;">#</th>
+            <th class="no-sort" style="width: 50%;">Tên chức năng</th>
+            <th class="no-sort" style="width: 30%;">Ghi chú</th>
+            <th class="no-sort" style="width: 10%;">Hành động</th>
+        </tr>
+    </thead>
+    <tbody class="list">
+        <% if @tfunctions.any? %>
+            <% @tfunctions.each_with_index do |tf, index| %>
+                <tr id="function-<%= tf.id %>">
+                    <td><%= (session[:page].to_i - 1) * session[:per_page].to_i + index + 1 %></td>
+                    <td class="text-start"><%= tf.name %></td>
+                    <td class="text-start"><%= tf.sdesc %></td>
+                    <td class="text-center">
+                        <div class="d-flex justify-content-center align-items-center">
+                            <%= link_to edit_tfunction_path(tf), class: 'btn btn-link', onclick: "showLoadding(true);",
+                                        data: { bs_toggle: 'tooltip', bs_placement: 'top', bs_title: 'Chỉnh sửa' },
+                                        remote: true do %>
+                                <i class="text-primary fas fa-pen"></i>
+                            <% end %>
+                            
+                            <%= link_to tfunction_path(tf), class: 'btn btn-link delete-tfunction-btn', 
+                                        method: :delete,
+                                        data: { 
+                                            bs_toggle: 'tooltip', 
+                                            bs_placement: 'top', 
+                                            bs_title: 'Xóa',
+                                            can_delete: tf.can_be_deleted,
+                                            tfunction_name: tf.name,
+                                            tfunction_id: tf.id,
+                                            remote: true
+                                        } do %>
+                                <i class="text-danger fas fa-trash"></i>
+                            <% end %>
+                        </div>
+                    </td>
+                </tr>
+            <% end %>
+        <% else %>
+            <tr>
+                <td colspan="4" class="text-center">Không có dữ liệu</td>
+            </tr>
+        <% end %>
+    </tbody>
+</table>
+
+<div class='d-flex justify-content-between align-items-center mt-3'>
+    <div style="font-size: 14px; font-weight: 400; color: #4E606E;">
+        <%
+            current_page = session[:page]&.to_i || 1
+            per_page = session[:per_page]&.to_i || 10
+            start_record = (current_page - 1) * per_page + 1
+            end_record = [current_page * per_page, @total_records].min
+        %>
+
+        <%=lib_translate('Show')%> <%= start_record %>-<%= end_record %> <%=lib_translate('Up_to')%> <%= @total_records %> <%=lib_translate('Record')%>
+    </div>
+    <div>
+        <%= render_pagination_limit_offset(works_index_path(tab: @tab_names[:functions], lang: session[:lang], per_page: session[:per_page], search: session[:search]), 10, @tfunctions.count).html_safe %>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+
+        document.querySelectorAll('.delete-tfunction-btn').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const canDelete = this.getAttribute('data-can-delete') === 'true';
+                const tfunctionName = this.getAttribute('data-tfunction-name');
+                
+                if (canDelete) {
+                    if (confirm(`Xác nhận xóa chức năng ${tfunctionName}?`)) {
+                        showLoadding(true);
+
+                        const token = $('meta[name="csrf-token"]').attr('content');
+                        
+                        $.ajax({
+                            url: this.getAttribute('href'),
+                            type: 'DELETE',
+                            dataType: 'script',
+                            headers: {
+                                'X-CSRF-Token': token
+                            },
+                            success: function(response) {
+                            },
+                            error: function(xhr) {
+                                showLoadding(false);
+                                alert('Có lỗi xảy ra khi xóa chức năng');
+                            }
+                        });
+                    }
+                } else {
+                    alert("Đối với các chức năng đã được gán nhiệm vụ, hệ thống sẽ không cho phép xóa. Để xóa chức năng, vui lòng xóa toàn bộ các nhiệm vụ liên quan trước.");
+                }
+                
+                return false;
+            });
+        });
+    });
+</script>

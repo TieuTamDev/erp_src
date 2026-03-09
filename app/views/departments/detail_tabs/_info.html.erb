@@ -1,0 +1,171 @@
+<style>
+    .text-style {
+        font-weight: 500;
+        font-size: 16px;
+        color: #333333;
+    }
+</style>
+
+<% if !@is_subdepartment %>
+    <div class="d-flex">
+        <div style="max-width: 50%;min-width: 50%;" class="p-3">
+            <div class="d-flex align-items-center">
+                <h5 style="font-weight: 600;color: #2C7BE5;font-size: 24px;" class="me-3">Thông tin chung</h5><hr class="mb-0 mt-0 navbar-vertical-divider" style="flex-grow: 1;">
+            </div>
+            <div>
+                <div class="mb-2">
+                    <label class="form-label mb-0">Tên đơn vị</label>
+                    <div class="text-style"><%= @department.name%></div>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label mb-0">Mã đơn vị</label>
+                    <div class="text-style"><%= @department.scode%></div>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label mb-0">Loại đơn vị</label>
+                    <div class="text-style"><%= @department.stype%></div>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label mb-0">Tên đơn vị bằng tiếng anh</label>
+                    <div class="text-style"><%= @department.name_en%></div>
+                </div>
+            </div>
+        </div>
+        <div style="max-width: 50%;min-width: 50%;" class="p-3">
+            <div class="d-flex align-items-center">
+                <h5 style="font-weight: 600;color: #2C7BE5;font-size: 24px;" class="me-3">Quản lý đơn vị</h5><hr class="mb-0 mt-0 navbar-vertical-divider" style="flex-grow: 1;">
+            </div>
+            <div>
+                <div class="mb-2">
+                    <label class="form-label mb-0">Trưởng đơn vị</label>
+                    <div class="text-style"><%= @department.leader_name%></div>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label mb-0">Email</label>
+                    <div class="text-style"><%= @department.leader%></div>
+                </div>
+                <div>
+                    <label class="form-label mb-0">Đơn vị chủ quản</label>
+                    <div class="text-style"><%= @department.organization_name%> ( <%= @department.scode%> ) </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="d-flex">
+        <div style="max-width: 50%;min-width: 50%;" class="p-3">
+            <div class="d-flex align-items-center">
+                <h5 style="font-weight: 600;color: #2C7BE5;font-size: 24px;" class="me-3">Thành lập & Xác nhận</h5><hr class="mb-0 mt-0 navbar-vertical-divider" style="flex-grow: 1;">
+            </div>
+            <div>
+                <div class="mb-2">
+                    <label class="form-label mb-0">Ngày thành lập</label>
+                    <div class="text-style"><%= @department.issued_date&.strftime("%d/%m/%Y")%></div>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label mb-0">Quyết định thành lập</label>
+                    <div class="text-style"><%= @department.issue_id%></div>
+                </div>
+                <div>
+                    <label class="form-label mb-0">Kí xác nhận thành lập bởi</label>
+                    <div class="text-style"><%= @department.issued_name%></div>
+                </div>
+            </div>
+        </div>
+        <div style="max-width: 50%;min-width: 50%;" class="p-3">
+            <div class="d-flex align-items-center">
+                <h5 style="font-weight: 600;color: #2C7BE5;font-size: 24px;" class="me-3">Trạng thái & Ghi chú</h5> <hr class="mb-0 mt-0 navbar-vertical-divider" style="flex-grow: 1;">
+            </div>
+            <div>
+                <div class="mb-2">
+                    <label class="form-label mb-0">Trạng thái</label>
+                    <div class="text-style <%= @department.status == '0' ? 'text-success' : 'text-danger'%>">
+                        <%= @department.status == '0' ? 'Hoạt động' : 'Không hoạt động'%>
+                    </div>
+                </div>
+                <div>
+                    <label class="form-label mb-0">Ghi chú</label>
+                    <div class="text-style"><%= @department.note%></div>
+                </div>
+            </div>
+        </div>
+    </div>
+<% else %>
+    <div class="d-flex">
+        <div style="max-width: 50%;min-width: 50%;" class="p-3">
+            <div class="d-flex align-items-center">
+                <h5 style="font-weight: 600;color: #2C7BE5;font-size: 24px;" class="me-3">Thông tin chung</h5><hr class="mb-0 mt-0 navbar-vertical-divider" style="flex-grow: 1;">
+            </div>
+            <div>
+                <div class="mb-2">
+                    <label class="form-label mb-0">Tên nhóm</label>
+                    <div class="text-style"><%= @department.name%></div>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label mb-0">Mã nhóm</label>
+                    <div class="text-style"><%= @department.scode%></div>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label mb-0">Loại nhóm</label>
+                    <div class="text-style"><%= @department.stype%></div>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label mb-0">Tên nhóm bằng tiếng anh</label>
+                    <div class="text-style"><%= @department.name_en%></div>
+                </div>
+            </div>
+        </div>
+        <div style="max-width: 50%;min-width: 50%;" class="p-3">
+            <div class="d-flex align-items-center">
+                <h5 style="font-weight: 600;color: #2C7BE5;font-size: 24px;" class="me-3">Quản lý nhóm</h5><hr class="mb-0 mt-0 navbar-vertical-divider" style="flex-grow: 1;">
+            </div>
+            <div>
+                <div class="mb-2">
+                    <label class="form-label mb-0">Trưởng nhóm</label>
+                    <div class="text-style"><%= @department.leader_name%></div>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label mb-0">Email</label>
+                    <div class="text-style"><%= @department.leader%></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="d-flex">
+        <div style="max-width: 50%;min-width: 50%;" class="p-3">
+            <div class="d-flex align-items-center">
+                <h5 style="font-weight: 600;color: #2C7BE5;font-size: 24px;" class="me-3">Thành lập & Xác nhận</h5><hr class="mb-0 mt-0 navbar-vertical-divider" style="flex-grow: 1;">
+            </div>
+            <div>
+                <div class="mb-2">
+                    <label class="form-label mb-0">Ngày thành lập</label>
+                    <div class="text-style"><%= @department.issued_date&.strftime("%d/%m/%Y")%></div>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label mb-0">Quyết định thành lập</label>
+                    <div class="text-style"><%= @department.issue_id%></div>
+                </div>
+                <div>
+                    <label class="form-label mb-0">Kí xác nhận thành lập bởi</label>
+                    <div class="text-style"><%= @department.issued_name%></div>
+                </div>
+            </div>
+        </div>
+        <div style="max-width: 50%;min-width: 50%;" class="p-3">
+            <div class="d-flex align-items-center">
+                <h5 style="font-weight: 600;color: #2C7BE5;font-size: 24px;" class="me-3">Trạng thái & Ghi chú</h5> <hr class="mb-0 mt-0 navbar-vertical-divider" style="flex-grow: 1;">
+            </div>
+            <div>
+                <div class="mb-2">
+                    <label class="form-label mb-0">Trạng thái</label>
+                    <div class="text-style <%= @department.status == '0' ? 'text-success' : 'text-danger'%>">
+                        <%= @department.status == '0' ? 'Hoạt động' : 'Không hoạt động'%>
+                    </div>
+                </div>
+                <div>
+                    <label class="form-label mb-0">Ghi chú</label>
+                    <div class="text-style"><%= @department.note%></div>
+                </div>
+            </div>
+        </div>
+    </div>
+<% end %>

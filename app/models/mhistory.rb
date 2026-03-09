@@ -1,0 +1,2 @@
+class Mhistory < ApplicationRecord
+end

@@ -1,0 +1,2 @@
+class Tmpcontract < ApplicationRecord
+end

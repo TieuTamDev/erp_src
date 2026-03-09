@@ -1,0 +1,27 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  attend: one
+  dtcheckin: 2025-06-27 14:00:13
+  dtcheckout: 2025-06-27 14:00:13
+  status: MyString
+  reason: MyText
+  owner: MyText
+  docs: MyText
+  approved_at: 2025-06-27 14:00:13
+  approved_by: MyText
+  pic: MyString
+  stype: MyString
+
+two:
+  attend: two
+  dtcheckin: 2025-06-27 14:00:13
+  dtcheckout: 2025-06-27 14:00:13
+  status: MyString
+  reason: MyText
+  owner: MyText
+  docs: MyText
+  approved_at: 2025-06-27 14:00:13
+  approved_by: MyText
+  pic: MyString
+  stype: MyString

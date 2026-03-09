@@ -1,0 +1,904 @@
+<%  stype_text = lib_translate("appointment.#{@stype}")
+    trust_collection_period = (@appointment&.trust_collection_period || Time.now).strftime("%d/%m/%Y")
+    appointment_date = (@appointment&.appointment_date || @appointment&.expected_appointment_date || Time.now).strftime("%d/%m/%Y")
+    user_assigns = @form_data[:assign_users].map{|user| "<option value='#{user.id}'>#{user.last_name} #{user.first_name} (#{user.sid})</option>"}.join
+%>
+<style>
+
+    .valid-survey.invalid .radio-group{
+      border: 1px solid red;
+      border-radius: 4px;
+    }
+    .error-container{
+      display: none;
+    }
+    .valid-survey.invalid .error-container{
+      display: block !important;
+    }
+
+    .radio-wrap:has(input[type="radio"]:checked){
+      background-color: var(--falcon-gray-200);
+      border: 1px solid var(--falcon-input-border-color);
+      border-radius: .25rem;
+    }
+
+    .is-invalid .tox-tinymce {
+      border-color: #dc3545;
+    }
+    
+    .invalid-feedback {
+      display: block;
+      color: #dc3545;
+      margin-top: 0.25rem;
+    }
+
+    .select2-container.is-invalid .select2-selection {
+      border-color: #dc3545 !important;
+    }
+
+    .select2-container + .invalid-feedback {
+      margin-top: 0.25rem;
+    }
+
+    .invalid-feedback.d-block {
+      display: block !important;
+    }
+
+    .card {
+      border-radius: 10px;
+      border: none;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .upload-area {
+      background-color: #e9f0fe;
+      border: 2px dashed #bedaff;
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .upload-area.dragover {
+      background-color: #dce7fd;
+      border-color: #0d6efd;
+    }
+    .upload-area:hover {
+      background-color: #dce7fd;
+    }
+    .upload-icon {
+      color: #0d6efd;
+      font-size: 48px;
+      margin-bottom: 15px;
+    }
+    .file-item {
+      border: 1px solid #f0f0f0;
+      border-radius: 10px;
+      padding: 10px 15px;
+      margin-top: 20px;
+    }
+    .file-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .file-actions button {
+      background: none;
+      border: none;
+      padding: 0;
+    }
+    .file-size {
+      color: #6c757d;
+      font-size: 14px;
+    }
+    .badge-file {
+      background-color: #0d6efd;
+      color: white;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-weight: normal;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .upload-area.drag-over {
+      border-color: #007bff !important;
+      background-color: #f0f8ff !important;
+      border-style: dashed !important;
+      transform: scale(1.02);
+      box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
+    }
+    
+    .upload-area .upload-icon {
+      transition: transform 0.2s ease;
+      margin-bottom: 10px;
+    }
+    
+    .upload-area .upload-icon img {
+      width: 48px;
+      height: 48px;
+      opacity: 0.7;
+    }
+    
+    .upload-area:hover .upload-icon {
+      transform: scale(1.1);
+    }
+    
+    .upload-area p {
+      margin: 10px 0 0 0;
+      color: #666;
+      font-size: 16px;
+      font-weight: 500;
+    }
+    
+    .upload-area.drag-over p {
+      color: #007bff;
+      font-weight: 600;
+    }
+
+    @keyframes uploadSuccess {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+    
+    .upload-area.upload-success {
+      animation: uploadSuccess 0.5s ease;
+      border-color: #28a745;
+      background-color: #f8fff9;
+    }
+
+    .upload-area.uploading {
+      pointer-events: none;
+      opacity: 0.7;
+    }
+    
+    .upload-area.uploading::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 20px;
+      height: 20px;
+      border: 2px solid #007bff;
+      border-top: 2px solid transparent;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      transform: translate(-50%, -50%);
+    }
+    
+    @keyframes spin {
+      0% { transform: translate(-50%, -50%) rotate(0deg); }
+      100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+    
+    .list-group-item:hover {
+      background-color: #f8f9fa;
+      border-color: #007bff;
+    }
+    
+    .action-button {
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+      margin-left: 5px;
+    }
+    
+    .action-button:hover {
+      background-color: #e9ecef;
+      transform: scale(1.1);
+    }
+
+    @media (max-width: 768px) {
+      .upload-area {
+      padding: 30px 15px;
+      }
+      
+      .upload-area .upload-icon img {
+      width: 40px;
+      height: 40px;
+      }
+      
+      .upload-area p {
+      font-size: 14px;
+      }
+    }
+</style>
+<div class="modal-body px-4 pb-3">
+	<div class="accordion border rounded overflow-hidden" id="accordionFaq">
+		<div class="card shadow-none rounded-bottom-0 border-bottom">
+			<div class="accordion-item border-0">
+				<div class="card-header p-0" id="faqAccordionHeading1">
+					<button style="background-color: #f0f2f3;" class="accordion-button btn btn-link text-decoration-none d-block w-100 py-2 px-3 border-0 text-start rounded-0 shadow-none" data-bs-toggle="collapse" data-bs-target="#collapseFaqAccordion1" aria-expanded="true" aria-controls="collapseFaqAccordion1">
+						<span class="fas fa-caret-right accordion-icon me-3" data-fa-transform="shrink-2"></span>
+						<span class="fw-medium font-sans-serif text-900">Thông tin bổ nhiệm</span>
+					</button>
+				</div>
+        <div class="d-flex p-3">
+            <div class="col-md-4 col-12">
+                <label class="form-label text-dark fw-semibold mb-1">Họ và tên cá nhân <%= lib_translate("appointment.#{@form_data[:appointment].stype}").downcase %>:</label>
+                <p class="mb-0">
+                  <%= @form_data[:appointment]&.user&.last_name %>
+                  <%= @form_data[:appointment]&.user&.first_name %>
+                  (<span class="text-muted"><%= @form_data[:appointment]&.user&.sid %></span>)
+                </p>
+            </div>
+            <div class="col-md-4 col-12">
+              <label class="form-label text-dark fw-semibold mb-1">Thuộc đơn vị:</label>
+              <p class="mb-0"><%= @form_data[:appointment]&.department&.name %></p>
+            </div>
+            <div class="col-md-4 col-12">
+              <label class="form-label text-dark fw-semibold mb-1">Vị trí <%= lib_translate("appointment.#{@form_data[:appointment].stype}").downcase %>:</label>
+              <p class="mb-0"><%= @form_data[:appointment]&.positionjob&.name %></p>
+            </div>
+        </div>
+				<div class="accordion-collapse collapse show" id="collapseFaqAccordion1" aria-labelledby="faqAccordionHeading1" data-parent="#accordionFaq">
+          <%= form_tag appointment_path(id: @form_data[:appointment_id]),method: :patch,id:'form-update-process',multipart: true do %>
+            <div class="accordion-body p-3 pt-0" id="input-wrap">
+              <div class="d-flex">
+                <div class="me-3">
+                  <label for="appointment_date" class="form-label text-dark">Thời gian <%= stype_text%> :</label>
+                  <div class="datepicker-container">
+                    <span style="position: relative;" class="outline-element-container">
+                        <input value="<%= appointment_date %>" style="width: fit-content;" maxlength="10" id="appointment_date" type="text" name="appointment_date"
+                        class="form-control flatpickr_appointment_date"
+                        placeholder="dd/mm/yyyy"
+                        objtype="7"
+                        name="action_element"
+                        objindex=""
+                        aria-label="Select Date">
+                    </span>
+                  </div>
+                </div>
+                <div class="me-3">
+                  <label class="form-label text-dark">Đánh giá tín nhiệm:</label>
+                  <div class="valid-survey" id="survey-error-section" name="survey-error-section">
+                    <div class="d-flex radio-group">
+                      <div class="radio-wrap p-1 ps-2 pe-2 me-2" style="cursor: pointer;">
+                        <div class="form-check m-0" style="cursor: pointer;">
+                          <input class="form-check-input" onchange="onCheckSurvey(this)" type="radio" name="is_survey" id="surveyYes" value="YES" style="cursor: pointer;" <%= @appointment.is_survey == "YES" ? 'checked' : '' %>>
+                          <label class="form-check-label m-0" for="surveyYes" style="cursor: pointer;">Đánh giá tín nhiệm</label>
+                        </div>
+                      </div>
+                      <div class="radio-wrap p-1 ps-2 pe-2" style="cursor: pointer;">
+                        <div class="form-check m-0" style="cursor: pointer;">
+                          <input class="form-check-input" onchange="onCheckSurvey(this)" type="radio" name="is_survey" id="surveyNo" value="NO" style="cursor: pointer;" <%= @appointment.is_survey == "NO" ? 'checked' : '' %>>
+                          <label class="form-check-label m-0" for="surveyNo" style="cursor: pointer;">Không đánh giá tín nhiệm</label>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="error-container" style="display:none"><div class="fst-italic invalid-feedback d-block">Vui lòng chọn khảo sát.</div></div>
+                  </div>
+                </div>
+                  <div id="input-trust-collection-wrap">
+                    <% if @appointment.is_survey == "YES" %>
+                        <label for="trust_collection_period" class="form-label text-dark">Thời gian tổng hợp thông tin <%= stype_text%> :</label>
+                        <div class="datepicker-container">
+                            <span style="position: relative;" class="outline-element-container">
+                                <input value="<%= trust_collection_period %>" style="width: fit-content;" maxlength="10" id="trust_collection_period" type="text" name="trust_collection_period"
+                                class="form-control flatpickr_trust_collection_period"
+                                placeholder="dd/mm/yyyy"
+                                objtype="7"
+                                name="action_element"
+                                objindex=""
+                                aria-label="Select Date">
+                            </span>
+                        </div>
+                    <%end%>
+                </div>
+              </div>
+              <div class="card-body p-0">
+                <h5 class="pt-2" style="font-size: 18px; color: #333333;">File đính kèm</h5>
+                <p class="text-secondary m-0">Vui lòng tải file lên không vượt quá 5MB</p>
+                <label class="upload-area mb-3" for="file-upload" style="cursor: pointer;width: 100%;">
+                  <div class="d-flex flex-column align-items-center">
+                    <div class="upload-icon">
+                      <img src="<%= image_path('/assets/image/upload.svg') %>">
+                    </div>
+                    <p class="mb-0">Thả file vào đây</p>
+                  </div>
+                  <input type="file" name="files[]" id="file-upload" class="d-none" accept=".pdf,.doc,.docx,.png" multiple>
+                  <input name="remove_media_ids" id="remove-media-ids" class="d-none">
+                </label>
+                <div class="scrollbar" style="max-height: 297px;">
+                  <ul id="stored-file-list" class="list-group"></ul>
+                  <ul id="file-list" class="list-group"></ul>
+                </div>
+                <p class="text-secondary">Chỉ hỗ trợ tải file pdf,word,png.</p>
+              </div>
+              <div hidden>
+                  <input name="mandocuhandle_id" value="<%= @form_data[:mandocuhandle_id]%>" hidden/>
+                  <input name="appointment_id" value="<%= @form_data[:appointment_id]%>" hidden/>
+                  <input name="status" value="<%= @form_data[:status]%>" hidden/>
+                  <div id="extra-inputs"></div>
+              </div>
+            </div>
+          <%end%>
+				</div>
+			</div>
+		</div>
+		<div class="card shadow-none rounded-0 ">
+			<div class="accordion-item border-0">
+				<div class="card-header p-0" id="faqAccordionHeading15">
+					<button style="background-color: #f0f2f3;" class="accordion-button btn btn-link text-decoration-none d-block w-100 py-2 px-3 border-0 text-start rounded-0 shadow-none" data-bs-toggle="collapse" data-bs-target="#collapseFaqAccordion15" aria-expanded="true" aria-controls="collapseFaqAccordion15">
+						<span class="fas fa-caret-right accordion-icon me-3" data-fa-transform="shrink-2"></span>
+						<span class="fw-medium font-sans-serif text-900">Thông tin nhân sự <%= @form_data[:user] ? @form_data[:user].last_name : "N/A" %> <%= @form_data[:user] ? @form_data[:user].first_name : "" %></span>
+					</button>
+				</div>
+				<div class="accordion-collapse collapse show" id="collapseFaqAccordion15" aria-labelledby="faqAccordionHeading15" data-parent="#accordionFaq">
+					<div class="accordion-body p-0">
+						<div class="card-body py-1">
+							<%= render "appointments/layouts/user_info" %>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal-footer border-0 px-4 pb-4 pt-0">
+	<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+	<%= render "appointments/buttons/submit_buttons"%>
+</div>
+<script>
+
+    var media_temps = [];
+    var stored_medias = <%= @form_data[:mediafiles].to_json.html_safe%> || [];
+    var removeMediaIds = [];
+    
+    flatpickr("#appointment_date", {
+                dateFormat: "d/m/Y",
+                minDate: "today",
+                allowInput: true,
+                defaultDate: null,
+                onReady: function (selectedDates, dateStr, instance) {
+                    instance.input.placeholder = "Chọn thời gian";
+                }
+            });
+
+  function initMediafile() {
+    stored_medias.forEach(doc=>{
+      renderFileItems(null,doc.media_id,doc.file_name,doc.file_size,doc.file_type,"stored-file-list");
+    });
+    let previousFileCount = 0;
+
+    $("#file-upload").on('change',(e)=>{
+      let files = e.target.files;
+      let currentFileCount = files.length;
+  
+      if(currentFileCount === 0) {
+        if(media_temps.length > 0) {
+          setTimeout(() => {
+            updateInputFile();
+          }, 10);
+        }
+        return;
+      }
+
+      if(currentFileCount > 0) {
+        let beforeProcessCount = media_temps.length;
+        
+        fileChangeHandle(files);
+
+        const uploadArea = document.querySelector('.upload-area');
+        const uploadText = uploadArea.querySelector('p');
+        
+        setTimeout(() => {
+          const { validFiles } = validateFiles(Array.from(files));
+          
+          if (validFiles.length > 0) {
+            uploadText.textContent = `Đã thêm ${validFiles.length} file`;
+            uploadArea.classList.add('upload-success');
+            
+            setTimeout(() => {
+              uploadText.textContent = 'Thả file vào đây';
+              uploadArea.classList.remove('upload-success');
+            }, 2000);
+          } else {
+            uploadText.textContent = 'Thả file vào đây';
+          }
+        }, 100);
+
+        previousFileCount = currentFileCount;
+      }
+    });
+
+    let dialogOpened = false;
+    $("#file-upload").on('click', function() {
+      dialogOpened = true;
+      this.setAttribute('data-previous-files', media_temps.length);
+    });
+
+    $("#file-upload").on('focus', function() {
+      if(dialogOpened) {
+        dialogOpened = false;
+      }
+    });
+
+    initDragAndDrop();
+  }
+
+  function initDragAndDrop() {
+    const uploadArea = document.querySelector('.upload-area');
+    const uploadIcon = uploadArea.querySelector('.upload-icon');
+    const uploadText = uploadArea.querySelector('p');
+    
+    // Prevent default drag behaviors
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      uploadArea.addEventListener(eventName, preventDefaults, false);
+      document.body.addEventListener(eventName, preventDefaults, false);
+    });
+
+    // Highlight drop area when item is dragged over it
+    ['dragenter', 'dragover'].forEach(eventName => {
+      uploadArea.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      uploadArea.addEventListener(eventName, unhighlight, false);
+    });
+
+    // Handle dropped files
+    uploadArea.addEventListener('drop', handleDrop, false);
+
+    function preventDefaults(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    function highlight(e) {
+      uploadArea.classList.add('drag-over');
+      uploadArea.style.backgroundColor = '#f0f8ff';
+      uploadArea.style.borderColor = '#007bff';
+      uploadArea.style.borderStyle = 'dashed';
+      uploadText.textContent = 'Thả file tại đây';
+      
+      // Add animation to upload icon
+      if (uploadIcon) {
+        uploadIcon.style.transform = 'scale(1.1)';
+        uploadIcon.style.transition = 'transform 0.2s ease';
+      }
+    }
+
+    function unhighlight(e) {
+      uploadArea.classList.remove('drag-over');
+      uploadArea.style.backgroundColor = '';
+      uploadArea.style.borderColor = '';
+      uploadArea.style.borderStyle = '';
+      uploadText.textContent = 'Thả file vào đây';
+      
+      // Reset upload icon animation
+      if (uploadIcon) {
+        uploadIcon.style.transform = 'scale(1)';
+      }
+    }
+
+    function handleDrop(e) {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      
+      if (files.length > 0) {
+        // Use the same validation logic as regular file input
+        fileChangeHandle(files);
+        
+        // Show success feedback for valid files
+        const uploadArea = document.querySelector('.upload-area');
+        const uploadText = uploadArea.querySelector('p');
+        
+        setTimeout(() => {
+          const { validFiles } = validateFiles(Array.from(files));
+          
+          if (validFiles.length > 0) {
+            uploadText.textContent = `Đã thêm ${validFiles.length} file`;
+            uploadArea.classList.add('upload-success');
+            
+            setTimeout(() => {
+              uploadText.textContent = 'Thả file vào đây';
+              uploadArea.classList.remove('upload-success');
+            }, 2000);
+          } else {
+            uploadText.textContent = 'Thả file vào đây';
+          }
+        }, 100);
+      }
+    }
+  }
+
+  function validateFiles(files) {
+    const allowedTypes = ['.pdf', '.doc', '.docx', '.png'];
+    const allowedMimeTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'image/png'
+    ];
+    
+    let validFiles = [];
+    let invalidFiles = [];
+    let oversizeFiles = [];
+    
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+      const isValidType = allowedTypes.includes(fileExtension) || allowedMimeTypes.includes(file.type);
+      const isValidSize = file.size / (1024 ** 2) <= 5;
+      
+      if (!isValidType) {
+        invalidFiles.push(file.name);
+      } else if (!isValidSize) {
+        oversizeFiles.push(file.name);
+      } else {
+        validFiles.push(file);
+      }
+    }
+    
+    return {
+      validFiles,
+      invalidFiles,
+      oversizeFiles
+    };
+  }
+
+  function fileChangeHandle(files) {
+    // Handle both FileList and Array
+    const fileArray = Array.isArray(files) ? files : Array.from(files);
+    
+    // Validate files using helper function
+    const { validFiles, invalidFiles, oversizeFiles } = validateFiles(fileArray);
+    
+    // Show error messages for invalid files
+    if (invalidFiles.length > 0) {
+      alert(`Các file sau không được hỗ trợ: ${invalidFiles.join(', ')}\nChỉ hỗ trợ file: PDF, Word (.doc, .docx), PNG`);
+    }
+    
+    if (oversizeFiles.length > 0) {
+      alert(`Các file sau có dung lượng vượt quá 5 MB: ${oversizeFiles.join(', ')}\nVui lòng chọn file khác.`);
+    }
+    
+    // Process valid files
+    for (let i = 0; i < validFiles.length; i++) {
+      let file = validFiles[i];
+      let temp_id = generate_id("file-id");
+      
+      media_temps.push({
+        temp_id: temp_id,
+        file: file
+      });
+      renderFileItems(temp_id, null, file.name, file.size, file.type, "file-list");
+    }
+    
+    if (validFiles.length > 0) {
+      updateInputFile();
+    }
+
+    if (invalidFiles.length > 0 || oversizeFiles.length > 0) {
+      setTimeout(() => {
+        updateInputFile();
+      }, 100);
+    }
+  }
+
+  function generate_id(pre) {
+    let ran_num = [1,2,3,4,5,6,7,8,9,0];
+    let s_ran_num = "";
+    for (let i = 0; i < 5; i++) {
+        let index = randomInteger(0,ran_num.length - 1);
+        s_ran_num += ran_num[index];
+    }
+    let time = new Date().valueOf();
+    return `${pre}-${time}-${s_ran_num}`;
+  }
+
+  function randomInteger(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  function renderFileItems(temp_id,doc_id,name,size,type,listID) {
+    let str_size = formatBytes(size);
+    let file_type = getFileType(type,name.split('.').pop());
+    let itemStyle = "";
+    let warning = "";
+
+    let imageUrl = '<%= root_path %>' + 'assets/image/' + `${file_type}.png`;
+    let ul = $("#"+listID);
+
+    let btnPreview = ``;
+    if(doc_id){
+      btnPreview = `<div class="action-button" onclick="clickViewFile('${name}','${type}')" style="padding: 2px 7px;">
+                <img style="width: 20px;" src="<%= image_path("/assets/image/or_eye.svg") %>" alt="Preview">
+              </div>`;
+    }
+    ul.append(`
+        <li data-temp-id="${temp_id}" data-doc-id="${doc_id}" class="list-group-item" style="display:flex;align-items: center;justify-content: space-between;${itemStyle}">
+            <div style="width: 70%;">
+                <div style="display:flex">
+                  <img style="margin-right: 5px;" src="${imageUrl}" alt="file">
+                  <p class="m-0 form-check-label" style="font-size: 0.9em;font-weight:600;text-overflow: ellipsis;overflow: hidden;">${name}</p>
+                </div>
+                <p class="m-0">${str_size} ${warning}</p>
+            </div>
+            <div class="me-2 d-flex align-items-center">
+              ${btnPreview}  
+              <div class="action-button" onclick="removeItemFile('${temp_id}',${doc_id})" style="padding: 2px 7px;">
+                <img style="width: 14px;" src="<%= image_path("/assets/image/or_trash.svg") %>" alt="Delete">
+              </div>
+            </div>
+        </li>`);
+    $(".preview-list-group").html(ul.html());
+    $(".preview-list-group .btn.btn-danger.btn-sm").addClass("d-none");
+  }
+
+  function formatBytes(a,b=2,k=1024){
+    let d=Math.floor(Math.log(a)/Math.log(k));
+    return 0 == a ? "0 Bytes" : parseFloat((a/Math.pow(k,d)).toFixed(Math.max(0,b)))+" "+["Bytes","KB","MB","GB","TB","PB","EB","ZB","YB"][d]
+  }
+
+  function getFileType(type,ext) {
+    if(type != "" && type.trim().length != 0){
+      let types = {
+        "photo":"image/png image/jpg image/jpeg image/webp image/gif image/tiff",
+        "doc":"application/msword application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "excel":"application/vnd.ms-excel application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "power-point":"application/vnd.ms-powerpoint application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        "text":"text/plain",
+        "pdf":"application/pdf",
+        "video":"video/mp4 video/avi video/x-ms-wmv video/quicktime",
+        "zip":"application/zip application/x-zip-compressed"
+      }
+      for (var key in types){
+        if(types[key].includes(type)){
+          return key;
+        }
+      }
+    }else{
+      if(ext == "rar"){
+        return "zip";
+      }
+      return "file";
+    }
+    return "file"
+  }
+
+  function removeItemFile(temp_id,doc_id) {
+    // remove store file
+    if(doc_id){
+      removeMediaIds.push(doc_id);
+      $("#remove-media-ids").val(removeMediaIds.join(','));
+      $(`[data-doc-id="${doc_id}"]`).remove();
+    }else if(temp_id != 'null'){
+        // remove quest temp media
+        let index = media_temps.findIndex(media=>{return media.temp_id == temp_id});
+        if(index >= 0){
+          media_temps.splice(index,1);
+          updateInputFile();
+        }
+        $(`[data-temp-id="${temp_id}"]`).remove();
+    }
+  }
+
+  function clickViewFile(file_name,type) {
+    var type = getFileType(type,"");
+    let file_url = window.location.origin + "/mdata/hrm/" + file_name;
+    switch (type) {
+      case "photo":
+        window.open(file_url, '_blank');
+        break;
+      case "doc":
+        let viewerUrl = `https://view.officeapps.live.com/op/view.aspx?src=${file_url}`;
+        window.open(viewerUrl, '_blank');
+        break;
+      case "pdf":
+        window.open(file_url, '_blank');
+        break;
+      default:
+        break;
+    }
+  }
+
+  function clickDownloadInputFile(temp_id,doc_id) {
+    if(temp_id != "null"){
+      let media = media_temps.find(media=>{return media.temp_id == temp_id});
+      if(media){
+        let url = URL.createObjectURL(media.file);
+        var link = document.getElementById('link-download');
+        link.setAttribute('download', media.file.name);
+        link.setAttribute('href', url);
+        link.click();
+      }
+
+    }else if(doc_id){
+      media_temps.forEach(media=>{
+        if(media.doc_id == doc_id){
+          var link = document.getElementById('link-download');
+          let url = window.location.origin + "/mdata/sftraining/" + media.file_name;
+          link.setAttribute('download', media.file_name);
+          link.setAttribute('href', url);
+          link.click();
+        }
+      });
+    }
+  }
+
+  function renameFile(originalFile, newName) {
+    let ext = originalFile.name.split('.').pop();
+    newName = newName + "." + ext;
+    return new File([originalFile], newName, {
+        type: originalFile.type,
+        lastModified: originalFile.lastModified,
+    });
+  }
+
+  function updateInputFile() {
+    // media data
+    let mediaTransfer = new DataTransfer();
+      media_temps.forEach(media=>{
+          let convert_file = renameFile(media.file,media.temp_id);
+          mediaTransfer.items.add(convert_file);
+      })
+    document.getElementById("file-upload").files = mediaTransfer.files;
+  }
+
+    function initPopups() {
+        $("#popupConfirmForm .modal-content").html(`
+            <div class="modal-header">
+                <h5 class="modal-title m-0"><%= @form_data[:is_user_deputy] ? 'Trình lên Trưởng Phòng' : "Gửi Phó Phòng"%></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="p-2 pb-3">
+                <label class="form-label">Chọn <%= @form_data[:is_user_deputy] ? 'Trưởng phòng' : "Phó Phòng"%></label>
+                <select class="form-select input" id="assign_user_id" name="assign_user_id">
+                <%= user_assigns.html_safe%>
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary close-btn" type="button" data-bs-dismiss="modal">Đóng</button>
+                <button class="btn btn-primary confirm-btn" type="button">Xác nhận</button>
+            </div>
+        `);
+    }
+
+    function clickSubmitAppointProcess(status,result,next_department_id,next_department_scode,next_status) {
+      // valid from
+      if(!ValidForm()){
+        return;
+      }
+      let popupID = "";
+      switch (result) {
+          case "assign":
+              popupID = "#popupConfirmForm";
+              if (<%= !@form_data[:is_user_deputy]%>){
+                  result = "created";
+                  next_status = "<%=@appointment.status %>";
+              }
+              break;
+          case "created":
+              submitUpdate(popupID,status,result,next_department_id,next_department_scode,"<%=@appointment.status %>");
+              return;
+          default:
+              break;
+      }
+      $(".modal").modal("hide");
+      openConfirmPopup(popupID,status,result,next_department_id,next_department_scode,next_status);
+    }
+
+    function openConfirmPopup(popupID,status,result,next_department_id,next_department_scode,next_status) {
+
+        let dialog = $(popupID);
+        dialog.find(".confirm-btn").off().on('click',()=>{
+            submitUpdate(popupID,status,result,next_department_id,next_department_scode,next_status);
+        });
+
+        dialog.modal('show');
+
+        // init popup controls
+        $('#assign_user_id').select2({
+                theme: 'bootstrap-5',
+                language: {
+                    searching: function () {
+                        return 'Đang tìm kiếm...';
+                    },
+                    loadingMore: function () {
+                        return 'Đang tải...';
+                    }
+                },
+                placeholder: 'Chọn nhân viên',
+            });
+    }
+
+    function submitUpdate(popupID,status,result,next_department_id,next_department_scode,next_status) {
+        let updateForm = $("#form-update-process");
+        let wrapinputs = updateForm.find("#extra-inputs");
+        wrapinputs.html("");
+        let inputs = {};
+
+        // popup input
+        let popup = $(popupID);
+        popup.find(".input").each((_,element)=>{
+            let name = element.getAttribute("name");
+            let value = element.value;
+            inputs[name] = value;
+        });
+
+        if(result == "approved"){
+            if(inputs.assign_user_id == ""){
+                alert("Vui lòng chọn người xử lý!");
+                return;
+            }
+        }
+
+        // step data
+        inputs["result"] = result;
+        inputs["next_department_id"] = next_department_id;
+        inputs["next_department_scode"] = next_department_scode;
+        inputs["next_status"] = next_status;
+
+        // append inputs
+        Object.keys(inputs).forEach(key=>{
+            wrapinputs.append(`<input name="${key}" value="${inputs[key]}" hidden/>`);
+        });
+
+        updateForm.submit();
+        popup.modal('hide');
+        showLoadding(true);
+    }
+
+    function onCheckSurvey(input) {
+      $(".valid-survey").toggleClass("invalid",false);
+      renderInputTrustCollection(input.value == "YES");
+    }
+
+    function renderInputTrustCollection(bShow) {
+        let inputWrap = $("#input-trust-collection-wrap");
+        if(bShow){
+            inputWrap.html(`
+                <label for="trust_collection_period" class="form-label text-dark">Thời gian lấy ý kiến khảo sát <%= stype_text%>:</label>
+                <div class="datepicker-container">
+                    <span style="position: relative;" class="outline-element-container">
+                        <input value="<%= trust_collection_period %>" style="width: fit-content;" maxlength="10" id="trust_collection_period" type="text" name="trust_collection_period"
+                        class="form-control flatpickr_trust_collection_period"
+                        placeholder="dd/mm/yyyy"
+                        objtype="7"
+                        name="action_element"
+                        objindex=""
+                        aria-label="Select Date">
+                    </span>
+                </div>
+            `);
+            initDateCollectionSelect();
+        }else{
+            inputWrap.html(``);
+        }
+    }
+
+    function initDateCollectionSelect() {
+        flatpickr("#trust_collection_period", {
+                dateFormat: "d/m/Y",
+                minDate: "today",
+                allowInput: true,
+                defaultDate: null,
+                onReady: function (selectedDates, dateStr, instance) {
+                instance.input.placeholder = "Chọn thời gian";
+                }
+            });
+    }
+    function updateBtnText() {
+        $('button[data-status="propose_creation"][data-result="assign"]').text("<%= @form_data[:is_user_deputy] ? "Trình Trưởng Phòng" : "Gửi Phó Phòng"%>");
+    }
+
+    function ValidForm() {
+      let valid = true;
+      if(!$("#surveyYes").prop('checked') && !$("#surveyNo").prop('checked')){
+        $(".valid-survey").toggleClass("invalid",true);
+        alert("Vui lòng chọn khảo sát.");
+        valid = false;
+      }
+
+      return valid;
+    }
+
+
+    updateBtnText();
+    initMediafile();
+    initPopups();
+    initDateCollectionSelect();
+</script>

@@ -1,0 +1,203 @@
+<%= stylesheet_link_tag '/assets/mystyle/forms.css'%>
+<div class="list_form">
+  <div class="bmtu_header_dashboard">
+    <h3 class="mt-2 overview_text"><%= lib_translate("List_form")  %></h3>
+  </div>
+  <div class="card mb-3">
+    <div class="card-body pt-0">
+      <div class="tab-content">
+        <%# <% if is_access(session["user_id"], "FORMS","ADD") > %>
+          <button onclick="openFormAddform()" class="btn btn-primary btn-add-user mt-3" id="btn-add-user" data-bs-toggle="modal" data-bs-target="#modal-form">
+            <%= lib_translate("Add_form")  %>
+          </button>
+        <%# <% end > %>
+        <div class="tab-pane preview-tab-pane active" role="tabpanel"
+          aria-labelledby="tab-dom-5a3c857c-8deb-4307-af64-a62f27089443"
+          id="dom-5a3c857c-8deb-4307-af64-a62f27089443">
+            <div class="table-responsive scrollbar">
+            <%= render_search_pagination(forms_index_path()).html_safe %>
+              <table id="table_form" class="table table-bordered fs--1 mb-0 table-hover" style="margin-top: 0px !important; margin-bottom: 0px !important">
+                <thead class="bg-200 text-900">
+                  <tr>
+                    <th data-sort="id" style="display: none;">ID</th>
+                    <th class="sort" data-sort="name" style="text-align: center; cursor: pointer;"><%= lib_translate("Name")  %></th>
+                    <th class="sort" data-sort="scode" style="text-align: center; cursor: pointer;"><%= lib_translate("Code")  %></th>
+                    <th class="sort" data-sort="app" style="text-align: center; cursor: pointer;"><%= lib_translate("App")  %></th>
+                    <th class="sort" data-sort="app" style="text-align: center; cursor: pointer;"><%= lib_translate("Note")  %></th>
+                    <th class="sort" data-sort="content" style="text-align: center; cursor: pointer;"><%= lib_translate("content")  %></th>
+                    <th style="text-align: center; cursor: pointer;" class="sort" data-sort="status"><%= lib_translate("Status")  %></th>
+                  <%# <% if (is_access(session["user_id"], "FORMS","EDIT") || is_access(session["user_id"], "FORMS","DEL")) > %>
+                    <th class="no-sort" style="text-align: center"></th>
+                    <%# <% end > %>
+                  </tr>
+                </thead>
+                <tbody class="list">
+                  <% @forms.each do |form| %>
+                      <tr>
+                          <td style="display: none;"> <%= form.id %> </td>
+                          <td class="name"> <%= form.name %> </td>
+                          <td class="scode"> <%= form.scode %> </td>
+                          <td class="app"> <%= form.app %> </td>
+                          <td class="app"> <%= form.note %> </td>
+                          <td class="content"> <%= form.contents %> </td>
+                          <td style="text-align: center" class="status">
+                            <%= (if form.status=="ACTIVE" 
+                              lib_translate("ac_icon")
+                            else 
+                              lib_translate("inac_icon")
+                            end ) %>
+                          </td>
+                          <%# <% if (is_access(session["user_id"], "FORMS","EDIT") || is_access(session["user_id"], "FORMS","DEL")) > %>
+                          <td style="min-width: 100px; text-align: center;">
+                            <%# <% if is_access(session["user_id"], "FORMS","EDIT")> %>
+                              <a class="edit_form" style="text-decoration: none;"
+                                  onclick='openFormUpdateform(
+                                    "<%= form.id %>", 
+                                    "<%= form.name %>", 
+                                    "<%= form.scode %>",
+                                    "<%= form.app %>",
+                                    "<%= form.note %>",
+                                    "<%= form.contents %>",
+                                    "<%= form.status %>")' data-bs-toggle="modal" data-bs-target="#modal-form">
+                                  <span class="text-primary fas fa-edit me-3" style="width: 15px"></span>
+                              </a>
+                            <%# <% end > %>
+                            <% if is_access(session["user_id"], "FORMS","DEL") %>
+                              <!-- Button trigger modal -->
+                              <a data-toggle="modal" data-target="#modal-form-delete-<%= form.id %>" style="cursor: pointer;">
+                                <span class="text-danger fas fa-trash" style="width: 12px;"></span>
+                              </a>
+                              <!-- Modal -->
+                              <div class="modal fade" id="modal-form-delete-<%= form.id %>" tabindex="-1" role="dialog"
+                              aria-labelledby="exampleModalLabel" aria-hidden="true">
+                              <div class="modal-dialog" role="document">
+                                  <div class="modal-content">
+                                  <div class="modal-header">
+                                      <h5 class="modal-title" id="exampleModalLabel"><%= lib_translate("Are_you_sure")  %></h5>
+                                      <button type="button" class="close" data-dismiss="modal" aria-label="Close" style=" border: none;background: none;">
+                                      <span aria-hidden="true" style="font-size: 20px;">&times;</span>
+                                      </button>
+                                  </div>
+                                  <div class="modal-body">
+                                      <%= lib_translate("Are_you_sure_to_delete_this_form")  %><span style="font-weight:bold; color:red;"> <%= form.name %> </span>?
+                                  </div>
+                                  <div class="modal-footer">
+                                      <button type="button" class="btn btn-secondary" data-dismiss="modal"><%= lib_translate("Close")  %></button>
+                                      <%= link_to lib_translate("Delete"), url_for(action: :del, id: form.id), method: :delete, class: "btn btn-danger", id: "btn_delete_form", onclick: "delete_loading_form(this)" %>
+                                      <div id="loading_button_delete_form" class= "btn btn-danger" style="opacity: 0.8; width: 100%; display:none;" >
+                                        <i class ="fa fa-spinner fa-spin"> </i>  <%=lib_translate("Deleting")%> 
+                                      </div>
+                                  </div>
+                                  </div>
+                              </div>
+                              </div>
+                            <% end %>
+                          </td>
+                          <%# <% end > %>
+                      </tr>
+                  <% end %>
+                </tbody>
+              </table>
+              <%= render_pagination_limit_offset(forms_index_path(lang: session[:lang], per_page: session[:per_page], search: session[:search]), 10, @forms.count).html_safe %>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+</div>
+<!-- modal -->
+<div class="modal fade" id="modal-form" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content position-relative">
+      <div class="position-absolute top-0 end-0 mt-2 me-2 z-index-1">
+        <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div class="rounded-top-lg py-3 ps-4 pe-6 bg-light">
+          <h4 class="mb-1" id="cls_bmtu_form_add_title"><%= lib_translate("Create_form")  %></h4>
+        </div>
+        <div class="p-4 pb-0">
+          <div id="error_explanation" class="text-danger" style="text-align: center;font-size: 13px;"></div>
+            <div class="form-add-form">
+              <%= form_for @form, :url=> forms_update_path, html: {method: :post, id:"form_add_form", class:'col-12' } do |f| %>
+                <div class="erro_labble mb-2">
+                    <p style="display:none; color: rgb(197 82 82);border: 1px solid rgb(199 136 136 / 23%);background: rgb(255 54 54 / 16%);border-radius: 5px;padding: 10px"
+                    id="erro_labble_content">
+                    </p>
+                </div>
+                <div class="row mb-3" style="display:none;">
+                  <%= f.label :id, class: "col-sm-4 col-lg-3 col-form-label" %>
+                  <div class="col-sm-8 col-lg-9">
+                        <%= f.text_field :id, class: 'form-control' , name: 'form_id_add', id:  'form_id_add' %>
+                  </div>
+                </div>
+                <div class="row mb-3"> 
+                      <label class="col-sm-4 col-lg-3 col-form-label"><%= lib_translate("Name") %>:</label>
+                  <div class="col-sm-8 col-lg-9">
+                  <%= f.text_field :name, class: 'form-control',  name:'form_name_add',  id:'form_name_add' %>
+                  </div>
+                </div>
+                <div class="row mb-3"> 
+                      <label class="col-sm-4 col-lg-3 col-form-label"><%= lib_translate("Code") %>:</label>
+                  <div class="col-sm-8 col-lg-9">
+                    <%= f.text_field :scode, class: 'form-control' , name: 'form_scode_add' , id: 'form_scode_add'%>
+                  </div>
+                </div>
+                <div class="row mb-3"> 
+                    <label class="col-sm-4 col-lg-3 col-form-label"><%= lib_translate("App") %>:</label>
+                  <div class="col-sm-8 col-lg-9">
+                    <%= f.text_field :app, class: 'form-control' , name: 'form_app_add' , id: 'form_app_add'%>
+                  </div>
+                </div>
+                <div class="row mb-3"> 
+                      <label class="col-sm-4 col-lg-3 col-form-label"><%= lib_translate("note") %>:</label>
+                  <div class="col-sm-8 col-lg-9">
+                    <%= f.text_area :note, class: 'form-control' , name: 'form_note_add' , id: 'form_note_add'%>
+                  </div>
+                </div>
+                <div class="row mb-3"> 
+                      <label class="col-sm-4 col-lg-3 col-form-label"><%= lib_translate("content") %>:</label>
+                  <div class="col-sm-8 col-lg-9">
+                    <%= f.text_area :contents, class: 'form-control' , name: 'form_content_add' , id: 'form_content_add'%>
+                  </div>
+                </div>
+                <fieldset>
+                  <div class="row mb-3" style="align-items: center;">
+                    <label class="col-sm-4 col-lg-3 col-form-label"><%= lib_translate("Status") %>:</label>
+                    <div class="col-sm-8 col-lg-9">
+                      <div class="row">
+                        <div class="col-auto">
+                          <input checked type="radio" id="form_status_active" class="form-check-input" value="ACTIVE" name="form_status_add"/> <label class="form-check-label" for="form_status_active" style="cursor: pointer"> ACTIVE</label>
+                        </div>
+                        <div class="col-auto">
+                          <input  type="radio" id="form_status_inactive" class="form-check-input" value="INACTIVE" name="form_status_add"/> <label class="form-check-label" for="form_status_inactive" style="cursor: pointer"> INACTIVE</label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </fieldset>
+                <div class="modal-footer border-0 p-0 mb-2">
+                  <%= f.submit "" , type:"submit" , id:"btn_add_new_form_buttton",
+                    class: "btn btn-warning border-red border-pink-600 cls-bmtu-text-red md:group-hover:bg-pink-50 btn-block btn-block text-uppercase "%>
+                    <div id="loading_button_form" class= "btn btn-warning border-red border-pink-600 cls-bmtu-text-red md:group-hover:bg-pink-50 btn-block btn-block text-uppercase " style="opacity: 0.8;display:none;" >
+                          <i class ="fa fa-spinner fa-spin"> </i>  <%=lib_translate("Save")%> 
+                    </div>
+                </div>
+              <% end %>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>  
+</div>  
+<%# function form - Hai code %>
+<script>
+  let createform = "<%= lib_translate("Create_form")%>";
+  let updateform = "<%= lib_translate("Update_form")%>";
+</script>
+<%= javascript_include_tag '/assets/myjs/forms.js' %>
+  
+<!-- Dinh Quoc Hai -->
+<%= javascript_include_tag '/assets/lib_hrm/jquery-3.2.1.slim.min.js', integrity: 'sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN', crossorigin: 'anonymous' %>
+<%= javascript_include_tag '/assets/lib_hrm/bootstrap.min.js', integrity: 'sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl', crossorigin: 'anonymous'%>

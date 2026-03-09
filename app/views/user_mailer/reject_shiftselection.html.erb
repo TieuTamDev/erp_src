@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+            background-color: #f9f9f9;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            padding: 10px 18px;
+            border-radius: 5px;
+        }
+
+        h2 {
+            color: #2c3e50;
+        }
+
+        .footer {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #999;
+        }
+        table.data-table {
+            border-collapse: collapse;
+        }
+        table.data-table td, table.data-table th {
+            border: 1px solid #bfbfbf;
+            text-align: center;
+        }
+        table.data-table thead {
+            background: #DDDDDD;
+        }
+        table.data-table thead th {
+            font-weight: normal;
+        }
+            table.data-table tfoot {
+            font-weight: bold;
+        }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2 style="margin-top: 5px;">📢 Thông báo duyệt kế hoạch tuần</h2>
+      <p>Xin chào,<%= @content[:user_full_name]%></p>
+      <p>Kế hoạch làm việc trong tuần <%= @content[:start_date]%> - <%= @content[:end_date]%> đã bị từ chối</p>
+      <p>Lý do: <b><%= @content[:reason]%></b></p>
+      <p style="margin-bottom: 3px;">Kế hoạch chi tiết</p>
+      <table class="data-table">
+        <thead>
+            <tr style="height: 26px;">
+                <th style="width: 43px;">#</th>
+                <th style="width: 150px;">Ngày</th>
+                <th style="width: 120px;">Ca sáng</th>
+                <th style="width: 120px;">Ca chiều</th>
+            </tr>
+        </thead>
+        <tbody>
+            <%
+                works = @content[:works].group_by { |item| item["work_date"] }
+                .transform_values do |items|
+                    sang = items.find { |i| i["start_time"] < "12:00" }
+                    chieu = items.find { |i| i["start_time"] >= "12:00" }
+                    {
+                        sang: sang ? "#{sang['start_time']} - #{sang['end_time']}" : nil,
+                        chieu: chieu ? "#{chieu['start_time']} - #{chieu['end_time']}" : nil
+                    }
+                end
+            %>
+            <%works.each do |key,value|%>
+                <tr style="height: 33px;">
+                    <td><%= index + 1%></td>
+                    <td><%= Date.parse(key).strftime("%d/%m/%Y")%></td>
+                    <td><%= value[:sang]%></td>
+                    <td><%= value[:chieu]%></td>
+                </tr>
+            <%end%>
+        </tbody>
+      </table>
+      <p>Trân trọng,<br/>Hệ thống ERP</p>
+      <div class="footer">
+        Email này được gửi tự động từ hệ thống, vui lòng không phản hồi lại email này.
+      </div>
+    </div>
+  </body>
+</html>

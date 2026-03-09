@@ -1,0 +1,50 @@
+/* line 1, /apps/platform/app/assets/stylesheets/mresizablecolumns.scss */
+.rc-handle-container {
+  position: relative;
+}
+
+/* line 4, /apps/platform/app/assets/stylesheets/mresizablecolumns.scss */
+.rc-handle {
+  position: absolute;
+  width: 7px;
+  cursor: ew-resize;
+  margin-left: -3px;
+  z-index: 2;
+}
+
+/* line 11, /apps/platform/app/assets/stylesheets/mresizablecolumns.scss */
+table.rc-table-resizing {
+  cursor: ew-resize;
+}
+
+/* line 14, /apps/platform/app/assets/stylesheets/mresizablecolumns.scss */
+table.rc-table-resizing thead,
+table.rc-table-resizing thead > th,
+table.rc-table-resizing thead > th > a {
+  cursor: ew-resize;
+}
+
+/* line 21, /apps/platform/app/assets/stylesheets/mresizablecolumns.scss */
+img.ribbon {
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  right: 0;
+  border: 0;
+  cursor: pointer;
+}
+
+/* line 29, /apps/platform/app/assets/stylesheets/mresizablecolumns.scss */
+.container {
+  margin-top: 60px;
+}
+
+/* line 32, /apps/platform/app/assets/stylesheets/mresizablecolumns.scss */
+#actions-column {
+  width: 200px;
+}
+
+/* line 36, /apps/platform/app/assets/stylesheets/mresizablecolumns.scss */
+.th_extension {
+  line-height: inherit !important;
+}

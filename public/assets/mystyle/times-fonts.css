@@ -1,0 +1,122 @@
+p, h1, h2, h3, h4, h5, h6, span {
+    font-family: "Times";
+    margin:0;
+    padding:0;
+    font-size: 13px;
+    line-height: 28px;
+}
+
+body{
+    font-family: "Times";
+    margin:0;
+    padding:0;
+    position: relative;
+    line-height: 28px;
+    font-size: 13px;
+}
+table { 
+    width: 100%; 
+    border-collapse: collapse; 
+}
+
+.bold{
+    font-family:"Times-bold";
+    font-weight: bold
+}
+.italic{
+    font-family:"Times-italic"
+}
+.text-center {
+    text-align: center;
+}
+.text-left {
+    text-align: start;
+}
+.text-right {
+    text-align: end;
+}
+.text-padding {
+    padding-left: 10px;
+}
+table th, table td{
+    padding-left: 5px;
+    padding-right: 5px;
+}
+th p{
+    font-family:"Times-bold";
+    font-weight: bold !important;
+}
+.underline-text {
+    text-decoration: underline;
+}
+.uppercase {
+    text-transform: uppercase;
+}
+
+thead {
+    display: table-row-group;
+}
+
+.mgt-10 {
+    margin-top: 10px;
+}
+.mgt-5 {
+    margin-top: 5px;
+}
+
+
+.mar-10 {
+    margin-top: -10px;
+}
+
+.fs-14{
+    font-size: 14px;
+}
+.fs-13{
+    font-size: 13px;
+}
+.fs-12{
+    font-size: 12px;
+}
+
+.pdl-1em {
+    padding-left: 1em;
+}
+.pdl-2em {
+    padding-left: 2em;
+}
+.pdl-3em {
+    padding-left: 3em;
+}
+.pdl-4em {
+    padding-left: 4em;
+}
+.pdl-5em {
+    padding-left: 5em;
+}
+.page-break-inside-avoid{
+    min-height: 150px;
+    page-break-inside: avoid;
+}
+.page-break-before-always{
+    page-break-before: always;
+}
+.limited-width-money{
+    width: 50px; 
+    max-width: 50px; 
+    word-wrap: break-word; 
+    overflow: hidden;
+}
+.limited-width-text{
+    width: 100px; 
+    max-width: 100px; 
+    min-width: 30px;
+    word-wrap: break-word; 
+    overflow: hidden;
+}
+.limited-width-amount{
+    width: 30px; 
+    max-width: 30px; 
+    word-wrap: break-word; 
+    overflow: hidden;
+}

@@ -1,0 +1,130 @@
+
+  .align-middle {
+    color: #b8b8bd;
+  }
+  #id_add_holiday:hover, #id_cancel_add_holiday:hover{
+    color: var(--falcon-btn-falcon-success-color) !important;
+  }
+  .form-add-holiday {
+    justify-content: center;
+    display: flex;
+    border-radius: 10px;
+  }
+
+  #form-add-holiday-container {
+    background: rgba(0, 0, 0, 0.84);
+    overflow-y: scroll;
+  }
+
+  #form-update-holiday-container {
+    background: rgba(0, 0, 0, 0.84);
+    overflow-y: scroll;
+  }
+
+  #form_add_holiday {
+    width: 80%;
+  }
+
+  #cls_bmtu_form_add_title {
+    font-size: 25px;
+    font-weight: bold;
+    text-align: center;
+  }
+
+  .cls_bmtu_close_btn {
+    width: 100%;
+  }
+
+  .btn-close {
+    text-align: right;
+    color: red;
+  }
+
+  .close_form_add {
+    color: red;
+    font-size: 20px;
+    font-weight: bold;
+  }
+
+  .edit_holiday {
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .img_review img{
+    width: 400px !important;
+    height: 340px !important;
+    padding: 10px;
+    object-fit: contain;
+  }
+
+  .pd-20px{
+    padding-bottom: 20px;
+  }
+  .profile-tab-nav {
+    min-width: 250px;
+    align-items: center;
+  }
+  .img-user-dtail{
+    width: auto;
+    height: auto;
+    margin-top: 70px;
+    margin-left: 50px;
+  }
+
+  .img-user-dtail img{
+    width: 150px !important;
+    height: 150px !important;
+    object-fit: contain;
+
+  }
+
+  .img-user-dtail input{
+    margin-top: 20px;
+    font-weight: bold;
+    margin-left: -20px;
+
+  }
+
+  .edit_work {
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .form-add-work {
+    justify-content: center;
+    display: flex;
+    border-radius: 10px;
+  }
+
+  #form-add-work-container {
+    background: rgba(0, 0, 0, 0.84);
+    overflow-y: scroll;
+  }
+
+  #form-update-work-container {
+    background: rgba(0, 0, 0, 0.84);
+    overflow-y: scroll;
+  }
+
+  #form_add_work {
+    width: 80%;
+  }
+
+  .icon-loading {
+    margin-right: 10px;
+    color: #fff;
+    animation: spin 2s linear;
+  }
+
+  @keyframes spin {
+    0%{
+      transform: rotate(0deg);
+    }
+    100%{
+      transform: rotate(360deg);
+    }
+  }
+
+  input:focus::placeholder {
+    color: transparent;
+  }

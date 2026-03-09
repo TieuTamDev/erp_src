@@ -1,0 +1,392 @@
+<style>
+   input::-ms-reveal,
+  input::-ms-clear {
+    display: none;
+  }
+.main-content{
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  background-image: url('<%= image_path('image_login_bg_capp.jpg') %>');
+  overflow-x: hidden;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+    .container-forgotpw{
+        width: 100%;
+        height: 100vh;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    .form-forgotpw{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        width: 60%;
+        border-radius: 10px;
+        box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px; background-color: white;
+    }
+    .form-resetpw{
+      padding:20px;
+      display: flex;
+      width: 100%;
+      flex-direction: column;
+    }
+    .control-form-forgotpw{
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      width: 100%;
+      justify-content: space-between;
+      padding: 5px 0px;
+    }
+    .control-input-forgotpw{
+        width: 100%;
+    }
+    .cls_bmtu_notiMess_forgotPwr{
+        color: red;
+      }
+    .border-input-reset{
+       border: 1px solid var(--falcon-input-border-color);
+    }
+    button{
+        margin-top: 30px;
+    }
+   
+    .container-popup-forgotpw{
+        width: 100%;
+        height: 100vh;
+        margin: 0px auto;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .form-popup-forgotpw{
+        background-color: white;
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 1px 2px 8px #e3e3
+    }
+
+    .control-option-bottom-forgotpw{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: flex-end;
+    }
+      .bg_login_bmtu {
+    background-image: url('<%= image_path('image_login_bg_capp.jpg') %>');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: left;
+  }
+    @media screen and (max-width: 1110px){
+      .form-forgotpw{
+        width: 80%;
+      }
+    }
+    @media screen and (max-width: 749px){
+      .control-form-forgotpw{
+        padding: 5px 0px;
+      }
+      .form-resetpw {
+        padding: 0px 20px 20px 20px;
+      }
+      .form-forgotpw{
+        flex-direction: column;
+      }
+      .snip1205{
+        width:50%
+      }
+    }
+    @media screen and (max-width: 500px){
+      .control-form-forgotpw{
+        padding: 5px 0px;
+      }
+      .form-forgotpw{
+        flex-direction: column;
+      }
+      .snip1205{
+        width:60%
+      }
+    }
+</style>
+<style>
+  /* Included color classes.. 
+	.red 
+	.blue 
+	.yellow
+	.green
+	.orange
+	.navy 
+*/
+/* Icon set - http://ionicons.com */
+@import url("<%= image_path('ionicons.min.css')%>");
+div.snip1205 {
+  position: relative;
+  overflow: hidden;
+  margin: 10px;
+  text-align: center;
+}
+.snip1205{
+  width:50%
+}
+div.snip1205 img {
+  max-width: 100%;
+  vertical-align: top;
+}
+div.snip1205 i {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border-radius: 50%;
+  font-size: 34px;
+  color: #000000;
+  width: 60px;
+  height: 60px;
+  line-height: 60px;
+  background: #ffffff;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.50);
+  -webkit-transform: translate(-50%, -50%) scale(0);
+  transform: translate(-50%, -50%) scale(0);
+  transition: all 300ms 0ms cubic-bezier(0.6, -0.28, 0.735, 0.045);
+}
+div.snip1205 a {
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  position: absolute;
+}
+
+
+
+div.snip1205:hover img,
+div.snip1205.hover img {
+  opacity: 0.3;
+  /* -webkit-filter: grayscale(100%); */
+  /* filter: grayscale(100%); */
+}
+div.snip1205:hover i,
+div.snip1205.hover i {
+  -webkit-transform: translate(-50%, -50%) scale(1);
+  transform: translate(-50%, -50%) scale(1);
+  transition: all 300ms 100ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+</style>
+<body>
+<%= render partial: "shared/flash"%>    
+<main class="main bg-style-bmtu" id="top">
+  <div class="container-fluid">
+    <div class="row min-vh-100 flex-center g-0">
+      <div class="col-lg-8 col-xxl-5 py-3  position-relative" style="z-index: 0;">
+        <img class="bg-auth-circle-shape top-0" style="right: -8.75rem; left: auto;" src="<%= image_path("bg-shape.png") %>" alt="" width="250">
+        <img class="bg-auth-circle-shape-2" src="<%= image_path("shape-1.png") %>" alt="" width="150">
+        <a class="d-flex flex-center">
+          <img class="" src="<%= image_path("/assets/image/logo.svg")  %>"  width="250"/>
+          <img class="" src="<%= image_path("buhlogo.png") %>" alt="" width="250" />
+        </a>
+        <div class="card overflow-hidden z-index-1">
+          <div class="card-body p-0">
+            <div class="row g-0 h-100">
+              <div class="col-md-5 text-center bg_login_bmtu">
+              </div>
+              <div class="col-md-7 d-flex flex-center">
+                <div class="p-4 p-md-5 flex-grow-1">
+                  <div  style="text-align: center;width: 100%;">
+                    <h3 class="h3" style="color: #dc973f;">
+                        <%= lib_translate('Reset_your_password')%>
+                    </h3>
+                    <p id='txt_notiMess' class=cls_bmtu_notiMess_forgotPwr style="display: none;"></p>
+                </div>
+                  <div class="row justify-content-center">
+                    <div class="col-sm-8 col-md">
+                      <%= form_tag resetpwd_update_path(),:class =>"form-resetpw" do %>
+                        <div class="control-form-forgotpw">
+                          <div class="control-lable-forgotpw">
+                              <label>
+                              <%= lib_translate('New_Password')%> <span style="color: red" class="red">* </span>:
+                              </label>
+                          </div>
+                          <div class="control-input-forgotpw position-relative">
+                              <%= password_field_tag :password,"",:class => "form-control border-input-reset", :name=>"txt_password", :id=>"txt_password"%>
+                              <a style="cursor: pointer;" id="show_pwd">
+                                <i class="fa fa-eye-slash" id="eye1"
+                                  style="position:absolute;right: 25px;bottom: 9px;"></i>
+                              </a>
+                          </div>
+                        </div>
+                        <div class="control-form-forgotpw ">
+                          <div class="control-lable-forgotpw">
+                          
+                              <label>
+                                    <%= lib_translate('Re_Password')%><span style="color: red" class="red">* </span>:
+                              </label>
+                          </div>
+                          <div class="control-input-forgotpw position-relative">
+                              <%= password_field_tag :repassword,"",:class => "form-control border-input-reset", :name=>"txt_repassword", :id=>"txt_repassword"%>
+                              <a style="cursor: pointer;" id="show_re_pwd">
+                                <i class="fa fa-eye-slash" id="eye2"
+                                  style="position:absolute;right: 25px;bottom: 9px;"></i>
+                              </a>
+                          </div>
+                        </div>
+                        <%= button_tag(type: 'submit', class: "btn btn-primary" , id:'btn_submit_changepw') do %>
+                          <span >
+                                <%= lib_translate('Reset')%>
+                          </span>
+                        <%end%>
+
+                      <%end%>
+                      <a class="fs--1 text-600" href="<%= login_path(lang: session[:lang]) %>"><%=lib_translate('go_home')%><span class="d-inline-block ms-1">&rarr;</span></a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+
+
+
+<script>
+  function CheckPassword(inputtxt){ 
+    var decimal=  /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,99}$/;
+    if(inputtxt.match(decimal)){     
+      return true;
+    }
+    else{   
+    return false;
+    }
+  }
+  document.getElementById('btn_submit_changepw').onclick = function (){
+    var newPassword =document.getElementById('txt_password').value;
+    var errorNewPassword = document.getElementById('txt_password');
+
+    var confirmPassword =document.getElementById('txt_repassword').value;
+    var errorConfirmPassword = document.getElementById('txt_repassword');
+    var error = document.getElementById('txt_notiMess');
+
+
+    if (newPassword == "") {
+      if (confirmPassword != "") {
+        errorConfirmPassword.style.border= "1px solid var(--falcon-input-border-color)";
+      }
+      errorNewPassword.style.border= "1px solid red";
+      error.innerHTML = "<%=lib_translate('Check_blank_password')%>";
+      error.style.display="block";
+    }else if (newPassword.length < 8) {
+        error_password.style.border= "1px solid red";
+        error_label.innerHTML = "<%=lib_translate('Check_lenght_password')%>";
+        error_label.style.display="block";
+    }else if (confirmPassword == "") {
+      if (newPassword != "") {
+        errorNewPassword.style.border= "1px solid var(--falcon-input-border-color)";
+      }
+      errorConfirmPassword.style.border= "1px solid red";
+      error.innerHTML = "<%=lib_translate('Check_blank_re_password')%>";
+      error.style.display="block";
+    }else if(CheckPassword(newPassword) == false){
+      errorNewPassword.style.border= "1px solid red";
+      error.innerHTML = "<%=lib_translate('Pwd_vaild_rule')%>";
+      error.style.display="block";
+    }else if(CheckPassword(confirmPassword) == false){
+      errorConfirmPassword.style.border= "1px solid red";
+      error.innerHTML = "<%=lib_translate('Pwd_vaild_rule')%>";
+      error.style.display="block";
+    }else if (confirmPassword != newPassword) {
+      error.innerHTML = "<%=lib_translate('Check_password_not_match')%>";
+      error.style.display="block";
+    }else{
+      errorConfirmPassword.style.border= "1px solid var(--falcon-input-border-color)";
+      errorNewPassword.style.border= "1px solid var(--falcon-input-border-color)";
+    }
+  };
+  document.getElementById("txt_password").onchange =function(){
+    var password= document.getElementById('txt_password').value;
+    var error_password= document.getElementById('txt_password');
+    var cf_password= document.getElementById('txt_repassword').value;
+    var error_label= document.getElementById('txt_notiMess');
+    if (password.length < 8) {
+      error_password.style.border= "1px solid red";
+      error_label.innerHTML = "<%=lib_translate('Check_lenght_password')%>";
+      error_label.style.display="block";
+    }else if(CheckPassword(password) == false){
+      error_password.style.border= "1px solid red";
+      error_label.innerHTML = "<%=lib_translate('Pwd_vaild_rule')%>";
+      error_label.style.display="block";
+    }else{
+      error_password.style.border= "1px solid var(--falcon-input-border-color)";
+      error_label.style.display="none";
+    }
+  }
+  document.getElementById("txt_repassword").onchange =function(){
+    var cf_password= document.getElementById('txt_repassword').value;
+    var error_cf_password= document.getElementById('txt_repassword');
+    var password= document.getElementById('txt_password').value;
+    var error_password= document.getElementById('txt_password');
+
+    var error_label= document.getElementById('txt_notiMess');
+    if (cf_password == "") {
+      error_label.innerHTML = "<%=lib_translate('Check_blank_re_password')%>";
+      error_password.style.border= "1px solid red";
+    }else if(CheckPassword(cf_password) == false){
+      error_cf_password.style.border= "1px solid red";
+      error_label.innerHTML = "<%=lib_translate('Pwd_vaild_rule')%>";
+      error_label.style.display="block";
+    }else{
+      error_cf_password.style.border= "1px solid var(--falcon-input-border-color)";
+      error_label.style.display="none";
+    }
+  };
+
+  const passwordField = document.querySelector("#txt_password");
+const eyeIcon = document.querySelector("#show_pwd");
+eyeIcon.addEventListener("click", function () {
+const type = passwordField.getAttribute("type") === "password" ? "text" : "password";
+passwordField.setAttribute("type", type);
+
+var pwdtype = document.getElementById("txt_password").getAttribute("type");
+var eye1 = document.getElementById('eye1');
+
+
+
+if (pwdtype == "text") {
+  eye1.classList.remove("fa-eye-slash");
+  eye1.classList.add("fa-eye");
+} else {
+  eye1.classList.add("fa-eye-slash");
+  eye1.classList.remove("fa-eye");
+}
+})
+
+const rePasswordField = document.querySelector("#txt_repassword");
+const eyeIcon2 = document.querySelector("#show_re_pwd");
+eyeIcon2.addEventListener("click", function () {
+const type = rePasswordField.getAttribute("type") === "password" ? "text" : "password";
+rePasswordField.setAttribute("type", type);
+
+var pwdtype = document.getElementById("txt_repassword").getAttribute("type");
+var eye2 = document.getElementById('eye2');
+
+if (pwdtype == "text") {
+  eye2.classList.remove("fa-eye-slash");
+  eye2.classList.add("fa-eye");
+} else {
+  eye2.classList.add("fa-eye-slash");
+  eye2.classList.remove("fa-eye");
+}
+})
+</script>

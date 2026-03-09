@@ -1,0 +1,328 @@
+ <style>
+    .content{
+      background-image: url('<%= image_path('image_login_bg_capp.jpg') %>');
+    }
+    .container-forgotpw{
+        width: 100%;
+        height: 100vh;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .form-forgot-pw{
+      padding:20px;
+      display: flex;
+      width: 100%;
+      flex-direction: column;
+    }
+    .control-form-forgotpw{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        width: 100%;
+        justify-content: space-between;
+        padding: 0px 0px 25px 0px;
+    }
+    .cls_bmtu_notiMess_forgotPwr{
+      color: red;
+    }
+    .control-input-forgotpw{
+        width: 100%;
+        
+    }
+    .border-input-forgotpw{
+      border: 2px solid #007bff;
+    }
+    .container-popup-forgotpw{
+        width: 100%;
+        height: 100vh;
+        margin: 0px auto;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .form-popup-forgotpw{
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 1px 2px 8px #e3e3;
+      height: 30%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-evenly;
+    }
+
+    .control-option-bottom-forgotpw{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
+    }
+    @media screen and (max-width: 999px){
+
+    }
+    @media screen and (max-width: 749px){
+      .form-forgot-pw{
+        padding:0px 20px 20px 20px;
+      }
+
+      .snip1205{
+        width:70%
+      }
+    }
+</style>
+
+<style>
+  /* Included color classes.. 
+	.red 
+	.blue 
+	.yellow
+	.green
+	.orange
+	.navy 
+*/
+/* Icon set - http://ionicons.com */
+@import url("<%= image_path('ionicons.min.css')%>");
+div.snip1205 {
+  position: relative;
+  overflow: hidden;
+  margin: 10px;
+  text-align: center;
+}
+.snip1205{
+  width:50%
+}
+div.snip1205 img {
+  max-width: 100%;
+  vertical-align: top;
+}
+div.snip1205 i {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border-radius: 50%;
+  font-size: 34px;
+  color: #000000;
+  width: 60px;
+  height: 60px;
+  line-height: 60px;
+  background: #ffffff;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.50);
+  -webkit-transform: translate(-50%, -50%) scale(0);
+  transform: translate(-50%, -50%) scale(0);
+  transition: all 300ms 0ms cubic-bezier(0.6, -0.28, 0.735, 0.045);
+}
+div.snip1205 a {
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  position: absolute;
+}
+
+
+
+div.snip1205:hover img,
+div.snip1205.hover img {
+  opacity: 0.3;
+  /* -webkit-filter: grayscale(100%); */
+  /* filter: grayscale(100%); */
+}
+div.snip1205:hover i,
+div.snip1205.hover i {
+  -webkit-transform: translate(-50%, -50%) scale(1);
+  transform: translate(-50%, -50%) scale(1);
+  transition: all 300ms 100ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+</style>
+
+<style>
+  .bg_login_bmtu {
+    background-image: url('<%= image_path('image_login_bg_capp.jpg') %>');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: left;
+  }
+  </style>
+
+<main class="main bg-style-bmtu" id="top">
+  <div class="container-fluid">
+    <div class="row min-vh-100 flex-center g-0">
+      <div class="col-lg-8 col-xxl-5 py-3  position-relative" style="z-index: 0;">
+        <img class="bg-auth-circle-shape top-0" style="right: -8.75rem; left: auto;" src="<%= image_path("bg-shape.png") %>" alt="" width="250">
+        <img class="bg-auth-circle-shape-2" src="<%= image_path("shape-1.png") %>" alt="" width="150">
+        <a class="d-flex flex-center">
+          <img class="" src="<%= image_path("/assets/image/logo.svg")  %>"  width="250"/>
+          <img class="" src="<%= image_path("buhlogo.png") %>" alt="" width="250" />
+        </a>
+        <div class="card overflow-hidden z-index-1">
+          <div class="card-body p-0">
+            <div class="row g-0 h-100">
+              <div class="col-md-5 text-center bg_login_bmtu">
+              </div>
+              <div class="col-md-7 d-flex flex-center">
+                <div class="p-4 p-md-5 flex-grow-1">
+                  <div class="">
+                    <h4 class="mb-0" style="color: #dc973f;"><%=lib_translate('Recover_your_password')%> </h4>
+                    <p class="mb-4"><%=lib_translate('Enter_your_email_and_we_will_send_you_a_reset_link')%></p>
+                    <p id='txt_notiMess' class=cls_bmtu_notiMess_forgotPwr style="display: none;"></p>
+                  </div>
+                  <div class="row justify-content-center">
+                    <div class="col-sm-8 col-md">
+                      <%= form_tag forgotpw_info_path(), :class => "mb-3", id: "form-forgotpw" do %>
+                        <label class="form-label" for="card-email"><%= lib_translate("Email") %>:<span style="color: red;">*</span></label>
+                        <%= text_field_tag :email,"",:class => 'form-control', :name => "txt_email",:id => "input-forgotpw"%>
+                        <div class="mb-3"></div> 
+                      <%= button_tag(type:'button',class:"btn btn-danger d-block w-100 mt-3", id:'btn_resetpw') do%>
+                      <span>
+                          <%=lib_translate('Reset_password')%>
+                      </span>
+                  <% end %>
+              <% end %>
+                      
+                      <a class="fs--1 text-600" href="<%= login_path(lang: session[:lang]) %>"><%=lib_translate('go_home')%><span class="d-inline-block ms-1">&rarr;</span></a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div style="width: 100%;height: 100%;position: fixed;top: 0;left: 0;background-color: #1b10107d;display: none;"  id="popup-forgotpw">
+    <div class="container-popup-forgotpw">
+        <div class="form-popup-forgotpw card">
+            <div  style="text-align: left;width: 100%;">
+                <h3 class="h3" id="txt_h3_title">
+                    <%=lib_translate('We_have_send_to_your_email')%>
+                </h3>
+                <p>
+                    <%=lib_translate('Please')%> <a style="font-weight: bold;color: var(--falcon-btn-falcon-info-color);" href="https://accounts.google.com/AccountChooser/signinchooser?service=mail&continue=https%3A%2F%2Fmail.google.com%2Fmail%2F&flowName=GlifWebSignIn&flowEntry=AccountChooser" target="_blank"> <%=lib_translate('Check_your_email')%></a>
+                </p>
+            </div>
+            <div class="control-option-bottom-forgotpw">
+                  <a class="fs--1 text-600" href="<%= dashboards_index_path(lang: session[:lang]) %>"><%=lib_translate('go_home')%><span class="d-inline-block ms-1">&rarr;</span></a>
+                <div>
+                        <%=lib_translate('You_did_not_get_email')%>
+                    <a class="cls_bmtu_Resend_forgotPwr btn btn-primary" onclick="requestCheckMailOrIdCardFrw()"id='id_bmtu_Resend'> <%=lib_translate('Re_send')%></a>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+
+    <script>
+        document.getElementById("btn_resetpw").onclick = function() {
+            var value_input= document.getElementById('input-forgotpw').value.trim();
+            var err_input= document.getElementById('input-forgotpw');
+            var txt_err= document.getElementById('txt_notiMess');
+            if(value_input == ""){
+                document.getElementById('popup-forgotpw').style.display="none";
+                txt_err.innerHTML="<%=lib_translate('Please_enter_your_email')%>";
+                txt_err.style.display="block";
+                err_input.style.border="2px solid red"
+            }else{
+                jQuery.ajax({
+                    data: { value_input:value_input },
+                    type: 'Get',
+                    url: "<%=forgotpw_path()%>",
+                    dataType: "JSON",
+                    success: function (result) {
+                        if(result.valResult == "true"){
+                           document.getElementById("form-forgotpw").submit();
+                            document.getElementById('popup-forgotpw').style.display="block"
+                            document.getElementById('txt_h3_title').innerHTML="<%=lib_translate('We_have_send_to_your_email')%> " + result.email+".";
+                            var nCountCheck = sessionStorage.getItem("ses_nCountCheck");
+                            var timeleft = 20;
+                            if(nCountCheck == 0){
+                    
+                                var downloadTimer = setInterval(function(){
+                                sessionStorage.setItem("ses_nCountCheck", 1);
+                                timeleft--;
+                                document.getElementById("id_bmtu_Resend").innerHTML=`${timeleft}`;
+                    
+                                if (timeleft == 0){
+                                    sessionStorage.setItem("ses_nCountCheck", 0);
+                                    document.getElementById("id_bmtu_Resend").innerHTML="<%=lib_translate('Re_send')%>";
+                                }
+                               
+                                if(timeleft <= 0){
+                                    clearInterval(downloadTimer);
+                                }
+                    
+                                },1000);
+                            }
+                        }else{
+                            document.getElementById('popup-forgotpw').style.display="none";
+                            txt_err.style.display="block";
+                            txt_err.innerHTML="<%=lib_translate('Your_email_dose_not_exist_in_the_system')%>"
+                            err_input.style.border="2px solid red"
+                        }
+                    }
+                });    
+            }
+           
+        };
+        document.getElementById('input-forgotpw').onchange = function(){
+          var value_input= document.getElementById('input-forgotpw').value;
+          var err_input= document.getElementById('input-forgotpw');
+          var txt_err= document.getElementById('txt_notiMess');
+          if(value_input == ""){
+              txt_err.innerHTML="<%=lib_translate('Please_enter_your_email')%>";
+              txt_err.style.display="block";
+              err_input.style.border="2px solid red"
+          }else{
+            txt_err.style.display="none";
+            err_input.style.border="#007bff"
+          }
+        }
+        sessionStorage.setItem("ses_nCountCheck", 0);
+        function requestCheckMailOrIdCardFrw (){
+                var value_input= document.getElementById('input-forgotpw').value;
+                var nCountCheck = sessionStorage.getItem("ses_nCountCheck");
+                var timeleft = 20;
+                if(nCountCheck == 0){
+    
+                    var downloadTimer = setInterval(function(){
+                      sessionStorage.setItem("ses_nCountCheck", 1);
+                      timeleft--;
+                      document.getElementById("id_bmtu_Resend").innerHTML=`${timeleft}`;
+        
+        
+                      if (timeleft == 0){
+                        sessionStorage.setItem("ses_nCountCheck", 0);
+                        document.getElementById("id_bmtu_Resend").innerHTML=("<%=lib_translate('Re_send')%>");
+                        if(value_input ==""){
+                          document.getElementById('popup-forgotpw').style.display="none";
+                          txt_err.innerHTML="<%=lib_translate('Please_enter_your_email')%>";
+                          txt_err.style.display="block";
+                          err_input.style.border="2px solid red"
+                        }else{
+                          jQuery.ajax({
+                            data: {txt_email:value_input},
+                            type: 'Post',
+                            url: "<%=forgotpw_info_path()%>",
+                            dataType: "JSON",
+                            success: function (result) {
+                          }
+                        });
+                        }
+                      }
+                      
+                      if(timeleft <= 0){
+                        clearInterval(downloadTimer);
+                      }
+        
+                    },1000);
+                }
+        }
+</script>
+

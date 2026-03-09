@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Error logs</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f9f9f9;
+      margin: 0;
+      padding: 10px;
+    }
+    h3 {
+      color: #333;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      background-color: #fff;
+    }
+    thead {
+      background-color: #007BFF;
+      color: #fff;
+    }
+    th, td {
+      text-align: left;
+      padding: 10px;
+      border: 1px solid #ddd;
+    }
+    th {
+      font-weight: bold;
+    }
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+    .footer {
+      margin-top: 20px;
+      text-align: center;
+      color: #666;
+      font-size: 14px;
+    }
+    .pagination {
+      display: flex;
+    }
+    .pagination .page-link {
+      display: block;
+      background-color: #3291f7;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      cursor: pointer;
+      border-radius: 4px;
+      text-decoration: unset;
+      margin-right:4px;
+    }
+
+    .pagination .page-link.disabled {
+      background-color: #e5e5e5;
+      pointer-events: none;
+      color: #b5b5b5;
+    }
+
+    .pagination .page-link:hover {
+      background-color: #0056b3;
+    }
+
+    .pagination .current {
+      background-color: #e9e9e9;
+      color: black;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: default;
+      margin-right: 4px;
+      border: 1px solid #c3c3c3;
+    }
+    .refresh{
+      border: 1px solid #adadad;
+      text-decoration: none;
+      color: #767676;
+      border-radius: 5px;
+      padding: 5px;
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+    .refresh:hover{
+      background-color: #fff8ef;
+    }
+    .tab-nav{
+      display:flex;
+      margin-bottom: 12px;
+    }
+    .tab-button{
+      display: block;
+      cursor: default;
+      border-top-left-radius: 4px;
+      border-top-right-radius: 4px;
+      padding: 4px 10px 4px 10px;
+      border-bottom: 3px solid white;
+      font-size: 20px;
+      color: #383838;
+      text-decoration: none;
+    }
+    .tab-button:hover{
+      background-color:#efefef;
+      border-bottom: 3px solid #1e55d1;
+    }
+    .tab-action{
+      background-color:#efefef;
+      border-bottom: 3px solid #1e55d1;
+      font-weight: 600;
+    }
+    :root{
+        --bs-primary: #0d6efd;
+        --bs-primary-hover: #0b5ed7;
+        --bs-secondary: #6c757d;
+        --bs-secondary-hover: #5c636a;
+        --bs-border: #ced4da;
+        --bs-focus: rgba(13,110,253,.25);
+        --bs-body: #212529;
+        --bs-bg: #fff;
+        --bs-radius: .375rem;
+        --bs-input-padding: .375rem .75rem;
+        --bs-font: system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans","Liberation Sans","Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+    }
+    .mb-3{ margin-bottom: 1rem; }
+    .d-flex{ display:flex; }
+    .flex-wrap{ flex-wrap: wrap; }
+    .justify-content-end{ justify-content: flex-end; }
+    .gap-2{ gap: .5rem; }
+    .form-input{
+        display:flex;
+        flex-direction: column;
+        /*min-width: 220px;*/
+    }
+    .form-input label,
+    .form-label{
+        font: 500 14px/1.2 var(--bs-font);
+        color: var(--bs-body);
+        margin-bottom: .375rem;
+    }
+    .form-input input,
+    .form-control{
+        display:block;
+        width:100%;
+        padding: var(--bs-input-padding);
+        font: 400 14px/1.5 var(--bs-font);
+        color: var(--bs-body);
+        background-color: var(--bs-bg);
+        background-clip: padding-box;
+        border: 1px solid var(--bs-border);
+        border-radius: var(--bs-radius);
+        outline: none;
+        transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+        box-sizing: border-box;
+    }
+    .form-input input:focus,
+    .form-control:focus{
+        border-color: var(--bs-primary);
+        box-shadow: 0 0 0 .25rem var(--bs-focus);
+    }
+    .btn{
+        --btn-padding-y: .375rem;
+        --btn-padding-x: .75rem;
+        --btn-font-size: 14px;
+        display:inline-block;
+        font: 500 var(--btn-font-size)/1.5 var(--bs-font);
+        text-align:center;
+        cursor:pointer;
+        user-select:none;
+        padding: var(--btn-padding-y) var(--btn-padding-x);
+        border: 1px solid transparent;
+        border-radius: var(--bs-radius);
+        transition: color .15s ease-in-out, background-color .15s ease-in-out,
+        border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+        text-decoration: none;
+    }
+    .btn:disabled{ opacity:.65; pointer-events:none; }
+    .btn-primary{
+        color:#fff;
+        background-color: var(--bs-primary);
+        border-color: var(--bs-primary);
+    }
+    .btn-primary:hover{
+        background-color: var(--bs-primary-hover);
+        border-color: var(--bs-primary-hover);
+    }
+    .btn-primary:focus{
+        box-shadow: 0 0 0 .25rem var(--bs-focus);
+    }
+    .btn-secondary{
+        color:#fff;
+        background-color: var(--bs-secondary);
+        border-color: var(--bs-secondary);
+    }
+    .btn-secondary:hover{
+        background-color: var(--bs-secondary-hover);
+        border-color: var(--bs-secondary-hover);
+    }
+    .btn-secondary:focus{
+        box-shadow: 0 0 0 .25rem var(--bs-focus);
+    }
+    .actions{
+        display:flex;
+        align-items:end;
+        gap:.5rem;
+    }
+    input[type="datetime-local"]{
+        font: inherit;
+        color: inherit;
+        background-color: var(--bs-bg);
+        border: 1px solid var(--bs-border);
+        border-radius: var(--bs-radius);
+        padding: var(--bs-input-padding);
+        box-sizing: border-box;
+    }
+    input[type="datetime-local"]:focus{
+        border-color: var(--bs-primary);
+        box-shadow: 0 0 0 .25rem var(--bs-focus);
+    }
+    @media (max-width: 575.98px){
+        .form-input{ min-width: 100%; }
+        .actions{ width:100%; justify-content:flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <%
+    persisted = request.query_parameters.symbolize_keys.except(:page) # giữ tất cả params hiện có, bỏ page
+
+    persisted[:tab]  = params[:tab]
+    persisted[:code] = params[:code]
+
+    base_url = dev_errors_path(persisted)
+    start_page = [@page - (@max_pages / 2), 1].max
+    end_page   = [start_page + @max_pages - 1, @total_pages].min
+    start_page = [end_page - @max_pages + 1, 1].max
+
+    pagin = ""
+    if @total_pages > 1
+      pagin = content_tag(:div, class: 'pagination') do
+        [].tap do |links|
+          links << link_to('Đầu', "#{base_url}&page=1", class: "page-link #{@page > 1 ? "" : "disabled"}")
+          links << link_to('Prev', "#{base_url}&page=#{@page - 1}", class: "page-link #{@page > 1 ? "" : "disabled"}")
+
+          (start_page..end_page).each do |page|
+            if page == @page
+              links << content_tag(:span, page, class: 'current')
+            else
+              links << link_to(page, "#{base_url}&page=#{page}", class: 'page-link')
+            end
+          end
+
+          links << link_to('Next', "#{base_url}&page=#{@page + 1}", class: "page-link #{@page < @total_pages ? "" : "disabled"}")
+          links << link_to('Cuối', "#{base_url}&page=#{@total_pages}", class: "page-link #{@page < @total_pages ? "" : "disabled"}")
+        end.join.html_safe
+      end
+    end
+  %>
+  <h3>System Error Logs. Admin Only <%= link_to "Refresh", dev_errors_path(tab: params[:tab],code: params[:code]),class:"refresh" %></h3>
+  <div class="tab-nav">
+    <a href="<%= dev_errors_path(tab:"error", code: params[:code])%>" class="tab-button <%= @tab == 'error' ? 'tab-action': ''%>">Errors</a>
+    <a href="<%= dev_errors_path(tab:"syslog", code: params[:code])%>" class="tab-button <%= @tab == 'syslog' ? 'tab-action': ''%>">Syslogs</a>
+  </div>
+  <% if @tab == "error"%>
+  <div id="tab-errors" class="container">
+    <%= pagin%>
+    <table id="error-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Message</th>
+          <th>Detail</th>
+          <th>User ID/Name</th>
+          <th>Request URL</th>
+          <th>Date time</th>
+        </tr>
+      </thead>
+        <tbody>
+          <% if @logs.any? %>
+            <% @logs.each do |log| %>
+            <tr>
+              <td><%= log.id %></td>
+              <td style="color: #1f81d9;"><%= log.msg %></td>
+              <td style="color: #d32828;"><%= log.msgdetails %></td>
+              <td><%= log.owner %></td>
+              <td><%= log.surl %></td>
+              <td><%= log.dtaccess&.strftime("%d/%m/%Y %H:%M:%S") %></td>
+            </tr>
+            <% end %>
+          <% else %>
+              <tr>
+                <td colspan="7" style="text-align: center; color: #888;">No errors logged yet.</td>
+              </tr>
+          <% end %>
+        </tbody>
+    </table>
+    <%= pagin%>
+  </div>
+  <%else%>
+  <div id="tab-perfomance" class="container">
+    <form class="mb-3" method="get" action="<%= dev_errors_path %>">
+      <input type="hidden" name="tab"  value="syslog">
+      <input type="hidden" name="code" value="<%= params[:code] %>">
+      <input type="hidden" name="dtstart_from" value="<%= @dtstart_from_iso.to_s %>">
+      <div class="d-flex flex-wrap justify-content-end gap-2">
+        <div class="form-input" style="max-width: 300px;">
+          <label>User email</label>
+          <input type="text" name="user_email" value="<%= params[:user_email].to_s %>">
+        </div>
+        <div class="form-input" style="max-width: 400px; min-width: 300px">
+          <label>Path</label>
+          <input type="text" name="spath" value="<%= params[:spath].to_s %>">
+        </div>
+        <div class="form-input" style="max-width: 400px; min-width: 300px">
+          <label>Action</label>
+          <input type="text" name="saction_name" value="<%= params[:saction_name].to_s %>">
+        </div>
+        <div class="form-input" style="max-width: 150px;">
+          <label for="dtstart_date">Start date</label>
+          <input
+            type="date"
+            id="dtstart_date"
+            name="dtstart_date"
+            value="<%= @dtstart_date_iso.to_s %>">
+        </div>
+        <div class="form-input" style="max-width: 150px;">
+          <label for="dtstart_time">Time</label>
+          <input
+            type="time"
+            id="dtstart_time"
+            name="dtstart_time"
+            step="60"
+            value="<%= @dtstart_time_display.to_s %>">
+        </div>
+        <div class="form-input" style="max-width: 100px;">
+          <label>Min Total</label>
+          <input type="text" name="min_note" value="<%= params[:min_note].to_s %>">
+        </div>
+        <div class="actions">
+          <button type="submit" class="btn btn-primary">Lọc</button>
+          <a class="btn btn-secondary" href="<%= dev_errors_path(tab: 'syslog', code: params[:code]) %>">Xóa lọc</a>
+        </div>
+      </div>
+    </form>
+      <table id="error-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>User</th>
+            <th>Path</th>
+            <th>Action</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Total(s)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if @logs.any? %>
+            <% @logs.each do |log| %>
+            <tr>
+              <td><%= log.id %></td>
+              <td><%= log.user_name %>/<%= log.user_email%></td>
+              <td><%= log.spath %></td>
+              <td><%= log.saction_name %></td>
+              <td><%= log.dtstart&.strftime("%d/%m/%Y %H:%M:%S") %></td>
+              <td><%= log.dtend&.strftime("%d/%m/%Y %H:%M:%S") %></td>
+              <td><%= log.note %></td>
+            </tr>
+            <% end %>
+          <% else %>
+            <tr>
+              <td colspan="7" style="text-align: center; color: #888;">No sys logged yet.</td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <%= pagin%>
+  </div>
+  <%end%>
+</body>
+</html>

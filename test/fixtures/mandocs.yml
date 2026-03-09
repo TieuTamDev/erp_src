@@ -1,0 +1,35 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  type_book: MyString
+  sno: MyString
+  ssymbol: MyString
+  stype: MyString
+  signed_by: MyString
+  contents: 
+  notes: 
+  slink: MyString
+  created_by: MyString
+  effective_date: 2023-02-02 01:00:16
+  spriority: MyString
+  number_pages: MyString
+  deadline: 2023-02-02 01:00:16
+  received_at: 2023-02-02 01:00:16
+  status: MyString
+
+two:
+  type_book: MyString
+  sno: MyString
+  ssymbol: MyString
+  stype: MyString
+  signed_by: MyString
+  contents: 
+  notes: 
+  slink: MyString
+  created_by: MyString
+  effective_date: 2023-02-02 01:00:16
+  spriority: MyString
+  number_pages: MyString
+  deadline: 2023-02-02 01:00:16
+  received_at: 2023-02-02 01:00:16
+  status: MyString

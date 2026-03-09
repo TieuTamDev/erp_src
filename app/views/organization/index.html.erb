@@ -1,0 +1,186 @@
+<%= stylesheet_link_tag '/assets/mystyle/orgazination_style.css'%>
+
+<div class="list_ORGANIZATION">
+  <div class="bmtu_header_dashboard">
+    <h3 class="mt-2 overview_text"><%= lib_translate("Organization_list")  %></h3>
+  </div>
+  <div class="card mb-3">
+    <div class="card-body pt-0">
+      <div class="tab-content">
+      <% if is_access(session["user_id"], "ORGANIZATION","ADD") %>
+          <button onclick="openFormAddOrganization()" class="btn btn-primary btn-add-user mt-3" id="btn-add-user" data-bs-toggle="modal" data-bs-target="#modal-organization">
+                  <%= lib_translate("Add_organization")  %>
+          </button>
+        <% end %>
+        <div class="tab-pane preview-tab-pane active" role="tabpanel"
+          aria-labelledby="tab-dom-5a3c857c-8deb-4307-af64-a62f27089443"
+          id="dom-5a3c857c-8deb-4307-af64-a62f27089443">
+            <div class="table-responsive scrollbar table-organization">
+            <%= render_search_pagination(organization_index_path()).html_safe %>
+              <table id="table_organization" class="table table-bordered fs--1 mb-0 table-hover" style="margin-top: 0px !important; margin-bottom: 0px !important">
+                <thead class="bg-200 text-900">
+                  <tr>
+                    <th data-sort="id" class="d-none" >ID</th>
+                    <th class="sort" data-sort="name"><%= lib_translate("Name_organization")  %></th>
+                    <th class="sort" data-sort="scode"><%= lib_translate("Scode_organization")  %></th>
+                    <th class="sort" data-sort="status"><%= lib_translate("Status")  %></th>
+                  <% if (is_access(session["user_id"], "ORGANIZATION","EDIT") || is_access(session["user_id"], "ORGANIZATION","DEL")) %>
+                      <th class="no-sort"></th>
+                    <% end %>
+                  </tr>
+                </thead>
+                <tbody class="list">
+                  <% @organizations.each do |organization|%>
+                    <tr>
+                          <td class="d-none">
+                              <%= organization.id %>
+                          </td>
+                          <td class="name" >
+                                <%= organization.name %>
+                          </td>
+                          <td class="scode">
+                              <%= organization.scode %>
+                          </td>
+
+                          <td  class="status text-center">
+                            <%= (if organization.status=="ACTIVE" 
+                              lib_translate("ac_icon")
+                            else 
+                              lib_translate("inac_icon")
+                            end ) %>
+                          </td>
+                          <% if (is_access(session["user_id"], "ORGANIZATION","EDIT") || is_access(session["user_id"], "ORGANIZATION","DEL")) %>
+                          <td style="min-width: 100px; text-align: center;">
+                              <% if is_access(session["user_id"], "ORGANIZATION","EDIT") %>
+                              <a class="edit_organization" style="text-decoration: none; cursor:pointer;"
+                                onclick="openFormUpdateOrganization('<%= organization.id %>', '<%= organization.name %>', '<%= organization.scode %>', '<%= organization.status %>')" data-bs-toggle="modal" data-bs-target="#modal-organization">
+                                <span class="text-primary fas fa-edit me-3 " style="width: 15px"></span>
+                              </a>
+                              <% end %>
+                              <% if is_access(session["user_id"], "ORGANIZATION","DEL") %>
+                              
+                              <a data-bs-toggle="modal" data-bs-target="#modal-organization-delete-<%= organization.id %>" style="cursor: pointer;">
+                              <span class="text-danger fas fa-trash" style="width: 12px;"></span>
+                              </a>
+                              <div class="modal fade" id="modal-organization-delete-<%= organization.id %>" >
+                              <div class="modal-dialog" role="document">
+                                  <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalLabel"><%= lib_translate("Are_you_sure")  %></h5>
+                                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close" style=" border: none;background: none;">
+                                        <span aria-hidden="true" style="font-size: 20px;">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <%= lib_translate("mes_delete_organization")  %><span style="font-weight:bold; color:red;"> <%= organization.name %> </span>?
+                                    </div>
+                                    <div class="modal-footer">
+                                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><%= lib_translate("Close")  %></button>
+                                      <%= link_to lib_translate("Delete"), url_for(action: :del, id: organization.id), method: :delete, class: "btn btn-danger", onclick: "delete_loading_organization(this)" %>
+                                      <div class= "btn btn-danger" style="opacity: 0.8; display:none;" >
+                                        <i class ="fa fa-spinner fa-spin"> </i>  <%=lib_translate("Deleting")%> 
+                                      </div>
+                                    </div>
+                                  </div>
+                              </div>
+                            </div>
+                            <% end %>
+                              <!-- Button trigger modal -->
+                             
+                          </td>
+                        <% end %>
+
+                          
+                      </tr>
+                  <%end%>
+                </tbody>
+              </table>
+              <%= render_pagination_limit_offset(organization_index_path(lang: session[:lang], per_page: session[:per_page], search: session[:search]), 10, @organizations.count).html_safe %>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+</div>
+
+
+
+<!-- modal -->
+<div class="modal fade" id="modal-organization" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content position-relative">
+      <div class="position-absolute top-0 end-0 mt-2 me-2 z-index-1">
+        <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0">
+        
+        <div class="rounded-top-lg py-3 ps-4 pe-6 bg-light">
+          <h4 class="mb-1" id="cls_bmtu_form_add_title"></h4>
+        </div>
+        <div class="p-4 pb-0">
+          <div id="error_explanation" class="text-danger" style="text-align: center;font-size: 13px;"></div>
+          <div class="form-add-organization">
+            <%= form_for @organization, :url=> organization_update_path, html: {method: :post, id:"form_add_organization", class:'col-12' } do |f| %>
+              <div class="erro_labble mb-2">
+                <p style="display:none; color: rgb(197 82 82);border: 1px solid rgb(199 136 136 / 23%);background: rgb(255 54 54 / 16%);border-radius: 5px;padding: 10px"
+                id="erro_labble_content">
+                </p>
+              </div>
+              <div class="row mb-3" style="display:none;">
+                <%= f.label :id, class: "col-sm-4 col-lg-3 col-form-label" %>
+                <div class="col-sm-8 col-lg-9">
+                      <%= f.text_field :id, class: 'form-control' , name: 'organization_id', id: 'organization_id' %>
+                </div>
+              </div>
+              <div class="row mb-3"> 
+                    <label class="col-sm-5 col-lg-4 col-form-label" for="inputEmail3"><%= lib_translate("Name_organization") %>:</label>
+                <div class="col-sm-7 col-lg-8">
+                <%= f.text_field :name, class: 'form-control',  name:'organization_name_add', id: 'organization_name_add' %>
+                </div>
+              </div>
+              <div class="row mb-3"> 
+                    <label class="col-sm-5 col-lg-4 col-form-label" for="inputEmail3"><%= lib_translate("Scode_organization") %>:</label>
+                <div class="col-sm-7 col-lg-8">
+                  <%= f.text_field :scode, class: 'form-control' , name: 'organization_scode_add',id:'organization_scode_add' %>
+                </div>
+              </div>
+              <fieldset>
+                <div class="row mb-3" style="align-items: center;">
+                  <label class="col-sm-5 col-lg-4 col-form-label" for="inputEmail3"><%= lib_translate("Status") %>:</label>
+                  <div class="col-sm-7 col-lg-8">
+                    <div class="row">
+                      <div class="col-auto">
+                        <input checked type="radio" id="organization_status_active" class="form-check-input" value="ACTIVE" name="organization_status_add" /> <label class="form-check-label" for="organization_status_active" style="cursor: pointer"> ACTIVE</label>
+                      </div>
+                      <div class="col-auto">
+                        <input  type="radio" id="organization_status_inactive" class="form-check-input" value="INACTIVE" name="organization_status_add" /> <label class="form-check-label" for="organization_status_inactive" style="cursor: pointer"> INACTIVE</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </fieldset>
+              <div class="modal-footer border-0 p-0 mb-2">
+                 <%= f.submit "" , type:"submit" , id:"btn_add_new_organization_buttton",
+                  class: "btn btn-warning border-red border-pink-600 cls-bmtu-text-red md:group-hover:bg-pink-50 btn-block btn-block text-uppercase "%>
+                  <div id="loading_button_organization" class= "btn btn-warning border-red border-pink-600 cls-bmtu-text-red md:group-hover:bg-pink-50 btn-block btn-block text-uppercase " style="opacity: 0.8;display:none;" >
+                        <i class ="fa fa-spinner fa-spin"> </i>  <%=lib_translate("Save")%> 
+                  </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let title_add= "<%= lib_translate('Create_organization')%>";
+  let title_update= "<%= lib_translate('Update_organization')%>";
+  let mess_del= "<%= lib_translate("mes_delete_organization")%>";
+  let action_del ="<%= url_for(action: :del)%>";
+</script>
+<%= javascript_include_tag '/assets/myjs/organization.js' %>
+

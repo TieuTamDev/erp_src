@@ -1,0 +1,192 @@
+<style>
+  .select2-container .select2-selection--single.is-invalid,
+  .select2-container .select2-selection--multiple.is-invalid {
+      border-color: #dc3545 !important;
+  }
+</style>
+
+<%= form_tag assign_submit_appointments_path, method: :post, id: "assignUserSubmit" do %>
+  <div class="modal-body p-0">
+    <div class="p-4">
+      <div class="row">
+        <div class="mb-3">
+          <label for="recipient_user_id" class="form-label text-dark">Người xử lý</label>
+          <select class="form-select" id="recipient_user_id" name="recipient_user_id">
+          </select>
+          <div id="recipient_user_id_error" class="invalid-feedback" style="display: none;">
+            Vui lòng chọn người xử lý
+          </div>
+        </div>
+      </div>
+      <%= hidden_field_tag :next_department_id, @form_data[:stream_datas].find { |data| data[:result] == 'assign' }&.dig(:next_department_id) %>
+      <%= hidden_field_tag :next_status, @form_data[:stream_datas].find { |data| data[:result] == 'assign' }&.dig(:next_status) %>
+      <%= hidden_field_tag :appointment_id, @form_data[:appointment_id] %>
+      <%= hidden_field_tag :mandocuhandle_id, @form_data[:mandocuhandle_id] %>
+      <%= hidden_field_tag :result, @form_data[:stream_datas].find { |data| data[:result] == 'assign' }&.dig(:result) %>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Đóng</button>
+    <button class="btn btn-primary" type="button" id="confirm_button" onclick="this.disabled=true; this.innerHTML='Đang xử lý...';">Đồng ý</button>
+  </div>
+<% end %>
+
+<script>
+  var nextDepartmentId = `<%= @form_data[:stream_datas].find { |data| data[:result] == 'assign' }&.dig(:next_department_id) %>`;
+
+  $(document).ready(function () {
+    function setDefaultValue(selectId, url, formatItem) {
+      $.ajax({
+        url: url,
+        type: "GET",
+        data: { page: 1 },
+        success: function (data) {
+          if (data.items.length > 0) {
+            let firstItem = data.items[0];
+            let displayText = formatItem ? formatItem(firstItem) : firstItem.name;
+            // Thêm option vào select
+            let newOption = new Option(displayText, firstItem.id, true, true);
+            $(selectId).append(newOption);
+            // Cập nhật giá trị cho Select2
+            $(selectId).val(firstItem.id).trigger('change');
+          }
+        }
+      });
+    }
+
+    // Khởi tạo Select2 trước
+    $('#recipient_user_id').select2({
+      theme: 'bootstrap-5',
+      language: {
+        searching: function () {
+          return 'Đang tìm kiếm...';
+        },
+        loadingMore: function () {
+          return 'Đang tải...';
+        }
+      },
+      placeholder: 'Chọn người xử lý ...',
+      ajax: {
+        delay: 1000,
+        url: `<%= @ROOT_PATH%>/appointments/get_users`,
+        data: function (params) {
+          return {
+            search: params.term,
+            department_id: nextDepartmentId,
+            staff_type: 1  // chỉ lấy nhân viên
+          };
+        },
+        processResults: function (data, params) {
+          let results = data.items.map(function (item) {
+            return { id: item.id, text: `${item.last_name} ${item.first_name} (${item.sid})` };
+          });
+          return {
+            results: results
+          };
+        }
+      }
+    });
+
+    $("#recipient_user_id").on("change", function () {
+      let departmentId = nextDepartmentId;
+      if (departmentId) {
+        setDefaultValue("#manager", `<%= @ROOT_PATH%>/appointments/get_users?department_id=${departmentId}`, 
+          function (item) {
+            return `${item.last_name} ${item.first_name} (${item.sid})`;
+          }
+        );
+      }
+      // Xóa trạng thái lỗi
+      $("#recipient_user_id").removeClass("is-invalid");
+      $("#recipient_user_id").next('.select2-container').find('.select2-selection').removeClass("is-invalid");
+      $("#recipient_user_id_error").hide();
+    });
+
+    // Validate khi bấm nút "Đồng ý"
+    $("#confirm_button").on("click", function () {
+      let selectedValue = $("#recipient_user_id").val();
+      let button = this;
+
+      if (!selectedValue || selectedValue === "") {
+        button.disabled = false;
+        button.innerHTML = 'Đồng ý';
+
+        $("#recipient_user_id").addClass("is-invalid");
+        $("#recipient_user_id").next('.select2-container').find('.select2-selection').addClass("is-invalid");
+        $("#recipient_user_id_error").show();
+      } else {
+        $("#recipient_user_id").removeClass("is-invalid");
+        $("#recipient_user_id").next('.select2-container').find('.select2-selection').removeClass("is-invalid");
+        $("#recipient_user_id_error").hide();
+
+        // Gửi form nếu không có lỗi
+        let formData = {
+          recipient_user_id: selectedValue,
+          next_department_id: $('[name="next_department_id"]').val(),
+          appointment_id: $('[name="appointment_id"]').val(),
+          mandocuhandle_id: $('[name="mandocuhandle_id"]').val(),
+          next_status: $('[name="next_status"]').val(),
+          result: $('[name="result"]').val()
+        };
+
+        showLoading(true);
+
+        $.ajax({
+          url: '<%= assign_submit_appointments_path %>',
+          type: 'POST',
+          data: formData,
+          dataType: 'json',
+          success: function (response) {
+            showLoading(false);
+            if (response.status === 'success') {
+              showFlash('success', response.message);
+              $('.modal.show').each(function () {
+                $(this).modal('hide');
+              });
+
+              $('.modal').on('hidden.bs.modal', function () {
+                if (!$(this).data('refresh-done')) {
+                  $(this).data('refresh-done', true);
+                  $('#refresh-btn').click();
+                }
+              });
+            } else {
+              showFlash('error', response.message);
+            }
+          },
+          error: function (xhr, status, error) {
+            showLoading(false);
+            button.disabled = false;
+            button.innerHTML = 'Đồng ý';
+            showFlash('error', 'Đã xảy ra lỗi khi gửi yêu cầu');
+          }
+        });
+      }
+    });
+  });
+
+  function showFlash(type, message) {
+    let alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+    let flashHtml = `
+      <div class="alert_show alert ${alertClass} alert-dismissible fade show" role="alert">
+        <span class="me-5">${message}</span>
+        <button class="btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    `;
+  
+    $('.alert_show').remove();
+    $('body').prepend(flashHtml);
+  
+    setTimeout(function() {
+      $(".alert_show").fadeOut();
+    }, 5000);
+  }
+
+  function showLoading(bShow) {
+    if(bShow) {
+        $("#loading_handle").css("display", "flex");
+    } else {
+        $("#loading_handle").css("display", "none");
+    }
+  };
+</script>

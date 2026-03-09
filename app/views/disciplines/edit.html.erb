@@ -1,0 +1,693 @@
+<!-- style -->
+<% content_for :head do %>
+  <%= stylesheet_link_tag "select2-bootstrap-5-theme.min" %>
+  <%= stylesheet_link_tag "select2.min" %>
+  <%= stylesheet_link_tag "prism-okaidia" %> 
+  <%= stylesheet_link_tag '/assets/lib_hrm/bootstrap-datetimepicker.min.css' %>  
+  <%= stylesheet_link_tag 'jquery-ui.css' %>  
+  <%= stylesheet_link_tag '/assets/lib_hrm/font-open-sans.css' %> 
+  <%= stylesheet_link_tag '/assets/lib_hrm/style_user_details.css' %>
+  
+
+  <%= stylesheet_link_tag "prism-okaidia" %>
+
+    <%# Vũ: include upload media dùng chung%>
+    <%= stylesheet_link_tag '/assets/lib_hrm/formmedia.css' %>
+    <%= javascript_include_tag '/assets/lib_hrm/formmedia_old.js' %>
+    <%# end %>
+
+    <%= stylesheet_link_tag '/assets/mystyle/discipline.css'%>
+<% end %>
+<!-- style -->
+<%= javascript_include_tag 'jquery.js'%>
+<%= javascript_include_tag 'jquery-ui.js'%>
+
+<% content_for :bottombody do %>
+    <%= javascript_include_tag 'prism' %>
+    <%= render partial: "shared/selectVN"%>    
+    <%= render partial: "shared/mutilInput"%>   
+    <script>
+      //datepicker
+        $(function () {		
+            $( ".datepicker" ).datetimepicker({
+              format: 'DD/MM/YYYY'
+            });
+      });
+    </script>
+    <%= javascript_include_tag 'jquery.min'%>
+    <%= javascript_include_tag 'select2.full.min'%>
+    <%= javascript_include_tag 'select2.min.js'%>
+    <%= javascript_include_tag '/assets/lib_hrm/bootstrap.min.js', integrity: 'sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl', crossorigin: 'anonymous'%>
+    <%= javascript_include_tag '/assets/lib_hrm/moment-with-locales.js' %>
+    <%= javascript_include_tag '/assets/lib_hrm/bootstrap-datetimepicker.min.js' %>
+<% end %> 
+
+
+  <%= stylesheet_link_tag 'jquery-ui.css' %>  
+  <%= javascript_include_tag '/assets/lib_hrm/bootstrap.min.js', integrity: 'sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl', crossorigin: 'anonymous'%>
+
+
+<div class="list_DISCIPLINE">
+  <div class="card mb-3">
+    <div class="m-3 p-1">
+      <div class="row">
+        <div class="col-12 col-sm-12 col-md-12 col-lg-8 col-xl-8 col-xxl-8 tag d-flex align-items-center title mt-3">
+            <h4 class="mb-1" style="color: var(--falcon-btn-falcon-success-active-color);"><%= lib_translate('List_Disciplines')%></h4>
+        </div>
+        <div class="col-12 col-sm-12 col-md-12 col-lg-4 col-xl-4 col-xxl-4 action-right-top d-flex align-items-center justify-content-end">
+          <% if is_access(session["user_id"], "DISCIPLINE","ADD") %>
+            <a class="nav-link ps-2 pe-3 border-end border-2" role="button" style="font-size: 13px; font-weight: 700" onclick="openFormAddDiscipline()" class="btn btn-primary mt-3"  data-bs-toggle="collapse" data-bs-target="#form_discipline" aria-expanded="false" aria-controls="form_discipline" id="btn-add-discipline">
+              <%= lib_translate("Add_Discipline") %> 
+            </a> 
+            <a id="id_cancel_discipline" class=" nav-link ps-2 pe-3 border-end border-2"  style="display:none; font-size: 13px; font-weight: 700;cursor:pointer" data-bs-toggle="collapse" data-bs-target="#form_discipline" aria-expanded="false" aria-controls="form_discipline">
+              <%= lib_translate("Cancle") %> 
+            </a> 
+              <% end %>
+        </div>
+      </div>
+      <hr class="mt-4 mb-3" style="width: 100%; height: 4px; background:  var(--falcon-badge-soft-secondary-background-color); ">
+    </div>
+
+
+      <div class="mb-2">
+    <div class="collapse m-1" id="form_discipline">
+      <div class="card m-3">
+          <div class="form-add">
+            <%= form_for @discipline, :url=> discipline_update_path, html: {method: :post, id:"form_add" } do |f| %>
+              <div class="d-flex justify-content-center">
+                    <h3 class="m-0" id="cls_bmtu_form_add_title">
+                        <%= lib_translate("Add_Discipline") %>
+                    </h3>
+                </div> 
+              <div class="erro_labble mb-2" >
+                <p style=" display: none; color: rgb(197 82 82); border: 1px solid rgb(199 136 136 / 23%); background: rgb(255 54 54 / 16%); border-radius: 5px;  padding: 10px; " id="erro_labble_discipline" ></p>
+              </div>
+              <div class="form-group pd-20px" style="display: none" class="txt_update_id" >
+                <%= f.label :id %>
+                <span style="color: red" class="red">* </span>
+                <%= f.text_field :id, class: 'form-control', name: 'discipline_id_add', id: 'discipline_id_add',autocomplete: 'off' %>
+              </div>
+              <div class="row">
+                  <div class="form-group pd-20px">
+                    <%= f.label lib_translate("Discipline_name") %> 
+                    <%= f.text_field :name, class: 'form-control', name: 'discipline_name_add', id: 'discipline_name_add',autocomplete: 'off' %>
+                  </div>
+                  <div class="form-group pd-20px">
+                    <%= f.label lib_translate("Scode") %> 
+                    <%= f.text_field :scode, class: 'form-control', name: 'discipline_scode_add', id: 'discipline_scode_add',autocomplete: 'off' %>
+                  </div>
+                
+                <div class="col-xl-6 col-sm-12">
+                  <div class="form-group  pd-20px" style="text-transform: capitalize;">                               
+                    <%= f.label lib_translate("Name") %>
+                    <span style="color: red" class="red">* </span>
+                    <select class="form-select selectpicker" id="discipline_user_id_add" size="1" name="discipline_user_id_add" data-options='{"removeItemButton":true,"placeholder":true}' >
+                      <% @users.each do |user| %>
+                          <option value="<%= user.id %>" ><%= user.last_name %> <%= user.first_name %></option>
+                      <% end %>
+                    </select>  
+                  </div>
+                  <div class="form-group pd-20px">
+                    <%= f.label lib_translate("Mdate") %> 
+                    <div id="datepicker-container" class="datepicker-container">
+                    <span style="position: relative;" class="outline-element-container"> <input maxlength="10" value="<%=Time.now.strftime("%d/%m/%Y")%>" id="discipline_mdate_add" type="text" name="discipline_mdate_add" class="form-control datepicker openemr-datepicker input-textbox outline-element incorrect" placeholder="dd/mm/yyyy" objtype="7" name="action_element" objindex=""  aria-label="Select Date"> <span class="correct-incorrect-icon"> </span></span>
+                    <div id="datepicker"></div>
+                  </div>
+                  </div>
+                </div>
+                <div class="col-xl-6 col-sm-12">
+                  <div class="form-group pd-20px">
+                    <%= f.label lib_translate("Stype") %> 
+                    <%= f.select_tag :stype, options_for_select([[ "Cảnh cáo","CANHCAO"] , [ "Khiển trách","KHIENTRACH"], [ "Tạm dừng công việc","TDCV"],[ "Bãi nhiệm","BAINHIEM"], [ "Cho thôi việc","CHOTHOIVIEC"]]), :class=> "form-control", :name=> 'sel_discipline_stype_add', :id=> 'sel_discipline_stype_add'%>
+                  </div>   
+                  <div style="display: flex; margin-top: 38px;">
+                    <%= f.label lib_translate("Status") %> :
+                    <div style="border: none;box-shadow: none; font-size: 14px;">
+                      <input checked type="radio" id="sel_discipline_status_active" class="form-check-input ms-3 me-1" value="ACTIVE" name="sel_discipline_status_add" /><label class="form-check-label" for="sel_discipline_status_active" style="cursor: pointer"> ACTIVE</label>
+                      <input  type="radio" id="sel_discipline_status_inactive" class="form-check-input ms-3 me-1" value="INACTIVE" name="sel_discipline_status_add" /><label class="form-check-label" for="sel_discipline_status_inactive" style="cursor: pointer"> INACTIVE</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="form-group">
+                <%= f.label lib_translate("Note")%> 
+                <%= f.text_area :note , class: 'form-control', name: 'discipline_note_add', id: 'discipline_note_add', autocomplete: 'off'%>
+              </div>
+              <div class="form-group" >
+                <%= f.submit "" , type:"submit" , id:"btn_add_new_discipline", class: "btn btn-primary mt-3  border-red border-pink-600 cls-bmtu-text-red md:group-hover:bg-pink-50 btn-block text-uppercase d-none", style: "width: 100%;" %>
+                <div id="loading_button_discipline" class= "btn btn-primary mt-3 border-red border-pink-600 cls-bmtu-text-red md:group-hover:bg-pink-50 btn-block text-uppercase" style="opacity: 0.8;width: 100%; display:none;" >
+                    <i class ="fa fa-spinner fa-spin"> </i>  <%=lib_translate("Save")%> 
+                </div>
+              </div>
+            <% end %>   
+
+            <%#  %>
+            <label onclick="clickCollapseDiscipline(this)" id= "btn-colapse-discipline-label" class= "card p-2 mt-3 d-flex ps-3 pe-3" style= "width: 100%; background: var(--falcon-badge-soft-dark-background-color); flex-direction: row; align-items: center; justify-content: space-between;" type="button" data-bs-toggle="collapse" data-bs-target="#form-list-file-discipline" aria-expanded="false" aria-controls="form-list-file-discipline">
+              <%=lib_translate("List_document_file_department")%> 
+              <i id="colapse-icon-discipline" style="transition: all 100ms ease 0s; font-size: 20px;" class="fas fa-angle-left"></i>
+            </label>
+            
+            <div class="collapse" id="form-list-file-discipline">
+              <div class="card-body bg-light" id="upload_file_discipline"></div>
+            </div>
+
+            <label id="name-btn-discipline" for="btn_add_new_discipline" class= "btn btn-primary mt-3 border-red border-pink-600 cls-bmtu-text-red md:group-hover:bg-pink-50 btn-block text-uppercase" style= "width: 100%;"></label>
+            <div id="loading_button_discipline" class= "btn btn-primary mt-3 border-red border-pink-600 cls-bmtu-text-red md:group-hover:bg-pink-50 btn-block text-uppercase" style="opacity: 0.8;width: 100%; display:none;" >
+              <i class ="fa fa-spinner fa-spin"> </i>  <%=lib_translate("Save")%> 
+            </div>
+            <%#  %>
+
+          </div>
+      </div>
+    </div>
+  </div>
+
+    <div class="card-body pt-0">
+      <div class="tab-content">
+        <div class="tab-pane preview-tab-pane active" role="tabpanel" aria-labelledby="tab-dom-5a3c857c-8deb-4307-af64-a62f27089443" id="dom-5a3c857c-8deb-4307-af64-a62f27089443">
+            <div class="table-responsive scrollbar">
+            <%= render_search_pagination(discipline_edit_path()).html_safe %>
+              <table id="table_discipline" class="table table-bordered fs--1 mb-0 table-hover" style="margin-top: 0px !important; margin-bottom: 0px !important">
+                <thead class="bg-200 text-900">
+                  <tr>
+                    <th data-sort="id" style="display: none;">ID</th>
+                    <th class="sort" data-sort="user" style="text-align: center; cursor: pointer;"><%= lib_translate("Name")%></th>
+                    <th class="sort" data-sort="name" style="text-align: center; cursor: pointer;"><%= lib_translate("Discipline_name")%></th>
+                    <th class="sort" data-sort="scode" style="text-align: center; cursor: pointer;"><%= lib_translate("Scode")%></th>
+                    <th class="sort" data-sort="stype" style="text-align: center; cursor: pointer;width: 120px;"><%= lib_translate("Stype")%></th>
+                    <th class="sort" data-sort="mdate" style="text-align: center; cursor: pointer;width: 100px;"><%= lib_translate("Mdate")%></th>
+                    <th class="no-sort" style="text-align: center; cursor: pointer;width: 100px;" class="sort" data-sort="status"><%= lib_translate("Status")%></th>
+                   <% if (is_access(session["user_id"], "DISCIPLINE","EDIT") || is_access(session["user_id"], "DISCIPLINE","DEL")) %>
+                    <th class="no-sort" style="text-align: center; width: 120px;"></th>
+                     <% end %>
+                  </tr>
+                </thead>
+                <tbody class="list">
+                  <% @disciplines.each do |discipline| %>
+                        <tr id= "id_edit_btn_discipline" myIdDiscipline = '<%= discipline.id%>'>
+                          <td style="text-align: center; display: none;"><%= discipline.id %></td>
+                          <td class="name" style="text-transform: capitalize; text-align: left; " > 
+                            <%= User.where("id = '#{discipline.user_id}' ").first.last_name%> <%= User.where("id = '#{discipline.user_id}' ").first.first_name%>
+                          </td>
+                          <td class="name" style="text-align: justify; " > 
+                            <%= discipline.name %>
+                          </td>
+                          <td class="stype"  style="text-align: justify; " >
+                            <%= discipline.scode %>
+                          </td>
+                          <td class="stype"  style="text-align: center; " >
+                            <%= (if discipline.stype=="CANHCAO" 
+                                    "Cảnh cáo"
+                                elsif discipline.stype=="KHIENTRACH"
+                                    "Khiển trách"
+                                elsif discipline.stype=="TDCV"
+                                    "Tạm dừng công việc"
+                                elsif discipline.stype=="BAINHIEM"
+                                    "Bãi nhiệm"
+                                else
+                                    "Cho thôi việc"
+                                end ) %>
+                          </td>
+                          <td class="issue_date" style="text-align: center; " >
+                            <%= discipline.mdate&.strftime('%d/%m/%Y') %>
+                          </td>
+                          <td class="status" style="text-align: center; " >
+                          
+                            <%= (if discipline.status=="ACTIVE" 
+                                          lib_translate("ac_icon")
+                                        else 
+                                          lib_translate("inac_icon")
+                                        end ) %>
+                          </td>
+
+                                  </td>
+                     <% if (is_access(session["user_id"], "DISCIPLINE","EDIT") || is_access(session["user_id"], "DISCIPLINE","DEL")) %>
+                          <td class="p-2" style="min-width: 100px; text-align: center;white-space: nowrap;">
+                          <% if is_access(session["user_id"], "DISCIPLINE","EDIT") %>
+                            <a class="edit_holiday me-3" style="text-decoration: none; cursor:pointer;" data-bs-toggle="collapse" data-bs-target="#form_discipline" aria-expanded="false" aria-controls="form_discipline" onclick="openFormUpdateDiscipline(    
+                              '<%= discipline.id %>',
+                              '<%= discipline.user_id %>',
+                              '<%= discipline.name %>',
+                              '<%= discipline.scode %>', 
+                              '<%= discipline.stype %>',
+                              '<%= discipline.mdate&.strftime('%d/%m/%Y') %>', 
+                              '<%= discipline.status %>', 
+                              '<%= discipline.note %>', 
+                              '<%=@users.where(id: discipline.user_id).first.last_name %> <%= @users.where(id: discipline.user_id).first.first_name %>')">
+                              <span class="text-primary far fa-edit"  style="width: 15px" ></span>
+                            </a>
+                              <% end %> 
+                                   <% if is_access(session["user_id"], "DISCIPLINE","DEL") %>
+                            <a data-toggle="modal" data-target="#exampleModal-#{<%= discipline.id %>}" style="cursor: pointer" >
+                              <span class="text-danger fas fa-trash"  style="width: 12px" ></span>
+                            </a>
+                             <% end %>
+
+                            <div class="modal fade" id="exampleModal-#{<%= discipline.id %>}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" >
+                              <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                  <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalLabel"><%= lib_translate("Are_you_sure")  %></h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="border: none; background: none" >
+                                      
+                                    </button>
+                                  </div>
+                                  <div class="modal-body"> 
+                                    <%= lib_translate("Are_you_sure_to_delete_this_discipline_of")  %> 
+                                    <span style="font-weight: bold; color: red"> <%= User.where("id = '#{discipline.user_id}' ").first.last_name%> <%= User.where("id = '#{discipline.user_id}' ").first.first_name%></span>?
+                                  </div>
+                                  <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal" id="close_discipline_delete_form" > <%= lib_translate("Close")  %>  </button>
+                                    <%= link_to lib_translate("Delete") , url_for(action: :del, id: discipline.id, uid: discipline.user_id), method: :delete, class: "btn btn-danger", id: "delete_discipline_delete_form" %>
+                                    <div id="loading_button_delete_discipline" class= "btn btn-danger" style="opacity: 0.8; width: 100%; display:none;" >
+                                      <i class ="fa fa-spinner fa-spin"> </i>  <%=lib_translate("Deleting")%> 
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <a onclick="clickOpenDocs('<%= discipline.id%>')" style="cursor: pointer" class="m-0 ms-3"><span class="fas fa-folder-open me-4 icon text-warning"></span></a>
+                          </td>
+                           <% end %> 
+                        </tr>     
+
+                        <%# form details file holiday  %>
+                        <tr id="tr-media-dis-doc-<%=discipline.id%>" style="display:none;" >
+                          <td style="text-align: center; display: none;"><%= discipline.id %></td>
+                          <td class="name" style="display: none" > 
+                            <%= User.where("id = '#{discipline.user_id}' ").first.last_name%> <%= User.where("id = '#{discipline.user_id}' ").first.first_name%>
+                          </td>
+                          <td class="name" style="display: none" > 
+                            <%= discipline.name %>
+                          </td>
+                          <td class="stype"  style="display: none" >
+                            <%= discipline.scode %>
+                          </td>
+                          <td class="stype"  style="display: none" >
+                            <%= (if discipline.stype=="0" 
+                                    "Cảnh cáo"
+                                elsif discipline.stype=="1"
+                                    "Khiển trách"
+                                elsif discipline.stype=="2"
+                                    "Tạm dừng công việc"
+                                elsif discipline.stype=="3"
+                                    "Bãi nhiệm"
+                                else
+                                    "Cho thôi việc"
+                                end ) %>
+                          </td>
+                          <td class="issue_date" style="display: none" >
+                            <%= discipline.mdate&.strftime('%d/%m/%Y') %>
+                          </td>
+                          <td class="status" style="display: none" >
+                          
+                            <%= (if discipline.status=="ACTIVE" 
+                                          lib_translate("ac_icon")
+                                        else 
+                                          lib_translate("inac_icon")
+                                        end ) %>
+                          </td>
+                          <td colspan="7">
+                            <div data-loaded="false" id="media-dis-doc-<%=discipline.id%>"><div>
+                          </td>
+                        </tr>
+
+                    <%end%>
+                </tbody>
+              </table>
+              <%= render_pagination_limit_offset(discipline_edit_path(lang: session[:lang], per_page: session[:per_page], search: session[:search]), 10, @disciplines.count).html_safe %>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%# modal delete holiday details %>
+<div class="modal fade" id="discipline-confirm" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <%= lib_translate("Message") %>
+        </h5>
+        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close" style="border: none; background: none">
+          <span aria-hidden="true" style="font-size: 20px">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <%= lib_translate("confirm_delete_message") %>
+        <span id="modal-mesasge-delete-name" style="font-weight: bold; color: red"></span>?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="button_close_delete"> <%= lib_translate("Close") %> </button>
+        <a class="btn btn-danger" id="button_delete" rel="nofollow" data-method="delete" href="#"><%=lib_translate("Delete")%></a>
+        <div id="loading_button_delete_discipline_details" class= "btn btn-danger" style="opacity: 0.8; width: 100%; display:none;" >
+          <i class ="fa fa-spinner fa-spin"> </i>  <%=lib_translate("Deleting")%> 
+        </div>
+      </div> 
+    </div>
+  </div>
+</div>
+<%#  %>
+
+<%= javascript_include_tag 'prism' %>
+<%= javascript_include_tag '/assets/myjs/resizableColumns.js'%>
+<!-- Vũ: translate dùng chung cho các media upload -->
+<script>
+
+  var media_trans = {
+    upload_guide_1:'<%= lib_translate("upload_guide_1") %>',
+    upload_guide_2:'<%= lib_translate("upload_guide_2") %>',
+    upload_guide_3:'<%= lib_translate("upload_guide_3") %>',
+    confirm_delete:'<%= lib_translate("confirm_delete") %>',
+    confirm_delete_all:'<%= lib_translate("confirm_delete_all") %>',
+    select_files:'<%= lib_translate("select_files") %>',
+    cancel:'<%= lib_translate("Cancel") %>',
+    confirm:'<%= lib_translate("Confirm") %>',
+    message:'<%= lib_translate("Message") %>',
+    remove:'<%= lib_translate("Remove") %>',
+    upload:'<%= lib_translate("Upload") %>',
+    error: '<%= lib_translate("error") %>',
+    try_again:'<%= lib_translate("try_again") %>',
+    file_name: '<%= lib_translate("File_name") %>',
+    create_date:'<%= lib_translate("Create_date") %>',
+    created_by:'<%= lib_translate("created_by") %>',
+  }
+
+  const formMediaDiscipline = new FormMedia("upload_file_discipline");
+  formMediaDiscipline.setIconPath('<%= root_path%>assets/image/');
+  formMediaDiscipline.setTranslate(media_trans);
+  formMediaDiscipline.init();
+  formMediaDiscipline.addEventListener("confirmdel",(data)=>{
+      console.log(data);
+      let action = '<%= url_for(action: :del, ck_action: "document")%>';
+      action += `&id=${data.relative_id}&did=${data.id}`;
+      doClick(action,'delete');
+  });
+  
+
+  function clickOpenDocs(discipline_id){
+
+    if($('#media-dis-doc-'+discipline_id).attr("data-loaded") == "false"){
+
+      $('#media-dis-doc-'+discipline_id).html("");
+      $('#tr-media-dis-doc-'+discipline_id).show();
+
+      var mediaform = new FormMedia('media-dis-doc-'+ discipline_id);
+
+      mediaform.setIconPath('<%= root_path%>assets/image/');
+      mediaform.setTranslate(media_trans);
+      mediaform.init();
+
+      mediaform.setAction('<%= url_for(action: :discipline_upload_mediafile)%>' + "?discipline_id="+ discipline_id);
+
+      mediaform.addEventListener("confirmdel",(data)=>{
+          let action = '<%= url_for(action: :del, ck_action: "document")%>';
+          action += `&id=${data.relative_id}&did=${data.id}`;
+          doClick(action,'delete');
+      });
+      $('#media-dis-doc-'+discipline_id).attr("data-loaded","true");
+      $.ajax({
+        type: "POST",
+        url: "<%= discipline_update_path%>",
+        data: { idDiscipline: discipline_id },
+        dataType: "JSON",
+        success: function (response) {
+        mediaform.removeTableItemAll();
+        mediaform.tableAddItems(response.listAr);
+        }
+      });
+
+
+    }else{
+      $('#tr-media-dis-doc-'+discipline_id).toggle();
+    }
+    
+
+
+  }
+
+// 
+  function clickCollapseDiscipline(element){
+    document.getElementById('colapse-icon-discipline').style.rotate = element.className.includes('collapsed') ? "unset" : "-90deg";
+  }
+
+
+  document.getElementById("name-btn-discipline").onclick = function () {    
+    document.getElementById("name-btn-discipline").style.display = "none"; 
+    document.getElementById("loading_button_discipline").style.display = "block";
+  };
+
+// 
+  //datepicker
+    $(function () {		
+        $( ".datepicker" ).datetimepicker({
+          format: 'DD/MM/YYYY'
+        });
+  });
+
+    $(function () {
+        $(".datepicker").on('keydown', function (e) {
+            IsNumeric(this, e.keyCode);
+        });
+        var isShift = false;
+        var seperator = "/";
+        function IsNumeric(input, keyCode) {
+            if (keyCode == 16) {
+                isShift = true;
+            }
+            //Allow only Numeric Keys.
+            if (((keyCode >= 48 && keyCode <= 57) || keyCode == 8 || keyCode <= 37 || keyCode <= 39 || (keyCode >= 96 && keyCode <= 105)) && isShift == false) {
+                if ((input.value.length == 2 || input.value.length == 5) && keyCode != 8) {
+                    input.value += seperator;
+                }
+                return true;
+            }
+            else {
+                return false;
+            }
+        };
+        $(".datepicker").keyup(function(e) {
+          // var datecheck = /^([1-9]|0[1-9]|[12][0-9]|3[0-1])\/([1-9]|0[1-9]|1[0 -2])\/\d{4}$/g;
+          var datecheck = /^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]|(?:Jan|Mar|May|Jul|Aug|Oct|Dec)))\1|(?:(?:29|30)(\/|-|\.)(?:0?[1,3-9]|1[0-2]|(?:Jan|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec))\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)(?:0?2|(?:Feb))\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9]|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep))|(?:1[0-2]|(?:Oct|Nov|Dec)))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$/g;
+          var textcheck = /[A-Za-z]/g;
+          var special = /[!"`'#%&.,:;<>=@{}~\$\(\)\*\+\-\\\?\[\]\^\|]+/;
+          var unikey = /^[a-zA-Z_ÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ]+$/;
+            if (!datecheck.test(this.value))
+              {
+                this.value = this.value.replace(textcheck, '');
+                this.value = this.value.replace(special, '');
+                this.value = this.value.replace(unikey, '');
+              }
+              // else if (textcheck.test(this.value) || special.test(this.value) || unikey.test(this.value)) {
+              //   this.value = this.value.replace(textcheck, '');
+              //   this.value = this.value.replace(special, '');
+              //   this.value = this.value.replace(unikey, '');
+              // }
+              else {
+                // return false;
+              }
+          // }
+        });       
+ 
+    });
+
+  function getTextToASCII() {
+      var value_resource_url = document.getElementById("discipline_name_add").value;
+      var value_resource_scode = document.getElementById("discipline_scode_add");
+      if (value_resource_url) {
+      var content = removeVietnameseTones(value_resource_url).replace(/ /g, '-');
+          content = content.replace('---', '-');
+          if (value_resource_scode) {
+                      value_resource_scode.value = content.toUpperCase()
+                  }
+      }
+  }
+  function removeVietnameseTones(str) {
+      str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g,"a"); 
+      str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g,"e"); 
+      str = str.replace(/ì|í|ị|ỉ|ĩ/g,"i"); 
+      str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g,"o"); 
+      str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g,"u"); 
+      str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g,"y"); 
+      str = str.replace(/đ/g,"d");
+      str = str.replace(/À|Á|Ạ|Ả|Ã|Â|Ầ|Ấ|Ậ|Ẩ|Ẫ|Ă|Ằ|Ắ|Ặ|Ẳ|Ẵ/g, "A");
+      str = str.replace(/È|É|Ẹ|Ẻ|Ẽ|Ê|Ề|Ế|Ệ|Ể|Ễ/g, "E");
+      str = str.replace(/Ì|Í|Ị|Ỉ|Ĩ/g, "I");
+      str = str.replace(/Ò|Ó|Ọ|Ỏ|Õ|Ô|Ồ|Ố|Ộ|Ổ|Ỗ|Ơ|Ờ|Ớ|Ợ|Ở|Ỡ/g, "O");
+      str = str.replace(/Ù|Ú|Ụ|Ủ|Ũ|Ư|Ừ|Ứ|Ự|Ử|Ữ/g, "U");
+      str = str.replace(/Ỳ|Ý|Ỵ|Ỷ|Ỹ/g, "Y");
+      str = str.replace(/Đ/g, "D");
+      // Some system encode vietnamese combining accent as individual utf-8 characters
+      // Một vài bộ encode coi các dấu mũ, dấu chữ như một kí tự riêng biệt nên thêm hai dòng này
+      str = str.replace(/\u0300|\u0301|\u0303|\u0309|\u0323/g, ""); // ̀ ́ ̃ ̉ ̣  huyền, sắc, ngã, hỏi, nặng
+      str = str.replace(/\u02C6|\u0306|\u031B/g, ""); // ˆ ̆ ̛  Â, Ê, Ă, Ơ, Ư
+      // Remove extra spaces
+      // Bỏ các khoảng trắng liền nhau
+      str = str.replace(/ + /g," ");
+      str = str.trim();
+      // Remove punctuations
+      // Bỏ dấu câu, kí tự đặc biệt
+      str = str.replace(/!|@|%|\^|\*|\(|\)|\+|\=|\<|\>|\?|\/|,|\.|\:|\;|\'|\"|\&|\#|\[|\]|~|\$|_|`|-|{|}|\||\\/g," ");
+      return str;
+  }
+
+  $('#id_cancel_discipline').click(function(){
+    $('#id_cancel_discipline').css({"display" : "none"});
+    $('#btn-add-discipline').css({"display" : "block"});
+  });
+  // form discipline
+  function openFormAddDiscipline() {
+
+    $('#id_cancel_discipline').css({"display" : "block"});
+    $('#btn-add-discipline').css({"display" : "none"});
+    $('#card-upload-mediafile').css({"display" : "none"});
+
+    document.getElementById("discipline_id_add").value = "";
+    document.getElementById("discipline_name_add").value = "";
+    document.getElementById("discipline_scode_add").value = "";
+    document.getElementById("discipline_note_add").value = ""; 
+    document.getElementById("cls_bmtu_form_add_title").innerHTML = "<%= lib_translate('Add_Discipline')  %>";
+    // document.getElementById("btn_add_new_discipline").value = "<%= lib_translate('Add_Discipline')  %>";
+    document.getElementById("discipline_name_add").addEventListener("keyup", function() {getTextToASCII()} );
+    document.getElementById("sel_discipline_status_active").checked = true;
+
+    document.getElementById("name-btn-discipline").innerHTML = "<%= lib_translate('Add_Discipline')  %>";
+    document.getElementById("btn-colapse-discipline-label").classList.add("d-none"); 
+  }
+
+  function openFormUpdateDiscipline(id, user_id, name, scode, stype, mdate, status, note, fullname) {
+    console.log("openFormUpdateDiscipline");
+    console.log(document.getElementById("name-btn-discipline"));
+      $('#form_discipline').addClass('show');
+      $('#id_cancel_discipline').css({"display" : "block"});
+      $('#btn-add-discipline').css({"display" : "none"});
+      $('#card-upload-mediafile').css({"display" : "block"});
+
+      document.getElementById("cls_bmtu_form_add_title").innerHTML = "<%= lib_translate('Update_Discipline')  %>";
+      // document.getElementById("btn_add_new_discipline").value = "<%= lib_translate('Update_Discipline')  %>";
+      document.getElementById("name-btn-discipline").innerHTML = "<%= lib_translate('Update_Discipline')  %>";
+
+
+      if(status == "ACTIVE"){
+        document.getElementById("sel_discipline_status_active").checked = true;
+      }
+      else {
+        document.getElementById("sel_discipline_status_inactive").checked = true;
+      }
+
+      document.getElementById("discipline_id_add").value = id;
+
+      document.getElementById("discipline_user_id_add").value = user_id;
+      document.getElementById("select2-discipline_user_id_add-container").innerHTML = fullname ;
+
+      document.getElementById("discipline_name_add").value = name;
+      document.getElementById("discipline_scode_add").value = scode;
+      document.getElementById("sel_discipline_stype_add").value = stype;
+      document.getElementById("discipline_mdate_add").value = mdate;
+      document.getElementById("discipline_note_add").value = note; 
+
+      document.getElementById("btn-colapse-discipline-label").classList.remove("d-none");
+
+      let arrDisciplineFile = [];
+      let action_upload = '<%= url_for(action: :discipline_upload_mediafile)%>';
+            
+      formMediaDiscipline.setAction(action_upload + "?discipline_id="+ id);
+
+
+    // start show filemedia list
+    $.ajax({
+        type: "POST",
+        url: "<%= discipline_update_path%>",
+        data: { idDiscipline: id },
+        dataType: "JSON",
+        success: function (response) {
+          formMediaDiscipline.removeTableItemAll();
+          formMediaDiscipline.tableAddItems(response.listAr);
+        }
+      });
+      //end
+
+  }
+
+
+      //datepicker
+  $(function () {		
+        $( ".datepicker" ).datetimepicker({
+          format: 'DD/MM/YYYY'
+        });
+  });
+
+  $(function () {
+        $(".datepicker").on('keydown', function (e) {
+            IsNumeric(this, e.keyCode);
+        });
+        var isShift = false;
+        var seperator = "/";
+        function IsNumeric(input, keyCode) {
+            if (keyCode == 16) {
+                isShift = true;
+            }
+            //Allow only Numeric Keys.
+            if (((keyCode >= 48 && keyCode <= 57) || keyCode == 8 || keyCode <= 37 || keyCode <= 39 || (keyCode >= 96 && keyCode <= 105)) && isShift == false) {
+                if ((input.value.length == 2 || input.value.length == 5) && keyCode != 8) {
+                    input.value += seperator;
+                }
+                return true;
+            }
+            else {
+                return false;
+            }
+        };
+        $(".datepicker").keyup(function(e) {
+          var datecheck = /^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]|(?:Jan|Mar|May|Jul|Aug|Oct|Dec)))\1|(?:(?:29|30)(\/|-|\.)(?:0?[1,3-9]|1[0-2]|(?:Jan|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec))\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)(?:0?2|(?:Feb))\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9]|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep))|(?:1[0-2]|(?:Oct|Nov|Dec)))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$/g;
+          var textcheck = /[A-Za-z]/g;
+          var special = /[!"`'#%&.,:;<>=@{}~\$\(\)\*\+\-\\\?\[\]\^\|]+/;
+          var unikey = /^[a-zA-Z_ÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ]+$/;
+             if (!datecheck.test(this.value))
+              {
+                this.value = this.value.replace(textcheck, '');
+                this.value = this.value.replace(special, '');
+                this.value = this.value.replace(unikey, '');
+              }
+             
+              else {
+                
+              }
+         
+        });       
+ 
+  });
+
+  
+  $( "#discipline_mdate_add" ).datepicker({
+    showButtonPanel: true,
+        dateFormat: "dd/mm/yy",
+        changeMonth: true,
+        changeYear: true,
+        yearRange: "c-100:c+10",
+        // defaultDate: +1,
+        buttonImageOnly: true,
+        buttonImage: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABEAAAATCAYAAAB2pebxAAABGUlEQVQ4jc2UP06EQBjFfyCN3ZR2yxHwBGBCYUIhN1hqGrWj03KsiM3Y7p7AI8CeQI/ATbBgiE+gMlvsS8jM+97jy5s/mQCFszFQAQN1c2AJZzMgA3rqpgcYx5FQDAb4Ah6AFmdfNxp0QAp0OJvMUii2BDDUzS3w7s2KOcGd5+UsRDhbAo+AWfyU4GwnPAYG4XucTYOPt1PkG2SsYTbq2iT2X3ZFkVeeTChyA9wDN5uNi/x62TzaMD5t1DTdy7rsbPfnJNan0i24ejOcHUPOgLM0CSTuyY+pzAH2wFG46jugupw9mZczSORl/BZ4Fq56ArTzPYn5vUA6h/XNVX03DZe0J59Maxsk7iCeBPgWrroB4sA/LiX/R/8DOHhi5y8Apx4AAAAASUVORK5CYII=",
+        showOn: "button",
+        buttonText: "<%= lib_translate("Choose_date") %>",
+        closeText: "<%= lib_translate("closeText") %>",
+        prevText: "<%= lib_translate("prevText") %>",
+        nextText: "<%= lib_translate("nextText") %>",
+        currentText: "<%= lib_translate("currentText") %>",
+        monthNamesShort: ["<%= lib_translate("Jan") %>", "<%= lib_translate("Feb") %>", "<%= lib_translate("Mar") %>", "<%= lib_translate("Apr") %>",
+        "<%= lib_translate("May") %>", "<%= lib_translate("Jun") %>", "<%= lib_translate("Jul") %>", "<%= lib_translate("Aug") %>", 
+        "<%= lib_translate("Sep") %>", "<%= lib_translate("Oct") %>", "<%= lib_translate("Nov") %>", "<%= lib_translate("Dec") %>"],
+        dayNamesMin: ["<%= lib_translate("Sun") %>", "<%= lib_translate("Mon") %>", "<%= lib_translate("Tue") %>", "<%= lib_translate("Wed") %>", 
+        "<%= lib_translate("Thu") %>", "<%= lib_translate("Fri") %>", "<%= lib_translate("Sat") %>"],
+        firstDay: 1,
+        isRTL: false,
+        showMonthAfterYear: false,
+        yearSuffix: "",
+});
+
+</script>
+
+
+

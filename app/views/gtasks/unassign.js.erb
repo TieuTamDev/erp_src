@@ -1,0 +1,14 @@
+$("#stask-<%= @stask.id %>").fadeOut(300, function() {
+  $(this).remove();
+
+  var tableBody = $(this).closest("tbody");
+  if (tableBody.children().length === 0) {
+    tableBody.closest(".stasks-container").find("table").replaceWith(
+      '<div class="alert alert-info">Chưa có công việc nào được gán cho nhóm này.</div>'
+    );
+  } else {
+    tableBody.children().each(function(index) {
+      $(this).find("td:first").text(index + 1);
+    });
+  }
+});

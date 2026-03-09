@@ -1,0 +1,10 @@
+.token-display {
+    background-color: rgb(160 218 243 / 66%);
+    border-radius: 5px;
+    padding-left: 3px;
+    padding-right: 3px;
+    border: 1px solid rgb(76 191 249);
+}
+.mce-content-body *[contentEditable=false][data-mce-selected][data-token-name] {
+    outline: unset !important;
+}

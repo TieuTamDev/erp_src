@@ -1,0 +1,256 @@
+<style>
+    table td {
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+    }
+    .btn.rounded-circle {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0 !important;
+    }
+
+    .btn.rounded-circle i {
+        margin: 0 !important;
+        line-height: 1 !important;
+    }
+</style>
+
+<div class="page-list-positionjob">
+    <div class="mt-1 d-flex">
+        <div class="me-auto">
+            <%= form_tag departments_department_details_path(tab: @tab_names[:subdepartments], lang: session[:lang], department_id: params[:department_id]), method: :post do %>
+                <div class="input-group">
+                    <%= text_field_tag :search, params[:search], class: "form-control", id: "function_search", placeholder: "Tìm kiếm" %>
+                    <span class="input-group-text bg-white">
+                        <span class="fas fa-search" style="color:#999999"></span>
+                    </span>
+                </div>
+            <% end %>
+        </div>
+        <% if is_access(session["user_id"], "SUBDEPARTMENT-ADD", "ADD") %>
+            <%= link_to new_subdepartment_path(department_id: params[:department_id]), class: "btn btn-primary me-3", id: "btn-add-subdepartment", onclick: "showLoadding(true);", remote: true do %>
+                <i class="fas fa-plus"></i> Thêm nhóm
+            <% end %>
+        <% end %>
+    </div>
+
+    <div class="mt-2">
+        <table class="table" style="background:white; margin-top: 15px;">
+            <thead>
+                <tr style="background: #F9FBFC;height: 38px;vertical-align: middle;">
+                    <th scope="col" style="width: 5%; text-align: center;">#</th>
+                    <th scope="col" style="width: 25%;">Tên nhóm</th>
+                    <th scope="col" style="width: 10%;">Số lượng</th>
+                    <th scope="col" style="width: 25%;">Trưởng nhóm</th>
+                    <th scope="col" style="width: 25%;">Phó nhóm</th>
+                    <th scope="col" style="width: 25%;">Mô tả</th>
+                    <th scope="col" style="width: 10%; text-align: center;">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if @subdepartments.any? %>
+                    <% @subdepartments.each_with_index do |s, index| %>
+                        <tr id="function-<%= s.id %>">
+                            <td><%= (session[:page].to_i - 1) * session[:per_page].to_i + index + 1 %></td>
+                            <td class="text-start">
+                                <%= link_to s.name, "#{departments_department_details_path(lang:session[:lang])}&department_id=#{s.id}", 
+                                    class: "text-decoration-underline text-primary fw-bold d-block w-100" %>
+                            </td>
+                            <td class="text-start"><%= s.amount %></td>
+                            <td class="text-start"><%= s.leader_name %></td>
+                            <td class="text-start"><%= s.deputy_name %></td>
+                            <td class="text-start"><%= s.note %></td>
+                            <td class="text-center">
+                                <div class="d-flex justify-content-center gap-2">
+                                    <% if is_access(session["user_id"], "ERP-CCTC-SUBDEPARTMENT","ADD") %>
+                                        <button class="btn btn-success btn-sm rounded-circle show-users-btn flex-shrink-0" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#usersModal"
+                                                data-department-id="<%= s.id %>"
+                                                data-department-name="<%= s.name %>"
+                                                data-bs-toggle="tooltip"
+                                                data-bs-placement="top"
+                                                data-bs-title="Danh sách nhân sự"
+                                                style="width: 35px; height: 35px; min-width: 35px;">
+                                            <i class="fas fa-users"></i>
+                                        </button>
+                                    <% end %>
+
+                                    <% if is_access(session["user_id"], "ERP-CCTC-SUBDEPARTMENT","EDIT") %>
+                                        <%= link_to edit_subdepartment_path(s, department_id: params[:department_id]), 
+                                                    class: 'btn btn-primary btn-sm rounded-circle flex-shrink-0', 
+                                                    onclick: "showLoadding(true);",
+                                                    data: { bs_toggle: 'tooltip', bs_placement: 'top', bs_title: 'Chỉnh sửa' },
+                                                    remote: true,
+                                                    style: 'width: 35px; height: 35px; min-width: 35px;' do %>
+                                            <i class="fas fa-pen"></i>
+                                        <% end %>
+                                    <% end %>
+                                    
+                                    <% if is_access(session["user_id"], "ERP-CCTC-SUBDEPARTMENT","DEL") %>
+                                        <%= link_to subdepartment_path(s, department_id: params[:department_id]), 
+                                                    class: 'btn btn-danger btn-sm rounded-circle delete-subdepartment-btn flex-shrink-0', 
+                                                    method: :delete,
+                                                    data: { 
+                                                        bs_toggle: 'tooltip', 
+                                                        bs_placement: 'top', 
+                                                        bs_title: 'Xóa',
+                                                        subdepartment_name: s.name,
+                                                        subdepartment_id: s.id,
+                                                        remote: true,
+                                                        confirm: "Bạn có chắc chắn muốn xóa nhóm \"#{s.name}\" không?\nHành động này không thể hoàn tác!"
+                                                    },
+                                                    style: 'width: 35px; height: 35px; min-width: 35px;' do %>
+                                            <i class="fas fa-trash-alt"></i>
+                                        <% end %>
+                                    <% end %>
+                                </div>
+                            </td>
+                        </tr>
+                    <% end %>
+                <% else %>
+                    <tr>
+                        <td colspan="6" class="text-center">Không có dữ liệu</td>
+                    </tr>
+                <% end %>
+            </tbody>
+        </table>
+
+        <div class='d-flex justify-content-between align-items-center mt-3'>
+            <div style="font-size: 14px; font-weight: 400; color: #4E606E;">
+                <%
+                    current_page = session[:page]&.to_i || 1
+                    per_page = session[:per_page]&.to_i || 10
+                    start_record = (current_page - 1) * per_page + 1
+                    end_record = [current_page * per_page, @total_records].min
+                %>
+
+                <%=lib_translate('Show')%> <%= start_record %>-<%= end_record %> <%=lib_translate('Up_to')%> <%= @total_records %> <%=lib_translate('Record')%>
+            </div>
+            <div>
+                <%= render_pagination_limit_offset(departments_department_details_path(tab: @tab_names[:subdepartments], lang: session[:lang], department_id: params[:department_id], per_page: session[:per_page], search: session[:search]), 10, @subdepartments.count).html_safe %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for displaying users -->
+<div class="modal fade" id="usersModal" tabindex="-1" aria-labelledby="usersModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="usersModalLabel">Danh sách nhân sự</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="users-loading" class="text-center" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Đang tải danh sách nhân sự...</p>
+                </div>
+                <div id="users-content">
+                    <!-- Users will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle show users button click
+    document.querySelectorAll('.show-users-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const departmentId = this.getAttribute('data-department-id');
+            const departmentName = this.getAttribute('data-department-name');
+            var root_path = '<%= @ERP_PATH %>';
+            
+            // Update modal title
+            document.getElementById('usersModalLabel').textContent = 
+                `Danh sách nhân sự - ${departmentName}`;
+            
+            // Show loading state
+            document.getElementById('users-loading').style.display = 'block';
+            document.getElementById('users-content').innerHTML = '';
+            
+            // Fetch users via AJAX
+            fetch(`${root_path}/subdepartments/${departmentId}/users`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-Token': document.querySelector('[name="csrf-token"]').content
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Hide loading state
+                document.getElementById('users-loading').style.display = 'none';
+                
+                // Build users table
+                let usersHtml = '';
+                if (data.users && data.users.length > 0) {
+                    usersHtml = `
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col" style="width: 10%;">#</th>
+                                    <th scope="col" style="width: 30%;">Họ và tên</th>
+                                    <th scope="col" style="width: 40%;">Email</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+                    
+                    data.users.forEach((user, index) => {
+                        const fullName = `${user.last_name || ''} ${user.first_name || ''}`.trim();
+                        usersHtml += `
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td>${fullName || ''}</td>
+                                <td>${user.email || ''}</td>
+                            </tr>
+                        `;
+                    });
+                    
+                    usersHtml += `
+                            </tbody>
+                        </table>
+                        <div class="mt-3">
+                            <small class="text-muted">Tổng cộng: ${data.users.length} nhân sự</small>
+                        </div>
+                    `;
+                } else {
+                    usersHtml = `
+                        <div class="text-center py-4">
+                            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">Không có nhân sự nào trong nhóm này</p>
+                        </div>
+                    `;
+                }
+                
+                document.getElementById('users-content').innerHTML = usersHtml;
+            })
+            .catch(error => {
+                console.error('Error fetching users:', error);
+                document.getElementById('users-loading').style.display = 'none';
+                document.getElementById('users-content').innerHTML = `
+                    <div class="text-center py-4">
+                        <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                        <p class="text-warning">Có lỗi xảy ra khi tải danh sách nhân sự</p>
+                        <button class="btn btn-sm btn-outline-primary" onclick="location.reload()">
+                            Thử lại
+                        </button>
+                    </div>
+                `;
+            });
+        });
+    });
+});
+</script>

@@ -1,0 +1,219 @@
+
+<% content_for :head do %>
+  <%= stylesheet_link_tag "select2-bootstrap-5-theme.min" %>
+  <%= stylesheet_link_tag "select2.min" %>
+<% end %>
+<% content_for :bottombody do %>
+    <%= javascript_include_tag 'select2.full.min'%>
+    <%= javascript_include_tag 'select2.min.js'%>
+<% end %> 
+<style>
+    #table_attend_teacher_wrapper .top {
+        display: none !important;
+    }
+    .badges {
+        display: inline-block;
+        padding: 2px 20px;
+        font-size: 12px;
+        font-weight: 600;
+        border-radius: 9999px; 
+    }
+    .badges-pending {
+        background-color: #DEE0E2;
+        color: #61666F;
+    }
+    .badges-primary {
+        background-color: rgba(0, 123, 255, 0.2); 
+        color: #007bff; 
+    }
+    .badges-primary {
+        background-color: rgba(0, 123, 255, 0.2); 
+        color: #007bff; 
+    }
+ 
+    .badges-info {
+        background-color: rgba(23, 162, 184, 0.2); 
+        color: #17a2b8; 
+    } 
+    
+    .badges-warning {
+        background-color: rgba(255, 139, 7, 0.2); 
+        color: #ff6a07; 
+    } 
+    .badges-success {
+        background-color: rgba(40, 167, 69, 0.2); 
+        color: #28a745; 
+    } 
+    .badges-danger {
+        background-color: rgba(220, 53, 69, 0.2); 
+        color: #dc3545; 
+    }
+    table td {
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+    }
+</style>
+<div class="mt-2">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="col-md-6">
+                <%= form_tag works_index_path(tab: @tab_names[:tasks], lang: session[:lang]), method: :post do %>
+                    <div class="input-group">
+                        <%= text_field_tag :search, params[:search], class: "form-control", id: "gtask_search", placeholder: "Tìm kiếm" %>
+                        <span class="input-group-text bg-white">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                        </svg>
+                        </span>
+                    </div>
+                <% end %>
+            </div>
+        </div>
+        <div class="col-md-6 d-flex justify-content-end">
+            <%= link_to new_task_path, class: "btn btn-primary",onclick:"showLoadding(true);", id: "btn-add-function", remote: true do %>
+                <i class="fas fa-plus"></i> Thêm công việc
+            <% end %>
+        </div>
+    </div>
+</div>
+<table id="table_gtasks" class="table table-customs table-bordered fs--1 mb-0" style="margin-top: 15px !important; margin-bottom: 0px !important">
+    <thead>
+        <tr style="background-color: #EFF2F1;">
+            <th class="no-sort" style="width: 5%;">#</th>
+            <th class="no-sort" style="width: 20%;">Tên công việc</th>
+            <th class="no-sort" style="width: 10%;">Mức độ TX</th>
+            <th class="no-sort" style="width: 10%;">Cấp xử lý</th>
+            <th class="no-sort" style="width: 10%;">Mức độ khó</th>
+            <th class="no-sort" style="width: 10%;">Mức độ ưu tiên</th>
+            <th class="no-sort" style="width: 15%;">Quy trình</th>
+            <th class="no-sort" style="width: 10%;">Trạng thái</th>
+            <th class="no-sort" style="width: 10%;">Hành động</th>
+        </tr>
+    </thead>
+    <tbody class="list">
+        <% @tasks.each_with_index do |task, index| %>
+            <tr id="task-<%= task.id %>">
+                <td><%= (session[:page].to_i - 1) * session[:per_page].to_i + index + 1 %></td>
+                <td class="text-start"><%= task.name %></td>
+                <td class="text-start">
+                    <% if task.frequency.present? %>
+                        <%= WorksHelper::FREQUENCY_TYPES[task.frequency.to_sym] %>
+                    <% else %>
+                        <%= "Không xác định" %>
+                    <% end %>
+                </td>
+                <td class="text-start"><%= task.level_handling %></td>
+                <td class="text-start"><%= task.level_difficulty %></td>
+                <td class="text-start"><%= task.priority %></td>
+                <td class="text-start">
+                    <% if task.files.present? %>
+                        <ul class="list-unstyled mb-0">
+                            <% task.files.each do |file| %>
+                                <div style="display: flex; align-items: center;">
+                                    <img class="task-icon" src="<%= image_path("/assets/image/#{file[:file_icon]}.png") %>">
+                                    <li style="list-style: none;"><%= file[:file_name] %></li>
+                                </div>
+                            <% end %>
+                        </ul>
+                    <% else %>
+                        <span class="text-muted">Không có file</span>
+                    <% end %>
+                </td>
+                <td class="text-start">
+                    <% if task.status == "ACTIVE" %>
+                      <span class="badges badges-success">Đang hoạt động</span>
+                    <% elsif task.status == "APPROVED" %>
+                      <span class="badges badges-success">Đã duyệt</span>
+                    <% else %>
+                      <%= task.status %>
+                    <% end %>
+                  </td>
+                <td class="text-center">
+                    <div class="d-flex justify-content-center align-items-center">
+                        <%= link_to edit_task_path(task), class: 'btn btn-link', onclick: "showLoadding(true);",
+                                    data: { bs_toggle: 'tooltip', bs_placement: 'top', bs_title: 'Chỉnh sửa' },
+                                    remote: true do %>
+                            <i class="text-primary fas fa-pen"></i>
+                        <% end %>
+                        
+                        <%= link_to task_path(task), class: 'btn btn-link delete-task-btn', 
+                                    method: :delete,
+                                    data: { 
+                                        bs_toggle: 'tooltip', 
+                                        bs_placement: 'top', 
+                                        bs_title: 'Xóa',
+                                        can_delete: task.can_be_deleted,
+                                        task_name: task.name,
+                                        task_id: task.id,
+                                        remote: true
+                                    } do %>
+                            <i class="text-danger fas fa-trash"></i>
+                        <% end %>
+                    </div>
+                </td>
+            </tr>
+        <% end %>
+    </tbody>
+</table>
+<div class='d-flex justify-content-between align-items-center mt-3'>
+    <div style="font-size: 14px; font-weight: 400; color: #4E606E;">
+        <%
+            current_page = session[:page]&.to_i || 1
+            per_page = session[:per_page]&.to_i || 10
+            start_record = (current_page - 1) * per_page + 1
+            end_record = [current_page * per_page, @total_records].min
+        %>
+
+        <%=lib_translate('Show')%> <%= start_record %>-<%= end_record %> <%=lib_translate('Up_to')%> <%= @total_records %> <%=lib_translate('Record')%>
+    </div>
+    <div>
+        <%= render_pagination_limit_offset(works_index_path(tab: @tab_names[:tasks], lang: session[:lang], per_page: session[:per_page], search: session[:search]), 10, @tasks.count).html_safe %>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+
+        document.querySelectorAll('.delete-task-btn').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const canDelete = this.getAttribute('data-can-delete') === 'true';
+                const taskName = this.getAttribute('data-task-name');
+                
+                if (canDelete) {
+                    if (confirm(`Xác nhận xóa công việc ${taskName}?`)) {
+                        showLoadding(true);
+
+                        const token = $('meta[name="csrf-token"]').attr('content');
+                        
+                        $.ajax({
+                            url: this.getAttribute('href'),
+                            type: 'DELETE',
+                            dataType: 'script',
+                            headers: {
+                                'X-CSRF-Token': token
+                            },
+                            success: function(response) {
+                            },
+                            error: function(xhr) {
+                                showLoadding(false);
+                                alert('Có lỗi xảy ra khi xóa công việc');
+                            }
+                        });
+                    }
+                } else {
+                    alert("Đối với các công việc đã được phân công cho nhân sự, hệ thống sẽ không cho phép xóa. Để xóa công việc, vui lòng gỡ bỏ toàn bộ các công việc liên quan đến các nhân sự trước!");
+                }
+                
+                return false;
+            });
+        });
+    });
+</script>

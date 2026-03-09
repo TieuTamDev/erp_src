@@ -1,0 +1,114 @@
+<style>
+  .select2-container.is-invalid .select2-selection {
+    border-color: #dc3545 !important;
+  }
+
+  .select2-container + .invalid-feedback {
+    margin-top: 0.25rem;
+  }
+
+  .invalid-feedback.d-block {
+    display: block !important;
+  }
+</style>
+
+<% stype_text = lib_translate("appointment.#{@stype}")%>
+
+<div class="modal-body px-4 pb-0">
+  <%= form_tag appointments_path, method: :post, id: "submitAppointment", remote: true do %>
+    <% if @form_data[:appointment].present? %>
+      <div class="col-12 mb-3">
+        <label for="taskName" class="form-label text-dark">Tên tác vụ</label>
+        <input type="text" class="form-control" id="taskName" name="title" value="<%= @form_data[:appointment].title %>" disabled>
+      </div>
+    <% end %>
+
+    <div class="col-12 mb-3">
+      <label for="department" class="form-label text-dark">Thuộc đơn vị</label>
+      <select class="form-select" id="department" name="new_dept"></select>
+    </div>
+
+    <div class="col-12 mb-3">
+      <label for="appointee" class="form-label text-dark">Họ và tên cá nhân <%= stype_text%></label>
+      <select class="form-select" id="appointee" name="user_id">
+      </select>
+    </div>
+    
+    <div class="col-12 mb-3">
+      <label for="position" class="form-label text-dark">Vị trí <%= stype_text%></label>
+      <select class="form-select" id="position" name="new_position">
+      </select>
+    </div>
+    
+    <div class="col-12 mb-3">
+      <label for="manager" class="form-label text-dark">Người xử lý</label>
+      <select class="form-select" id="manager" name="user_handle_id"> 
+      </select>
+    </div>
+
+    <div class="d-flex mb-3">
+      <div class="flex-grow-1">
+        <label for="level" class="form-label text-dark">Độ khẩn</label>
+        <select class="form-select" id="priority" name="priority">
+        </select>
+      </div>
+      <%if @stype == "BO_NHIEM" %>
+        <div class="flex-grow-1 ms-3">
+          <label for="expected_appointment_date" class="form-label text-dark">Thời gian dự kiến <%= stype_text%></label>
+          <div id="datepicker-container" class="datepicker-container">
+              <span style="position: relative;" class="outline-element-container"> 
+                <input maxlength="10" id="expected_appointment_date" type="text" name="expected_appointment_date"
+                  class="form-control flatpickr_expected_appointment_date" placeholder="Chọn thời gian dự kiến"
+                  aria-label="Select Date">
+          </div>
+        </div>
+      <%end%>
+    </div>
+    
+    <div class="mb-3">
+      <label for="notes" class="form-label text-dark">Lí do</label>
+      <textarea class="form-control" id="notes" name="note" rows="3" placeholder="Lí do"><%= @form_data[:appointment].present? ? @form_data[:appointment].note : '' %></textarea>
+    </div>
+
+    <%= hidden_field_tag :next_department_id, @form_data[:stream_datas].find { |data| data[:result] == 'created' }&.dig(:next_department_id) %>
+    <%= hidden_field_tag :appointment_id, @form_data[:appointment]&.id %>
+    <%= hidden_field_tag :mandocuhandle_id, @form_data[:mandocuhandle_id] %>
+    <%= hidden_field_tag :stype, @stype %>
+    <%= hidden_field_tag :appointee_name, '', id: 'appointee_name' %>
+    <%= hidden_field_tag :position_name, '', id: 'position_name' %>
+    <%= hidden_field_tag :department_name, '', id: 'department_name' %>
+    <%= hidden_field_tag :status, @form_data[:stream_datas].find { |data| data[:result] == 'created' }&.dig(:status) %>
+    <%= hidden_field_tag :next_status, @form_data[:stream_datas].find { |data| data[:result] == 'created' }&.dig(:next_status) %>
+  <% end %>
+</div>
+
+<div class="modal-footer border-0 px-4 pb-4 pt-0">
+  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+  <%= render "appointments/buttons/submit_buttons"%>
+</div>
+
+<script>
+  var root_path = '<%= @ERP_PATH %>';
+  var checkCurrentDepartment = `<%= @form_data[:next_department_scode] == "DV" %>`;
+  var nextDepartmentId = `<%= @form_data[:stream_datas].find { |data| data[:result] == 'created' }&.dig(:next_department_id) %>`;
+  var editDeptId = `<%= @form_data[:appointment]&.new_dept&.to_i || 'null' %>`;
+  var editAppointeeId = `<%= @form_data[:appointment]&.user_id&.to_i || 'null' %>`;
+  var editPositionId = `<%= @form_data[:appointment]&.new_position&.to_i || 'null' %>`;
+  var editManagerId = `<%= @form_data[:user_handle_id]&.to_i || 'null' %>`;
+  var currentDepartmentId = `<%= session[:department_id] %>`;
+  var currentDepartmentName = `<%= session[:department_name] %>`;
+  var stypeText = '<%= stype_text%>';
+  var apoint_stype = '<%= @stype%>';
+
+  flatpickr(".flatpickr_expected_appointment_date", {
+    dateFormat: "d/m/Y",
+    minDate: "today",
+    allowInput: true,
+    defaultDate: null,
+    onReady: function (selectedDates, dateStr, instance) {
+      instance.input.placeholder = "Chọn thời gian dự kiến";
+    }
+  });
+</script>
+
+<%= javascript_include_tag '/assets/myjs/appointment_update.js'%>

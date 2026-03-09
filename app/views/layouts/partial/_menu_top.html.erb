@@ -1,0 +1,293 @@
+<style>
+  .badges {
+      display: inline-block;
+      padding: 1px 15px;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 9999px; 
+  }
+  .badges-pending {
+      background-color: #DEE0E2;
+      color: #61666F;
+  } 
+  .badges-primary {
+      background-color: #d9e7fa; 
+      color: #215cac; 
+  } 
+  .badges-info {
+      background-color: #d8f3ff; 
+      color: #197aa4;  
+  }  
+  .badges-success {
+      color: #14AE5C;
+      background-color: #C8F9DF;
+  } 
+  .badges-warning {
+      background-color: #FEE9D7;
+      color: #FC953B;
+  } 
+  .badges-rejected {
+      background-color: #fee2e2;
+      color: #b91c1c;
+  }    
+  .badges-danger {
+      background-color: #fee2e2;
+      color: #b91c1c;
+  } 
+  .notifications {
+    color: var(--falcon-gray-1000);
+    text-decoration: none;
+    background-color: var(--falcon-notification-bg);
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    font-size: .8333333333rem;
+    font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    -webkit-transition: all .2s ease-in-out;
+    transition: all .2s ease-in-out;
+  }
+  .dropdown-menu-notification {
+    min-width: 19rem;
+    max-width: 22rem;
+  }
+  @media(min-width: 576px) {
+      .dropdown-menu-notification {
+          min-width: 40rem;
+      }
+  } 
+
+  .bell-shake {
+    animation: shake 0.8s ease-in 0s infinite; 
+  }
+
+  @keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: rotate(-10deg); }
+    50% { transform: rotate(10deg); }
+    75% { transform: rotate(-10deg); }
+    100% { transform: translateX(0); }
+  } 
+
+  .ripple-effect {
+    position: relative;
+    display: inline-block; 
+  }
+
+  .ripple-effect::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%; 
+    height: 100%;
+    background: rgb(255 0 0);
+    border-radius: 20px;
+    transform: translate(-50%, -50%) scale(1); 
+    animation: ripple 1.5s ease-out infinite;
+    z-index: -1; 
+  }
+
+
+  @keyframes ripple {
+    0% {
+      transform: translate(-50%, -50%) scale(0); 
+      opacity: 1;
+    }
+    100% {
+      transform: translate(-50%, -50%) scale(3); 
+      opacity: 0;
+    }
+  }
+
+  .ripple-effect span {
+    position: relative;
+    z-index: 1;
+  }
+ 
+  .notification-body .fw-semi-bold {
+    display: -webkit-box;
+    -webkit-line-clamp: 2; 
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 0; 
+  }
+
+  .notification-body .content-notice {
+    display: -webkit-box;
+    -webkit-line-clamp: 3; 
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 0.25rem; 
+  }
+
+  .notification-body {
+    max-width: 100%; 
+  }
+  
+  #loading_notification {
+        position: absolute;
+        z-index: 2;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgb(0 0 0 / 90%);
+        display: none;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        box-sizing: border-box;
+    }
+</style>
+<nav class="navbar navbar-light navbar-glass navbar-top navbar-expand">
+    <button class="btn navbar-toggler-humburger-icon navbar-toggler me-1 me-sm-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarVerticalCollapse" aria-controls="navbarVerticalCollapse" aria-expanded="false" aria-label="Toggle Navigation"><span class="navbar-toggle-icon"><span class="toggle-line"></span></span></button>
+    <a class="navbar-brand me-1 me-sm-3" href="<%= root_path(lang: session[:lang]) %>">
+      <div class="d-flex align-items-center">
+        <% if @user_info.present? && @user_info[:organizations]&.any? { |scode| %w[BMU BMTU].include?(scode) } %>
+          <img class="me-2 img_logo_bmtu" src="<%= image_path("/assets/image/logo.svg")  %>"  width="150"/>
+        <% elsif @user_info.present? && @user_info[:organizations]&.any? { |scode| %w[BUH].include?(scode) } %>
+          <%= image_tag "buhlogo.png", class: "me-2", width: "120" %>
+        <% else %>
+          <img class="me-2 img_logo_bmtu" src="<%= image_path("/assets/image/logo.svg")  %>"  width="150"/>
+        <% end %>
+      </div>
+    </a>
+    <ul class="navbar-nav navbar-nav-icons ms-auto flex-row align-items-center">
+      <li class="nav-item ms-2 me-1">
+        <select class="select_lang_home me-1" id="select_lang" onchange="checkLanguage()" style="border: none;border-radius: 50px; padding-left: 3px;width: auto; font-size: 13px;background: #d8e2ef;color: #2c7be5;cursor: pointer;">
+            <option value='vi'><%= lib_translate("VI") %></option>
+            <option value='en'><%= lib_translate("EN") %></option>
+        </select>
+      </li>
+
+      <li class="nav-item d-none d-sm-block ms-2 me-2">
+        <div style="border-radius: 100%;height: 30px;width: 30px;display: flex;justify-content: center; align-items: center; background-color: var(--falcon-gray-300);cursor: pointer;">
+          <a href="<%= releasednotes_index_path() %>" style="color: #2c7be5;">
+            <span class="fas fa-code-branch"></span>
+          </a>
+        </div>
+      </li>
+
+      <li class="nav-item d-none d-sm-block ms-2 me-1">
+        <div class="theme-control-toggle fa-icon-wait">
+          <input class="form-check-input ms-0 theme-control-toggle-input" id="themeControlToggle" type="checkbox" data-theme-control="theme" value="dark" />
+          <label class="mb-0 theme-control-toggle-label theme-control-toggle-light" for="themeControlToggle"><span class="fas fa-sun fs-0"></span></label>
+          <label class="mb-0 theme-control-toggle-label theme-control-toggle-dark" for="themeControlToggle"><span class="fas fa-moon fs-0"></span></label>
+        </div>
+      </li>
+
+      <li class="nav-item dropdown ms-2 me-1" id="render-notification">
+        <%= render partial: "notifies/partial/notification"%>
+      </li>
+      
+      <li class="nav-item dropdown px-1 ms-1 me-1">
+        <a class="nav-link fa-icon-wait nine-dots p-1" id="navbarDropdownMenu" role="button" data-hide-on-body-scroll="data-hide-on-body-scroll" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="43" viewBox="0 0 16 16" fill="none">
+            <circle cx="2" cy="2" r="2" fill="#6C6E71"></circle>
+            <circle cx="2" cy="8" r="2" fill="#6C6E71"></circle>
+            <circle cx="2" cy="14" r="2" fill="#6C6E71"></circle>
+            <circle cx="8" cy="8" r="2" fill="#6C6E71"></circle>
+            <circle cx="8" cy="14" r="2" fill="#6C6E71"></circle>
+            <circle cx="14" cy="8" r="2" fill="#6C6E71"></circle>
+            <circle cx="14" cy="14" r="2" fill="#6C6E71"></circle>
+            <circle cx="8" cy="2" r="2" fill="#6C6E71"></circle>
+            <circle cx="14" cy="2" r="2" fill="#6C6E71"></circle>
+          </svg>
+        </a>
+
+        <div class="dropdown-menu dropdown-caret dropdown-caret dropdown-menu-end dropdown-menu-card dropdown-caret-bg" aria-labelledby="navbarDropdownMenu">
+          <div class="card shadow-none">
+            <div class="scrollbar-overlay nine-dots-dropdown">
+              <div class="card-body px-3">
+                <div class="row text-center gx-0 gy-0">
+                  <div class="col-4">
+                    <a class="d-block hover-bg-200 px-2 py-3 rounded-3 text-center text-decoration-none" href="<%= user_profile_path(lang: session[:lang]) %>">
+                      <div class="avatar avatar-2xl"> 
+                      <img src='<%= @user_info.present? && @user_info['avatar_name'].present? ? "#{request.base_url}/mdata/hrm/#{@user_info['avatar_name']}" : image_path('no_avatar.jpg') %>' class="rounded-circle" alt="">
+                      </div>
+                      <p class="mb-0 fw-medium text-800 text-truncate fs--2"><%= lib_translate("account")  %></p>
+                    </a>
+                  </div>
+
+                  <% if is_access(session["user_id"], "SFTRAINING","READ") %>
+                  <div class="col-4">
+                    <form action="<%= redirect_to_straining_path %>" method="post">
+                      <button type="submit" style="border: none; background: unset;" class="btn_pmdt">
+                        <div class="d-block hover-bg-200 px-2 py-3 rounded-3 text-center text-decoration-none">
+                          <div class="avatar avatar-2xl"> 
+                          <img src='<%= image_path('QLDT.svg') %>' class="rounded-circle" alt="">
+                          </div>
+                          <p class="mb-0 fw-medium text-800 fs--2"><%= lib_translate("Quản lý đào tạo")  %></p>
+                        </div>
+                      </button>
+                    </form>
+                  </div>
+                  <%end%>
+
+                  <% if is_access(session["user_id"], "SFTRAINING-LMS","READ") %>
+                  <div class="col-4">
+                    <form action="<%= redirect_to_straining_path(system: 'sftraining-lms') %>" method="post">
+                      <button type="submit" style="border: none; background: unset;" class="btn_pmdt">
+                        <div class="d-block hover-bg-200 px-2 py-3 rounded-3 text-center text-decoration-none">
+                          <div class="avatar avatar-2xl"> 
+                          <img src='<%= image_path('Lms.svg') %>' class="rounded-circle" alt="">
+                          </div>
+                          <p class="mb-0 fw-medium text-800 fs--2"><%= lib_translate("LMS")  %></p>
+                        </div>
+                      </button>
+                    </form>
+                  </div>
+                  <%end%>
+
+                  <% if is_access(session["user_id"], "ASSETS","READ") %>
+                  <div class="col-4">
+                    <form action="<%= redirect_to_assets_path %>" method="post">
+                      <button type="submit" style="border: none; background: unset;" class="btn_asset">
+                        <input type="hidden" name="system" value="masset">
+                        <input type="hidden" name="resource" value="ASSETS">
+                        <div class="d-block hover-bg-200 px-2 py-3 rounded-3 text-center text-decoration-none">
+                          <div class="avatar avatar-2xl"> 
+                          <img src='<%= image_path('CSVC.svg') %>' class="rounded-circle" alt="">
+                          </div>
+                          <p class="mb-0 fw-medium text-800 fs--2"><%= lib_translate("Quản lý CSVC")  %></p>
+                        </div>
+                      </button>
+                    </form>
+                  </div>
+                  <%end%>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </li>
+
+      <li class="nav-item dropdown">
+        <a class="nav-link pe-0 ps-2" id="navbarDropdownUser" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <div class="avatar avatar-xl"> 
+              <img src='<%= @user_info.present? && @user_info['avatar_name'].present? ? "#{request.base_url}/mdata/hrm/#{@user_info['avatar_name']}" : image_path('no_avatar.jpg') %>' class="rounded-circle" alt="">
+          </div>
+        </a>
+        <div class="dropdown-menu dropdown-caret dropdown-caret dropdown-menu-end py-0" aria-labelledby="navbarDropdownUser">
+          <div class="bg-white dark__bg-1000 rounded-2 py-2"> 
+            <h6 class="dropdown-item m-0 d-flex align-items-center" style="font-weight: bold;"><span style="font-size: 15px;" class="fas fa-user-alt me-2"></span><%= @user_info.present? ? "#{@user_info['full_name']}(#{@user_info['sid']})" : "N/A" %></h6>
+            <h6 class="dropdown-item m-0 d-flex align-items-center"><span style="width: 15px; height: 15px;" class="fas fa-city fs-5 me-2"></span><%= @user_info.present? ? @user_info['department_name'] : "N/A" %></h6>
+            <hr class="mt-2 mb-2">
+            <a class="dropdown-item" href="<%= user_profile_path(lang: session[:lang]) %>"><%= lib_translate("Profile") %></a>
+            <a class="dropdown-item" href="<%= @ROOT_PATH%>/landingpage?lang=vi"><%= lib_translate("Logout") %></a>
+          </div>
+        </div>
+      </li>
+    </ul>
+</nav>
+<!-- <script>
+  $(document).ready(function() {
+      // const isShowNotification = sessionStorage.getItem("isShowNotification");
+
+      // if (isShowNotification === null && $("#navbarDropdownNotification").find(".bell-shake").length) {
+      //     $("#navbarDropdownNotification").click();
+      // }
+  });
+</script> -->

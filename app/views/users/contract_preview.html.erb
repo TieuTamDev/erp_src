@@ -1,0 +1,125 @@
+<!-- style -->
+<% content_for :head do %>
+    <%= stylesheet_link_tag '/assets/mystyle/contract_preview' %>
+<% end %>
+<!-- style -->
+<% content_for :bottombody do %>
+  <%= javascript_include_tag '/assets/myjs/contract_preview'%>
+<% end %>
+<nav class="mb-3" aria-p="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item">
+      <a
+        href="<%= users_index_path(lang: session[:lang])  %>"
+        style="color: rgb(0, 153, 255) !important"
+        ><%= lib_translate("employee_profile_management") %></a>
+    </li>
+    <li class="breadcrumb-item">
+      <a
+        href="<%= user_details_path(id: @contract.user_id,page: "contract" ,lang: session[:lang])  %>"
+        style="color: rgb(0, 153, 255) !important"
+        ><%= lib_translate("Contract") %></a
+      >
+    </li>
+    <li class="breadcrumb-item active" aria-current="page">
+      <%= lib_translate("Thông tin hợp đồng: ") %> 
+      <span style="border: none; background: transparent; font-weight: 700">
+      <%= @contract.name %>
+      </span> 
+      <%= lib_translate(" của ") %>
+      <span style="text-transform: capitalize; border: none; background: transparent; font-weight: 700">
+            <%= @contract.user.last_name %> <%= @contract.user.first_name %>
+      </span>
+    </li>
+  </ol>
+</nav>
+<div class = "container">
+  <div class="row mb-2">
+      <div class="d-flex justify-content-end">
+        <button class="btn btn-primary m-1" type="button" onclick="clickSave()"><%=lib_translate("Save")%></button>
+        <button class="btn btn-primary m-1" type="button" onclick="clickSave(true)"><%=lib_translate("Save_and_export")%></button>
+        <a class="btn btn-primary m-1" onclick="clickPrint()"><%=lib_translate("Print")%> <i class="fas fa-print"></i></a>
+    </div>
+  </div>
+  <div class="card" style=" border-radius: 0px; box-shadow: 2px 1px 4px #a5a5b5; min-height: 500px;">
+    <div id="scontent" style="color:black"></div>
+  </div>
+</div>
+
+<div class="modal" id="token-edit-popup" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 500px">
+    <div class="modal-content position-relative">
+      <div class="position-absolute top-0 end-0 mt-2 me-2 z-index-1">
+        <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div class="rounded-top-lg py-3 ps-4 pe-6 bg-light">
+          <h4 class="mb-1" id="modalExampleDemoLabel"><%=lib_translate("Edit_content")%></h4>
+        </div>
+        <div class="p-4 pb-0">
+            <div class="mb-3" hidden>
+              <label class="col-form-label" for="recipient-name"><%=lib_translate("Token")%>:</label>
+              <input class="form-control disabled" id="token-popup-name" readonly disabled/>
+            </div>
+            <div class="mb-3">
+              <div id="alert-token" style="display: none;">
+                <span class="fas fa-exclamation-triangle"></span>
+                <span><%= lib_translate("Valid_empty_warning")%></span>
+              </div>
+              <input class="form-control" id="token-popup-value" />
+              <input class="form-control" id="token-popup-id" value="" hidden/>
+            </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" type="button" data-bs-dismiss="modal"><%= lib_translate("Close")%></button>
+        <button id="button-save-token" class="btn btn-primary" type="button" onclick="clickSaveToken()"><%=lib_translate("Confirm")%></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%= form_tag user_contract_review_update_path,method:'POST',id:'preview-update-form' do %>
+  <input id="contract_id" type="hidden" name="contract_id" value="<%= @contract_id%>" type="text">
+  <input id="contractdetail_id" type="hidden" name="contractdetail_id" type="text" value="<%= @contractdetail_id%>">
+  <input id="bexport" type="hidden" name="export" type="text" value="false">
+<%  end %>
+
+<div class="modal fade" id="" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 500px">
+    <div class="modal-content position-relative">
+      <div class="position-absolute top-0 end-0 mt-2 me-2 z-index-1">
+        <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div class="rounded-top-lg py-3 ps-4 pe-6 bg-light">
+          <h4 class="mb-1" id="modalExampleDemoLabel"></h4>
+        </div>
+        <div class="p-4 pb-0">
+          <form>
+            <div class="mb-3">
+              <label class="col-form-label" for="recipient-name">Recipient:</label>
+              <input class="form-control" id="recipient-name" type="text" />
+            </div>
+            <div class="mb-3">
+              <label class="col-form-label" for="message-text">Message:</label>
+              <textarea class="form-control" id="message-text"></textarea>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Close</button>
+        <button class="btn btn-primary" type="button">Understood </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // for render contract preview
+  let tokenList = <%= @token_preview.to_json.html_safe%>;
+  let content = <%=@scontent_preview.to_json.html_safe%>;
+  let exitsTokens = <%=@existTokens.to_json.html_safe%>;
+  $("#scontent").html(content);
+</script>

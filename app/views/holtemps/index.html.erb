@@ -1,0 +1,113 @@
+<% content_for :head do %>
+    <%= javascript_include_tag '/assets/myjs/flatpickr.js' %>
+    <%= javascript_include_tag '/assets/myjs/flatpickr_local/vn.js' %>
+    <%= stylesheet_link_tag '/assets/mystyle/flatpickr.min.css' %>
+    <%= stylesheet_link_tag "select2-bootstrap-5-theme.min" %>
+    <%= stylesheet_link_tag "select2.min" %>
+    <style>
+        .lr-action{
+            background: #F5F9FF;
+            height: 188px;
+        }
+        .text-table{
+            color: #61666F;
+        }
+        .bg-thead{
+            background-color: #F9FBFC;
+        }
+        .bg-dttotal{
+            background-color: #F3F3F3;
+        }
+        table{
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        .tox-statusbar__branding {
+        display: none !important;
+        }
+    </style>
+<% end %>
+
+<% content_for :bottombody do %>
+    <%= javascript_include_tag '/assets/myjs/holtemps.js' %>
+    <%= javascript_include_tag '/assets/myjs/tinymce.min.js' %>
+<% end %>
+
+<div class="card mb-3">
+  <div class="card-body">
+    <div class="row gx-0 border rounded-2 p-3">
+      <div class="tab-content" style="width: 97%; margin: 0 auto;">
+        <h4>Biểu mẫu phép</h4>
+        <% if is_access(session["user_id"], "HOL-TEMPS","ADD") %>
+        <%= link_to 'Thêm mới',
+        new_holtemp_path,
+        class: 'btn btn-primary mb-2 col-1 btn-edit-holtemp' %>
+        <%end%>
+
+        <table id="holtemp-tbl" class="table table-bordered fs--1 mb-0">
+          <thead class="bg-200 text-900">
+            <tr>
+              <th style="width:4%; text-align: center;">STT</th>
+              <th class="text-center">Tên biểu mẫu</th>
+              <th class="text-center">Áp dụng từ</th>
+              <th class="text-center">Áp dụng đến</th>
+              <th class="text-center">Đơn vị sử dụng</th>
+              <th class="text-center">Trạng thái</th>
+              <th style="width:12%; text-align: center;"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @holtemps.each_with_index do |holtemp, index| %>
+              <tr>
+                <td class="text-center"><%= index + 1 %></td>
+                <td class="text-center"><%= holtemp.title %></td>
+                <td class="text-center"><%= holtemp.valid_from.strftime('%d/%m/%Y') if holtemp.valid_from.present? %></td>
+                <td class="text-center"><%= holtemp.valid_to.strftime('%d/%m/%Y') if holtemp.valid_to.present? %></td>
+                <td class="text-center">
+                  <%= Department.find_by(id: holtemp.dept)&.name || "Không xác định" %>
+                </td>
+
+                <td class="text-center">
+                    <%= holtemp.status == 'ACTIVE' ? 'Hoạt động' : 'Không hoạt động' %>
+                </td>
+
+                <td style="text-align: center;">
+                    <%= link_to raw('<i class="text-info fa fa-eye"></i>'), '#', class: 'btn-preview-content me-3', data: { content: holtemp.content } %>
+                    <% if is_access(session["user_id"], "HOL-TEMPS","EDIT") %>
+                    <%= link_to raw('<i class="text-primary fa fa-file-signature"></i>'),edit_holtemp_path(holtemp),class: 'btn-edit-holtemp me-3' %>
+                    <% end %>
+                    <% if is_access(session["user_id"], "HOL-TEMPS","DEL") %>
+                    <%= link_to raw('<i class="text-danger fa fa-trash"></i>'), holtemp_path(holtemp), method: :delete, data: { confirm: 'Bạn có chắc chắn muốn xoá?' }, class: 'me-3' %>
+                    <% end %>
+
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="holtempModal" tabindex="-1" aria-labelledby="holtempModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+    </div>
+  </div>
+</div>
+<!-- Modal hiển thị nội dung -->
+<div class="modal fade" id="previewContentModal" tabindex="-1" aria-labelledby="previewContentModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Nội dung biểu mẫu</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+      </div>
+      <div class="modal-body">
+        <div id="previewContent" style="max-height: 70vh; overflow-y: auto;"></div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,106 @@
+<nav class="mb-3"   style="
+--falcon-breadcrumb-divider: url(
+  &#34;data:image/svg + xml,
+  %3Csvgxmlns='http://www.w3.org/2000/svg'width='8'height='8'%3E%3Cpathd='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z'fill='%23748194'/%3E%3C/svg%3E&#34;
+);
+"  aria-p="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item">
+      <%= link_to 'Danh sách tài liệu', documents_index_path%>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page">
+      <span style="text-transform: capitalize;border: none; background: transparent; font-weight: bold"><%= lib_translate("Change_history_of_system_documentation")%><%= @get_app%></span>
+    </li>
+  </ol>
+</nav>
+<div class="card mb-3">
+    <div class="card-body pt-0">
+        <div class="tab-content mt-1">
+            <div id="positonjob_table_filter" class="dataTables_filter" style="display: flex;flex-direction: row-reverse;">
+                <form class="d-flex" action=" <%= documents_history_path %>" accept-charset="UTF-8" method="get" style="width: 30%;">
+                <input name="utf8" type="hidden" value="✓">
+                <input type="text" name="search" id="search_user" value="" placeholder="Tìm kiếm" class="form-control form-control-sm">
+                <input class="d-none" name="lang" value="vi"><input type="submit" hidden="">
+                <input class="d-none" name="iddoc" value="<%=params[:iddoc]%>%"><input type="submit" hidden="">
+                </form>
+            </div>
+            <table id="table_ethnic" class="table table-bordered fs--1 mb-0 table-hover resizable dataTable no-footer" style="margin-top: 0px !important; margin-bottom: 0px !important">
+                <thead class="bg-200 text-900">
+                <tr>
+                    <th class="sort" data-sort="oder" style="cursor: pointer; width: 5%; text-align: center"><%= lib_translate("Oder")  %></th>
+                    <th style="text-align: center; cursor: pointer;" class="sort"><%= lib_translate("Value_changes")%></th>
+                    <th style="text-align: center; cursor: pointer;" class="sort"><%= lib_translate("Content_changes")%></th>
+                    <th style="text-align: center; cursor: pointer;" class="sort"><%= lib_translate("People_change")%></th>
+                    <th style="text-align: center; cursor: pointer;" class="sort"><%= lib_translate("Update_day")%></th>
+                </tr>
+                </thead>
+                <tbody class="list">
+                <% @mydochis.each_with_index do |mydochi, index| %>
+                    <tr>
+                        <td style="text-align: center;"><%= index + 1 %></td> 
+                        <td style="text-align: center;"><%= mydochi.sfield%></td>
+                        <% if mydochi.sfield == "META" %>
+                            <td style="text-align: center;">
+                                <a style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#modal-view" onclick='openViewContents("<%= escape_javascript(mydochi.fvalue) %>", "<%=escape_javascript(mydochi.tovalue)%>")'>
+                                    <span class="text-success far fa-eye me-3" style="width : 15px"></span>
+                                </a>
+                            </td>
+                        <%else%>
+                            <td style="text-align: center;">
+                                <a style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#modal-view" onclick='openViewContents("<%= escape_javascript(mydochi.fvalue) %>", "<%=escape_javascript(mydochi.tovalue)%>")'>
+                                    <span class="text-success far fa-eye me-3" style="width : 15px"></span>
+                                </a>
+                            </td>
+                        <% end %>
+                        <td style="text-align: center;"><%= mydochi.owner%></td>
+                        <td style="text-align: center;"><%= mydochi.created_at&.strftime("%d/%m/%Y %H:%M")%></td>
+                    </tr>
+                <% end %>
+                </tbody>
+            </table>
+            <%= render_pagination_limit_offset(documents_history_path(lang: session[:lang], per_page: session[:per_page], search: session[:search], iddoc: session[:iddoc]), 10, @mydochis.count).html_safe %>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modal-view" tabindex="-1" role="dialog" aria-hidden="true" data-bs-focus="false">
+    <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 98%;">
+        <div class="modal-content position-relative">
+            <div class="position-absolute top-0 end-0 mt-2 me-2 z-index-1">
+                <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="rounded-top-lg py-3 ps-4 pe-6 bg-light">
+                    <h4 class="mb-1"><%= lib_translate("Content_changes") %></h4>
+                </div>
+                <div class="p-4 pb-0">
+                    <div class="form-view">
+                        <input id="id_view" class="d-none">
+                        <div class="d-flex justify-content-between" >
+                            <div class="col-6 p-2" style="border-right: 1px solid #ccc; overflow-y: scroll;">
+                                <label for="contents_view" class="form-label"><%= lib_translate('Old_content') %>:</label>
+                                <hr>
+                                <div style="max-height: 700px;">
+                                    <label id="view_fvalue" style="white-space: pre-wrap; width: 100%;"></label>
+                                </div>
+                            </div>
+                            <div class="col-6 p-2" style="overflow-y: scroll;">
+                                <label for="contents_view" class="form-label"><%= lib_translate('New_content') %>:</label>
+                                <hr>
+                                <div style="max-height: 700px;">
+                                    <label id="view_tovalue" style="white-space: pre-wrap; width: 100%;"></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+function openViewContents(fvalue, tovalue) {
+	$("#view_fvalue").html(fvalue);
+	$("#view_tovalue").html(tovalue);
+}
+</script>
+

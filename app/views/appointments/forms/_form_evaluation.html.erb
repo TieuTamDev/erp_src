@@ -1,0 +1,5 @@
+<% url = survey_answer_path(@form_data[:appointsurvey_id],lang: session[:lang]) %>
+<script defer>
+    $("#loading").css("display", "flex");
+    window.location.href = "<%= raw url %>";
+</script>

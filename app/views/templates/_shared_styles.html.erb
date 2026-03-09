@@ -1,0 +1,19 @@
+<style>
+    @font-face {
+        font-family: 'Times';
+        font-weight: normal;
+        src: url("<%= Rails.root.join('app', 'assets', 'fonts', 'times.svg') %>") format('svg')
+
+    }
+    @font-face {
+        font-family: 'Times-bold';
+        font-weight: normal;
+        src: url("<%= Rails.root.join('app', 'assets', 'fonts', 'times-bold.svg') %>") format('svg')
+    }
+    @font-face {
+        font-family: 'Times-italic';
+        font-weight: normal;
+        src: url("<%= Rails.root.join('app', 'assets', 'fonts', 'times-italic.svg') %>") format('svg')
+    }
+</style>
+<link rel="stylesheet" href="<%= Rails.root.join('public', 'assets', 'mystyle', 'times-fonts.css') %>">

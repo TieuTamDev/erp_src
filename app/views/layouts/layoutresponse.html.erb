@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="shortcut icon" type="image/x-icon" href="<%= image_path("buhlogowebsite.png") %>" />
+     <title>BMTU - Quản lý nhân sự</title>
+  <%= yield :head %>
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      <meta name="theme-color" content="#ffffff">  
+      <%= csrf_meta_tags %>
+      <%= stylesheet_link_tag "application"  %> 
+      <%= javascript_include_tag 'config'%>
+      <%= javascript_include_tag 'simplebar.min'%>
+      <!-- ===============================================-->
+      <!--    Stylesheets-->
+      <!-- ===============================================--> 
+      <%= stylesheet_link_tag "/assets/lib_hrm/font-google-open-sancss.css?family=Open+Sans:300,400,500,600,700%7cPoppins:300,400,500,600,700,800,900&amp;display=swap", rel: "stylesheet"%> 
+      <%= stylesheet_link_tag "simplebar.min"  %> 
+      <%= stylesheet_link_tag "theme-rtl.min", id: "style-rtl"%> 
+      <%= stylesheet_link_tag "theme.min", id: "style-default"  %> 
+      <%= stylesheet_link_tag "user-rtl.min", id: "user-style-rtl" %> 
+      <%= stylesheet_link_tag "user.min" , id: "user-style-default"  %> 
+
+ 
+
+  
+</head>
+
+    <style>
+      .bg-style-bmtu {
+        background-image: var(--bgr-page-login-bmtu-img);
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-position: center;
+      }
+    </style>
+
+    <%= yield %>
+
+    <%= javascript_include_tag 'popper.min'%>
+    <%= javascript_include_tag 'bootstrap.min'%>
+    <%= javascript_include_tag 'anchor.min'%>
+    <%= javascript_include_tag 'is.min'%>
+    <%= javascript_include_tag 'echarts.min'%>
+    <%= javascript_include_tag 'lottie.min'%>
+    <%= javascript_include_tag 'all.min'%>
+    <%= javascript_include_tag 'lodash.min'%>
+    <%= javascript_include_tag 'list.min'%>
+    <%= javascript_include_tag 'theme'%> 
+    <%= javascript_include_tag 'jquery.min'%>
+  
+</html>

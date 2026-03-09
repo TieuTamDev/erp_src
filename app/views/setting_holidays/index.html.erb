@@ -1,0 +1,1254 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "select2-bootstrap-5-theme.min" %>
+  <%= stylesheet_link_tag "select2.min" %>
+  <%= stylesheet_link_tag "https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" %> <!-- Sử dụng CDN cho flatpickr CSS -->
+<% end %>
+
+<% content_for :bottombody do %>
+  <%= javascript_include_tag "https://cdn.jsdelivr.net/npm/flatpickr" %> <!-- Sử dụng CDN cho flatpickr JS -->
+  <%= javascript_include_tag '/assets/lib_hrm/moment-with-locales.js' %>
+  <%= javascript_include_tag 'select2.full.min' %>
+  <%= javascript_include_tag 'select2.min.js' %>
+<% end %>
+
+<div class="list_users">
+  <div class="card mb-3">
+    <div class="card-body pt-0">
+      <div class="tab-content">
+        <div class="row">
+          <div class="col">
+            <h3 class="mt-2 overview_text"><%= lib_translate("Cấu hình ngày nghỉ") %></h3>
+          </div>
+        </div>
+
+        <div class="mt-3">
+          <!-- Nav tabs -->
+          <ul class="nav nav-tabs <%= current_user.uorgs.count > 1 ? '' : 'd-none' %>" role="tablist">
+            <li class="nav-item">
+              <a id="man_in_tab_1" 
+                 class="nav-link <%= ['BMU', 'BMTU'].include?(@uorg_scode) ? 'active' : '' %>" 
+                 data-bs-toggle="tab" 
+                 href="#setting_holidays_bmu" 
+                 onclick='changeTab("BMU")'>
+                <%= lib_translate("BMU") %>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a id="man_in_tab_2" 
+                 class="nav-link <%= @uorg_scode == 'BUH' ? 'active' : '' %>" 
+                 data-bs-toggle="tab" 
+                 href="#setting_holidays_buh" 
+                 onclick='changeTab("BUH")'>
+                <%= lib_translate("BUH") %>
+              </a>
+            </li>
+          </ul>
+
+          <div class="tab-content">
+            <div id="setting_holidays_bmu" class="tab-pane fade <%= ['BMU', 'BMTU'].include?(@uorg_scode) ? 'show active' : '' %>">
+              <div class="row justify-content-end d-none">
+                  <div class="dropdown font-sans-serif" style="height: 5px; width: 90px;">
+                        <a style="cursor: pointer;" class="navbar-toggler-humburger-icon navbar-vertical-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span class="navbar-toggle-icon"><span class="toggle-line"></span></span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="dropdownMenuLink">
+                            <div style="display:flex;flex-direction: column;width: max-content;">
+                                
+                                <button onclick="clickOpenImport()" class="btn btn-success mt-3" data-bs-toggle="modal" data-bs-target="#modal-import-file" id="btn-import-file">
+                                    <%= lib_translate("Nhập dữ liệu")%> <span class="fas fa-file-excel"></span>
+                                </button>
+                                
+                                <button data-bs-toggle="modal" data-bs-target="#modal-export-student" class="btn btn-warning mt-3 d-none" type="button">Xuất báo cáo - thống kê <img class="me-1" src="<%= image_path("/assets/image/icons8-microsoft-excel-2019-48.png") %>" alt="" width="23" /></button>
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+              <form action='<%= setting_holidays_index_path() %>' accept-charset='UTF-8' method='get'>
+                <div id='positonjob_table_filter' class='dataTables_filter'>
+                  <input name='utf8' type='hidden' value='✓'>
+                  <input class="d-none" name="uorg_scode" value="BMU">
+                  <input class='d-none' name='lang' value='vi'>
+                  <% if !params[:per_page].nil?  %>
+                  <input class='d-none' name='per_page' value='<%= params[:per_page] %>'>
+                  <% end %>
+                  <input type='submit' hidden>
+                  <div class="d-flex" style="justify-content: space-between;">
+                    <div class="me-1" style="width: 500px;">
+                        <label style="margin-bottom: 0px !important;"><%= lib_translate("Phòng ban") %></label>
+                        <select class="select-form selectpicker" name="department_bmu" id="department_bmu_select" onchange="this.form.submit()">
+                          <option value="">Tất cả phòng ban</option>
+                          <% @departments_bmu&.each do |department| %>
+                            <option value="<%= department&.id %>" <%= params[:department_bmu] == department&.id.to_s ? 'selected' : '' %>>
+                              <%= department&.name %>
+                            </option>
+                          <% end %>
+                        </select>
+                    </div>
+                    <div class="btn_fillter d-none">
+                        <div>
+                            <button type="submit" class="btn btn-primary"><%= lib_translate("Tìm kiếm")  %></button>
+                        </div>
+                    </div>
+                  </div>
+                  <div class="row justify-content-end">
+                    <div style="width: 500px;" >
+                        <input type='text' name='search' id='search_user' value='<%= params[:search] %>' placeholder='<%= lib_translate('Search') %>' class='form-control form-control-sm'>
+                        <input class='d-none' name='lang' value='vi'><input type='submit' hidden>
+                    </div>
+                  </div>
+                </div>
+              </form>
+      
+              <div class="table-responsive scrollbar mt-2"> 
+
+                <table id="user_bmu" class="table table-bordered fs--1 mb-0" style="margin-top: 0px !important; margin-bottom: 0px !important">
+                  <thead class="bg-200 text-900">
+                    <tr>
+                      <th class="sort" style="width:4%; text-align: center;"><%= lib_translate("Oder") %></th>
+                      <th class="sort"><%= sort_link('user_sid', lib_translate("Mã nhân sự")) %></th>
+                      <th class="sort"><%= sort_link('user_fullname', lib_translate("Họ và tên")) %></th>
+                      <th class="sort"><%= sort_link('department_name', lib_translate("Phòng ban")) %></th>
+                      <th class="sort"><%= sort_link('positionjob_name', lib_translate("Vị trí công việc")) %></th>
+                      <th class="sort text-center" style="width: 6%;"><%= sort_link('hol_positionjob', lib_translate("Phép năm")) %></th>
+                      <th class="sort text-center" style="width: 6%;"><%= sort_link('hol_seniority', lib_translate("Phép TN")) %></th>
+                      <th class="sort text-center" style="width: 6%;"><%= sort_link('hol_exist', lib_translate("Phép tồn")) %></th>
+                      <th class="sort text-center" style="width: 6%;"><%= sort_link('total_holiday', lib_translate("Tổng")) %></th>
+                      <th class="sort text-center" style="width: 6%;"><%= sort_link('used_holiday', lib_translate("Đã dùng")) %></th>
+                      <th class="sort text-center" style="width: 6%;"><%= sort_link('remain_holiday', lib_translate("Còn lại")) %></th>
+                      <th class="no-sort text-center" style="width: 6%;"><%= lib_translate("Hành động") %></th>
+                    </tr>
+                  </thead>
+                  <tbody class="list_user_bmu">
+                    <% @results_bmu.each_with_index do |data, index| %>
+                      <tr style="vertical-align: middle;" data-holiday-id="<%= data[:id_curent_holiday] %>">
+                        <td style="text-align: center;"><%= (@page - 1) * @per_page + index + 1 %></td>
+                        <td><%= data[:user_sid] %></td>
+                        <td><%= data[:user_fullname] %></td>
+                        <td><%= data[:department_name] %></td>
+                        <td><%= data[:positionjob_name] %></td>
+                        <td style="text-align: center; font-size: 14px;">
+                          <input type="text" class="form-control hol-positionjob-input fw-bold" 
+                                value="<%= data[:hol_positionjob].present? ? data[:hol_positionjob].to_f.round(1) : '0' %>" 
+                                data-id="<%= data[:hol_positionjob_id] %>" 
+                                data-original-value="<%= data[:hol_positionjob].present? ? data[:hol_positionjob].to_f.round(1) : '0' %>" 
+                                style="width: 70px; margin: 0 auto; text-align: center; font-size: 14px;">
+                        </td>
+                        <td style="text-align: center; font-size: 14px; font-weight: bold;">
+                          <%= data[:hol_seniority].present? ? data[:hol_seniority]&.to_f.round(1) : '0' %>
+                          <input type="hidden" class="hol-positionjob-id" value="<%= data[:hol_seniority_id].present? ? data[:hol_seniority_id] : '' %>">
+                          <input type="hidden" class="hol-seniority-value" value="<%= data[:hol_seniority].present? ? data[:hol_seniority]&.to_f.round(1) : '0' %>">
+                        </td>
+                        <td style="text-align: center;">
+                          <%
+                            deadline_exist = "31/03/#{Time.now.year}" # Sử dụng năm hiện tại (ví dụ: 31/03/2025)
+                            if data[:deadline_exist].present?
+                              begin
+                                Date.strptime(data[:deadline_exist], '%d/%m/%Y')
+                                deadline_exist = data[:deadline_exist]
+                              rescue ArgumentError
+                                deadline_exist = "31/03/#{Time.now.year}"
+                              end
+                            end
+                            begin
+                              deadline_date = Date.strptime(deadline_exist, '%d/%m/%Y')
+                              is_expired = deadline_date <= Date.today - 1
+                            rescue ArgumentError
+                              is_expired = false
+                            end
+                          %>
+                          <div class="d-flex align-items-center justify-content-center" style="flex-direction: column">
+                            <input type="text" class="form-control hol-exist-input me-1 fw-bold" 
+                                  value="<%= data[:hol_exist].present? ? data[:hol_exist].to_f.round(1) : '0' %>" 
+                                  data-id="<%= data[:hol_exist_id] %>" 
+                                  data-original-value="<%= data[:hol_exist].present? ? data[:hol_exist].to_f.round(1) : '0' %>" 
+                                  style="width: 70px; text-align: center; font-size: 14px;">
+                            <input type="text" class="form-control hol-exist-deadline mt-1" 
+                                  title="<%= is_expired ? 'Ngày hạn đã qua' : '' %>"
+                                  value="<%= deadline_exist %>" 
+                                  data-id="<%= data[:hol_exist_id] %>" 
+                                  data-original-value="<%= deadline_exist %>"
+                                  style="width: 100px; text-align: center; font-size: 12px; <%= is_expired ? 'color: red;' : '' %>">
+                          </div>
+                        </td>
+                        <td style="text-align: center;">
+                          <input type="text" class="form-control total-holiday-input fw-bold" 
+                                value="<%= data[:total_holiday].present? ? data[:total_holiday].to_f.round(1) : '0' %>" 
+                                data-id="<%= data[:id_curent_holiday] %>" 
+                                data-original-value="<%= data[:total_holiday].present? ? data[:total_holiday].to_f.round(1) : '0' %>" 
+                                style="width: 70px; margin: 0 auto; text-align: center; font-size: 14px;">
+                        </td>
+                        <td style="text-align: center;">
+                          <input type="text" class="form-control used-holiday-input fw-bold" 
+                                value="<%= data[:used_holiday].present? ? data[:used_holiday].to_f.round(1) : '0' %>" 
+                                data-id="<%= data[:id_curent_holiday] %>" 
+                                data-original-value="<%= data[:used_holiday].present? ? data[:used_holiday].to_f.round(1) : '0' %>" 
+                                style="width: 70px; margin: 0 auto; text-align: center; font-size: 14px;" readonly>
+                        </td>
+                        <td style="text-align: center; font-size: 14px; font-weight: bold;" class="remaining-value">
+                          <% remaining = data[:remain_holiday].present? ? (data[:remain_holiday].to_f).round(1) : "0" %>
+                          <%= remaining %>
+                        </td>
+                        <td style="text-align: center;">
+                          <%if data[:check_contract].present?%>
+                            <%if !data[:id_curent_holiday].present?%>
+                              <button class="btn btn-primary btn-sm save-btn" onclick="onclickSaveData(this,<%=data[:user_id]%>)">Lưu</button>
+                            <%else%>
+                              <button class="btn btn-success btn-sm save-btn" onclick="onclickSaveData(this,<%=data[:user_id]%>)">Cập nhật</button>
+                            <%end%>
+                          <%else%>
+                            <span style="text-wrap: auto;" class="text-warning">Nhân sự chưa có thông tin hợp đồng<span>
+                          <%end%>
+                        </td>
+                      </tr>
+                    <% end %>
+                  </tbody>
+                </table>
+
+                <% if @results_bmu_total > 0 %>
+                  <div class="d-flex justify-content-center mt-3">
+                    <div class="col-auto">
+                      <nav aria-label="Page navigation">
+                        <ul class="pagination mb-0">
+                          <li class="page-item <%= @page == 1 ? 'disabled' : '' %>">
+                            <%= link_to "«", setting_holidays_index_path(
+                              page: @page - 1, 
+                              per_page: @per_page, 
+                              lang: session[:lang], 
+                              search: params[:search], 
+                              uorg_scode: @uorg_scode, 
+                              department_buh: params[:department_buh],
+                              department_bmu: params[:department_bmu]
+                              ), class: "page-link" %>
+                          </li>
+                          <% (1..@total_pages).each do |i| %>
+                            <li class="page-item <%= @page == i ? 'active' : '' %>">
+                              <%= link_to i.to_s, setting_holidays_index_path(
+                                page: i, 
+                              per_page: @per_page, 
+                              lang: session[:lang], 
+                              search: params[:search], 
+                              uorg_scode: @uorg_scode, 
+                              department_buh: params[:department_buh],
+                              department_bmu: params[:department_bmu]
+                                ), class: "page-link" %>
+                            </li>
+                          <% end %>
+                          <li class="page-item <%= @page == @total_pages ? 'disabled' : '' %>">
+                            <%= link_to "»", setting_holidays_index_path(
+                              page: @page + 1, 
+                              per_page: @per_page, 
+                              lang: session[:lang], 
+                              search: params[:search], 
+                              uorg_scode: @uorg_scode, 
+                              department_buh: params[:department_buh],
+                              department_bmu: params[:department_bmu]
+                              ), class: "page-link" %>
+                          </li>
+                        </ul>
+                      </nav>
+                    </div>
+                    <div class="col-auto ms-2">
+                      <form action="<%= setting_holidays_index_path %>" accept-charset="UTF-8" method="get">
+                        <select class="form-select" name="per_page" id="per_page_select" onchange="this.form.submit()">
+                          <option value="25" <%= @per_page == 25 ? 'selected' : '' %>>25</option>
+                          <option value="50" <%= @per_page == 50 ? 'selected' : '' %>>50</option>
+                          <option value="100" <%= @per_page == 100 ? 'selected' : '' %>>100</option>
+                          <option value="200" <%= @per_page == 200 ? 'selected' : '' %>>200</option>
+                        </select>
+                        <input class="d-none" name="lang" value="<%= session[:lang] %>">
+                        <input class="d-none" name="search" value="<%= params[:search] %>">
+                        <input class="d-none" name="page" value="1">
+                        <input class="d-none" name="uorg_scode" value="<%= @uorg_scode %>">
+                        <input class="d-none" name="department_bmu" value="<%= params[:department_bmu] %>">
+                      </form>
+                    </div>
+                  </div>
+                <% else %>
+                  <p class="text-center mt-3">Không có dữ liệu để hiển thị.</p>
+                <% end %>
+              </div>
+            </div>
+
+            <div id="setting_holidays_buh" class="tab-pane fade <%= @uorg_scode == 'BUH' ? 'show active' : '' %>">
+                
+              <form action='<%= setting_holidays_index_path() %>' accept-charset='UTF-8' method='get'>
+                <div id='positonjob_table_filter' class='dataTables_filter'>
+                  <input name='utf8' type='hidden' value='✓'>
+                  <input class="d-none" name="uorg_scode" value="BUH">
+                  <input class='d-none' name='lang' value='vi'>
+                  <% if !params[:per_page].nil?  %>
+                  <input class='d-none' name='per_page' value='<%= params[:per_page] %>'>
+                  <% end %>
+                  <input type='submit' hidden>
+                  <div class="d-flex" style="justify-content: space-between;">
+                    <div class="me-1" style="width: 500px;">
+                        <label style="margin-bottom: 0px !important;"><%= lib_translate("Phòng ban") %></label>
+                        <select class="select-form selectpicker" name="department_buh" id="department_buh_select" onchange="this.form.submit()">
+                          <option value="">Tất cả phòng ban</option>
+                          <% @departments_buh&.each do |department| %>
+                            <option value="<%= department&.id %>" <%= params[:department_buh] == department&.id.to_s ? 'selected' : '' %>>
+                              <%= department&.name %>
+                            </option>
+                          <% end %>
+                        </select>
+                    </div>
+                    <div class="btn_fillter d-none">
+                        <div>
+                            <button type="submit" class="btn btn-primary"><%= lib_translate("Tìm kiếm")  %></button>
+                        </div>
+                    </div>
+                  </div>
+                  <div class="row justify-content-end">
+                    <div style="width: 500px;" >
+                        <input type='text' name='search' id='search_user' value='<%= params[:search] %>' placeholder='<%= lib_translate('Search') %>' class='form-control form-control-sm'>
+                        <input class='d-none' name='lang' value='vi'><input type='submit' hidden>
+                    </div>
+                  </div>
+                </div>
+              </form>
+              <div class="table-responsive scrollbar mt-2"> 
+                <table id="user_buh" class="table table-bordered fs--1 mb-0 mt-2" style="margin-top: 0px !important; margin-bottom: 0px !important">  
+                  <thead class="bg-200 text-900">
+                    <tr>
+                      <th class="sort" style="width:4%; text-align: center;"><%= lib_translate("Oder") %></th>
+                      <th class="sort"><%= sort_link('user_sid', lib_translate("Mã nhân sự")) %></th>
+                      <th class="sort"><%= sort_link('user_fullname', lib_translate("Họ và tên")) %></th>
+                      <th class="sort"><%= sort_link('department_name', lib_translate("Phòng ban")) %></th>
+                      <th class="sort"><%= sort_link('positionjob_name', lib_translate("Vị trí công việc")) %></th>
+                      <th class="sort text-center" style="width: 7%;"><%= sort_link('hol_positionjob', lib_translate("Phép VTCV")) %></th>
+                      <th class="sort text-center" style="width: 6%;"><%= sort_link('hol_seniority', lib_translate("Phép TN")) %></th>
+                      <th class="sort text-center" style="width: 6%;"><%= sort_link('hol_exist', lib_translate("Phép tồn")) %></th>
+                      <th class="sort text-center" style="width: 6%;"><%= sort_link('total_holiday', lib_translate("Tổng")) %></th>
+                      <th class="sort text-center" style="width: 6%;"><%= sort_link('used_holiday', lib_translate("Đã dùng")) %></th>
+                      <th class="sort text-center" style="width: 6%; position: relative; white-space: normal; word-wrap: break-word; word-break: break-word;"><%= sort_link('used_fholiday', lib_translate("Đã dùng tồn")) %></th>
+                      <th class="sort text-center" style="width: 6%;"><%= sort_link('remain_holiday', lib_translate("Còn lại")) %></th>
+                      <th class="no-sort text-center" style="width: 6%;"><%= lib_translate("Hành động") %></th>
+                    </tr>
+                  </thead>   
+                  <tbody class="list_user_buh">
+                    <% @results_bmu.each_with_index do |data, index| %>
+                      <tr style="vertical-align: middle;" data-holiday-id="<%= data[:id_curent_holiday] %>" class="<%= 'table-warning' if data[:check_value] == true %>">
+                        <td style="text-align: center;"><%= (@page - 1) * @per_page + index + 1 %></td>
+                        <td><%= data[:user_sid] %></td>
+                        <td><%= data[:user_fullname] %></td>
+                        <td><%= data[:department_name] %></td>
+                        <td><%= data[:positionjob_name] %></td>
+                        <td style="text-align: center; font-size: 14px;">
+                          <input type="text" class="form-control hol-positionjob-input fw-bold" 
+                                value="<%= data[:hol_positionjob].present? ? data[:hol_positionjob].to_f.round(1) : '0' %>" 
+                                data-id="<%= data[:hol_positionjob_id] %>" 
+                                data-name="hol_positionjob"
+                                data-original-value="<%= data[:hol_positionjob].present? ? data[:hol_positionjob].to_f.round(1) : '0' %>" 
+                                style="width: 70px; margin: 0 auto; text-align: center; font-size: 14px;">
+                        </td>
+                        <td style="text-align: center; font-size: 14px; font-weight: bold;padding: 0">
+                          <%= data[:hol_seniority].present? ? data[:hol_seniority]&.to_f.round(1) : '0' %>
+                          <input type="hidden" class="hol-seniority-id" value="<%= data[:hol_seniority_id] ? data[:hol_seniority_id] : '' %>">
+                          <input type="hidden" class="hol-seniority-value" value="<%= data[:hol_seniority].present? ? data[:hol_seniority]&.to_f.round(1) : '0' %>">
+                        </td>
+                        <td style="text-align: center;padding: 0">
+                          <%
+                            deadline_exist = "31/03/#{Time.now.year}" # Sử dụng năm hiện tại (ví dụ: 31/03/2025)
+                            if data[:deadline_exist].present?
+                              begin
+                                Date.strptime(data[:deadline_exist], '%d/%m/%Y')
+                                deadline_exist = data[:deadline_exist]
+                              rescue ArgumentError
+                                deadline_exist = "31/03/#{Time.now.year}"
+                              end
+                            end
+                            begin
+                              deadline_date = Date.strptime(deadline_exist, '%d/%m/%Y')
+                              is_expired = deadline_date <= Date.today - 1
+                            rescue ArgumentError
+                              is_expired = false
+                            end
+                          %>
+                          <div class="d-flex align-items-center justify-content-center" style="flex-direction: column; padding: 0">
+                            <input type="text" class="form-control hol-exist-input me-1 fw-bold" 
+                                  value="<%= data[:hol_exist].present? ? data[:hol_exist].to_f.round(1) : '0' %>" 
+                                  data-id="<%= data[:hol_exist_id] %>" 
+                                  data-name="hol_exist"
+                                  data-original-value="<%= data[:hol_exist].present? ? data[:hol_exist].to_f.round(1) : '0' %>" 
+                                  style="width: 70px; text-align: center; font-size: 14px;">
+                            <input type="text" class="form-control hol-exist-deadline mt-1" 
+                                  title="<%= is_expired ? 'Ngày hạn đã qua' : '' %>"
+                                  value="<%= deadline_exist %>" 
+                                  data-id="<%= data[:hol_exist_id] %>" 
+                                  data-original-value="<%= deadline_exist %>"
+                                  data-name="hol_exist_deadline"
+                                  style="width: 100px; text-align: center; font-size: 12px; <%= is_expired ? 'color: red;' : '' %>">
+                          </div>
+                        </td>
+                        <td style="text-align: center;padding: 0">
+                          <input type="text" class="form-control total-holiday-input fw-bold" 
+                                value="<%= data[:total_holiday].present? ? data[:total_holiday].to_f.round(1) : '0' %>" 
+                                data-id="<%= data[:id_curent_holiday] %>" 
+                                data-original-value="<%= data[:total_holiday].present? ? data[:total_holiday].to_f.round(1) : '0' %>" 
+                                style="width: 70px; margin: 0 auto; text-align: center; font-size: 14px;" 
+                                readonly>
+                        </td>
+                        <td style="text-align: center;padding: 0">
+                          <input type="text" class="form-control used-holiday-input fw-bold" 
+                                value="<%= data[:used_holiday].present? ? data[:used_holiday].to_f.round(1) : '0' %>" 
+                                data-id="<%= data[:id_curent_holiday] %>" 
+                                data-original-value="<%= data[:used_holiday].present? ? data[:used_holiday].to_f.round(1) : '0' %>" 
+                                style="width: 70px; margin: 0 auto; text-align: center; font-size: 14px;" readonly>
+                        </td>
+                        <td style="text-align: center;padding: 0">
+                          <input type="text" class="form-control used-fholiday-input fw-bold" 
+                                value="<%= data[:used_fholiday].present? ? data[:used_fholiday].to_f.round(1) : '0' %>" 
+                                data-id="<%= data[:id_curent_holiday] %>" 
+                                data-original-value="<%= data[:used_fholiday].present? ? data[:used_fholiday].to_f.round(1) : '0' %>" 
+                                style="width: 70px; margin: 0 auto; text-align: center; font-size: 14px;" readonly>
+                        </td>
+                        <td style="text-align: center; font-size: 14px; font-weight: bold;padding: 0" class="remaining-value">
+                          <% remaining = data[:remain_holiday].present? ? (data[:remain_holiday].to_f).round(1) : "0" %>
+                          <%= data[:remain_holiday] %>
+                        </td>
+                        <td style="text-align: center;padding: 0">
+                          <%if data[:check_contract].present?%>
+                            <%if !data[:id_curent_holiday].present?%>
+                              <button class="btn btn-primary btn-sm save-btn" onclick="onclickSaveData(this,<%=data[:user_id]%>)">Lưu</button>
+                            <%else%>
+                              <button class="btn btn-success btn-sm save-btn" onclick="onclickSaveData(this,<%=data[:user_id]%>)">Cập nhật</button>
+                            <%end%>
+                          <%else%>
+                            <span style="text-wrap: auto;" class="text-warning">Nhân sự chưa có thông tin hợp đồng<span>
+                          <%end%>
+                        </td>
+                      </tr>
+                    <% end %>
+                  </tbody>
+                </table>
+                <% if @results_bmu_total > 0 %>
+                  <div class="d-flex justify-content-center mt-3">
+                    <div class="col-auto">
+                      <nav aria-label="Page navigation">
+                        <ul class="pagination mb-0">
+                          <li class="page-item <%= @page == 1 ? 'disabled' : '' %>">
+                            <%= link_to "«", setting_holidays_index_path(
+                              page: @page - 1, 
+                              per_page: @per_page, 
+                              lang: session[:lang], 
+                              search: params[:search], 
+                              uorg_scode: @uorg_scode, 
+                              department_buh: params[:department_buh],
+                              department_bmu: params[:department_bmu]
+                              ), class: "page-link" %>
+                          </li>
+                          <% (1..@total_pages).each do |i| %>
+                            <li class="page-item <%= @page == i ? 'active' : '' %>">
+                              <%= link_to i.to_s, setting_holidays_index_path(
+                                page: i, 
+                                per_page: @per_page, 
+                                lang: session[:lang], 
+                                search: params[:search], 
+                                uorg_scode: @uorg_scode, 
+                                department_buh: params[:department_buh],
+                                department_bmu: params[:department_bmu]
+                                ), class: "page-link" %>
+                            </li>
+                          <% end %>
+                          <li class="page-item <%= @page == @total_pages ? 'disabled' : '' %>">
+                            <%= link_to "»", setting_holidays_index_path(
+                              page: @page + 1, 
+                              per_page: @per_page, 
+                              lang: session[:lang], 
+                              search: params[:search], 
+                              uorg_scode: @uorg_scode, 
+                              department_buh: params[:department_buh],
+                              department_bmu: params[:department_bmu]
+                              ), class: "page-link" %>
+                          </li>
+                        </ul>
+                      </nav>
+                    </div>
+                    <div class="col-auto ms-2">
+                      <form action="<%= setting_holidays_index_path %>" accept-charset="UTF-8" method="get">
+                        <select class="form-select" name="per_page" id="per_page_select" onchange="this.form.submit()">
+                          <option value="25" <%= @per_page == 25 ? 'selected' : '' %>>25</option>
+                          <option value="50" <%= @per_page == 50 ? 'selected' : '' %>>50</option>
+                          <option value="100" <%= @per_page == 100 ? 'selected' : '' %>>100</option>
+                          <option value="200" <%= @per_page == 200 ? 'selected' : '' %>>200</option>
+                        </select>
+                        <input class="d-none" name="lang" value="<%= session[:lang] %>">
+                        <input class="d-none" name="search" value="<%= params[:search] %>">
+                        <input class="d-none" name="page" value="1">
+                        <input class="d-none" name="uorg_scode" value="<%= @uorg_scode %>">
+                        <input class="d-none" name="department_buh" value="<%= params[:department_buh] %>">
+                      </form>
+                    </div>
+                  </div>
+                <% else %>
+                  <p class="text-center mt-3">Không có dữ liệu để hiển thị.</p>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%# Model inport file %>
+<div class="modal fade" data-bs-keyboard="false" data-bs-backdrop="static" id="modal-import-file" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 500px">
+    <div class="modal-content position-relative">
+      <div class="position-absolute top-0 end-0 mt-1 me-2 z-index-1">
+        <button  class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base button-cancel-import" style="width: 2rem;height: 2rem;" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div class="rounded-top-lg py-3 ps-4 pe-6 bg-light">
+          <h5 class="mb-1"><%= lib_translate("Import_from_file")%></h5>
+        </div>
+        <%# File preview/process %>
+          <div class="border rounded-1 mt-2 me-2 ms-2" id="import-file-containter" style="display:none;">
+            <div class="ps-2" style="display: flex;align-items: center;">
+                <%= image_tag("/assets/image/excel.png") %>
+                <div class="ms-2">
+                    <p class="m-0" id="import-file-name" style="font-size: 0.9em;font-weight: 600;">...</p>
+                    <p class="m-0" id="import-file-size" style="font-size: 0.8em;">...</p>
+                </div>
+            </div>
+            <div class="progress me-2 ms-2 mb-1" style="height:7px">
+                <div class="progress-bar bg-success" id="file-process" role="progressbar" style="transition: width 0.2s ease; width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                </div>
+            </div>
+          </div>
+        <div class="pe-3 ps-3 pt-3 pb-2">
+          <%# Form import file setting-holidays %>
+          <div>
+            <input id="file-import-setting-holidays-bmu" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" type="file" name="file" hidden>
+            <label for="file-import-setting-holidays-bmu" id="label-select-file" class="btn btn-warning m-0"><%= lib_translate("select_files")%></label>
+            <button class="btn btn-primary btn-secondary disabled" onclick="clickImportFile()" id="button-upload-file" type="submit">
+              <%# icon %>
+              <span class="spinner-border spinner-border-sm upload-process" role="status" aria-hidden="true"></span>
+              <%# text %>
+              <span class="upload-text"><%= lib_translate("Upload")%><span class="fas fa-upload ms-1"></span></span>
+            </button>
+            <div class="btn btn-primary" id="reupload-button" style="display: none;" onclick="clickReupload()"><%= lib_translate("Continue_import")%></div>
+            <a href="<%= setting_holidays_download_template_bmu_path %>" class="btn btn-success <%= ['BMU', 'BMTU'].include?(@uorg_scode) ? '' : 'd-none' %>">Mẫu BMU<span class="ms-1 fas fa-download"></span></a>
+            <a href="<%= setting_holidays_download_template_buh_path %>" class="btn btn-success <%= ['BUH'].include?(@uorg_scode) ? '' : 'd-none' %>">Mẫu BUH<span class="ms-1 fas fa-download"></span></a>
+          </div>
+          <div id="import-server-error" style="display:none;">
+            <span class="badge badge-soft-danger">Lỗi khi xử lý dữ liệu. Vui lòng kiểm tra và thử lại.</span>
+          </div>
+          <%# Import result %>
+          <div id="import-result" class="border rounded-1 mt-2 collapse">
+            <h5 class="p-2 fs-0 bg-200"><%= lib_translate("Processing_result")%>:<span id="result-total"></span></h5>
+            <div class="p-2">
+              <p class="m-0">
+                <span style="font-weight: 500;font-size: 17px;"><%= lib_translate("Total")%>:</span>
+                <span id="result_total" style="font-size: 18px;color: black;font-weight: 800;">0</span>
+              </p>
+              <p class="m-0">
+                <span style="font-weight: 500;font-size: 17px;"><%= lib_translate("Success")%>:</span>
+                <span id="success_count" class="text-success" style="font-size: 18px;color: black;font-weight: 800;">0</span>
+              </p>
+              <p class="m-0">
+                <span style="font-weight: 500;font-size: 17px;"><%= lib_translate("Duplicate")%>:</span>
+                <span id="update_count" class="text-info" style="font-size: 18px;color: black;font-weight: 800;">0</span>
+                <span id="update-all-button" onclick="uploadAllImport()" class="btn btn-primary btn-sm ms-4" style="padding: 0px 7px;font-size: 0.7em;display:none;"><%= lib_translate("Update_all")%></span>
+              </p>
+              <div id="update_list" class="ps-2 mt-2 scrollbar" style="max-height: 300px;"></div>
+              <p class="m-0">
+                <span style="font-weight: 500;font-size: 17px;"><%= lib_translate("Not_Success")%>:</span>
+                <span id="error_count" class="text-danger" style="font-size: 18px;color: black;font-weight: 800;">0</span>
+              </p>
+              <div id="error_list" class="ps-3 scrollbar" style="max-height: 300px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary button-cancel-import" type="button" data-bs-dismiss="modal"><%= lib_translate("Close")%></button>
+      </div>
+    </div>
+  </div>
+</div>
+<%# form submit upload file bmu %>
+<%= form_tag setting_holidays_update_imports_path,method:'POST',multipart: true,id:'update_import_form', remote: true,authenticity_token: true do %>
+  <input id="datas" type="hidden" name="datas" type="text">
+<%end%>
+
+<script>
+
+    var title_update = '<%= lib_translate("Update_student")%>';
+    var title_create = '<%= lib_translate("Create_student")%>';
+    let trans_skip = '<%= lib_translate("Skip")%>';
+    let trans_update = '<%= lib_translate("Update")%>';
+    let trans_upload = '<%= lib_translate("Upload")%>';
+    let trans_uploading = '<%= lib_translate("Uploading")%>';
+    let trans_processing = '<%= lib_translate("Processing")%>';
+</script>
+
+<script>
+function changeTab(uorg_scode) {
+  document.body.style.cursor = 'wait';
+  const urlParams = new URLSearchParams(window.location.search);
+  urlParams.set('uorg_scode', uorg_scode);
+  urlParams.set('page', '1');
+  // Giữ nguyên department hiện tại nếu có
+  if (uorg_scode === 'BMU' || uorg_scode === 'BMTU') {
+    urlParams.set('department_bmu', urlParams.get('department_bmu') || '');
+  } else if (uorg_scode === 'BUH') {
+    urlParams.set('department_buh', urlParams.get('department_buh') || '');
+  }
+  window.location.href = '<%= setting_holidays_index_path %>?' + urlParams.toString();
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const inputs = document.querySelectorAll(
+    '.list_user_buh input[data-name="hol_positionjob"], ' +
+    '.list_user_buh input[data-name="hol_exist"], ' +
+    '.list_user_buh input[data-name="hol_exist_deadline"]'
+  );
+
+  function normalizeNumber(val) {
+    const floatVal = parseFloat(val);
+    return isNaN(floatVal) ? null : Math.round(floatVal * 10) / 10;
+  }
+
+  function isValueChanged(input) {
+    const name = input.getAttribute('data-name');
+    const current = input.value.trim();
+    const original = input.getAttribute('data-original-value')?.trim() || '';
+
+    if (name === 'hol_exist_deadline') {
+      return current !== original;
+    }
+
+    const currentNum = normalizeNumber(current);
+    const originalNum = normalizeNumber(original);
+
+    return currentNum !== originalNum;
+  }
+
+  inputs.forEach(input => {
+    ['input', 'paste'].forEach(eventType => {
+      input.addEventListener(eventType, function () {
+        const row = this.closest('tr');
+        if (!row) return;
+
+        const inputsToCheck = row.querySelectorAll(
+          'input[data-name="hol_positionjob"], ' +
+          'input[data-name="hol_exist"], ' +
+          'input[data-name="hol_exist_deadline"]'
+        );
+
+        const isChanged = Array.from(inputsToCheck).some(isValueChanged);
+
+        if (isChanged) {
+          row.classList.add('table-warning');
+        } else {
+          row.classList.remove('table-warning');
+        }
+      });
+    });
+  });
+});
+
+</script>
+
+<script>
+  // Đặt mã trong IIFE để tránh xung đột scope
+  (function() {
+    let currentYear = new Date().getFullYear(); // Ví dụ: 2025
+  let previousYear = currentYear - 1; // Ví dụ: 2024
+  const today = new Date(); // Ngày hiện tại
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+
+  document.addEventListener('DOMContentLoaded', function() {
+    // Kiểm tra xem flatpickr đã được tải chưa
+    if (typeof flatpickr === 'undefined') {
+      console.error('Flatpickr is not loaded. Please ensure the library is included.');
+      return;
+    }
+
+    // Khởi tạo datetime picker cho các ô hol-exist-deadline
+    flatpickr(".hol-exist-deadline", {
+      dateFormat: "d/m/Y", // Định dạng ngày
+      defaultDate: function(elem) {
+        return elem.value || `31/03/${previousYear}`; // Giá trị mặc định từ input hoặc 31/03/<previousYear>
+      },
+      enable: [
+        {
+          from: `01/01/${previousYear}`, // Ví dụ: 01/01/2024
+          to: `31/12/${currentYear}`     // Ví dụ: 31/12/2025
+        }
+      ],
+      onChange: function(selectedDates, dateStr, instance) {
+        instance.input.value = dateStr; // Cập nhật giá trị input khi chọn ngày
+        // Kiểm tra nếu deadline nhỏ hơn ngày hiện tại, đổi màu đỏ
+        const deadlineDate = new Date(selectedDates[0]);
+        if (deadlineDate <= yesterday) {
+          instance.input.style.color = 'red';
+        } else {
+          instance.input.style.color = ''; // Reset về màu mặc định
+        }
+        const row = instance.input.closest('tr');
+        const tableId = row.closest('table').id;
+        if (tableId === 'user_bmu') {
+          // Cập nhật phép hè khi thay đổi deadline (chỉ cho user_bmu)
+          updateTotalHoliday(row, tableId);
+        }
+          updateTotalHoliday(row, tableId);
+        // Cập nhật tổng khi thay đổi deadline
+      },
+      onReady: function(selectedDates, dateStr, instance) {
+        // Kiểm tra ngay khi khởi tạo
+        const deadlineDate = new Date(selectedDates[0]);
+        if (deadlineDate <= yesterday) {
+          instance.input.style.color = 'red';
+        }
+      }
+    });
+
+    function customRoundToHalf(val) {
+      const intPart = Math.floor(val);
+      const decimal = val - intPart;
+
+      if (decimal < 0.5) {
+        return intPart; // Làm tròn về 0
+      } else if (decimal > 0.5) {
+        return intPart + 1; // Làm tròn thành 1
+      } else {
+        return val; // Giữ nguyên nếu decimal = 0.5
+      }
+    }
+    // Xử lý nhập số thập phân cho các input và thêm sự kiện cập nhật tổng
+    const inputs = document.querySelectorAll('.hol-summer-input, .hol-exist-input, .total-holiday-input, .used-holiday-input, .hol-positionjob-input');
+    inputs.forEach(input => {
+      input.addEventListener('input', function () {
+        let value = this.value;
+
+        // Chỉ cho phép số và dấu chấm
+        value = value.replace(/[^0-9.]/g, '');
+
+        // Đảm bảo chỉ có một dấu chấm
+        const parts = value.split('.');
+        if (parts.length > 2) {
+          value = parts[0] + '.' + parts[1];
+        }
+
+        // Gán lại giá trị đã làm sạch vào ô input, KHÔNG ép số ngay lúc này
+        this.value = value;
+
+        const row = this.closest('tr');
+        const tableId = row.closest('table').id;
+
+        if (tableId === 'user_bmu') {
+          if (this.classList.contains('total-holiday-input')) {
+            updateHolSummer(row);
+          }
+          if (this.classList.contains('hol-positionjob-input')  || this.classList.contains('hol-exist-input')) {
+            updateTotalHoliday(row, tableId);
+          }
+        } else if (tableId === 'user_buh') {
+          if (this.classList.contains('hol-positionjob-input') || this.classList.contains('hol-exist-input')) {
+            updateTotalHoliday(row, tableId);
+          }
+        }
+
+        if (this.classList.contains('total-holiday-input') || this.classList.contains('used-holiday-input')) {
+          updateRemaining(row);
+        }
+      });
+
+      // Tùy chọn: Làm tròn khi người dùng rời khỏi ô input (blur)
+      input.addEventListener('blur', function () {
+        let value = parseFloat(this.value);
+        if (!isNaN(value)) {
+          this.value = customRoundToHalf(value).toFixed(1);
+        }
+      });
+    });
+
+
+    // Hàm cập nhật Phép hè (chỉ áp dụng cho user_bmu)
+    function updateHolSummer(row) {
+      const totalInput = row.querySelector('.total-holiday-input');
+
+      const holPositionjobInput = row.querySelector('.hol-positionjob-input');
+      const holPositionjob = parseFloat(holPositionjobInput.value) || 0;
+
+      const holSeniority = parseFloat(row.querySelector('td:nth-child(7)').textContent) || 0; // Phép thâm niên
+      const holExistInput = row.querySelector('.hol-exist-input');
+      const holExistDeadline = row.querySelector('.hol-exist-deadline');
+
+      const total = parseFloat(totalInput.value) || 0;
+      let holExist = parseFloat(holExistInput.value) || 0;
+
+      // Kiểm tra deadline của phép tồn
+      const deadlineParts = holExistDeadline.value.split('/');
+      const deadlineDate = new Date(`${deadlineParts[2]}-${deadlineParts[1]}-${deadlineParts[0]}`);
+      if (deadlineDate <= yesterday) {
+        holExist = 0; // Không sử dụng phép tồn nếu đã hết hạn
+      }
+
+    }
+
+    // Hàm cập nhật Tổng (total_holiday)
+    function updateTotalHoliday(row, tableId) {
+      const holSeniority = parseFloat(row.querySelector('td:nth-child(7)').textContent) || 0; // Phép thâm niên
+      const holExistInput = row.querySelector('.hol-exist-input');
+      const holExistDeadline = row.querySelector('.hol-exist-deadline');
+      const totalInput = row.querySelector('.total-holiday-input');
+      const totalFInput = row.querySelector('.total-fholiday-input');
+
+      const holPositionjobInput = row.querySelector('.hol-positionjob-input');
+      const holPositionjob = parseFloat(holPositionjobInput.value) || 0;
+
+      let holExist = parseFloat(holExistInput.value) || 0;
+
+      // Kiểm tra deadline của phép tồn
+      const deadlineParts = holExistDeadline.value.split('/');
+      const deadlineDate = new Date(`${deadlineParts[2]}-${deadlineParts[1]}-${deadlineParts[0]}`);
+      if (deadlineDate <= yesterday) {
+        holExist = 0; // Không sử dụng phép tồn nếu đã hết hạn
+      }
+
+      let total;
+    
+      total = holPositionjob + holSeniority + holExist;
+      
+      const totalCount = Math.max(0, total);
+
+      totalInput.value = customRoundToHalf(total).toFixed(1); // Giới hạn tối đa 50
+      totalInput.textContent = customRoundToHalf(total).toFixed(1);
+
+      // Cập nhật Còn lại sau khi tổng thay đổi
+      updateRemaining(row);
+    }
+
+    // Hàm cập nhật Còn lại
+    function updateRemaining(row) {
+      const totalInput = row.querySelector('.total-holiday-input');
+      const usedInput = row.querySelector('.used-holiday-input');
+      const usedfInput = row.querySelector('.used-fholiday-input');
+      const remainingCell = row.querySelector('.remaining-value');
+
+      const total = parseFloat(totalInput.value) || 0;
+      const used = parseFloat(usedInput.value) || 0;
+      const usedf = parseFloat(usedfInput.value) || 0;
+      const remaining = Math.max(0, total - (used + usedf));
+      remainingCell.textContent = customRoundToHalf(remaining).toFixed(1);
+    }
+  });
+})();
+
+</script>
+
+<script>
+
+  function onclickSaveData(btn, user_id) {
+    // 1. Lấy đúng <tr> chứa nút
+    var row = btn.closest('tr');
+    if (!row) {
+      alert("Không tìm thấy dòng dữ liệu để lưu.");
+      return;
+    }
+
+    // 2. Lấy id holiday từ data-holiday-id
+    var id = row.getAttribute('data-holiday-id') || null;
+
+    // 3. Lấy input theo class, dùng DOM .value (không dùng attr)
+    var holPositionInput   = row.querySelector('.hol-positionjob-input');
+    var holSeniorityHidden = row.querySelector('.hol-seniority-value');
+    var holExistInput      = row.querySelector('.hol-exist-input');
+    var holExistDeadline   = row.querySelector('.hol-exist-deadline');
+    var totalHolidayInput  = row.querySelector('.total-holiday-input');
+    var usedHolidayInput   = row.querySelector('.used-holiday-input');
+
+    var payload = {
+      id_curent_holiday: id,
+      user_id: user_id,
+      hol_positionjob:    holPositionInput ? holPositionInput.value : '',
+      hol_seniority:      holSeniorityHidden ? holSeniorityHidden.value : '',
+      hol_exist:          holExistInput ? holExistInput.value : '',
+      deadline_exist:     holExistDeadline ? holExistDeadline.value : '',
+      total_holiday:      totalHolidayInput ? totalHolidayInput.value : '',
+      used_holiday:       usedHolidayInput ? usedHolidayInput.value : ''
+    };
+
+    console.log("PAYLOAD gửi lên:", payload);
+
+    $.ajax({
+      url: '/mywork/setting_holidays/update_holiday_detail',
+      method: 'POST',
+      data: payload,
+      success: function (res) {
+        if (res.status === 'ok') {
+          window.location.reload();
+          alert('Cập nhật thành công');
+        } else {
+          alert(res.message || 'Có lỗi khi lưu dữ liệu');
+        }
+      },
+      error: function (xhr) {
+        let msg = "Có lỗi khi lưu dữ liệu";
+
+        if (xhr.responseJSON && xhr.responseJSON.message) {
+          msg = xhr.responseJSON.message;
+        } else if (xhr.responseText) {
+          msg = xhr.responseText;
+        }
+
+        alert(msg);
+      }
+    });
+  }
+
+
+  // Import file
+  function initImportFile(){
+    $("#file-import-setting-holidays-bmu").on('change',(e)=>{
+      let file = $("#file-import-setting-holidays-bmu")[0].files[0];
+      if(file != undefined && file != null){
+        $("#import-file-containter").show();
+        $("#button-upload-file").toggleClass("btn-secondary disabled",false);
+        $("#file-process").css("width","0%");
+        $("#import-file-size").html(formatBytes(file.size));
+        $("#import-file-name").html(file.name);
+      }
+    })
+  }
+  initImportFile();
+
+  function clickOpenImport(){
+    // clean form
+    let uploadBtn = $("#button-upload-file");
+    let selectBtn = $("#label-select-file");
+    let reUpload = $("#reupload-button");
+    $("#import-file-containter").hide();
+    uploadBtn.toggleClass("disabled",true);
+    uploadBtn.show();
+    selectBtn.toggleClass("disabled",false);
+    selectBtn.show();
+    reUpload.hide();
+
+    $("#file-import-setting-holidays-bmu").val(null);
+    $('input[name="authenticity_token"]').val($('meta[name="csrf-token"]').attr("content"));
+    $('#import-result').collapse("hide");
+    uploadBtn.find(".upload-text").show();
+    uploadBtn.find(".upload-process").hide();
+
+    $("#update_list").html("");
+    $("#error_list").html("");
+    $("#import-server-error").hide();
+}
+
+function clickImportFile(){
+  let file = $("#file-import-setting-holidays-bmu")[0].files[0];
+  if(file != undefined && file != null){
+    
+    let uploadBtn = $("#button-upload-file");
+    let selectBtn = $("#label-select-file");
+    
+    // disable cancel when on process
+    $(".button-cancel-import").toggleClass("disabled",true);
+
+    // process state: 2
+    uploadBtn.toggleClass("disabled",true);
+    selectBtn.toggleClass("disabled",true);
+    selectBtn.toggleClass("btn-secondary disabled",true);
+    uploadBtn.find(".upload-text").html(trans_uploading);
+    uploadBtn.find(".upload-process").show();
+
+    // send file
+    sendImportFile(file);
+	}
+}
+
+
+/**
+ * Send file to backend action
+ * @param {File} file 
+ */
+function sendImportFile(file){
+  let processItem = $("#file-process");
+  let formdata = new FormData();
+  formdata.append("file",file);
+  formdata.append("authenticity_token",$('meta[name="csrf-token"]').attr("content"));
+
+  var request = new XMLHttpRequest();
+  request.onreadystatechange = function(){
+    if(request.readyState == 4 && request.status >= 200 && request.status <= 299){
+      try {
+        let result = JSON.parse(request.responseText);
+        if (result.code >= 400){
+        console.log(result);
+
+        showServerError();
+        }else{
+        console.log(result);
+        renderResult(result);
+        }
+      } catch (e){
+        console.log(e)
+        showServerError();
+      }
+    }
+    else if(request.status >= 400 && request.readyState == 4){
+      try{
+      let result = JSON.parse(request.responseText);
+      console.log(result);
+      }catch(e){
+      console.log(e);
+      }
+      showServerError();
+    }
+  };
+
+  request.upload.addEventListener('progress', function(e){
+    var progress_width = Math.ceil(e.loaded/e.total * 100);
+    processItem.css("width",`${progress_width}%`);
+    if(progress_width == 100){
+      setTimeout(() => {
+      $("#import-file-containter").hide();
+      processItem.css("width","0%");
+      $("#button-upload-file").find(".upload-text").html(trans_processing);
+      }, 400);
+    }
+  }, false);
+
+  let action = $("#import-action").html();
+  request.open('POST', action);
+  request.send(formdata);
+}
+
+function showServerError(){
+  $(".button-cancel-import").toggleClass("disabled",false);
+  let uploadBtn = $("#button-upload-file");
+  let selectBtn = $("#label-select-file");
+  let resultShow = $('#import-result');
+  let reUpload = $("#reupload-button");
+
+
+  uploadBtn.toggleClass("btn-secondary disabled",true);
+  uploadBtn.find(".upload-text").html(trans_upload);
+  uploadBtn.find(".upload-process").hide();
+  uploadBtn.hide();
+
+  selectBtn.toggleClass("disabled",false);
+  selectBtn.hide();
+
+  reUpload.show();
+
+  $("#file-import-setting-holidays-bmu").val(null);
+  $("#update_list").html("");
+  $("#error_list").html("");
+  resultShow.collapse('hide');
+  $("#import-server-error").show();
+}
+
+let import_update_list = [];
+function renderResult(result){
+import_update_list = result.updates;
+  // disable cancel when upload done
+  $(".button-cancel-import").toggleClass("disabled",false);
+  let uploadBtn = $("#button-upload-file");
+  let selectBtn = $("#label-select-file");
+  let resultShow = $('#import-result');
+  let reUpload = $("#reupload-button");
+
+  uploadBtn.toggleClass("btn-secondary disabled",true);
+  uploadBtn.find(".upload-text").html(trans_upload);
+  uploadBtn.find(".upload-process").hide();
+  uploadBtn.hide();
+
+  selectBtn.toggleClass("disabled",false);
+  selectBtn.hide();
+
+  reUpload.show();
+
+  $("#file-import-setting-holidays-bmu").val(null);
+  //  load data
+  $("#result_total").html(result.result_total);
+  $("#success_count").html(result.success_count);
+  let valids = result.valids;
+  let error_count = $("#error_count");
+  error_count.html(valids.length);
+  error_count.toggleClass("text-400",valids.length <= 0);
+
+  // update
+  let update_count = $("#update_count");
+  update_count.html(import_update_list.length);
+  update_count.toggleClass("text-400",import_update_list.length <= 0);
+  if(import_update_list.length > 0){
+    $("#update-all-button").show();
+  }else{
+    $("#update-all-button").hide();
+  }
+  let updateContainer = $("#update_list");
+  import_update_list.forEach(user=>{
+    if (user.avatar_url == null){
+    user.avatar_url = no_avatar_url;
+    }
+    updateContainer.append(`<div id="update-import-${user.id}" class="border rounded-1 p-2 update-import-item" style="display: flex;align-items: center;justify-content: space-between;">
+                <div style="display: flex;">
+                  <div class="avatar me-2" style="display: flex;justify-content: center;flex-direction: column;">
+                  <div style="border: 1px solid var(--falcon-badge-soft-secondary-background-color);border-radius: 50%;background-image: url(${user.avatar_url});overflow: hidden;background-repeat: no-repeat;background-size: cover;height: 2.9rem;width: 2.9rem;">
+                  </div>
+                  </div>
+                  <div>
+                  <p class="m-0" style="font-size: 0.9em;font-weight: 600;color: var(--falcon-badge-soft-dark-color);">${user.origin_name}</p>
+                  <p class="m-0" style="font-size: 0.8em;font-weight: 500;color: var(--falcon-badge-soft-info-color);">${user.origin_email}</p>
+                  <p class="badge badge-soft-danger m-0 error-message" style="font-size: 0.75em;text-align: left;width: fit-content;display:none;"></p>
+                  </div>
+                </div>
+                <div>
+                  <div class="btn btn-secondary btn-sm btn-action" style="font-size: 0.7em;" onclick="skipUpdate(${user.id})">${trans_skip}</div>
+                  <div class="btn btn-primary btn-sm btn-action btn-update" style="font-size: 0.7em;min-width: 65px;" onclick="updateImport(${user.id})">
+                  <span class="text-update" >${trans_update}</span>
+                  <span class="spinner-border spinner-border-sm process-update" role="status" aria-hidden="true" style="display:none;height: 13px;width: 13px;"></span>
+                  </div>
+                  <span class='fas fa-check text-success me-3 icon-done' style="width:18px; height:18px;display:none;"></span>
+                </div>
+                </siv>`)
+  });
+
+  // errors
+  let error_list = $("#error_list");
+  error_list.html("");
+  valids.forEach(valid=>{
+    error_list.append(`<p class="m-0">
+              <span class="badge me-1 badge-soft-danger">${valid.line}</span>
+            </p>`);
+  })
+  resultShow.collapse('show');
+
+}
+
+
+/**
+ * Handle update duplicate import
+ * @param {any} userId
+ */
+function updateImport(userId){
+  // get user data
+  let user = null
+  import_update_list.forEach(item=>{
+    if(item.id === userId){
+    user = item;
+    }
+  })
+
+  if(user == null){
+    console.log("Not find :",userId)
+    return;
+  }
+  submitUpdateImportForm(`#update-import-${userId}`,[user]);
+
+}
+
+function submitUpdateImportForm(itemId,data){
+  // pass data to remote form
+  let uploadForm = $("#update_import_form");
+  uploadForm.find("#datas").attr("value", JSON.stringify(data))
+
+  $('input[name="authenticity_token"]').val($('meta[name="csrf-token"]').attr("content"));
+  // submit
+  uploadForm.submit();
+
+  // upload button effect
+  if (itemId != null){
+    let itemContainer = $(itemId);
+    itemContainer.find(".text-update").hide();
+    itemContainer.find(".process-update").show();
+
+    // all button effect
+    itemContainer.find(".btn-action").toggleClass("disabled",true);
+    itemContainer.find(".error-message").hide();
+  }else{
+    let list_item = $("#update_list");
+
+    list_item.find(".text-update").hide();
+    list_item.find(".process-update").show();
+    // all button effect
+    list_item.find(".btn-action").toggleClass("disabled",true);
+    list_item.find(".error-message").hide();
+  } 
+}
+
+/**
+ * Handle update all duplicate import
+ */
+function uploadAllImport(){
+  submitUpdateImportForm(null,import_update_list);
+}
+
+/**
+ * Onclick Skip update
+ * @param {any} userId 
+ */
+function skipUpdate(userId){
+  // remove store user
+  for (let i = 0; i < import_update_list.length; i++) {
+    if(userId == import_update_list[i].id){
+    import_update_list.splice(i, 1);
+    break;
+    }
+  }
+  // remove element
+  $(`#update-import-${userId}`).remove();
+
+  // count
+  $("#update_count").html(import_update_list.length);
+
+  if(import_update_list.length > 0){
+    $("#update-all-button").show();
+  }else{
+    $("#update-all-button").hide();
+  }
+}
+
+/**
+ * Call from back end
+ */
+function resultUpdateImport(result){
+	result.updateds.forEach(update=>{
+
+		for (let i = 0; i < import_update_list.length; i++) {
+		if(update.id == import_update_list[i].id){
+			import_update_list.splice(i, 1);
+			break;
+		}
+		}
+
+		let wrapContainer = $(`#update-import-${update.id}`);
+		wrapContainer.find(".icon-done").show();
+		wrapContainer.find(".btn-action").remove();
+	});
+
+	result.errors.forEach(item=>{
+		
+		let wrapContainer = $(`#update-import-${item.id}`);
+		// update button
+		wrapContainer.find(".text-update").show();
+		wrapContainer.find(".process-update").hide();
+		// all action button
+		wrapContainer.find(".btn-action").toggleClass("disabled",false);
+		// show error message
+		wrapContainer.find(".error-message").show();
+		wrapContainer.find(".error-message").html(item.message);
+	})
+}
+
+
+/**
+ * Fortmat file size
+ * @param {*} a Fiel size
+ * @param {*} b 
+ * @param {*} k 
+ * @returns 
+ */
+function formatBytes(a,b=2,k=1024){
+	let d=Math.floor(Math.log(a)/Math.log(k));
+	return 0 == a ? "0 Bytes" : parseFloat((a/Math.pow(k,d)).toFixed(Math.max(0,b)))+" "+["Bytes","KB","MB","GB","TB","PB","EB","ZB","YB"][d]
+}
+
+</script>

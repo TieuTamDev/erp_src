@@ -1,0 +1,333 @@
+<html lang="vi">
+	<head>
+		<meta charset='UTF-8'>
+		<title><%= file_name %></title> 
+	</head>
+	<body>
+		<style>
+			@font-face {
+				font-family: 'Times';
+				font-weight: normal;
+				src: url('<%= Rails.root.join('public', "assets", "fonts", "times.svg")%>') format('svg')
+			}
+			@font-face {
+				font-family: 'Times-bold';
+				font-weight: normal;
+				src: url('<%= Rails.root.join('public', "assets", "fonts", 'times-bold.svg')%>') format('svg')
+			}
+			@font-face {
+				font-family: 'Times-italic';
+				font-weight: normal;
+				src: url('<%= Rails.root.join('public', "assets", "fonts", 'times-italic.svg')%>') format('svg')
+			}
+		</style>
+		<style>
+			td, h2, h2, h3, h4, h5, h6, span, p {
+				font-family: 'Times';
+				font-size: 13px;
+				line-height: 1.35;
+			}
+			
+			.bold, b, th, h2{
+				font-family: 'Times-bold';
+				font-size: 13px;
+				line-height: 1.35;
+			}
+			.italic, i {
+				font-family: 'Times-italic';
+				line-height: 1.35;
+			}
+			.text-align {
+				text-align: center;
+			}
+			.margin-auto {
+				margin: 0 auto;
+			}
+			.mt-3 {
+				margin-top: 25px
+			}
+			.ms-3 {
+				margin-left: 30px
+			}
+			.me-3 {
+				margin-right: 30px
+			}
+			.mb-3 {
+				margin-bottom: 30px
+			}
+			.mb-2 {
+				margin-bottom: 20px
+			}
+			.mb-1 {
+				margin-bottom: 10px
+			}
+			.mb-0 {
+				margin-bottom: 0px
+			}
+			.pt-1 {
+				padding-top: 8px
+			}
+			.pt-0 {
+				padding-top: 0px
+			}
+			.mt-0 {
+				margin-top: 0px
+			}
+			.underline {
+				border-bottom: 1px solid black;
+				padding-bottom: 1px; 
+				display: inline-block;
+			}
+			table, tr, th, td, thead, tbody {
+				border: 0.9px solid rgb(0, 0, 0);
+				padding: 2px;
+				border-collapse: collapse; 
+			}
+			.no-boder, .no-boder tr, .no-boder th, .no-boder td, .no-boder thead, .no-boder tbody {
+				border: none;
+			}
+			.table-survey {
+				width: 100%;
+				border-collapse: collapse;
+				font-size: 13px;
+				page-break-inside: auto; 
+			}
+
+			.table-survey th, 
+			.table-survey td {
+				border: 0.9px solid black;
+				padding: 5px;
+			}
+
+			.table-survey thead {
+				display: table-header-group; 
+			}
+
+			.table-survey tbody tr {
+				page-break-inside: avoid; 
+			}
+
+			@media print {
+				table {
+					page-break-before: always; 
+				}
+			}
+			.table-survey thead {
+				display: table-header-group; 
+			}
+
+			.table-survey tbody {
+				display: table-row-group;
+			}
+			.chart-placeholder {
+				border: 1px dashed #ccc;
+				padding: 10px 10px;
+				text-align: center;
+				margin: 10px 0;
+				font-style: italic;
+			}
+			.text_justify { 
+				text-indent: 2em; 
+				line-height: 1.35; 
+				margin: 6px 0; 
+			}
+			.bg-green {
+				background: #06705C;
+				color: white;
+				text-align: start;
+			}
+			.bg-green-light {
+				background: #089278;
+				color: white;
+			}
+			.color-green-light { 
+				color: #155639;
+			}
+			.color-red-light { 
+				color: #ff1504;
+			}
+		</style>
+
+		<table class='no-boder' style='width: 100%; text-align: center;'>
+			<tr>
+				<td>TRƯỜNG ĐẠI HỌC Y DƯỢC</td>
+				<td><b>CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</b></td>
+			</tr>
+			<tr>
+				<td>BUÔN MA THUỘT</td>
+				<td><b><b class="underline">Độc lập - Tự do - Hạnh phúc</b></b></td>
+			</tr>
+			<tr>
+				<td><b>PHÒNG T<b class="underline">Ổ CHỨC - HÀN</b>H CHÍNH</b></td>
+				<td></td>
+			</tr>
+			<tr>
+				<td class="pt-1">Số: <%= no_mandoc %>/BC-TCHC</td>
+				<td class="pt-1"><p class="italic">Đắk Lắk, <%= Time.now.strftime("Ngày %d tháng %m năm %Y") %></ơ></td>
+			</tr>
+		</table>
+
+		<h2 class='text-align mt-3 mb-0'>
+			<b>BÁO CÁO KẾT QUẢ ĐÁNH GIÁ LẤY Ý KIẾN TÍN NHIỆM VỊ TRÍ</b>
+		</h2>
+		<h2 class='text-align mt-0 mb-0'>
+			<b><%= appointment.positionjob.name.upcase%> <%= appointment.department.name.upcase%></b>
+		</h2>
+		<h2 class='text-align mt-0 mb-2'>
+			<b class="underline">(ỨNG VIÊN: <%= "#{appointment&.user&.academicrank&.scode} #{appointment&.user&.last_name.upcase} #{appointment&.user&.first_name.upcase}" %>)</b>
+		</h2>
+        
+		<p class="text_justify">Phòng Tổ chức - Hành chính triển khai đánh giá lấy ý kiến tín nhiệm vị trí <%= appointment.positionjob.name%> <%= appointment.department.name%> (Ứng viên: <%= "#{appointment&.user&.academicrank&.scode} #{appointment&.user&.last_name} #{appointment&.user&.first_name}" %>) từ ngày <b><%= appointment.created_at.strftime("%Hh%Mp ngày %d/%m/%Y") %></b> đến ngày <b><%= appointment.updated_at.strftime("%Hh%Mp ngày %d/%m/%Y") %></b>. Kết quả được tổng hợp như sau:</p>
+
+		<h2 class="text_justify"><b>A. THỐNG KÊ CHUNG</b></h2>  
+
+		<table class="table-survey"> 
+			<tr>
+				<td class="bg-green"><b>Quy mô đánh giá:</b></td>
+				<td>Đối tượng đánh giá: <span class="color-red-light"><%= total %></span>. Trong đó: (<%= evaluation_summary.pluck(:total, :positionjob_name).map {|total, position| "#{total} #{position}" }.join('; ')%>).</td>
+			</tr>
+			<tr>
+				<td class="bg-green"><b>Số lượng CBNV thực hiện đánh giá tín nhiệm:</b></td>
+				<td>
+					- Tỉ lệ thực hiện đánh giá tín nhiệm: <span class="color-red-light"><%= count_attend %>/<%= total %></span> Chiếm tỷ lệ: <%= rotate %>%.
+					<br>
+					- Tổng số CBNV - GV đồng cấp đã tham gia đánh giá tín
+					nhiệm: 8/8. Chiếm tỷ lệ: 100%.
+				</td>
+			</tr>
+			<tr><th colspan="2" class="bg-green"><b>Tỉ lệ đồng ý bổ nhiệm</b></th></tr>
+			<tr>
+				<td rowspan="2" class="bg-green-light"><i>Tính trên Tổng số lượng đối tượng gửi lấy đánh giá</i></td>
+				<td>Tỉ lệ đồng ý bổ nhiệm: 9/10. Chiếm tỷ lệ: 90%
+					(1 lãnh đạo không tham gia thực hiện phiếu tín
+					nhiệm)</td>
+			</tr>
+			<tr> 
+				<td>Tỉ lệ đồng ý bổ nhiệm đồng cấp: 8/8. Chiếm tỷ lệ: 100%</td>
+			</tr>
+			<tr>
+				<td rowspan="2" class="bg-green-light"><i>Tổng số lượng đối tượng đã tham gia đánh giá</i></td>
+				<td>Tỉ lệ đồng ý bổ nhiệm: 9/ 9 Chiếm tỷ lệ: 100%</td>
+			</tr>
+			<tr>
+				<td>Tỉ lệ đồng ý bổ nhiệm đồng cấp: 8/8. Chiếm tỷ lệ:
+					100%</td>
+			</tr>
+			<tr><th colspan="2" class="bg-green"><b>Tỉ lệ Không đồng ý bổ nhiệm</b></th></tr>
+			<tr>
+				<td rowspan="2" class="bg-green-light"><i>Tính trên Tổng số lượng đối
+					tượng gửi lấy đánh giá</i></td>
+				<td>Tỉ lệ không đồng ý bổ nhiệm: 1/10. Chiếm tỷ lệ: 10%
+					(1 lãnh đạo không tham gia thực hiện phiếu tín
+					nhiệm)
+					</td>
+			</tr>
+			<tr> 
+				<td>Tỉ lệ không đồng ý bổ nhiệm đồng cấp: 0/10. Chiếm tỷ
+					lệ: 0%</td>
+			</tr>
+			<tr>
+				<td rowspan="2" class="bg-green-light"><i>Tổng số lượng đối tượng đã
+					tham gia đánh giá</i></td>
+				<td>Tỉ lệ không đồng ý bổ nhiệm: 0/9 Chiếm tỷ lệ: 0 %</td>
+			</tr>
+			<tr>
+				<td>Tỉ lệ không đồng ý bổ nhiệm đồng cấp: 0/9. Chiếm tỷ
+					lệ: 0 %</td>
+			</tr>
+		</table>
+	
+		<h2 class="text_justify"><b>B. THỐNG KÊ CHI TIẾT NỘI DUNG ĐÁNH GIÁ</b></h2>
+		<p class="text_justify italic">Tỷ lệ thống kê dựa trên kết quả đánh giá tín nhiệm/Tổng số người được gửi đánh giá tín nhiệm.</p>
+        <% count = 0 %>
+        <% surveys.each_with_index do |survey, index| count = index + 1 %> 
+            <h2><%= survey[:index] %>. <%= survey[:gsurvey_name].upcase %></h2>
+            <table class="table-survey">
+                <thead>
+                    <tr>
+                        <th>Nội dung đánh giá chi tiết</th>
+                        <th>Không hài lòng<br>(%)</th>
+                        <th>Bình thường<br>(%)</th>
+                        <th>Hài lòng<br>(%)</th>
+                        <th>Rất hài lòng<br>(%)</th>
+                    </tr>
+				</thead> 
+                <tbody>
+					<% survey[:questions_multiple].each_with_index do |question, index| %>
+                        <tr>
+                            <td><%= index + 1 %>. <%= question[:qsurvey_name] %></td>
+                            <% question[:answers].each do |answers| %>
+                                <td class="text-align"><%= answers[:rotate] %></td>
+                            <% end %>
+                        </tr>
+					<% end %>
+				</tbody> 
+            </table>
+            <div class="chart-placeholder">[Biểu đồ câu trả lời của biểu mẫu. Tên câu hỏi: I. ĐẠO ĐỨC. Số lượng câu trả lời: …]</div> 
+            <p><b>Ý kiến góp ý khác?</b> Không có</p>
+        <% end %> 
+
+		<h2><%= to_roman(count + 1) %>. KẾT LUẬN CHUNG</h2>
+		<table class="table-survey">
+			<tr>
+				<th class="bg-green-light">Nội dung đánh giá chi tiết</th>
+				<th class="bg-green-light">Đồng ý<br>(%)</th>
+				<th class="bg-green-light">Không đồng ý<br>(%)</th>
+			</tr>
+			<tr>
+				<th colspan="3" class="bg-green">I. Tỷ lệ tính trên Tổng số lượng đối tượng gửi lấy đánh giá</th>
+			</tr>
+			<tr>
+				<td>1. Đồng ý giới thiệu <%= "#{appointment&.user&.academicrank&.scode} #{appointment&.user&.last_name} #{appointment&.user&.first_name}" %> được xem xét bổ nhiệm vị trí <%= appointment.positionjob.name%> <%= appointment.department.name%></td>
+				<td class="text-align color-green-light"><i><%= approved[:rotate_total] %>%<br>Tổng số lượng tham gia đánh giá đồng ý bổ nhiệm/Tổng số lượng đối tượng gửi lấy đánh giá.</i></td>
+				<td class="text-align color-red-light"></td>
+			</tr>
+			<tr>
+				<td>2. Không đồng ý giới thiệu <%= "#{appointment&.user&.academicrank&.scode} #{appointment&.user&.last_name} #{appointment&.user&.first_name}" %> được xem xét bổ nhiệm vị trí <%= appointment.positionjob.name%> <%= appointment.department.name%></td>
+				<td class="text-align color-green-light"></td>
+				<td class="text-align color-red-light"><i><%= rejected[:rotate_total] %>%<br>Tổng số lượng tham gia đánh giá KHÔNG đồng ý bổ nhiệm/Tổng số lượng đối tượng gửi lấy đánh giá.</i></td>
+			</tr>
+			<tr>
+				<th colspan="3" class="bg-green">II. Tỷ lệ tính trên Tổng số lượng đối tượng đã tham gia đánh giá</th>
+			</tr>
+			<tr>
+				<td>1. Đồng ý giới thiệu <%= "#{appointment&.user&.academicrank&.scode} #{appointment&.user&.last_name} #{appointment&.user&.first_name}" %> được xem xét bổ nhiệm vị trí <%= appointment.positionjob.name%> <%= appointment.department.name%></td>
+				<td class="text-align color-green-light"><i><%= approved[:rotate_attend] %>%<br>Tổng số lượng tham gia đánh giá đồng ý bổ nhiệm/Tổng số lượng đối tượng đã tham gia đánh giá.</i></td>
+				<td class="text-align color-red-light"></td>
+			</tr>
+			<tr>
+				<td>2. Không đồng ý giới thiệu <%= "#{appointment&.user&.academicrank&.scode} #{appointment&.user&.last_name} #{appointment&.user&.first_name}" %> được xem xét bổ nhiệm vị trí <%= appointment.positionjob.name%> <%= appointment.department.name%></td>
+				<td class="text-align color-green-light"></td>
+				<td class="text-align color-red-light"><i><%= rejected[:rotate_attend] %>%<br>Tổng số lượng tham gia đánh giá KHÔNG đồng ý bổ nhiệm/Tổng số lượng đối tượng đã tham gia đánh giá.</i></td>
+			</tr>
+		</table>
+			
+		<h2><%= to_roman(count + 2) %>. ĐỀ XUẤT ỨNG VIÊN PHÙ HỢP, NẾU CÓ</h2>
+		<p>Không có</p>
+	
+		<div style='height: 270px; width: 100%; page-break-inside: avoid;'>
+			<table class='no-boder' style='width: 100%; text-align: center;'>
+				<tr>
+					<td style='width: 50%'><b>TRƯỞNG PHÒNG</b></td>
+					<td style='width: 50%'><b>NGƯỜI BÁO CÁO</b></td>
+				</tr>
+				<tr>
+					<td style='width: 50%'><b>TỔ CHỨC – HÀNH CHÍNH</b></td>
+					<td style='width: 50%'><b>KT. TRƯỞNG PHÒNG</b></td>
+				</tr>
+				<tr>
+					<td style='width: 50%'></td>
+					<td style='width: 50%'><b>PHÓ TRƯỞNG PHÒNG TC-HC</b></td>
+				</tr>
+				<tr style='height: 70px'>
+					<td></td>
+					<td></td> 
+				</tr>
+				<tr style='height: 40px; vertical-align: top'>
+					<td><b>ThS. Trần Nguyễn Tuấn Anh</b></td>
+					<td><b>ThS. Võ Thị Thuỳ Dung</b></td> 
+				</tr>
+			</table>
+		</div>
+	</body>
+</html>

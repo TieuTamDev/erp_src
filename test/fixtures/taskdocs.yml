@@ -1,0 +1,15 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  mediafile: one
+  stask: one
+  sdesc: MyText
+  note: MyString
+  status: MyString
+
+two:
+  mediafile: two
+  stask: two
+  sdesc: MyText
+  note: MyString
+  status: MyString

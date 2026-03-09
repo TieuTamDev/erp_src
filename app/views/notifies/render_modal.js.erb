@@ -1,0 +1,13 @@
+$('.modal').modal('hide');
+$('#popupLargeModal .modal-content').html("<%= j render partial: "notifies/modals/modal_#{@modal}" %>");
+$('#popupLargeModal .modal-content').prepend("<%= j(render 'shared/new_modal_title', title: @notice.title ) %>");
+$('#popupLargeModal').modal('show');
+showLoading(false);
+function showLoading(bShow) {
+    if(bShow){
+        $("#loading_handle").css("display", "flex");
+    }else{
+        $("#loading_handle").css("display", "none");
+    }
+}
+

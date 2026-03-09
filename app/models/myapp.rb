@@ -1,0 +1,2 @@
+class Myapp < ApplicationRecord
+end

@@ -1,0 +1,839 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "select2-bootstrap-5-theme.min" %>
+  <%= stylesheet_link_tag "select2.min" %>
+  <%= javascript_include_tag '/assets/myjs/smallcalendar/small-calendar.js' %>
+<% end %>
+
+<% content_for :bottombody do %>
+  <%= javascript_include_tag 'select2.min.js' %>
+<% end %>
+
+<script>
+    let get_image_evidence_attends_path = "<%= get_image_evidence_attends_path %>";
+    let approve_request_attends_path = "<%= approve_request_attends_path %>";
+    let reject_request_attends_path = "<%= reject_request_attends_path %>";
+</script>
+
+
+<style>
+  #calendar-workshilf{
+    height: 466px;
+    overflow: scroll;
+    border: 1px solid #d1d1d1;
+  }
+  .calender-table thead th {
+    position: sticky !important;
+    top: -1px;
+    background: #f9f9f9;
+    z-index: 2;    
+    padding: 0px;
+    top: -1px;
+    border-bottom: 1px solid #efefef !important;
+  }
+  .calender-table td{
+    padding: 0px;
+    overflow: unset;
+  }
+  .group-column-day{
+    text-align: center;
+  }
+  .group-column{
+    padding: 0px !important;
+    width: 81px;
+  }
+  .event-item{
+    background-color:white;
+    border: 1px solid #d3cfcf;
+    border-radius: 5px;
+    padding: 2px 5px;
+    z-index: 1;
+    user-select:none;
+    overflow: hidden;
+    box-shadow: 0px 0px 4px 0px #00000040;
+    text-align: start;
+    text-wrap-mode: nowrap;
+  }
+  .event-item-month{
+    background-color: #72A7EE;
+    text-wrap-mode: nowrap;
+    border-radius: 4px;
+    overflow: hidden;
+    color: white;
+    margin-bottom: 3px;
+    width: 100%;
+    text-indent: 4px;
+  }
+
+  [data-cell-date]{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding:0px 3px;
+    user-select: none;
+  }
+
+  tr.row-hightlight td{
+    border-top: 2px solid #0EA5E9;
+    border-bottom: 2px solid #0EA5E9;
+  }
+
+  tr.row-hightlight td:first-child{
+    border-left: 2px solid #0EA5E9;
+  }
+
+  tr.row-hightlight td:last-child{
+    border-right: 2px solid #0EA5E9;
+  }
+
+</style>
+
+<div class="attend-container">
+  <div class="card mb-3">
+    <div class="card-body pt-0">
+      <div class="tab-content">
+        <div class="row">
+          <div class="col">
+            <h5 class="mt-2 mb-3 overview_text"><%= lib_translate("Duyệt đề xuất") %></h5>
+          </div>
+        </div>
+        <div class="mt-0">
+          <div class="tab-content">
+            <div class="d-flex justify-content-between align-items-end mb-2">
+              <div class="d-flex">
+                <div onclick="onClickStepTime(-1)" class="d-flex justify-content-center align-items-center me-2" style="font-size: 24px;cursor: pointer;width: 30px;">
+                  <span class="fas fa-angle-left"></span>
+                </div>
+                <div class="d-flex justify-content-center align-items-center">
+                  <span><b class="display-current-time" style="user-select: none;"></b></span>
+                </div>
+                <div onclick="onClickStepTime(1)" class="d-flex justify-content-center align-items-center ms-2" style="font-size: 24px;cursor: pointer;width: 30px;">
+                  <span class="fas fa-angle-right"></span>
+                </div>
+              </div>
+              <div>
+                <select class="form-select" name="calender-week-month" onchange="onChangeTimeType(this)">
+                  <option value="week">Tuần</option>
+                  <option value="month">Tháng</option>
+                </select>
+              </div>
+            </div>
+            <div id="calendar-workshilf" class="mb-2" style="background-color: white;"></div>
+            <div class="d-flex justify-content-between mb-2">
+              <div class="d-flex gap-2 align-items-center flex-wrap">
+                <%= form_tag get_process_attend_attends_path, method: :get, id: "form-search-attends", remote: true, authenticity_token: true do %>
+                  <div class="form-input" style="max-width: 300px;">
+                    <input type="text" onkeydown="onSearchUser(event,this)" 
+                          name="search" placeholder="Mã/Tên nhân viên" 
+                          class="form-control h-38" maxlength="50">
+                  </div>
+                  <input name="page" value="1" class="d-none" hidden/>
+                  <input name="per_page" value="25" class="d-none" hidden/>
+                  <input name="week_num" value="" class="d-none" hidden/>
+                  <input name="year" value="" class="d-none" hidden/>
+                <%end%>
+                
+                <div>
+                  <select class="form-control" name="request_type" id="request-type">
+                    <option value="">Tất cả loại đề nghị</option>
+                    <option value="early-check-out">Về sớm</option>
+                    <option value="late-check-in">Đi trễ</option>
+                    <option value="shift-change">Đổi ca</option>
+                    <option value="work-trip">Đi công tác</option>
+                    <option value="additional-check-in">Chấm công vào làm bù</option>
+                    <option value="additional-check-out">Chấm công tan làm bù</option>
+                    <option value="update-shift">Cập nhật ca</option>
+                    <!-- @author: trong.lq @date: 23/10/2025 - Option cho đề xuất chỉnh sửa kế hoạch làm việc -->
+                    <option value="edit-plan">Chỉnh sửa kế hoạch làm việc</option>
+                  </select>
+                </div>
+                
+                <!-- Thêm các nút filter -->
+                <div class="d-flex gap-1">
+                  <button type="button" class="btn btn-outline-primary btn-sm" onclick="applyFilters()">
+                    <i class="fas fa-filter me-1"></i>Lọc
+                  </button>
+                  <button type="button" class="btn btn-outline-secondary btn-sm" onclick="clearAllFilters()">
+                    <i class="fas fa-times me-1"></i>Xóa lọc
+                  </button>
+                </div>
+              </div>
+              
+              <div class="d-flex gap-2">
+                <button class="btn btn-primary" onclick="clickApprovalSelected('APPROVED')">Duyệt nhóm</button>
+                <button class="btn btn-danger" onclick="clickApprovalSelected('REJECTED')">Từ chối</button>
+              </div>
+            </div>
+            <div class="table-responsive scrollbar">
+              <table id="attend-request" class="table table-bordered fs--1 mb-0 mt-0">
+                <thead class="bg-200 text-900">
+                <tr>
+                  <th class="text-center" style="width: 64px;">
+                    <input class="form-check-input" type="checkbox" name="check_all" onchange="onCheckAllProcessAttend(this)"/>
+                  </th>
+                  <th><%= lib_translate("Mã nhân viên") %></th>
+                  <th><%= lib_translate("Tên nhân viên") %></th>
+                  <th><%= lib_translate("Loại đề nghị") %></th>
+                  <th style="width: 236.625px;"><%= lib_translate("Ca đề xuất") %></th>
+                  <th><%= lib_translate("Chi tiết") %></th>
+                  <th><%= lib_translate("Ngày gửi") %></th>
+                  <th><%= lib_translate("Lý do") %></th>
+                  <th class="text-center"><%= lib_translate("Trạng thái") %></th>
+                  <th class="text-center"></th>
+                </tr>
+                </thead>
+                <tbody class="attend-request-tbody"></tbody>
+              </table>
+            </div>
+            <div class="pagin-wrap d-flex justify-content-center mt-2"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modal-approval-shiftissue" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-md">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Duyệt đề xuất</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="shiftissue-list" class="scrollbar" style="max-height: 375px"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary me-2 confirm-btn">Phê duyệt</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%= form_tag get_process_attend_attends_path, method: :get, id: "form-get-process-attend",remote:true, format: :js, authenticity_token: true do %>
+    <input type="text" name="search" class="d-none" hidden/>
+    <input name="page" value="1" class="d-none" hidden/>
+    <input name="per_page" value="25" class="d-none" hidden/>
+    <input name="year" value="" class="d-none" hidden/>
+    <input name="week_num" value="" class="d-none" hidden/>
+    <input name="request_type" value="" class="d-none" hidden/>
+<%end%>
+
+<%= form_tag shiftissues_update_shiftissue_path, method: :post, id: "form-update-process-attend",remote:true, authenticity_token: true do %>
+    <input name="status"class="d-none" hidden/>
+    <textarea name="data" class="d-none" hidden> </textarea>
+<%end%>
+
+
+
+<script>
+
+  let selectItems = [];
+  let currentTime = moment().startOf('isoWeek').add(1, 'weeks');
+  let time_type = "week";
+
+  let colors = [
+              "#0EA5E9",
+              "#FC953B",
+              "#16A34A",
+              "#AF52DE",
+              "#0E37E8",
+              "#510EE8",
+              "#E80EA4",
+              "#A5E80E",
+              "#FCF53B",
+              "#42F915",
+              "#15F9CB",
+              "#DE5180",
+              "#0973A3",
+              "#D66503",
+              "#0F7233",
+              "#8222B2",
+              "#0926A2",
+              "#3809A2",
+              "#A20972",
+              "#73A209",
+              "#D6CE03",
+              "#28B804",
+              "#04B894",
+              "#B22151"
+            ];
+
+  function initCalendar() {
+    $("#calendar-workshilf").smallCalendar({
+      currentTime: currentTime,
+      renderWeekEvent: renderWeekEvent,
+      week:{
+        item_height: 48
+      }
+    });
+  }
+
+  function onChecShilfIssue(checkbox) {
+    let checked = checkbox.checked;
+    let input_count = $('.attend-request-tbody input[type="checkbox"]').length;
+    let temp = checked ? ":checked" : ":not(:checked)";
+    let check_count = $(`.attend-request-tbody input[type="checkbox"]${temp}`).length;
+
+    $(`[name="switch-view-${checkbox.value}"]`).prop("checked",checked);
+
+    if(input_count == check_count){
+      $('input[name="check_all"]').prop("checked",checked);
+    }else{
+      $('input[name="check_all"]').prop("checked",false);
+    }
+    loadEventCalendar();
+  }
+
+  function onChangeTimeType(select) {
+    time_type = select.value;
+    $("#calendar-workshilf").smallCalendar("switchView", time_type);
+  }
+
+  function onClickStepTime(step) {
+    gotoWeek(step);
+  }
+
+  function getDayRange() {
+    const start = currentTime.clone().startOf("isoWeek");
+    const end = start.clone().endOf("isoWeek");
+
+    return {
+      startDate: start.format("YYYY-MM-DD"),
+      endDate: end.format("YYYY-MM-DD")
+    };
+  }
+
+  function gotoWeek(step) {
+      if(step == 1){
+          currentTime.add(1, 'weeks');
+      }else if(step == -1){
+          currentTime.subtract(1, 'weeks');
+      }
+      displayTimeData();
+      
+      console.log('Week navigation - step:', step);
+      submitFormGetProcessAttend(1);
+      $("#calendar-workshilf").smallCalendar("updateDate",currentTime);
+  }
+  
+  function gotoMonth(step) {
+    if(step == 1){
+      currentTime.add(1, 'months');
+    }else if(step == -1){
+      currentTime.subtract(1, 'months');
+    }
+    displayTimeData();
+    submitFormGetProcessAttend(1);
+    $("#calendar-workshilf").smallCalendar("updateDate",currentTime);
+  }
+
+  function displayTimeData() {
+    let weekNum = currentTime.isoWeek();
+    $(".display-current-time").html(`Tuần ${weekNum} năm ${currentTime.isoWeekYear()}`);
+  }
+
+  function loadEventCalendar() {
+    let events = [];
+    const seen = new Set();
+
+    $('.attend-request-tbody input[type="checkbox"]:checked').each((index, element) => {
+      let color = colors[index % colors.length];
+      let id = element.value;
+
+      let item = shiftissues.find(s => String(s.id) === String(id));
+      if (!item) return;
+
+      if (item.stype === "WORK-TRIP") {
+        if (Array.isArray(item.grouped_work_trips)) {
+          item.grouped_work_trips.forEach(trip => {
+            let date = trip.work_date ? moment(trip.work_date).format("YYYY-MM-DD") : null;
+            if (!date) return;
+
+            let start = "07:30";
+            let end = "17:00";
+
+            let key = `${item.id}_${date}_${start}_${end}`;
+            if (seen.has(key)) return;
+            seen.add(key);
+
+            events.push({
+              id: key,
+              original_id: item.id,
+              user_id: item.user_id,
+              title: item.stype_text || "Đi công tác",
+              user_name: item.user_name || "",
+              date: date,
+              start: start,
+              end: end,
+              color: color,
+            });
+          });
+        }
+      } else {
+        let date = item.work_date ? moment(item.work_date).format("YYYY-MM-DD") : null;
+        if (!date) return;
+
+        let start = item.start_time || "00:00";
+        let end = item.end_time || "23:59";
+
+        let key = `${item.id}_${date}_${start}_${end}`;
+        if (seen.has(key)) return;
+        seen.add(key);
+
+        events.push({
+          id: key,
+          original_id: item.id,
+          user_id: item.user_id,
+          title: item.stype_text || item.stype || "Event",
+          user_name: item.user_name || "",
+          date: date,
+          start: start,
+          end: end,
+          color: color,
+        });
+      }
+    });
+
+    console.log("Events gửi vào calendar:", events);
+    $("#calendar-workshilf").smallCalendar("loadEvents", events);
+  }
+
+
+
+
+  function onCheckAllProcessAttend(checkbox) {
+    let checked = checkbox.checked;
+    $('.attend-request-tbody input[type="checkbox"]').prop("checked",checked);
+    loadEventCalendar();
+  }
+
+  function getDayRange() {
+    const start = currentTime.clone().startOf("isoWeek");
+    const end = start.clone().endOf("isoWeek");
+
+    return {
+      startDate: start.format("YYYY-MM-DD"),
+      endDate: end.format("YYYY-MM-DD")
+    };
+  }
+  
+  function renderWeekEvent(event) {
+    const showTime = event.start && event.start !== "00:00" && event.start !== "23:59";
+    const timeHtml = showTime ? `<div style="font-size:12px;font-weight:600;color:${event.color}; margin-bottom:2px;">${event.start}</div>` : '';
+
+    return `
+      <div class="event-item" style="position: absolute; border-left: 4px solid ${event.color}; width: calc(100% - 8px); box-sizing: border-box;">
+        ${timeHtml}
+        <div style="font-weight:600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${event.user_name}</div>
+        <div style="font-size: 13px; filter: brightness(85%); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+          ${event.title}
+        </div>
+      </div>
+    `;
+  }
+
+
+  function onClickButtonPage(page) {
+      let form = $("#form-get-process-attend");
+      let searchValue = $("#form-search-attends input[name='search']").val() || '';
+      let requestType = $('#request-type').val() || '';
+
+      form.find('[name="search"]').val(searchValue);
+      form.find('[name="request_type"]').val(requestType);
+      form.find('[name="page"]').val(page);
+      form.find('[name="week_num"]').val(currentTime.isoWeek());
+      form.find('[name="year"]').val(currentTime.isoWeekYear());
+
+      form.submit();
+      showLoadding(true);
+  }
+
+
+  function getSelectData() {
+    selectItems = [];
+    let select_ids = [];
+    $('.attend-request-tbody input[data-check-select][type="checkbox"]:checked').each((index,element)=>{
+      selectItems.push(element.value);
+    });
+  }
+
+  function clickApprovalSelected(status) {
+
+    getSelectData();
+
+    if (selectItems.length == 0) {
+      alert("Vui lòng chọn đề xuất trước khi xử lý!");  
+      return;
+    }
+
+    renderPopup(selectItems,status);
+  }
+
+  function renderPopup(ids,status) {
+    let popupID = "modal-approval-shiftissue";
+    let dialog = $("#" + popupID);
+    let listwrap = dialog.find("#shiftissue-list");
+    listwrap.html(``);
+    ids.forEach(id=>{
+      let shiftissue = shiftissues.find(item=>{return item.id == id});
+      if(shiftissue){
+        let item_html = renderShiftissueItem(shiftissue,status);
+        listwrap.append(item_html);
+      }
+    });
+
+    dialog.find(".confirm-btn").off().on('click',()=>{
+      if(!IsValidFormApproval(ids,status)){
+        alert("Vui lòng nhập lý do từ chối!");
+        return;
+      }
+      submitUpdate(popupID,status);
+    });
+    dialog.find(".confirm-btn").html( status == "REJECTED" ? "Từ chối" : "Phê duyệt" );
+    dialog.find(".confirm-btn").toggleClass("btn-danger",false);
+    dialog.find(".confirm-btn").toggleClass("btn-primary",false);
+    dialog.find(".confirm-btn").toggleClass( status == "REJECTED" ? "btn-danger" : "btn-primary" ,true);
+    dialog.modal('show');
+  }
+
+  function IsValidFormApproval(ids,status) {
+    if(status == "REJECTED"){
+      for (let i = 0; i < ids.length; i++) {
+        const id = ids[i];
+        let reason = $("#reason-"+id).val().trim();
+        if(reason == ""){
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  function renderShiftissueItem(shiftissue, status) {
+
+      let details = renderItemDetails(shiftissue);
+
+      let inputReason = "";
+      if (status === "REJECTED") {
+          inputReason = `
+              <div class="mb-2">
+                  <label class="form-label" for="reason-${shiftissue.id}">Lý do từ chối:</label>
+                  <textarea class="form-control" id="reason-${shiftissue.id}" rows="3"></textarea>
+              </div>`;
+      }
+
+      let docHtml = "";
+      let docText = "Không có";
+      if (shiftissue.file_name) {
+          docHtml = `<img style="max-width: 100%; border: 1px solid #ddd; border-radius: 4px; padding: 4px;" 
+                        src="/mdata/hrm/${shiftissue.file_name}" alt="file">`;
+          docText = "";
+      }
+
+
+      let dateHtml = "";
+
+      if (shiftissue.stype === "WORK-TRIP" && Array.isArray(shiftissue.grouped_work_trips)) {
+          // Gom nhóm dữ liệu theo ngày
+          const byDate = {};
+          shiftissue.grouped_work_trips.forEach((trip) => {
+              const dateYmd = moment(trip.work_date).format("YYYY-MM-DD");
+              if (!byDate[dateYmd]) byDate[dateYmd] = { morning: false, afternoon: false };
+
+              const start = trip.start_time;
+              const end = trip.end_time;
+
+              // Xác định ca dựa vào giờ
+              if (start && end) {
+                  const startHour = parseInt(start.split(":")[0], 10);
+                  if (startHour < 12) byDate[dateYmd].morning = true;
+                  else byDate[dateYmd].afternoon = true;
+              }
+          });
+
+          // Render HTML tương tự đoạn mẫu
+          const entries = Object.keys(byDate)
+              .sort()
+              .map((dYmd) => {
+                  const d = moment(dYmd).format("DD-MM-YYYY");
+                  const f = byDate[dYmd];
+                  let label = "";
+                  if (f.morning && f.afternoon) label = "cả ngày";
+                  else if (f.morning) label = "ca sáng";
+                  else if (f.afternoon) label = "ca chiều";
+                  else label = "ca";
+
+                  return `<div class="mb-1">📅 <strong>${d}</strong>: <strong>${label}</strong></div>`;
+              });
+
+          const mid = Math.ceil(entries.length / 2);
+          const col1 = entries.slice(0, mid).join("");
+          const col2 = entries.slice(mid).join("");
+
+          dateHtml = `
+            <div class="mt-1">
+              <div class="mb-2">Chi tiết công tác theo ngày:</div>
+              <div class="row">
+                <div class="col-12 col-md-6">${col1}</div>
+                <div class="col-12 col-md-6">${col2}</div>
+              </div>
+            </div>`;
+      } else if (shiftissue.start_date && shiftissue.end_date) {
+          // Trường hợp có start_date, end_date nhưng không có grouped_work_trips
+          dateHtml = `
+            <div class="mb-2">
+              <span>Ngày: </span>
+              <b><span>${moment(shiftissue.start_date).format("DD/MM/YYYY")} - ${moment(shiftissue.end_date).format("DD/MM/YYYY")}</span></b>
+            </div>`;
+      } else {
+          // Trường hợp chỉ có work_date
+          dateHtml = `
+            <div class="mb-2">
+              <span>Ngày: </span>
+              <b><span>${moment(shiftissue.work_date).format("DD/MM/YYYY")}</span></b>
+            </div>`;
+      }
+
+      let item = `
+          <div class="shiftissue-item mb-3">
+              <div class="mb-2">
+                  <span>Tên nhân sự: </span> 
+                  <b><span class="issue-user-name">${shiftissue.user_name}</span></b>
+              </div>
+              <div class="mb-2">
+                  <span>Loại đề xuất: </span> 
+                  <b><span>${shiftissue.stype_text}</span></b>
+              </div>
+              ${dateHtml}
+              ${details}
+              <div class="mb-2">
+                  <span>Lý do đề xuất: </span> 
+                  <b><span style="color: #f57557;">${shiftissue.note || "Không có"}</span></b>
+              </div>
+              <div class="mb-2">
+                  <span>Minh chứng: </span> 
+                  <b><span>${docText}</span></b>
+                  <div class="issue-docs-wrap mt-1">
+                      ${docHtml}
+                  </div>
+              </div>
+              ${inputReason}
+          </div>
+          <hr class="divider">`;
+
+      return item;
+  }
+
+
+  function renderItemDetails(shiftissue) {
+    let details = "";
+    switch (shiftissue.stype) {
+      case "EARLY-CHECK-OUT":
+        details = `<div class="mb-2">
+                      <span>Giờ ra: </span><span style="color: #738ffb;"><b>${shiftissue.us_end}</b></span>
+                    </div>`;
+        break;
+      case "LATE-CHECK-IN":
+        details = `
+          <div class="mb-2">
+            <span>Giờ vào: </span><span style="color: #738ffb;"><b>${shiftissue.us_start}</b></span>
+          </div>`;
+        break;
+      case "SHIFT-CHANGE":
+        details = `
+          <div class="mb-2 d-flex align-items-center">
+
+            <div class="d-flex flex-column justify-content-center align-items-center" style="max-width: 40%;width: fit-content;">
+              <div><span><b>${shiftissue.user_name}</b></span></div>
+              <div style="color: #738ffb;">
+                <span><b>${shiftissue.start_time} - ${shiftissue.end_time}</b></span>
+              </div>
+            </div>
+            
+            <div class="me-3 ms-3" style="font-size: 23px;color: #f3b668;">
+              <span class="fas fa-arrows-alt-h"></span>
+            </div>
+
+            <div class="d-flex flex-column justify-content-center align-items-center" style="max-width: 40%;width: fit-content;">
+              <div><span><b>${shiftissue.change_user_name}</b></span></div>
+              <div style="color: #738ffb;">
+                <span><b>${shiftissue.c_start_time} - ${shiftissue.c_end_time}</b></span>
+              </div>
+            </div>
+          </div>
+          
+          `;
+        break;
+      case "UPDATE-SHIFT":
+        details = `
+          <div class="mb-2">
+            <span>Giờ vào: </span><span style="color: #738ffb;"><b>${shiftissue.us_start}</b></span> <span class="me-2 ms-2">-</span> <span>Giờ ra: </span><span style="color: #738ffb;"><b>${shiftissue.us_end}</b></span>
+          </div>`;
+        break;
+      case "ADDITIONAL-CHECK-IN":
+        details = `
+          <div class="mb-2">
+            <span>Giờ vào: </span> <span style="color: #738ffb;"><b>${shiftissue.us_start}</b></span>
+          </div>`;
+        break;
+      case "ADDITIONAL-CHECK-OUT":
+        details = `
+          <div class="mb-2">
+            <span>Giờ ra: </span> <span style="color: #738ffb;"><b>${shiftissue.us_end}</b></span>
+          </div>`;
+        break;
+      case "EDIT-PLAN":
+        // @author: trong.lq
+        // @date: 23/10/2025
+        // Hiển thị thông tin chỉnh sửa kế hoạch làm việc
+        details = `
+          <div class="mb-2">
+            <span>Tuần chỉnh sửa: </span><span style="color: #738ffb;"><b>${shiftissue.content || "-"}</b></span>
+          </div>`;
+        break;
+      default:
+        break;
+    }
+    return details;
+  }
+
+  function clickApprovalOne(id) {
+    selectItems = [id];
+    renderPopup([id],"APPROVED");
+  }
+
+  function submitUpdate(popupID, status) {
+      let popup = $("#" + popupID);
+      let data = [];
+      
+      selectItems.forEach(id => {
+          let reason = $(`#reason-${id}`).val();
+          
+          
+          data.push({
+              id: id,
+              reason: reason,
+              is_work_trip_representative: true 
+          });
+      });
+      
+      let form = $("#form-update-process-attend");
+      form.find('textarea[name="data"]').val(JSON.stringify(data));
+      form.find('input[name="status"]').val(status);
+      form.submit();
+      showLoadding(true);
+      popup.modal("hide");
+  }
+
+
+  function onApproval(success) {
+    showLoadding(false);
+    if(success){
+      $(".modal").modal("hide");
+      submitFormGetProcessAttend();
+      showAlert("Cập nhật thành công","success");
+    }else{
+      showAlert("Lỗi khi duyệt","danger");
+    }
+  }
+  function onSearchUser(e, input) {
+      if (e.key === "Enter" || e.keyCode === 13) {
+          e.preventDefault();
+          
+          // Reset về trang 1 khi search
+          let form = $("#form-get-process-attend");
+          form.find('[name="page"]').val(1);
+          
+          // Submit form với search mới
+          submitFormGetProcessAttend();
+      }
+  }
+  function searchWorkshifts(page = 1, per_page = 25) {
+      let searchValue = $("#form-search-attends input[name='search']").val().trim();
+      let requestType = $('#request-type').val() || '';
+      
+      let mainForm = $("#form-get-process-attend");
+      mainForm.find('[name="search"]').val(searchValue);
+      mainForm.find('[name="request_type"]').val(requestType);
+      mainForm.find('[name="page"]').val(page);
+      mainForm.find('[name="per_page"]').val(per_page);
+      mainForm.find('[name="week_num"]').val(currentTime.isoWeek());
+      mainForm.find('[name="year"]').val(currentTime.isoWeekYear());
+      
+      console.log('Search Workshifts - Request Type:', requestType);
+      
+      mainForm.submit();
+      showLoadding(true);
+  }
+  function clearAllFilters() {
+      $("#form-search-attends input[name='search']").val('');
+      $('#request-type').val('');
+      console.log('All filters cleared');
+      
+      let form = $("#form-get-process-attend");
+      form.find('[name="page"]').val(1);
+      submitFormGetProcessAttend();
+  }
+
+  function clearSearch() {
+      $("#form-search-attends input[name='search']").val('');
+      
+      let form = $("#form-get-process-attend");
+      form.find('[name="page"]').val(1);
+      submitFormGetProcessAttend();
+  }
+
+  function clearRequestType() {
+      $('#request-type').val('');
+      console.log('Request type cleared');
+      
+      let form = $("#form-get-process-attend");
+      form.find('[name="page"]').val(1);
+      submitFormGetProcessAttend();
+  }
+  initCalendar();
+  displayTimeData();
+  submitFormGetProcessAttend();
+
+  $(document).ready(function() {
+      $('#request-type').on('change', function() {
+          
+          let form = $("#form-get-process-attend");
+          form.find('[name="page"]').val(1);
+          
+          submitFormGetProcessAttend();
+      });
+  });
+
+
+  function submitFormGetProcessAttend(page) {
+      let form = $("#form-get-process-attend");
+      
+      // Lấy giá trị search từ form riêng biệt
+      let searchValue = $("#form-search-attends input[name='search']").val() || '';
+      
+      // Lấy giá trị request type từ select riêng biệt  
+      let requestType = $('#request-type').val() || '';
+      
+      // Set các giá trị vào form chính
+      form.find('[name="search"]').val(searchValue);
+      form.find('[name="request_type"]').val(requestType);
+      form.find('[name="week_num"]').val(currentTime.isoWeek());
+      form.find('[name="year"]').val(currentTime.isoWeekYear());
+      if (page){
+          form.find('[name="page"]').val(page);
+      }
+      form.submit();
+      showLoadding(true);
+  }
+  function applyFilters() {
+    let form = $("#form-get-process-attend");
+    form.find('[name="page"]').val(1);
+    submitFormGetProcessAttend();
+  }
+
+  function refreshData() {
+    submitFormGetProcessAttend();
+  }
+</script>

@@ -1,0 +1,26 @@
+    <main class="main" id="top">
+      <div class="container" data-layout="container">
+        <script>
+          var isFluid = JSON.parse(localStorage.getItem('isFluid'));
+          if (isFluid) {
+            var container = document.querySelector('[data-layout]');
+            container.classList.remove('container');
+            container.classList.add('container-fluid');
+          }
+        </script>
+        <div class="row flex-center min-vh-100 py-6 text-center"> 
+          <div class="col-sm-10 col-md-8 col-lg-6 col-xxl-5">
+          <a class="d-flex flex-center mb-1" href="<%= root_path(lang: session[:lang]) %>">
+           <%= image_tag "logo.png", width: "250"%></a>
+            <div class="card">
+              <div class="card-body p-4 p-sm-5">
+                <div class="fw-black lh-1 text-300 fs-error">404</div>
+                <hr />
+                <p class="lead mt-4 text-800  fw-semi-bold w-md-75 w-xl-100 mx-auto"><%= lib_translate("Your_account_does_not_have_access_to_this_function")  %>!!!</p>
+                <a class="btn btn-primary btn-sm mt-3" href="<%= session[:last_url] %>"><span class="fas fa-home me-2"></span><%= lib_translate("Back")  %></a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>

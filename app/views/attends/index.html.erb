@@ -1,0 +1,1117 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag '/assets/mystyle/fullcalendar_main.min.css' %>
+  <%= javascript_include_tag '/assets/myjs/fullcalendar_main.min.js' %>
+  <%= stylesheet_link_tag '/assets/mystyle/flatpickr.min.css' %>
+  <%= javascript_include_tag '/assets/myjs/locales-all.global.min.js' %>
+  <%= javascript_include_tag '/assets/myjs/flatpickr.js' %>
+  <%= javascript_include_tag '/assets/myjs/flatpickr_local/vn.js' %>
+  <%= stylesheet_link_tag '/assets/mystyle/flatpickr.min.css' %>
+  <%= javascript_include_tag '/assets/myjs/dayjs.min.js' %>
+  <%= javascript_include_tag '/assets/myjs/isoWeek.js' %>
+  <%= javascript_include_tag '/assets/myjs/application.js' %>
+<% end %>
+<% content_for :bottombody do %>
+  <%= javascript_include_tag '/assets/myjs/attend.js' %>
+  <%= javascript_include_tag '/assets/myjs/attend_schedule.js' %>
+<% end %>
+<style>
+    /* CSS cho time picker cập nhật ca */
+    .time-picker-update-shift {
+      cursor: pointer !important;
+      background-color: #f8f9fa !important;
+      user-select: none !important;
+      -webkit-user-select: none !important;
+      -moz-user-select: none !important;
+      -ms-user-select: none !important;
+    }
+    .time-picker-update-shift:focus {
+      background-color: #f8f9fa !important;
+      border-color: #86b7fe !important;
+      box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+      outline: none !important;
+    }
+    .time-picker-update-shift::-webkit-calendar-picker-indicator {
+      cursor: pointer !important;
+    }
+    /* CSS cho time picker cập nhật ca - chỉ áp dụng cho class cụ thể */
+    .time-picker-update-shift-flatpickr-popup input {
+      pointer-events: none !important;
+      user-select: none !important;
+      -webkit-user-select: none !important;
+      -moz-user-select: none !important;
+      -ms-user-select: none !important;
+    }
+    
+    #workshiftModal {
+        .modal-body {
+            color: #000000
+        }
+
+        .custom-modal-width {
+            max-width: 90% !important;
+            margin: 40px auto 0 auto;
+        }
+
+        .bg-thead {
+            background-color: #F9FBFC;
+        }
+
+        .total-input {
+            width: 100%;
+            height: 36px;
+            background-color: #f5f5f5;
+            border: 0px solid #f5f5f5;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: 500;
+            pointer-events: none;
+        }
+
+        #weekTabContent .pane-approver {
+            display: none;
+        }
+
+        .fc-week-selected .fc-daygrid-day-frame {
+            background: rgba(13, 110, 253, .15);
+        }
+
+        .fc-daygrid-day-frame {
+            height: 90px;
+            max-height: 90px;
+            overflow: hidden;
+        }
+
+        .fc-past-disabled {
+            background: #f5f5f5;
+            pointer-events: none;
+            opacity: .6;
+        }
+
+        td.row-workshift.day-off input[type="text"],
+        td.row-workshift.pending input[type="text"],
+        td.row-workshift.day-off select.location,
+        td.row-workshift.pending select.location,
+        td.row-workshift.off-holiday input[type="text"],
+        td.row-workshift.off-holiday select.location,
+        td.row-workshift.off-leave input[type="text"],
+        td.row-workshift.off-leave select.location {
+            pointer-events: none;
+            opacity: .55;
+        }
+
+        td.row-workshift.off-leave input[type="text"],
+        td.row-workshift.off-leave select.location {
+            border-color: #0d6efd !important;
+            color: #0d6efd !important;
+        }
+
+        td.row-workshift.off-holiday input[type="text"],
+        td.row-workshift.off-holiday select.location {
+            border-color: #b91c1c !important;
+            color: #b91c1c !important;
+        }
+
+        .nav-week-tab.active a.week {
+            color: #0d6efd;
+            font-weight: bold;
+        }
+
+        a.remove svg {
+            cursor: pointer;
+        }
+
+        .template-shift-row{
+            display: grid;
+            grid-template-columns: repeat(2, minmax(260px, 1fr)) auto;
+            column-gap: 16px;
+            row-gap: 8px;
+            align-items: end;
+        }
+
+        .template-shift-row .tpl-group{
+            display: flex;
+            flex-direction: column;
+        }
+
+        .template-shift-row .tpl-label{
+            font-weight: 500;
+            color: var(--bs-gray-700);
+            margin-bottom: 6px;
+            font-size: 13px;
+        }
+
+        .template-shift-row .tpl-fields{
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .template-shift-row .tpl-apply{
+            align-self: end;
+        }
+
+        .badges-temp {
+            background-color: #DEE0E2;
+            color: #61666F;
+        }
+
+        .badges-pending {
+            background-color: #FEE9D7;
+            color: #FC953B;
+        }
+
+        .badges-reject {
+            background-color: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .badges-approve {
+            color: #14AE5C;
+            background-color: #C8F9DF;
+        }
+
+        .badges {
+            display: inline-block;
+            padding: 2px 7px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 9999px;
+        }
+        .fc-daygrid-day-top{
+            display:flex;
+            flex-direction:column;
+            align-items:flex-start;
+        }
+        .fc-day-flag{
+            margin-top:10px;
+            font-size:11px;
+            padding:2px 6px;
+            border-radius:3px;
+            background:#f8f9fa;
+            border:1px solid #e9ecef;
+            display:block;
+            max-width:100%;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+            cursor:pointer;
+        }
+
+        .fc-day-holiday .fc-day-flag{ color:#e55353; border-color:#f5c2c7; }
+        .fc-day-leave   .fc-day-flag{ color:#0d6efd; border-color:#b6d4fe; }
+
+        .ws-status-badge{
+            display: inline-block;
+            max-width: 130px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            vertical-align: middle;
+            font-size: 14px;
+            line-height: 1.2;
+        }
+        .ws-status-holiday{ color:#dc3545; }
+        .ws-status-leave  { color:#0d6efd; }
+
+    }
+    .modal-content {
+        border: 1px solid #E0E0E0;
+        border-radius: 8px;
+    }
+
+    .modal-header {
+        border-bottom: 1px solid #E0E0E0;
+    }
+
+    .modal-title {
+        font-size: 18px;
+        font-weight: bold;
+        color: #005FBE;
+    }
+
+    .modal-body {
+        padding: 20px;
+    }
+
+    .info-section {
+        margin-bottom: 16px;
+    }
+
+    .info-label {
+        font-size: 14px;
+        margin-bottom: 8px;
+        color: #333;
+    }
+
+    .info-label span {
+        font-size: 14px;
+        font-weight: normal;
+    }
+
+    .info-label::before {
+        content: attr(data-label);
+        font-weight: bold;
+        margin-right: 4px;
+    }
+    /* Modal body cuộn được để luôn nhìn thấy nút */
+    #requestModal .modal-body{
+      max-height: calc(100vh - 200px);
+      overflow: auto;
+    }
+    /* Khung chọn ảnh */
+    .evidence-container{
+      width:100%;
+      border:2px dashed var(--falcon-border-color-translucent);
+      border-radius:5px;
+      padding:8px 10px;
+      cursor:pointer;
+      text-align:center;
+    }
+
+    /* Preview: MẶC ĐỊNH thấp hơn ~1/2 */
+    .evidence-preview{
+      width:280px;
+      height:140px;              /* ↓ còn 1/2 */
+      margin:0 auto;
+      overflow:hidden;
+      background-repeat:no-repeat;
+      background-size:cover;
+      background-position:center;
+      transition:height .2s ease; /* mượt khi đổi kích thước */
+    }
+
+    /* Khi đã có ảnh -> trả về kích thước cũ */
+    .evidence-preview.has-image{
+      height:350px;              /* như hiện tại */
+    }
+    .fc-daygrid-event-harness a.badges-pending,
+    .fc-daygrid-event-harness a.badges-rejected,
+    .fc-daygrid-event-harness a.badges-approved {
+        cursor: pointer;
+        border-radius: 4px;
+        padding: 2px 6px;
+        font-size: 11px;
+        font-weight: 600;
+    }
+    .fc-daygrid-event-harness a.badges-pending {
+        background-color: #FEE9D7 !important;
+        .fc-event-main {
+            color: #FC953B !important;
+        }
+    }
+    .fc-daygrid-event-harness a.badges-rejected {
+        background-color: #fee2e2 !important;
+        .fc-event-main {
+            color: #b91c1c !important;
+        }
+    }
+    .fc-daygrid-event-harness a.badges-approved {
+        background-color: #C8F9DF !important;
+        .fc-event-main {
+            color: #14AE5C !important;
+        }
+    }
+    .shift-indicator-container {
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        display: flex;
+        gap: 4px;
+        z-index: 10;
+    }
+
+    .shift-circle {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        font-size: 10px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+    }
+
+    .fc-daygrid-day-frame {
+      position: relative; /* Bắt buộc để .shift-indicator dùng absolute */
+    }
+
+    select.form-control {
+      appearance: auto !important; /* hiện mũi tên mặc định */
+      -webkit-appearance: auto !important;
+      -moz-appearance: auto !important;
+      background-color: #fff;
+      background-image: none; /* nếu có icon nền che */
+    }
+
+    .custom-modal-header {
+      background-color: #d3e3fd !important;
+      border-bottom: 1px solid #60a5fa;
+    }
+
+    .custom-modal-header .modal-title {
+      color:#005FBE; /*rgb(14 119 183);*/
+      font-weight: 700 ;
+      text-transform: uppercase; /* chữ in hoa */
+      letter-spacing: 0.5px;      /* giãn nhẹ chữ */
+    }
+
+    .modal-content.custom-modal-content {
+      background-color:#f0f4f9;
+    }
+
+    .fc-event.fc-shift-pending {
+      background-color: #FFA500 !important; /* Cam */ #04288d
+      border-color: #FFA500 !important;
+      color: white !important;
+      height: 25px;
+      border-radius: 6px !important;
+    }
+    .fc-event.fc-shift-pending .fc-event-title{
+      color:#04288d !important
+    }
+    .fc-event.fc-shift-approved {
+      background-color:rgb(16, 185, 129) !important;
+      border-color:rgb(40 167 69) !important;
+    }
+
+    .fc-event.fc-shift-approved .fc-event-title{
+      color:#04288d !important
+    }
+
+    .fc-event.fc-shift-rejected {
+        background-color:rgb(236, 23, 44) !important; /* Bootstrap danger */
+        border-color: #DC3545 !important;
+        height: 25px;
+    }
+
+    .fc-event.fc-shift-rejected .fc-event-title{
+      color: white !important
+    }
+
+        /* Style cho proposalTitle */
+    #proposalTitle {
+      font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif; /* Font rõ ràng, hiện đại */
+      font-size: 18px;             /* Kích thước tiêu đề */
+      font-weight: 700;            /* Chữ đậm */
+      padding: 6px 12px;           /* Khoảng cách trong */
+      border-radius: 2px;          /* Bo góc nhẹ */
+      letter-spacing: 0.5px;       /* Giãn chữ nhẹ */
+      text-transform: uppercase;   /* Chữ in hoa */
+    }
+
+    /* Style cho tiêu đề "Đề xuất" */
+    #requestModal .modal-header .modal-title {
+      font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif; /* Font hiện đại, dễ đọc */
+      font-size: 20px;             /* Kích thước chữ */
+      font-weight: 700;            /* Chữ đậm */
+      letter-spacing: .2px;       /* Giãn chữ nhẹ */
+      text-transform: uppercase;   /* In hoa toàn bộ */
+      padding: 6px 12px;           /* Khoảng cách trong */
+      border-radius: 2px;  
+      color:rgb(82, 119, 180);
+    }
+
+    #schedule-calendar .fc-toolbar-title {
+      font-weight: 900 !important;
+      font-size: 1.35rem; /* tuỳ chỉnh */
+    }
+
+    #toastContainer { z-index: 1080; }
+
+    #toastContainer .toast{
+      min-width: 380px;
+      max-width: 560px;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    #toastContainer .toast .d-flex{ align-items: center; }
+
+    /* body co giãn, chừa chỗ cho nút đóng */
+    #toastContainer .toast .toast-body{
+      flex: 1 1 auto;
+      padding: .75rem 1rem;
+    }
+
+    /* luôn hiển thị rõ nút đóng */
+    #toastContainer .toast .btn-close{
+      opacity: .9;
+      /* icon trắng trên nền màu */
+      filter: invert(1) brightness(200%);
+    }
+
+    .attend-container table td{
+      overflow: unset !important
+    }
+
+
+
+
+    /* Tổng thể lưới & viền */
+    #schedule-calendar .fc .fc-scrollgrid,
+    #schedule-calendar .fc-theme-standard td,
+    #schedule-calendar .fc-theme-standard th {
+      border-color: #e5e7eb; /* tailwind gray-200 */
+    }
+
+    /* Chiều cao mỗi slot (áp dụng cho timeGrid) */
+    #schedule-calendar .fc-timegrid-slot {
+      height: 26px;               /* 15' -> bạn có thể 22–30 tuỳ ý */
+    }
+
+    /* Vạch phụ (giữa các slot) nhạt/dotted để đỡ rối */
+    #schedule-calendar .fc-timegrid-slot.fc-timegrid-slot-minor {
+      border-top-style: dotted;
+      border-top-color: #e5e7eb;
+      opacity: .6;
+    }
+
+
+    /* Nền ngày hiện tại (week view) cho rõ hơn */
+    #schedule-calendar .fc-timegrid-col.fc-day-today .fc-timegrid-col-frame {
+      background: rgba(33, 86, 172, 0.06);  /* blue-500 @ 6% */
+    }
+
+    /* Vạch 'Now' màu đỏ */
+    #schedule-calendar .fc-timegrid-now-indicator-line {
+      border-color: #ef4444; /* red-500 */
+    }
+    #schedule-calendar .fc-timegrid-now-indicator-arrow {
+      border-color: transparent transparent #ef4444 transparent;
+    }
+
+    /* Sự kiện dạng pill */
+    #schedule-calendar .fc-timegrid-event {
+      border: 0;
+      border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.08);
+      padding: 2px 6px;
+      min-height: 7px;          /* các block 5' cũng nhìn rõ */
+      background: #eef2ff;
+      color: #3730a3;      
+      line-height: 1.2;      
+    }
+
+    /* Chữ trong event: thời gian & tiêu đề */
+    #schedule-calendar .fc-timegrid-event .fc-event-time,
+    #schedule-calendar .fc-timegrid-event .fc-event-title {
+      font-size: 12px;
+      font-weight: 900;
+      line-height: 1.2;
+    }
+
+    /* Ẩn “dot” nhỏ của event rất ngắn, luôn hiển thị như pill */
+    #schedule-calendar .fc-timegrid-event .fc-event-main-frame::before {
+      display: none !important;
+    }
+
+    /* Thanh header view week */
+    #schedule-calendar .fc-col-header-cell-cushion {
+      font-weight: 600;
+    }
+    #schedule-calendar .fc-header-toolbar {
+        margin-bottom: 0px !important;
+    }
+    #schedule-calendar .fc-daygrid-day-frame {
+        min-height: 11vh;
+    }
+
+    #schedule-legend .legend-item {
+      display: inline-flex; align-items: center; gap: .5rem;
+      padding: 2px 8px; border-radius: 9999px; background: #f8fafc;
+      border: 1px solid #e5e7eb; font-size: .9rem;
+    }
+    #schedule-legend .legend-dot {
+      width: 18px; height: 18px; border-radius: 50%;
+      border: 2px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.15) inset;
+    }
+
+    .legend-square {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border-radius: 2px; /* hoặc 0 nếu bạn muốn góc vuông hoàn toàn */
+      margin-right: 5px;
+    }
+
+    .hidden-row {
+      display: none !important;
+    }
+
+    .shift-row {
+      background-color: #f9f9fc; /* nhẹ, dịu mắt */
+      border: 1px solid #e0e0e0; /* tạo khung rõ ràng */
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
+    }
+    .shift-row:hover {
+      background-color: #eef3ff;
+      border-color: #b3c7ff;
+    }
+
+    .shift-row .form-control, .shift-row .form-select {
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+      padding: 6px 10px;
+      font-size: 14px;
+      transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    }
+
+    .shift-row .form-control:focus, .shift-row .form-select:focus {
+      border-color: #80bdff;
+      box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+      outline: none;
+    }
+
+    .shift-row .btn {
+      padding: 4px 10px;
+      font-size: 14px;
+      border-radius: 4px;
+      transition: background-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    }
+
+    .shift-row .btn:hover {
+      background-color: #0056b3;
+      box-shadow: 0 4px 8px rgba(0,0,0,.1);
+    } 
+</style>
+
+<script>
+    let get_data_request_attend_attends_path = "<%= get_data_request_attend_attends_path %>";
+    let fetch_all_attends_in_month_attends_path = "<%= fetch_all_attends_in_month_attends_path %>";
+    let get_all_workshifts = "<%= workshifts_get_all_workshifts_path %>";
+    let get_all_managers = "<%= workshifts_get_all_managers_path %>";
+    let get_holidays = "<%= @CSVC_PATH + "api/v1/mapi_utils/get_holidays?organization=" + @uorg_scode %>";
+    let get_user_on_leaves = "<%= @ERP_PATH + "api/v1/mapi_utils/get_employee_leave_days?id=" + @id.to_s %>";
+    let get_available_dates = "<%= @ERP_PATH + "api/v1/mapi_utils/get_available_dates" %>";
+    let get_campus = "<%= @CSVC_PATH + "api/v1/mapi_utils/get_all_campuses" %>";
+    let get_teaching_schedules = "<%= @PMDT_PATH + "api/v1/mapi_utils/get_teaching_schedules?user_id=" + @id.to_s %>";
+    let save_scheduleweeks = "<%= scheduleweeks_save_scheduleweeks_path %>";
+    let get_scheduleweeks = "<%= scheduleweeks_get_scheduleweeks_path %>";
+    let get_data_date_attend_attends_path = "<%= get_data_date_attend_attends_path %>";
+    let avatar_url = "<%= image_url('no_avatar.jpg') %>";
+</script>
+
+<div class="attend-container">
+  <div class="card">
+    <div class="card-title mb-0">
+      <div class="tab-content">
+        <div class="mt-3">
+          <div class="d-flex justify-content-between align-items-center flex-wrap mt-3">
+            <div class="d-flex align-items-center ms-4">
+              <h3 class="me-3 fs-2">
+                <span class="far fa-calendar-alt me-2 fs-2"></span>
+                <span><%= lib_translate("Lịch làm việc") %></span>
+              </h3>
+            </div>
+            <div id="schedule-legend" class="d-flex flex-wrap align-items-center gap-2 me-4">
+              <span class="legend-item"><span class="legend-dot" style="background:#000000"></span>Nghỉ hàng tuần</span>
+              <span class="legend-item"><span class="legend-dot" style="background:#dc3545"></span>Nghỉ lễ</span>
+              <span class="legend-item"><span class="legend-dot" style="background:#94a3b8"></span>Nghỉ phép</span>
+              <span class="legend-item"><span class="legend-dot" style="background:#125de7"></span>Lịch giảng dạy</span>
+              <span class="legend-item"><span class="legend-dot" style="background:#fd7e14"></span>Ca làm việc đã duyệt</span>
+              <span class="legend-item"><span class="legend-dot" style="background:#28a745"></span>Đã chấm công</span>
+              <span class="legend-item"><span class="legend-square" style="background:#f59e0b"></span>Chưa duyệt</span>
+              <span class="legend-item"><span class="legend-square" style="background:rgb(16, 185, 129)"></span>Đã duyệt</span>
+            </div>
+          </div>
+          <div class="d-flex justify-content-between card-header pt-0">
+            <div class="d-flex align-items-center">
+              <div class="me-2 ms-2">
+                <button class="btn btn-sm btn-falcon-default me-1" onclick="clickNextcalendar(0)"><span class="fas fa-chevron-left"></span></button>
+                <button class="btn btn-sm btn-falcon-default" onclick="clickNextcalendar(1)"><span class="fas fa-chevron-right"></span></button>
+              </div>
+              <p class="m-0 fs-1" id="calendar-schedule-title"></p>
+            </div>
+            <div class="d-flex mt-2 align-items-end">
+              <div class="dropdown font-sans-serif me-md-2">
+                <button class="btn btn-falcon-default text-600 btn-sm dropdown-toggle dropdown-caret-none" type="button" id="email-filter" data-bs-toggle="dropdown" data-boundary="viewport" aria-haspopup="true" aria-expanded="false">
+                  <span id="data-view-title">Tháng</span>
+                  <span class="fas fa-sort ms-2 fs--1"></span>
+                </button>
+                <div class="dropdown-menu dropdown-menu-end border py-2" aria-labelledby="email-filter">
+                  <a class="active dropdown-item d-flex justify-content-between cursor-pointer" data-fc-view="dayGridMonth">Tháng
+                    <span class="icon-check">
+                      <span class="fas fa-check" data-fa-transform="down-4 shrink-4"></span>
+                    </span>
+                  </a>
+                  <a class="dropdown-item d-flex justify-content-between cursor-pointer" data-fc-view="timeGridWeek">Tuần
+                    <span class="icon-check">
+								        <span class="fas fa-check" data-fa-transform="down-4 shrink-4"></span>
+							      </span>
+                  </a>
+                </div>
+              </div>
+              <div class="me-2">
+                <button type="button" class="btn btn-primary btn-sm" id="register-workshift"><span class="fas fa-plus me-2 fs--1"></span>Kế hoạch</button>
+              </div>
+              <div class="me-1">
+                <button type="button" class="btn btn-primary btn-sm" id="create-request"><span class="fas fa-plus me-2 fs--1"></span>Đề xuất</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+    <div class="card-body pt-0">
+      <div id="schedule-calendar" style="position: relative;">
+          <div id="day-tooltip" style="
+          display: none;
+          position: absolute;
+          z-index: 999;
+          background: white;
+          border: 1px solid #ccc;
+          border-radius: 4px;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+          padding: 8px;
+          font-size: 0.9rem;
+          max-width: 300px;
+        "></div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal Đề xuất chấm công -->
+<div class="modal fade" id="requestModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border custom-modal-content">
+      <div class="modal-header px-x1 bg-light border-bottom-0 custom-modal-header">
+        <h5 class="modal-title">Đề xuất</h5>
+        <button class="btn-close me-n1" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="<%= save_attend_request_attends_path %>" method="post" id="form_request_attend" enctype="multipart/form-data">
+        <%= csrf_meta_tags %>
+        <%= hidden_field_tag :authenticity_token, form_authenticity_token %>
+        <div class="modal-body p-x1">
+          <div class="mt-3">
+            <label class="fs-0 fw-bold" for="requestType"><%= lib_translate("Loại đề xuất") %>:</label>
+            <select class="form-control" name="request_type" id="request-type">
+              <option value="early-check-out">Về sớm</option>
+              <option value="late-check-in">Đi trễ</option>
+              <option value="shift-change">Đổi ca</option>
+              <option value="work-trip">Đi công tác</option>
+              <option value="additional-check-in">Chấm công vào làm bù</option>
+              <option value="additional-check-out">Chấm công tan làm bù</option>
+              <option value="update-shift">Cập nhật ca</option>
+              <option value="edit-plan">Chỉnh sửa kế hoạch làm việc</option>
+              <option value="compensatory-leave">Nghỉ bù</option>
+            </select>
+          </div>
+          <!-- === Thời gian chung cho Về sớm/Đi muộn === -->
+          <div id="section-early-late" class="mt-3">
+            <div div class="mt-3">
+              <label class="fs-0 fw-bold" for="original-date">Ngày làm việc<span class="text-danger">*</span>:</label>
+              <input class="form-control bg-light date-choose" id="original-date" type="text" name="original_date" />
+            </div>  
+            <div class="row">
+              <div class="col-6">
+                <label class="fs-0 fw-bold" for="shiftSelectChangecheck">Ca làm việc<span class="text-danger">*</span>:</label>
+                <select name="workshift_id" class="form-control" id="shiftSelectChangecheck"></select>
+              </div>
+              <div class="col-6">
+                <label class="fs-0 fw-bold" for="requestTime">Thời gian<span class="text-danger">*</span>:</label>
+                <input class="form-control time-picker" id="request-time" type="time" name="time" />
+              </div>
+            </div>
+          </div>
+          
+          <!-- === Đổi Ca === -->
+          <div id="section-shift-change" class="mt-3 d-none">
+            <div class="mt-3">
+              <%# <div class="col-6"> %>
+                <label class="fs-0 fw-bold" for="original-date">Ngày làm việc<span class="text-danger">*</span>:</label>
+                <input class="form-control bg-light t date-choose" id="original-date" type="text" name="original_date"  />
+              <%# </div> %>
+              <%# <div class="col-6">
+                <label class="fs-0 fw-bold" for="shiftSelectChange">Ca làm việc<span class="text-danger">*</span>:</label>
+                <select name="workshift_id" class="form-control" id="shiftSelectChange"></select>
+              </div> %>
+            </div>
+            <div class="mt-3">
+              <%# <div class="col-6"> %>
+                <label class="fs-0 fw-bold" for="request-date-new">Ngày đăng ký đổi ca<span class="text-danger">*</span>:</label>
+                <input class="form-control bg-light t date-choose" id="request-date-new" type="text" name="target_date"  />
+              <%# </div> %>
+              <%# <div class="col-6">
+                <label class="fs-0 fw-bold" for="shiftSelectNew">Ca đăng ký đổi<span class="text-danger">*</span>:</label>
+                <select name="new_workshift_id" class="form-control" id="shiftSelectNew"></select>
+              </div> %>
+            </div>
+            <div class="mt-3">
+              <label class="fs-0 fw-bold" for="swap-with-user-id"><%= lib_translate("Đổi ca với") %>:</label>
+              <select name="swap_with_user_id" class="form-control" id="swap-with-user-id" required>
+              <option value="" selected disabled hidden>— Chọn người —</option></select>
+            </div>
+          </div>
+
+          <!-- === Đi công tác === -->
+            <!-- Row 1: Ngày làm việc -->
+          <div id="section-work-trip" class="mt-3 d-none">
+            <div class="row">
+              <div class="col-12">
+                <label class="fs-0 fw-bold" for="business_trip_range">Ngày đi công tác <span class="text-danger">*</span>:</label>
+
+                <!-- Thêm checkbox tại đây -->
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <!-- Checkbox: chọn khoảng liên tiếp -->
+                  <div class="form-check mb-0">
+                    <input class="form-check-input" type="checkbox" id="range_mode_toggle" checked>
+                    <label class="form-check-label" for="range_mode_toggle">
+                      Chọn khoảng thời gian liên tiếp
+                    </label>
+                  </div>
+
+                  <!-- Nút xóa -->
+                  <button type="button" id="clear_business_trip" class="btn btn-sm btn-outline-secondary" style="background-color: #518ddd; color: white;">
+                    Xóa ngày chọn trên lịch
+                  </button>
+                </div>
+
+                <input class="form-control bg-light t date-choose"
+                      id="business_trip_range"
+                      type="text"
+                      name="business_trip_range" />
+
+                <input type="hidden" id="trip_start" name="trip_start">
+                <input type="hidden" id="trip_end" name="trip_end">
+                <input type="hidden" id="trip_dates_filtered" name="trip_dates_filtered">
+                <input type="hidden" id="trip_shift_data" name="trip_shift_data" value="[]">
+
+                <div id="excluded-dates-container" class="mt-2"></div>
+                
+                <div id="business-trip-wrapper" class="p-2 rounded border bg-light-subtle d-none">
+                  <!-- Hiển thị lựa chọn ca làm việc -->
+                  <div id="business-trip-shift-container" class="mt-3" style="max-height: 320px; overflow-y: auto;"></div>
+
+                  <!-- Tổng vùng điều khiển bên dưới lịch -->
+                  <!-- Vùng footer điều khiển: phân trang + tổng số ngày -->
+                  <div id="trip-footer-controls" class="d-flex align-items-center gap-3 mt-2 flex-wrap d-none">
+                    <!-- Chọn số dòng hiển thị -->
+                    <div class="d-flex align-items-center gap-2">
+                      <select id="rowsPerPage" class="form-select form-select-sm w-auto">
+                        <option value="5" selected>5</option>
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                      </select>
+                    </div>
+
+                    <!-- Pagination kiểu << 1 / 3 >> -->
+                    <div id="pagination-controls" class="d-flex align-items-center gap-2">
+                      <button type="button" id="prev-page" class="btn btn-sm btn-outline-primary px-2">&laquo;</button>
+                      <span><span id="current-page">1</span>/<span id="total-pages">1</span></span>
+                      <button type="button" id="next-page" class="btn btn-sm btn-outline-primary px-2">&raquo;</button>
+                    </div>
+
+                    <!-- Tổng số ngày -->
+                    <div class="d-flex align-items-center gap-2">
+                      <label class="mb-0 fw-bold">Tổng ngày:</label>
+                      <input type="text" id="total_days_selected" class="form-control form-control-sm" style="width: 50px;" readonly value="0">
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- === Chỉnh sửa kế hoạch làm việc === -->
+          <!-- @author: trong.lq -->
+          <!-- @date: 22/10/2025 -->
+          <div id="section-edit-plan" class="mt-3 d-none">
+            <div class="row">
+              <div class="col-12">
+                <label class="fs-0 fw-bold" for="plan-week-select">Tuần chỉnh sửa<span class="text-danger">*</span>:</label>
+                <select class="form-control" id="plan-week-select" name="plan_week_num" required>
+                  <option value="">-- Chọn tuần --</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- === Chấm công bù === -->
+          <div id="section-additional-check" class="mt-3 d-none">
+            <!-- Row 1: Ngày làm việc -->
+            <div class="row">
+              <div class="col-12">
+                <label class="fs-0 fw-bold" for="original-date">Ngày làm việc<span class="text-danger">*</span>:</label>
+                <input class="form-control bg-light t date-choose"
+                      id="original-date"
+                      type="text"
+                      name="original_date"
+                       />
+              </div>
+            </div>
+
+            <!-- Row 2: Ca làm việc + Giờ (vào/ra) -->
+            <div class="row mt-3 align-items-end">
+              <div class="col-6">
+                <label class="fs-0 fw-bold" for="shiftSelectAdditional">Ca làm việc<span class="text-danger">*</span>:</label>
+                <select name="workshift_id" class="form-control" id="shiftSelectAdditional"></select>
+              </div>
+              <div class="col-6">
+                <label class="fs-0 fw-bold" required id="label-additional-time">Giờ vào<span class="text-danger">*</span>:</label>
+                <!-- Dùng 1 input giờ duy nhất, đổi name theo type -->
+                <input class="form-control time-picker"
+                      id="additional-time"
+                      type="time"
+                      name="check_in_time" />
+              </div>
+            </div>
+          </div>
+
+          <!-- === Cập nhật ca === -->
+          <div id="section-update-shift" class="mt-3 d-none">
+            <div class="row">
+              <div class="col-6">
+                <label class="fs-0 fw-bold" for="original-date">Ngày làm việc<span class="text-danger">*</span>:</label>
+                <input class="form-control bg-light t date-choose" id="original-date" type="text" name="original_date"  />
+              </div>
+              <div class="col-6">
+                <label class="fs-0 fw-bold" for="shiftSelectUpdate">Ca làm việc<span class="text-danger">*</span>:</label>
+                <select name="workshift_id" class="form-control" id="shiftSelectUpdate"></select>
+              </div>
+            </div>
+            <div class="shift-morning">
+              <label class="fs-0 mb-1 fw-bold">Ca sáng:</label>
+              <div class="row">
+                <div class="col-6">
+                  <label class="fs--1 fw-bold" for="morning-check-in">Giờ vào<span class="text-danger">*</span>:</label>
+                  <input class="form-control time-picker-update-shift" required id="morning-check-in" type="time" name="morning_check_in" readonly />
+                </div>
+                <div class="col-6">
+                  <label class="fs--1 fw-bold" for="morning-check-out">Giờ ra<span class="text-danger">*</span>:</label>
+                  <input class="form-control time-picker-update-shift" required id="morning-check-out" type="time" name="morning_check_out" readonly />
+                </div>
+              </div>
+            </div>
+            <div class="shift-afternoon">
+              <label class="fs-0 mt-3 mb-1 fw-bold">Ca chiều:</label>
+              <div class="row">
+                <div class="col-6">
+                  <label class="fs--1 fw-bold" for="afternoon-check-in">Giờ vào:</label>
+                  <input class="form-control time-picker-update-shift" required id="afternoon-check-in" type="time" name="afternoon_check_in" readonly />
+                </div>
+                <div class="col-6">
+                  <label class="fs--1 fw-bold" for="afternoon-check-out">Giờ ra:</label>
+                  <input class="form-control time-picker-update-shift" required id="afternoon-check-out" type="time" name="afternoon_check_out" readonly />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- === Đăng ký nghỉ bù === -->
+          <!--@author: an.cdb
+              @date: 09/03/2026-->
+          <div id="section-compensatory-leave" class="mt-3 d-none">
+            <div class="alert alert-info">
+              <i class="fas fa-info-circle"></i> 
+              Vui lòng cung cấp minh chứng ảnh giờ chấm công vào ngày làm vượt giờ
+            </div>
+            
+            <div class="mt-3">
+              <label class="fs-0 fw-bold" for="original-date">Ngày làm vượt giờ<span class="text-danger">*</span>:</label>
+              <input class="form-control bg-light date-choose" id="original-date" type="text" name="original_date" readonly />
+            </div>
+
+            <div class="row mt-3">
+              <div class="col-6">
+                <label class="fs-0 fw-bold" for="leave-date">Ngày bù<span class="text-danger">*</span>:</label>
+                <input class="form-control date-choose" id="leave-date" type="text" name="leave_date" />
+              </div>
+              <div class="col-6">
+                <label class="fs-0 fw-bold" for="leave-workshift">Ca nghỉ bù<span class="text-danger">*</span>:</label>
+                <select class="form-control" id="leave-workshift" name="leave_workshift_id"></select>
+              </div>
+            </div>
+
+            <div class="mt-3">
+              <label class="fs-0 fw-bold" for="comp-reason">Lý do vượt giờ<span class="text-danger">*</span>:</label>
+              <textarea class="form-control" id="comp-reason" name="reason" rows="3" 
+                        placeholder="Nêu lý do vượt giờ"></textarea>
+            </div>
+
+            <div class="mt-3">
+              <label class="fs-0 fw-bold" for="evidence-image">Minh chứng<span class="text-danger">*</span>:</label>
+              <input class="form-control" type="file" id="evidence-image" name="image" 
+                    accept="image/*" />
+              <small class="text-muted">Tải ảnh giờ chấm công (jpg, png)</small>
+            </div>
+
+            <div class="mt-3">
+              <label class="fs-0 fw-bold" for="comp-manager">Lãnh đạo duyệt<span class="text-danger">*</span>:</label>
+              <select class="form-control" id="comp-manager" name="approved_id">
+                <option value="">-- Chọn lãnh đạo --</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mt-3">
+            <label class="fs-0 fw-bold" for="requestApprovedBy"><%= lib_translate("Trưởng/phó phòng phê duyệt") %>:</label>
+            <select name="approved_id" class="form-control" id="approverSelect" required></select>
+            <input type="hidden" name="week_num" id="week_num" />
+            <input type="hidden" name="shiftselection_id" id="shiftselection-id" />
+          </div>
+          <div class="mt-3">
+            <label class="fs-0 fw-bold" for="requestReason"><%= lib_translate("Lý do") %><span class="text-danger">*</span>:</label>
+            <textarea class="form-control" rows="3" name="reason"></textarea>
+          </div>
+          <div class="mt-3" id="upload-evidence">
+            <label class="fs-0 fw-bold" for="image-evidence-edit"><%= lib_translate("Hình ảnh minh chứng") %>:</label>
+            <div onclick="clickSelectEvidence()" class="evidence-container mt-3 pt-2">
+              <div class="evidence-preview" id="evidence-preview"></div>
+              <div><i class="fas fa-plus" style="margin-right:5px"></i><%= lib_translate("Update_avatar_select_hint")%></div>
+            </div>
+            <label id="valid-message" class="mt-2" style="color: var(--falcon-badges-soft-danger-color);"></label>
+            <input name="image" id="image-evidence-edit" type="file" accept="image/*" onchange="onSelectEvidence(this)" hidden>
+          </div>
+        </div>
+        <div class="modal-footer d-flex justify-content-end align-items-center bg-light border-0">
+          <button class="btn btn-secondary" type="button" data-bs-dismiss="modal"><%= lib_translate("Đóng") %></button>
+          <button class="btn btn-primary px-4" type="submit" id="saveRequest"><%= lib_translate("Gửi yêu cầu") %></button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<!-- End modal gửi yêu cầu chấm công -->
+<!-- Modal xem chi tiết yêu cầu chấm công đã gửi -->
+<div class="modal fade" id="eventDetailModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="eventDetailModalLabel"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-custom" data-bs-dismiss="modal">Đóng</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- End modal xem chi tiết yêu cầu chấm công đã gửi -->
+<!-- Modal đăng ký lịch làm viêc -->
+<div class="modal fade" id="workshiftModal" tabindex="-1">
+  <div class="modal-dialog modal-xl custom-modal-width">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Kế hoạch làm việc cá nhân – <span id="calendarTitle"></span></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+        <div class="modal-body d-flex gap-3 align-items-stretch" id="workshiftContent">
+          <div id="calendar" class="flex-grow-1 col-4" ></div>
+          <div class="flex-grow-1 col-8">
+            <div class="d-flex align-items-center mb-2">
+              <ul class="nav nav-tabs mb-auto me-2" id="weekTabs" role="tablist"></ul>
+              <button id="btnAddWeek" type="button" class="btn btn-primary btn-sm me-2" title="Thêm tuần"><span class="fas fa-plus fs--1"></span></button>
+            </div>
+            <div id="reasonBox" class="alert alert-secondary mt-1 mb-2 me-2 d-none" role="alert"></div>
+            <div id="templateShiftContainer" class="border rounded p-3 mb-3 me-2 d-none"></div>
+            <div id="alertBox" class="alert alert-danger me-2 d-none" role="alert"></div>
+            <div class="tab-content border rounded me-2" id="weekTabContent"></div>
+            <div class="mt-4 me-2">
+              <label class="fs-0" for="approvedBy"><%= lib_translate("Người phê duyệt") %>:</label>
+              <select name="approved_id" class="form-control" id="approverWorkshift" required></select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="save-draft">Lưu nháp</button>
+          <button class="btn btn-primary px-4" type="button" id="save-selections"><%= lib_translate("Gửi") %></button>
+        </div>
+    </div>
+  </div>
+</div>
+<!-- End modal đăng ký lịch làm việc -->
+<!-- Modal hiển thị ca làm việc -->
+<div class="modal fade" id="shiftModal" tabindex="-1" aria-labelledby="shiftModalLabel" aria-hidden="true" style="max-width: 500px; height: 90vh;">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="shiftModalLabel">Thông tin ca làm việc</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+      </div>
+      <div class="modal-body" id="shiftModalBody">
+        <!-- Nội dung sẽ được inject vào đây -->
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal hiển thị chi tiết đề xuất -->
+<div class="modal fade" id="proposalModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-md">
+    <div class="modal-content custom-modal-content">
+      <div class="modal-header" style="background-color:#e8f0fe">
+        <h5 class="modal-title" id="proposalTitle" ></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="proposalModalBody">
+        <!-- Nội dung sẽ được render -->
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Toast container ở góc trên bên phải -->
+<div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index:1080">
+  <% if flash[:success].present? %>
+    <div class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body"><%= flash[:success] %></div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+      </div>
+    </div>
+  <% end %>
+
+  <% if flash[:notice].present? %>
+    <div class="toast align-items-center text-bg-primary border-0" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body"><%= flash[:notice] %></div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+      </div>
+    </div>
+  <% end %>
+
+  <% if flash[:alert].present? %>
+    <div class="toast align-items-center text-bg-warning border-0" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body"><%= flash[:alert] %></div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+      </div>
+    </div>
+  <% end %>
+
+  <% if flash[:error].present? %>
+    <div class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body"><%= flash[:error] %></div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+
+<!-- Modal lỗi (nếu có flash[:error] hoặc flash[:alert]) -->
+<div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Thông báo</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body"><%= flash[:error] || flash[:alert] %></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+      </div>
+    </div>
+  </div>
+</div>
+

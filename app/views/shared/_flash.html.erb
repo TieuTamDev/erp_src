@@ -1,0 +1,49 @@
+<style>
+    .alert_show {
+        position: fixed;
+        right: 5px;
+        top: 5px;
+        z-index: 9999;
+        opacity: 1;
+        animation: fade 5s forwards;
+    }
+
+    @keyframes fade {
+        0% {opacity: 0}
+        30% {opacity: 1}
+        70%{opacity: 1;}
+        100% { opacity: 0;}
+    }
+</style>
+
+<% if flash[:notice] %>
+    <div class="alert_show alert alert-success alert-dismissible fade show" role="alert">
+        <span class="me-5"><%= flash[:notice]%>!</span>
+        <button class="btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+<% end %>
+<% if flash[:notice_of_positionjob] %>
+    <div class="alert_show alert alert-danger mt-4">
+        <span class="me-5"><%= flash[:notice_of_positionjob]%></span>
+    </div>
+<% end %>
+<% if flash[:alert] %>
+    <div class="alert_show alert alert-warning alert-dismissible fade show" role="alert">
+        <span class="me-5"><%= flash[:alert]%>!</span>
+        <button class="btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+<%end%>
+<% if flash[:success] %>
+  <div class="alert alert_show alert-success">
+    <%= flash[:success] %>
+  </div>
+<% elsif flash[:error] %>
+  <div class="alert alert_show alert-danger">
+    <%= flash[:error] %>
+  </div>
+<% end %>
+<script>
+   setTimeout(function(){
+        $(".alert_show").hide();
+    }, 5000);
+</script>

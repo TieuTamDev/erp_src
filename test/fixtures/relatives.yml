@@ -1,0 +1,23 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  apply: one
+  name: MyString
+  birthday: 2022-12-14 11:04:52
+  phone: MyString
+  email: MyString
+  stype: MyString
+  state: MyString
+  note: MyText
+  status: MyString
+
+two:
+  apply: two
+  name: MyString
+  birthday: 2022-12-14 11:04:52
+  phone: MyString
+  email: MyString
+  stype: MyString
+  state: MyString
+  note: MyText
+  status: MyString

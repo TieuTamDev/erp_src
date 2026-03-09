@@ -1,0 +1,68 @@
+<% msetting ||= @msetting %>
+
+<%= form_for msetting, url: (msetting.new_record? ? msettings_path : msetting_path(msetting)),
+             html: { id: "msetting-form", method: (msetting.new_record? ? :post : :put), remote: true, novalidate: true } do |f| %>
+    <div class="modal-body">
+        <div class="mb-3">
+            <%= f.label :stype, ("Loại chức năng <span class='text-danger'>*</span>").html_safe %>
+            <%= f.select :stype, Msetting::STYPES.map { |k, v| [v, k] },
+                        { prompt: "-- Chọn chức năng --" },
+                        class: "form-select #{msetting.errors[:stype].any? ? 'is-invalid' : ''}" %>
+            <% if msetting.errors[:stype].any? %>
+                <div class="invalid-feedback d-block">
+                    <%= msetting.errors[:stype].join(", ") %>
+                </div>
+            <% end %>
+        </div>
+
+        <div class="mb-3">
+            <%= f.label :name, ("Tên chức năng <span class='text-danger'>*</span>").html_safe %> 
+            <%= f.text_field :name, class: "form-control #{msetting.errors[:name].any? ? 'is-invalid' : ''}", id: "msetting_name" %>
+            <% if msetting.errors[:name].any? %>
+                <div class="invalid-feedback d-block">
+                    <%= msetting.errors[:name].join(", ") %>
+                </div>
+            <% end %>
+        </div>
+
+        <div class="mb-3">
+            <%= f.label :scode, ("Mã chức năng <span class='text-danger'>*</span>").html_safe %> 
+            <%= f.text_field :scode, class: "form-control #{msetting.errors[:scode].any? ? 'is-invalid' : ''}", id: "msetting_scode" %>
+            <%# <small class="text-muted">Tự sinh từ Tên; có thể chỉnh. Định dạng: CHU‑C-NANG‑1</small> %>
+            <% if msetting.errors[:scode].any? %>
+                <div class="invalid-feedback d-block">
+                    <%= msetting.errors[:scode].join(", ") %>
+                </div>
+            <% end %>
+        </div>
+
+        <div class="mb-3">
+            <div class="row g-2">
+            <div class="col-md-6">
+                <%= f.label :valid_from, "Ngày bắt đầu" %>
+                <%= f.text_field :valid_from, class: "form-control js-date", placeholder: "dd/mm/yyyy", autocomplete: "off" %>
+            </div>
+            <div class="col-md-6">
+                <%= f.label :valid_to, "Ngày kết thúc" %>
+                <%= f.text_field :valid_to, class: "form-control js-date", placeholder: "dd/mm/yyyy", autocomplete: "off" %>
+
+            </div>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <%= f.label :svalue, ("Giá trị <span class='text-danger'>*</span>").html_safe %> 
+            <%= f.text_area :svalue, class: "form-control #{msetting.errors[:svalue].any? ? 'is-invalid' : ''}", id: "svalue", rows: 3 %>
+            <% if msetting.errors[:svalue].any? %>
+                <div class="invalid-feedback d-block">
+                    <%= msetting.errors[:svalue].join(", ") %>
+                </div>
+            <% end %>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Huỷ</button>
+            <%= f.submit "Lưu", class: "btn btn-primary" %>
+        </div>
+    </div>
+<% end %>

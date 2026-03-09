@@ -1,0 +1,264 @@
+<% content_for :head do %>
+  <%= javascript_include_tag '/assets/lib_file/bundle.js' %>
+<% end %>
+<% content_for :bottombody do %>
+  <%= javascript_include_tag '/assets/myjs/tab_user_signature.js' %>
+  <%# <%= javascript_include_tag '/assets/myjs/tab_signature.js' %>
+<% end %>
+<style>
+.filepond--root {
+    min-height: 150px;
+}
+.filepond--root .filepond--drop-label {
+    min-height: 150px;
+}
+</style>
+<div class="row">
+    <div class="col-12 col-sm-12 col-md-12 col-lg-8 col-xl-8 col-xxl-8 tag d-flex align-items-center title mt-3">
+        <h4 class="mb-1" style="color: var(--falcon-btn-falcon-success-active-color);"><%= lib_translate('Chữ ký')%></h4>
+    </div>
+    <div class="col-12 col-sm-12 col-md-12 col-lg-4 col-xl-4 col-xxl-4 action-right-top d-flex align-items-center justify-content-end">
+      <% if is_access(session["user_id"], request.env["PATH_INFO"] == "/user/details" ? "USER-DETAILS" : request.env["PATH_INFO"] == "/user/profile" ? "USER-PROFILE" : "","ADD") && request.env["PATH_INFO"] != "/user/profile" %>
+        <a id="id_add_singnature" class="nav-link pe-2 " role="button" style="font-size: 13px; font-weight: 700;color: var(--falcon-orange)" onclick="openFormAddSignature()" class="btn btn-primary mt-3" data-bs-toggle="collapse" data-bs-target="#collapse_signature" aria-expanded="false" aria-controls="collapse_signature">
+          <%= lib_translate("Thêm chữ ký") %> 
+        </a> 
+        <a id="id_cancel_add_singnature" class=" nav-link ps-2 pe-2 border-end border-2"  style="display:none; font-size: 13px; font-weight: 700;color: var(--falcon-orange)" data-bs-toggle="collapse" href="#collapse_signature" role="button" aria-expanded="false" aria-controls="collapse_signature">
+          <%= lib_translate("Cancle") %> 
+        </a> 
+        <% end %>
+    </div>
+</div>
+<hr class="mt-2 mb-3" style="width: 100%; height: 4px; background:  var(--falcon-badge-soft-secondary-background-color);">
+<div class="mb-2">
+  <div class="collapse" id="collapse_signature">
+    <div class="card p-3">
+      <div class="form-add" id="form-add"> 
+      <%= form_tag singnature_create_path() ,method:'POST', id: "form_singnature",multipart: true do %>
+          <div class="d-flex justify-content-center">
+            <h3 class="m-0" id="label_singnature">
+                <%= lib_translate("Thêm chữ ký") %>
+            </h3>
+        </div> 
+        <input type="hidden" name="idu" value="<%= @user&.id %>">
+          <div class="row">
+            <div class="col-xl-6 col-sm-12">
+              <div class="form-group">
+                <div class="">
+                  <label class="col-form-label" for="recipient-name">Tên chữ ký<span class="red">*</span>:</label>
+                  <input class="form-control" type="text" name="name" id="name_singnature" required>
+                </div>
+              </div>                  
+              <div class="form-group d-none" style="height: 100%;">  
+                  <div style="border: none;box-shadow: none;display: flex;align-items: center;margin-top: 18px;height: 100%;justify-content: center;">
+                    <div class="form-check m-0"><input class="form-check-input" id="isdefault" type="checkbox" name="isdefault" value="true" style="cursor: pointer;"><label style="cursor: pointer;" class="form-check-label m-0" for="isdefault">Đặt làm mặc định</label></div>
+                  </div>
+              </div>
+              <div class="form-group d-none"> 
+                  <label class="col-form-label" >Trạng thái</label> :
+                  <div style="border: none;box-shadow: none;display: flex;align-items: center;margin-top: 5px;">
+                    <input checked="" type="radio" id="singnature_status_active" class="form-check-input me-1" value="ACTIVE" name="singnature_status"><label class="form-check-label m-0" for="singnature_status_active" style="cursor: pointer"> ACTIVE</label>
+                    <input type="radio" id="singnature_status_inactive" class="form-check-input ms-3 me-1" value="INACTIVE" name="singnature_status"><label class="form-check-label m-0" for="singnature_status_inactive" style="cursor: pointer"> INACTIVE</label>
+                  </div>
+              </div>  
+              <div class="form-group">
+                <label class="col-form-label" for="recipient-name">Ghi chú:</label>
+                <textarea class="form-control" name="note_singnature" id="note_singnature" style="height: 82px;"></textarea>
+              </div>
+            </div>
+            <div class="col-xl-6 col-sm-12">    
+              <div id="render_uploadfile_singnture">
+                <label class="col-form-label" for="recipient-name">Hình ảnh chữ ký<span class="red">*</span>:</label>
+                <label id="label-select-sign" for="filepond_multiple" style="border: 2px dashed;border-radius: 9px;display: flex;justify-content: center;align-items: center;cursor: pointer;height: 200px;">
+                  <input type="file" id="filepond_multiple" class="filepond" name="filepond" data-allow-reorder="true" data-max-file-size="1MB" accept="image/png,image/jpeg" hidden>
+                  <span class="fas fa-plus"></span>
+                  <span>Chọn ảnh</span><br>
+                </label>
+              </div> 
+              <div id="render_image" style="display: flex;justify-content: center;border: 2px dotted;border-radius: 9px;overflow: hidden;height: 250px;">
+                <div style="position: absolute;">
+                  <div class="btn btn-falcon-success btn-sm btn-sm"  onclick="openEditer()">
+                    <span class="fas fa-edit"></span>Chỉnh sửa
+                  </div>
+                  <label class="btn btn-falcon-warning btn-sm m-0" for="filepond_multiple">
+                    <span class="far fa-file-image"></span>Chọn ảnh
+                  </label>
+                </div>
+                <img src="" id="image_singnature" onload="onPreviewLoad(this)" >
+              </div>                
+            </div> 
+          </div> 
+          <div class="d-flex justify-content-end"> 
+            <button id="name-btn-singature" type="submit" class="btn btn-primary mt-3  border-red border-pink-600 cls-bmtu-text-red md:group-hover:bg-pink-50 btn-block text-uppercase" style="width: 100%;">Thêm chữ ký</button>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div> 
+
+<div class="mb-3">
+  <div class="pt-0">
+    <div class="tab-content">
+      <table id="table_singnature" class="table table-bordered fs--1 mb-0 table-hover" style="margin-top: 0px !important; margin-bottom: 0px !important">
+          <thead class ="bg-200 text-900">
+              <tr>
+                  <th class="sort" data-sort="Created_by_stask" style="text-align: center;max-width: 35px;width: 100px;"><%= lib_translate("STT")  %></th>
+                  <th class="sort " data-sort="Name_stask" style="text-align: center;width: 150px;"><%= lib_translate("Chữ ký")  %></th>
+                  <th class="sort" data-sort="Scode_stask" style="text-align: start;"><%= lib_translate("Tên chữ ký")  %></th>
+                  <th class="sort " data-sort="Name_stask" style="text-align: center;width: 150px;"><%= lib_translate("Ngày tạo")  %></th>
+                  <th class="sort" data-sort="Created_by_stask" style="text-align: center;max-width: 100px;width: 100px;"><%= lib_translate("Đặt mặc định")  %></th>
+                  <% if (is_access(session["user_id"], request.env["PATH_INFO"] == "/user/details" ? "USER-DETAILS" : request.env["PATH_INFO"] == "/user/profile" ? "USER-PROFILE" : "","EDIT") || is_access(session["user_id"], request.env["PATH_INFO"] == "/user/details" ? "USER-DETAILS" : request.env["PATH_INFO"] == "/user/profile" ? "USER-PROFILE" : "","DEL")) && (request.env["PATH_INFO"] != "/user/profile") %>
+                  <th class="no-sort" style="text-align: center;width: 70px;position: relative;"></th>
+                  <% end %>
+              </tr>
+          </thead>
+          <tbody class="list"> 
+            <% @oSignature.each_with_index do |singnature, index| %> 
+                <tr>
+                  <td style="text-align: center;white-space: nowrap;vertical-align: middle;" class="Scode_stask"> 
+                    <%= index + 1 %>
+                  </td>
+                  <td style="text-align: start;white-space: nowrap;vertical-align: middle;" class="Name_stask "> 
+                    <a href="<%= request.base_url %>/mdata/hrm/<%= singnature.url %>" target="_blank">
+                      <img src="<%= request.base_url %>/mdata/hrm/<%= singnature.url %>" alt="<%= singnature.name %>" style="width: 100%;height: 100%;">
+                    </a>
+                  </td>
+                  <td style="text-align: start;white-space: nowrap;vertical-align: middle;" class="Scode_stask"> 
+                    <%= singnature.name %>
+                  </td>
+                  <td style="text-align: center;white-space: nowrap;vertical-align: middle;" class="Scode_stask"> 
+                    <%= singnature.dtcreated&.strftime("%d/%m/%Y") %>
+                  </td>
+                  <td style="text-align: center; white-space: nowrap;vertical-align: middle;" class="Created_by_stask">
+                    <input class="form-check-input" style="cursor:pointer;" name="name" onchange="onClickChangeDefault('<%= singnature.id %>')" type="radio" <%= singnature.isdefault ? "checked" : "" %>  />
+                  </td> 
+                  <% if (is_access(session["user_id"], request.env["PATH_INFO"] == "/user/details" ? "USER-DETAILS" : request.env["PATH_INFO"] == "/user/profile" ? "USER-PROFILE" : "","EDIT") || is_access(session["user_id"], request.env["PATH_INFO"] == "/user/details" ? "USER-DETAILS" : request.env["PATH_INFO"] == "/user/profile" ? "USER-PROFILE" : "","DEL")) && (request.env["PATH_INFO"] != "/user/profile") %>
+                  <td class="p-2" style="max-width: 100px; text-align: center ; white-space: nowrap;vertical-align: middle;">  
+                        <a style="text-decoration: none; cursor:pointer;" data-bs-toggle="collapse" data-bs-target="#collapse_signature" aria-expanded="false" aria-controls="collapse_signature" onclick="openFormUpdateSignature(    
+                          `<%= singnature.id %>`,
+                          `<%= singnature.name %>`,
+                          `<%= singnature.url %>`,
+                          `<%= singnature.isdefault %>`,
+                          `<%= singnature.status %>`,
+                          `<%= singnature.note %>`)">
+                          <span class="text-primary far fa-edit"  style="width: 15px" ></span>
+                        </a> 
+                  </td>
+                   <% end %>
+                </tr>  
+            <%end %> 
+          </tbody>
+      </table>
+      
+    </div>
+  </div>
+</div>
+<div id="edit-wrap" style="display:none;position: fixed;z-index: 99999;top: 0;left: 0;width: 100vw;height: 100vh;background: white;">
+    <div id="controls-buttons" style="display: flex;flex-direction: column;width: 130px;align-items: center;font-size: 18px;justify-content: center;">
+        <div data-toggle="remove-bg-action" style="cursor: pointer;width: 4em;height: 4em;display: flex;flex-direction: column;justify-content: center;align-items: center;border: 1px solid #c5c5c5;border-radius: 10px;background:white" onclick="command('remove-bg-action','toggle',[])">
+            <span class="fas fa-eraser"></span>
+            <span style="font-size: 13px;">Xóa nền</span>
+        </div>
+        <div data-toggle="flip-image-action" class="mt-3" style="cursor: pointer;width: 4em;height: 4em;display: flex;flex-direction: column;justify-content: center;align-items: center;border: 1px solid #c5c5c5;border-radius: 10px;background:white" onclick="command('flip-image-action','toggle',[])">
+            <span class="fas fa-redo"></span>
+            <span style="font-size: 13px;">Xoay ảnh</span>
+        </div>
+        <div data-toggle="crop-image-action" class="mt-3" style="cursor: pointer;width: 4em;height: 4em;display: flex;flex-direction: column;justify-content: center;align-items: center;border: 1px solid #c5c5c5;border-radius: 10px;background:white" onclick="command('crop-image-action','toggle',[])">
+            <span class="fas fa-crop-alt"></span>
+            <span style="font-size: 13px;">Cắt ảnh</span>
+        </div>
+        <div class="mt-3">
+            <div style="cursor: pointer;width: 4em;height: 4em;display: flex;flex-direction: column;justify-content: center;align-items: center;border: 1px solid #d14444;border-radius: 10px;background:white;color: #d14444;font-weight: bold;" onclick="command('cancel','',[])">
+                <span class="fas fa-times-circle"></span>
+                <span style="font-size: 13px;">Hủy</span>
+            </div>
+            <div class="mt-1" style="cursor: pointer;width: 4em;height: 4em;display: flex;flex-direction: column;justify-content: center;align-items: center;border: 1px solid #2c9135;border-radius: 10px;background:white;color: #2c9135;font-weight: bold;" onclick="command('finish','',['filepond_multiple'])">
+                <span class="fas fa-check"></span>
+                <span style="font-size: 11px;text-wrap: nowrap;">Hoàn thành</span>
+            </div>
+        </div>
+    </div>
+    <div id="editer-area" style="display: flex;flex-direction: column;align-items: center;flex-grow: 1;justify-content: center;" >
+        <div id="his-wrap" style="display: flex;justify-content: center;width: 100%;">
+            <button type="button" data-direction="back" onclick="command('rollback-action','',[-1])" style="outline: none;border: 1px solid #b5b5b5;border-top-left-radius: 10px;border-bottom-left-radius: 10px;border-right: 0px;" disabled>
+                <span class="fas fa-long-arrow-alt-left"></span>
+            </button>
+            <button type="button" data-direction="forward" onclick="command('rollback-action','',[1])" style="outline: none;border: 1px solid #b5b5b5;border-top-right-radius: 10px;border-bottom-right-radius: 10px;"  disabled>
+                <span class="fas fa-long-arrow-alt-right"></span>
+            </button>
+        </div>
+        <div id="controls-actions" class="mb-2 mt-2" style="display: flex;align-items: center;justify-content: center;width: 100%;">
+            <div style="display: none;align-items: center;" data-action="remove-bg-action">
+
+                <input type="range" id="range-input" min="0" max="255" value="255" step="1" style="width: 300px;cursor: pointer;"/>
+            </div>
+            <div style="display: none;font-size: 13px;justify-content: center;align-items: center;user-select: none;" data-action="flip-image-action">
+                <div class="ms-2" style="display: flex;align-items: center;cursor: pointer;" onclick="command('flip-image-action','',[0])">
+                    <span>
+                        <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" stroke-linecap="round" stroke-linejoin="round"><g><g stroke="none" fill="currentColor"><path d="M11.93 7.007V20a1 1 0 0 1-1 1H5.78a1 1 0 0 1-.93-1.368l5.15-12.993a1 1 0 0 1 1.929.368z"></path><path d="M14 7.007V20a1 1 0 0 0 1 1h5.149a1 1 0 0 0 .93-1.368l-5.15-12.993A1 1 0 0 0 14 7.007z" opacity=".6"></path></g></g></svg>
+                    </span>
+                    <span>Lật ngang</span>
+                </div>
+                <div class="ms-2" style="display: flex;align-items: center;cursor: pointer;" onclick="command('flip-image-action','',[1])">
+                    <span>
+                        <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" stroke-linecap="round" stroke-linejoin="round"><g><g stroke="none" fill="currentColor"><path d="M19.993 12.143H7a1 1 0 0 1-1-1V5.994a1 1 0 0 1 1.368-.93l12.993 5.15a1 1 0 0 1-.368 1.93z"></path><path d="M19.993 14a1 1 0 0 1 .368 1.93L7.368 21.078A1 1 0 0 1 6 20.148V15a1 1 0 0 1 1-1h12.993z" opacity=".6"></path></g></g></svg>
+                    </span>
+                    <span>Lật dọc</span>
+                </div>
+                <div class="ms-2" style="display: flex;align-items: center;cursor: pointer;" onclick="command('rotate-image-action','',[-90])">
+                    <span><svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" stroke-linecap="round" stroke-linejoin="round"><g><g stroke="none" fill="currentColor"><path fill="none" d="M-1-1h582v402H-1z"></path><rect x="3" rx="1" height="12" width="12" y="9"></rect><path d="M15 5h-1a5 5 0 015 5 1 1 0 002 0 7 7 0 00-7-7h-1.374l.747-.747A1 1 0 0011.958.84L9.603 3.194a1 1 0 000 1.415l2.355 2.355a1 1 0 001.415-1.414l-.55-.55H15z"></path></g></g></svg></span>
+                    <span>Xoay trái</span>
+                </div>
+                <div class="ms-2" style="display: flex;align-items: center;cursor: pointer;" onclick="command('rotate-image-action','',[90])">
+                    <span>
+                        <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" stroke-linecap="round" stroke-linejoin="round"><g><g stroke="none" fill="currentColor"><path fill="none" d="M-1-1h582v402H-1z"></path><path d="M11.177 5H10a5 5 0 00-5 5 1 1 0 01-2 0 7 7 0 017-7h1.374l-.747-.747A1 1 0 0112.042.84l2.355 2.355a1 1 0 010 1.415l-2.355 2.354a1 1 0 01-1.415-1.414l.55-.55z"></path><rect rx="1" height="12" width="12" y="9" x="9"></rect></g></g></svg>
+                    </span>
+                    <span>Xoay phải</span>
+                </div>
+            </div>
+            <div data-action="confirm-step" style="margin-left: 10px;display: none;margin-left: 10px;">
+                <div class="rounded-pill badge-soft-warning" style="cursor: pointer;border: 1px solid;z-index: 1000000;font-size: 13px;padding: 2px 11px;text-align: center;" onclick="command('cancel-action','',[])">
+                    <span class="fas fa-times"></span>
+                    <span>Hủy</span>
+                </div>
+                <div class="rounded-pill badge-soft-success ms-1" style="cursor: pointer;border: 1px solid;z-index: 1000000;font-size: 13px;padding: 2px 11px;text-align: center;" onclick="command('save-action','',[])">
+                    <span class="fas fa-save"></span>
+                    <span>Lưu</span>
+                </div>
+            </div>
+        </div>
+        <div id="canvas-wrap" style="border: 1px solid #c7c7c7;position: relative;width: fit-content; height: fit-content;overflow: hidden;">
+            <div id="crop" data-action="crop-image-action" data-direct="moving" style="border: 1px solid white;position: absolute;cursor: move;box-shadow: 0px 0px 0px 100vmax #000000ad;width: 50%;height: 50%;top: 0;left:0;display: none;">
+                <div style="position: absolute; width: 100%; height: 100%;display: flex;justify-content: space-evenly;pointer-events: none;">
+                    <div style="width: 1px; background-color: lightgrey; height: 100%;"></div>
+                    <div style="width: 1px; background-color: lightgrey; height: 100%;"></div>
+                </div>
+                <div style="position: absolute; width: 100%; height: 100%;display: flex;justify-content: space-evenly;flex-direction: column;pointer-events: none;">
+                    <div style="height: 1px; background-color: lightgrey; width: 100%;"></div>
+                    <div style="height: 1px; background-color: lightgrey; width: 100%;"></div>
+                </div>
+                <div data-direct="top" style="position: absolute;cursor:n-resize;top: -6px;left: 0;width: 100%;height: 12px;"></div>
+                <div data-direct="right" style="position: absolute;cursor:e-resize;left: calc(100% - 6px);top: 0;width: 12px;height: 100%;"></div>
+                <div data-direct="bottom" style="position: absolute;cursor:s-resize;top: calc(100% - 6px);width: 100%;height: 12px;"></div>
+                <div data-direct="left" style="position: absolute;cursor:w-resize;top: 0;left: -6px;border-radius: 0;width: 12px;height: 100%;"></div>
+                <div data-direct="top right" style="position: absolute;width: 15px;border-radius: 15px;height: 15px;background-color: #5a8ded;cursor:ne-resize;top: 0;left: 100%;transform: translate(-50%,-50%);"></div>
+                <div data-direct="top left" style="position: absolute;width: 15px;border-radius: 15px;height: 15px;background-color: #5a8ded;cursor: nw-resize;top: 0;left: 0;transform: translate(-50%,-50%);"></div>
+                <div data-direct="bottom right" style="position: absolute;width: 15px;border-radius: 15px;height: 15px;background-color: #5a8ded;cursor: se-resize;top: 100%;left: 100%;transform: translate(-50%,-50%);"></div>
+                <div data-direct="bottom left" style="position: absolute;width: 15px;border-radius: 15px;height: 15px;background-color: #5a8ded;cursor:sw-resize;left: 0;top: 100%;transform: translate(-50%,-50%);"></div>
+            </div>
+            <canvas id="canvas-sign"></canvas>
+        </div>
+    </div>
+    <div class="hidden-element" style="display:none;">
+        <a href="#" id="link-download"></a>
+    </div>
+</div>
+<%= form_tag singnature_change_path(),method: 'post',id:'form_change_default',remote:true,authenticity_token: true do %>
+  <input type="hidden" name="idu" value="<%= @user&.id %>">
+  <input id="change_id_signature" type="hidden" name="id_signature">
+<%end%>
+
+<script>
+  let singnature_create_path = '<%= singnature_create_path%>';
+  let singnature_upload_file_path = '/mywork/singnature/update';
+</script>

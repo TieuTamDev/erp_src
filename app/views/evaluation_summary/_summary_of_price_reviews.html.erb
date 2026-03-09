@@ -1,0 +1,105 @@
+<div class="row mb-3">
+    <!-- 3 thẻ thống kê trên cùng -->
+    <div class="col-12 col-md-4 mb-3 mb-md-0">
+        <div class="card border h-100" style="box-shadow: none;">
+            <div class="card-body">
+                <div class="d-flex">
+                    <strong>Quy mô đánh giá:
+                        <span class="text-primary fw-semi-bold"><%= @resultAppointSurvey[:total] %></span>
+                        Đối tượng</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-4 mb-3 mb-md-0">
+        <div class="card border h-100" style="box-shadow: none;">
+            <div class="card-body">
+                <div class="d-flex">
+                    <strong>Tổng đã tham gia:
+                        <span class="text-primary fw-semi-bold"><%= @resultAppointSurvey[:attend] %></span>/<%= @resultAppointSurvey[:total] %> Đối tượng</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-4">
+        <div class="card border h-100" style="box-shadow: none;">
+            <div class="card-body">
+                <div class="d-flex">
+                    <strong>Tỉ lệ:
+                        <span class="text-primary fw-semi-bold"><%= ((@resultAppointSurvey[:attend]&.to_f / @resultAppointSurvey[:total]) * 100).round %>%</span></strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Phần nội dung chính -->
+<div class="row d-flex align-items-stretch">
+    <div class="col-12 col-lg-6 mb-3 mb-lg-0" id="layout-left">
+        <div class="row g-3">
+            <!-- 2 thẻ nhỏ -->
+            <div class="col-12 col-sm-6">
+                <div class="card border h-100" style="box-shadow: none;">
+                    <div class="card-body">
+                        <div class="card-title">Đối tượng đánh giá:</div>
+                        <div class="content-main scrollable-content">
+                            <% @resultAppointSurvey[:evaluation_summary]&.each do |evaluation| %>
+                                <div class="mt-2 d-flex justify-content-between" style="margin-bottom: 1.7rem;">
+                                <span><%= evaluation[:positionjob_name] %>:</span>
+                                <span class="fw-semi-bold"><%= evaluation[:total] %></span>
+                                </div>
+                            <% end %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6">
+                <div class="card border h-100" style="box-shadow: none;">
+                    <div class="card-body">
+                        <div class="card-title">Tỉ lệ chi tiết (<%= ((@resultAppointSurvey[:attend]&.to_f / @resultAppointSurvey[:total]) * 100).round %>%)</div>
+                        <div class="content-main scrollable-content">
+                            <% @resultAppointSurvey[:evaluation_summary]&.each do |evaluation| %> 
+                                <div class="item-details my-2">
+                                    <div class="mb-1 d-flex justify-content-between">
+                                        <span class="text-info"><%= evaluation[:positionjob_name] %></span>
+                                        <div class="process-bar">                                                      
+                                            <span class="fw-semi-bold"><%= evaluation[:attend] %>/<%= evaluation[:total] %></span>
+                                        </div>
+                                    </div>
+                                    <div class="progress mb-3" style="height: 6.5px" role="progressbar" aria-valuenow="<%= evaluation[:attend_ratio] %>" aria-valuemin="0" aria-valuemax="100">
+                                        <div class="progress-bar" style="width: <%= evaluation[:attend_ratio] %>%; background-color: <%= "##{SecureRandom.hex(3)}" %>"></div>
+                                    </div>
+                                </div>
+                            <% end %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thẻ biểu đồ -->
+            <div class="col-12">
+                <div class="card border h-100" style="box-shadow: none;">
+                    <div class="card-body">
+                        <div class="card-title">Tỉ lệ đồng ý bổ nhiệm</div>
+                        <div style="width: 100%; height: 300px;">
+                            <canvas id="pieChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-lg-6 d-flex">
+        <div class="card border h-100 w-100" style="box-shadow: none;">
+            <div class="card-body">
+                <div class="card-title">Tỉ lệ đồng ý bổ nhiệm theo nhóm</div>
+                <div class="chart-wrapper" id="bar-chart-size">
+                    <canvas id="barChart"></canvas>
+                </div>
+                <div class="d-flex justify-content-end">
+                    <a href="<%= detail_appointment_evaluation_summary_index_path(@appointment, mandocuhandle_id: params[:mandocuhandle_id], lang: session[:lang]) %>" style="font-style: italic; text-decoration: underline;">Chi tiết*</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,176 @@
+<% content_for :head do %>
+    <%= javascript_include_tag '/assets/myjs/tinymcev6.min.js', referrerpolicy: "origin" %>
+<% end %> 
+
+<% content_for :bottombody do %>
+    <%= javascript_include_tag '/assets/myjs/documents.js'%>
+<% end %>
+<style></style>
+<!-- title header -->
+<div class="list_RELIGIONS">
+    <div class="bmtu_header_dashboard">
+        <h3 class="mt-2 overview_text"><%= lib_translate("List_documents")  %></h3>
+    </div>
+</div>
+<!-- show released notes list -->
+<div class="card mb-3">
+    <div class="card-body pt-0">
+        <div class="tab-content">
+                <button class="btn btn-primary btn-add-user mt-3" id="btn-add-user" data-bs-toggle="modal" data-bs-target="#modal-document">
+                <%= lib_translate("Add_Document")  %>
+                </button>
+                <%= render_search_pagination(documents_index_path()).html_safe %>
+                <table id="table_ethnic" class="table table-bordered fs--1 mb-0 table-hover resizable dataTable no-footer" style="margin-top: 0px !important; margin-bottom: 0px !important">
+                    <thead class="bg-200 text-900">
+                    <tr>
+                        <th class="sort" data-sort="name" style="cursor: pointer;"><%= lib_translate("App")  %></th>
+                        <th style="text-align: center; cursor: pointer;" class="sort" data-sort="status"><%= lib_translate("Meta")  %></th>
+                        <th class="no-sort" style="text-align: center"></th>
+                    </tr>
+                    </thead>
+                    <tbody class="list">
+                    <% @mydocs.each do |mydoc| %>
+                        <tr>
+                            <td><%= mydoc.app %></td> 
+                            <td style="text-align: center;"><%= mydoc.meta%></td>
+                            <td>
+                                <div class="d-flex justify-content-center">
+                                    <a style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#modal-view" onclick='openViewContents(`<%= escape_javascript(mydoc.content)%>`)' data-toggle="tooltip" data-placement="top" title="<%= lib_translate("Show")%>">
+                                        <span class="text-success far fa-eye me-3" style="width : 15px"></span>
+                                    </a>
+                                    <a style="background: none !important; border: none !important;cursor: pointer;" data-bs-toggle="modal" data-bs-target="#modal-document" data-update='<%= Base64.encode64({"id" =>  mydoc.id , "app" => mydoc.app, "contents" => mydoc.content , "meta" => mydoc.meta}.to_json) %>' data-toggle="tooltip" data-placement="top" title="<%= lib_translate("Edit")  %>">
+                                        <span class="text-primary fas fa-pen me-3"></span>
+                                    </a>
+                                     <a style="cursor: pointer;"href="<%= documents_history_path(iddoc: mydoc.id, lang: session[:lang]) %>" data-toggle="tooltip" data-placement="top" title="<%= lib_translate("Table_Histories")  %>">
+                                        <span class="text-info far fa-list-alt me-3" style="width : 15px"></span>
+                                    </a>
+                                    <a style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#modal-confirm-delete" data-confirm-delete='{"title": "<%= mydoc.meta %>", "path": "<%= documents_del_path(id: mydoc.id) %>"}' type="button" data-toggle="tooltip" data-placement="top" title="<%= lib_translate("Remove")%>">
+                                        <span class="text-danger fas fa-trash" style="width : 15px"></span>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    <% end %>
+                    </tbody>
+                </table>
+                <%= render_pagination_limit_offset(documents_index_path(lang: session[:lang], per_page: session[:per_page], search: session[:search]), 10, @mydocs.count).html_safe %>
+        </div>
+    </div>
+</div>
+<!-- Modal add Released Note -->
+<div class="modal fade" id="modal-document" tabindex="-1" role="dialog" aria-hidden="true" data-bs-focus="false">
+    <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+        <div class="modal-content position-relative">
+            <div class="position-absolute top-0 end-0 mt-2 me-2 z-index-1">
+                <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="rounded-top-lg py-3 ps-4 pe-6 bg-light">
+                    <h4 class="mb-1" id="cls_bmtu_form_add_title"><%= lib_translate("Add_Document")  %></h4>
+                </div>
+                <div class="p-4 pb-0">
+                    <div class="form-add-documents">
+                        <%= form_for Mydoc.new, :url=> documents_update_path, html: {method: :post, id:"form_add_documents", class:'col-12' } do |f| %>
+                            <div class="erro_labble mb-2">
+                                <p style="display:none; color: rgb(197 82 82);border: 1px solid rgb(199 136 136 / 23%);background: rgb(255 54 54 / 16%);border-radius: 5px;padding: 10px"
+                                id="erro_labble_content">
+                                </p>
+                            </div>
+                            <div class="row mb-3" style="display:none;">
+                                <div class="col-sm-9">
+                                    <%= f.text_field :id, class: 'form-control' , name: 'id', id:'id' %>
+                                </div>
+                            </div>
+                            <div class="row mb-3"> 
+                                <label class="col-sm-4 col-lg-3 col-form-label" ><%= lib_translate("App") %> <span style="color:red;" class="red">* </span>:</label>
+                                <div class="col-sm-8 col-lg-9">
+                                    <div id="valid_scode" style="color: red;font-size: 15px;font-style: italic;">
+                                        <%= lib_translate("Dữ liệu đã tồn tại trong hệ thống") %>
+                                    </div>
+                                    <%= f.text_field :app, class: 'form-control',  name:'app' , id:"app", :onkeyup => "toUpperCaseScode()"%>
+                                </div>
+                            </div>    
+                            <div class="row mb-3"> 
+                                <label class="col-sm-4 col-lg-3 col-form-label" ><%= lib_translate("Meta") %>:</label>
+                                <div class="col-sm-8 col-lg-9">
+                                    <%= f.text_field :meta, class: 'form-control',  name:'meta' , id:"meta"%>
+                                </div>
+                            </div>    
+                            <div class="col-12 mt-1">
+                                <label for="#contents" class="col-form-label"><%= lib_translate('Contents') %>:</label>
+                                <%= f.text_area(:content, :id=> "contents",:name=> "contents", :class =>"tinymce d-none") %>
+                                <div class="error error-content mt-2"></div>
+                            </div>
+                            <div class="modal-footer border-0 p-0 mb-2">
+                            <%= f.submit lib_translate("Save") , type:"button" , id:"btn_save",
+                                class: "btn btn-warning  border-red border-pink-600 cls-bmtu-text-red md:group-hover:bg-pink-50 btn-block btn-block text-uppercase " %>
+                                <div id="loading_button_documents" class= "btn btn-warning border-red border-pink-600 cls-bmtu-text-red md:group-hover:bg-pink-50 btn-block btn-block text-uppercase " style="opacity: 0.8;display:none;" >
+                                    <i class ="fa fa-spinner fa-spin"> </i>  <%=lib_translate("Save")%> 
+                                </div>
+                            </div>
+                        <% end %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!----Modal view contents------>
+<div class="modal fade" id="modal-view" tabindex="-1" role="dialog" aria-hidden="true" data-bs-focus="false">
+    <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+        <div class="modal-content position-relative">
+            <div class="position-absolute top-0 end-0 mt-2 me-2 z-index-1">
+                <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="rounded-top-lg py-3 ps-4 pe-6 bg-light">
+                    <h4 class="mb-1"><%= lib_translate("Contents") %></h4>
+                </div>
+                <div class="p-4 pb-0">
+                    <div class="form-view">
+                        <input id="id_view" class="d-none">
+                        <label id="view_content" style="width: 100%;"></label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!----Modal del----->
+<div class="modal fade" id="modal-confirm-delete" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="modal-confirm-delete" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+        <div class="modal-header">
+        <h5 class="modal-title" ><%= lib_translate("Are_you_sure")%></h5>
+        <button type="button" class="btn-close btn-close-confirm-delete" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+        <%= lib_translate("confirm_delete_message")  %> <span id="item-delete" style="font-weight:bold; color:red;"></span>?
+        </div>
+        <div class="modal-footer">
+        <a class="btn btn-danger btn-del" id="btn-confirm-delete" rel="nofollow" data-method="delete" href="#"><%= lib_translate("Delete")  %></a>
+        <button type="button" class="btn btn-secondary btn-close-confirm-delete" data-bs-dismiss="modal"><%= lib_translate("Close")  %></button>
+        </div>
+    </div>
+    </div>
+</div>
+<%= form_tag documents_check_app_path,method:'POST',multipart: true,id:'check_app', remote: true,authenticity_token: true do %>
+    <input type="hidden" name="check_app" id="check_app_input">
+<% end %>
+<script>
+    let title_create = "<%= lib_translate('Create_document')%>";
+    let title_update = "<%= lib_translate('Update_document')%>";
+    $(document).ready(function() {
+        $('[data-toggle="tooltip"]').tooltip({
+            delay: { "show": 100, "hide": 100 }
+        });
+    });
+    $('a[data-confirm-delete]').click(function() {
+        var data = JSON.parse(JSON.stringify($(this).data('confirm-delete')));
+        $('#item-delete').text(data.title);
+        $('#btn-confirm-delete').prop('href', data.path)
+    });
+    $('#btn-confirm-delete').click(function() {
+        $('#btn-confirm-delete').html('<i class ="fa fa-spinner fa-spin"> </i> ' + '<%= lib_translate("Deleting") %>');
+    });
+</script>

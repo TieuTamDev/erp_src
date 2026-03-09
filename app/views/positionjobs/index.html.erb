@@ -1,0 +1,412 @@
+<style>
+    
+</style>
+<% content_for :head do %>
+    <%= stylesheet_link_tag '/assets/mystyle/grap-drop.css' %>
+    <%= stylesheet_link_tag '/assets/mystyle/positionjobs_style.css' %>
+    <%= stylesheet_link_tag "select2-bootstrap-5-theme.min" %>
+    <%= stylesheet_link_tag "select2.min" %>
+<% end %>
+
+<% content_for :bottombody do %>
+    <!-- <%= javascript_include_tag '/assets/positionjobs/positionjobs.js' %> -->
+    <%= javascript_include_tag 'select2.full.min'%>
+    <%= javascript_include_tag 'select2.min.js'%>
+    <%= javascript_include_tag '/assets/myjs/positionjob.js'%>
+<% end %>
+<!-- positionjob -->
+<%# tab %>
+<div class="alert alert-info mt-4" style="display:none" id="msg_update_create_pj">
+</div>
+<div class="px-2 mt-4">
+    <div class="pc-tab">
+        <input id="tab1" type="radio" name="pct" />
+        <input id="tab2" type="radio" name="pct" />
+        <nav>
+            <ul>
+                <li class="tab1">
+                <label for="tab1"><%= lib_translate("Update_position_job") %></label>
+                </li>
+                <li class="tab2">
+                <label for="tab2"><%= lib_translate("Position_job_list") %></label>
+                </li>
+            </ul>
+        </nav>
+        <section style="padding-top: 10px !important">
+            <div class="tab1">
+                <div class="choose_postion_job" style="padding: 10px 0px;">
+                    <label style="padding: 10px 20px 0px 0px;"><%= lib_translate('Choose_position_job')%> </label>
+                    <select class="form-select sel1 selectpicker" name="category" id="sel1"  onchange="getValueSel(this)">
+                        <% @positionjobs.order('department_id ASC').each do |oPositionjobs| %>
+                            <option name="<%= oPositionjobs.name%>" value="<%= oPositionjobs.id%>" >
+                                <%= oPositionjobs.name%> <%= !oPositionjobs.department_id.nil? ? "(" + Department.where(id: oPositionjobs.department_id).first.name + ")" : ''%> 
+                            </option>
+                        <%end%>
+                    </select>
+                    <% if is_access(session["user_id"], "POSITIONJOBS","ADD") %> 
+                        <button onclick="openFormAddPositionJobs()" class="ms-4 btn btn-primary mb-1 btn_add_new">
+                            <%= lib_translate('New_Position_Job')  %>
+                        </button>
+                    <% end %>
+                </div>
+                <div style="display: none" id="loading_positionjob">
+                    <div class="spinner_handle"></div>
+                    <p style="color: var(--falcon-avatar-status-border-color);"><%= lib_translate("Inprogress_handle")  %>...</p>
+                </div>
+                <%# form xử lý thông tin %>
+                    <div class="card mb-3" id="form-tab1" style="display:none">
+                        <div class="card-header bg-light" style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; cursor:pointer" onclick="clickCollapse(this)" data-bs-toggle="collapse" data-bs-target="#work" >
+                            <h3>
+                                <%= lib_translate('Position_Job_Infomation')%>
+                            </h3>
+                            <span class="fas fa-chevron-circle-down" id="collapse-icon" style="font-size: 20px;pointer-events: none;transition: 200ms ease-in; color: rgba(var(--falcon-primary-rgb), var(--falcon-bg-opacity)) !important;"></span>
+                        </div>
+                        <div class="pt-0">
+                            <div class="tab-content">
+                                <div class="tab-pane preview-tab-pane active" role="tabpanel"aria-labelledby="tab-dom-5a3c857c-8deb-4307-af64-a62f27089443"id="dom-5a3c857c-8deb-4307-af64-a62f27089443">
+                                    <div class="infomation-container-positionjob">
+                                        <div id="work" class="collapse collapse show">
+                                            <div class="form-update-positionjob" >
+                                                <%= form_tag positionjob_update_path , :class=>"control-form-tag-create-position-job m-4", :id=>'update-positionjob',style:"display:none" do%>
+                                                    <div class="header-form-create-position-job">
+                                                        <span class="alert alert-warning mt-4" id="err_update_positionjob" style="display: none;"></span>
+                                                    </div>
+                                                    <div class="control-all-input-create-position-job">
+                                                        <div class="div-form-control-position-job" style="display: none;">
+                                                            <div class="label-control-position-job">
+                                                                <label>Id <span style="color: red;">*</span>:</label>
+                                                            </div>
+                                                            <div class="input-control-position-job">
+                                                                <%= text_field_tag :id, "" ,:class=>"form-control", :name=> "txt_id_pj", :id=>"txt_id_update_pj"%>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="row-update-positionjob">
+                                                            <div class="label-input-update-positionjob">
+                                                                <div class="label-control-update-position-job">
+                                                                    <label>
+                                                                    <%= lib_translate('Position_job_name')%> <span style="color: red;">*</span>:
+                                                                    </label>
+                                                                </div>
+                                                                <div class="input-control-position-job">
+                                                                    <%= text_field_tag :name, "" ,:class=>"form-control", :name=>"txt_name_pj", :id=>"txt_name_update_pj"%>
+
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="label-input-update-positionjob">
+                                                                <div class="label-control-update-position-job">
+                                                                    <label>
+                                                                        <%= lib_translate('Position_job_scode')%> <span style="color: red;">*</span>:
+                                                                    </label>
+                                                                </div>
+                                                                <div class="input-control-position-job">
+                                                                    <%= text_field_tag :scode, "" ,:class=>"form-control", :name=>"txt_scode_pj", :id=>"txt_scode_update_pj"%>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="row-update-positionjob">
+                                                            <div class="label-input-update-positionjob">
+                                                                <div class="label-control-update-position-job">
+                                                                    <label><%= lib_translate('Department_id')%>:</label>
+                                                                </div>
+                                                                <div class="input-control-position-job">
+                                                                    <select class="form-select selectpicker" name="txt_department_id_pj"id="txt_department_id_update_pj">
+                                                                            <option value="" checked>
+                                                                                <%= lib_translate('Choose_department')%>
+                                                                            </option>
+                                                                        <% if !@departments.nil?%>
+                                                                            <% @departments.each do |department| %>
+                                                                                <option value="<%= department.id%>">
+                                                                                    <%= department.name%>
+                                                                                </option>
+                                                                            <%end%>
+                                                                        <%end%>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            <div class="label-input-update-positionjob">
+                                                                <div class="label-control-update-position-job">
+                                                                    <label>
+                                                                        <%= lib_translate('Created_by')%> <span style="color: red;">*</span>:
+                                                                    </label>
+                                                                </div>
+                                                                <div class="input-control-position-job" id="sel_createby_positionjob">
+                                                                    
+                                                                    <select class="form-select selectpicker" name="txt_create_by_pj" id="txt_create_by_update_pj" >
+                                                                        <% @user.each do |u| %>
+                                                                            <option value="<%= u.id%>" style="text-transform: capitalize !important">
+                                                                                <%= u.last_name + " " + u.first_name %>
+                                                                                (<%= u.email%>)
+                                                                            </option>
+                                                                        <%end%>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="row-update-positionjob">
+                                                            <div class="label-input-update-positionjob">
+                                                                <div class="label-control-update-position-job">
+                                                                    <label >
+                                                                    <%= lib_translate('Status')%><span style="color: red;">*</span>:
+                                                                    </label>
+                                                                </div>
+                                                                <div class="input-control-position-job">
+                                                                    <div class="form-control" style="border: none;box-shadow: none; padding: 0 !important; background: none">
+                                                                        <input checked type="radio" id="sel_status_update_pjA" class="form-check-input ms-2 me-1" value="ACTIVE" name="sel_status_pj" /><label class="form-check-label" for="sel_status_update_pjA" style="cursor: pointer">ACTIVE</label>
+                                                                        <input  type="radio" id="sel_status_update_pjI" class="form-check-input ms-3 me-1" value="INACTIVE" name="sel_status_pj" /><label class="form-check-label" for="sel_status_update_pjI" style="cursor: pointer">INACTIVE</label>
+                                                                    </div>
+                                                                </div>      
+                                                            </div>
+                                                            <div class="label-input-update-positionjob">
+                                                                <div class="label-control-update-position-job">
+                                                                </div>
+                                                                <div class="input-control-position-job">
+                                                                    
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div style="display: flex;">
+                                                            <div style="width:16%;">
+                                                                <label class="mt-3">
+                                                                    <%= lib_translate('Desc')%> :
+                                                                </label>
+                                                            </div>
+                                                            <div class="input-control-position-job">
+                                                                <%= text_area_tag :note, "" ,:class=>"form-control ", :name=>"txt_desc_pj", :id=>"txt_desc_update_pj"%>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="button-update-positionjob" style="cursor: pointer">
+                                                        <% if is_access(session["user_id"], "POSITIONJOBS","DEL") %> 
+                                                            <button data-bs-toggle="modal" data-bs-target="#delete_item_modal"  name="" type="button" class="btn btn-danger me-3" id="btn-delete-positionjob"  style="display:none"onclick="delete_item(this)"  value="" >
+                                                                    <span id="valuebutton"><%= lib_translate('Delete')%></span>
+                                                            </button> 
+                                                        <% end %> 
+                                                        <% if is_access(session["user_id"], "POSITIONJOBS","EDIT") %> 
+                                                            <%= button_tag(type: 'button', class:'btn btn-primary', id:'btn-update-positionjob' ) do%>
+                                                                <span id="valuebutton"><%= lib_translate('Save')%></span>
+                                                            <%end%>
+                                                            <div id="loading_button_position_jobs" class= "btn btn-primary" style="opacity: 0.8;display:none;" >
+                                                                <i class ="fa fa-spinner fa-spin"> </i>  <%=lib_translate("Save")%> 
+                                                            </div>
+                                                        <% end %>
+                                                    </div>
+                                                <% end %>
+                                            </div>
+                                        </div>
+                                        <div class="assignment-task border border-top-2" id="responsible-main" >
+                                            <div class="container-drag-drop-position-job" >
+                                            <div class="card-header bg-light" style="display: flex; flex-direction: row; align-items: center; justify-content: space-between; " >
+                                                <h3>  <%= lib_translate('assign_job_position_to_position')%> <span  style="color: #fd7e14"  id="name_assign"> </span></h3>
+                                                <%# <span class="fas fa-chevron-circle-down" id="collapse-icons"  onclick="clickCollapses(this)" data-bs-toggle="collapse"  data-bs-target="#assignment_job" style="font-size: 20px;pointer-events: none;transition: 200ms ease-in;"></span> %>
+                                            </div>
+                                            <div  class="alert alert-info mt-4" id="notifi-responsible" style="display:none">
+                                                <p><%= lib_translate('Update_work_successfully')%> </p>
+                                            </div>
+                                                <div class="px-4">
+                                                    <div class="row collapse collapse show justify-content-md-center" id="assignment_job">
+                                                        <div class="col-5 col_assignment_job" style="user-select: none;">
+                                                            <div class="main-control-col " can-drop="true">
+                                                                <div class="card mb-3 border border-2">
+                                                                        <div class="card-body pt-0">
+                                                                            <div class="tab-content" data-panel="left" can-drop="true" style="height:430px;">
+                                                                                <div class="row g-0">
+                                                                                    <div class="col-auto mb-3">
+                                                                                        <div class="input-group mt-3">
+                                                                                            <h4>
+                                                                                                <%= lib_translate('Position_job_list')%>
+                                                                                            </h4>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div>
+                                                                                    <label style="padding: 10px 20px 0px 0px;"><%= lib_translate('Search_job')%> </label>
+                                                                                    <input type="text" id="myInput" class="form-control mb-4" onkeyup="myFunction()" >
+                                                                                </div>
+                                                                                <ul class="list-group listjobs scroll_item " id="list_all_task" >
+                                                                                    <% @stasks.each do |stask| %>
+                                                                                        <li class="list-group-item item " can-grap="true" data-panel="left" data-hl="true" data-name="<%= stask.name %>" id="<%= stask.id %>" >
+                                                                                            <input type="checkbox" onchange="onTaskSelect(this)" class="custom-control-input stl-checkbox" id="<%=stask.id%>left" value="<%= stask.id %>" name="<%= stask.name %>" > 
+                                                                                            <label class="form-check-label" for="<%=stask.id%>left"> <%= stask.name %></label>
+                                                                                        </li>
+                                                                                    <% end %>
+                                                                                </ul>
+                                                                            </div>
+                                                                        </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-1" style="display: flex;flex-direction: column;justify-content: center;align-items: center;">
+                                                            <div class="main-control-col col_button d-flex flex-column" >
+                                                                    <button id="btn_remove_tasks" style="height: 30px;padding-top: 0px;"  class="btn btn-secondary btn-lg" onclick="clickButtonMove('right')" >
+                                                                        <span class="fas fa-fast-backward" ></span>
+                                                                    </button>
+                                                                    <button  id="btn_add_tasks"  style="height: 30px;padding-top: 0px;    margin-top: 72px;" class="btn btn-secondary btn-lg" onclick="clickButtonMove('left')">
+                                                                        <span class="fas fa-fast-forward"></span>
+                                                                    </button>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-5 col_assignment_job" style="user-select: none;">
+                                                            <div class="main-control-col"  >
+                                                                <div class="card mb-3 border border-2">
+                                                                    <div class="card-body pt-0">
+                                                                        <div class="tab-content" data-panel="right" can-drop="true" id="right_panel" style="height:430px;">
+                                                                            <div class="row justify-content-end g-0">
+                                                                                <div class="col- mb-3">
+                                                                                    <div class="input-group mt-3">
+                                                                                        <h4>
+                                                                                        <%= lib_translate('Selected_job_list')%>
+                                                                                        </h4>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                            <ul class="list-group scroll_item" id="list_select_task" ></ul>
+                                                                            
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                      <% if is_access(session["user_id"], "POSITIONJOBS","EDIT") %> 
+                                                            <div class= "col-1" style="display: flex;flex-direction: column;align-items: center;justify-content: center;">
+                                                                <div class="button-update-positionjob" style="margin-top: 20px;width:100%">
+                                                                    <button id="btn-save-task-rp" style="width:100%" class="btn btn-primary mb-2" type="submit" onclick="saveValueToResponsible()">
+                                                                    <%= lib_translate('Save')%>
+                                                                    </button>
+                                                                    <div id="loading_button_task_pjs" class= "btn btn-primary" style="opacity: 0.8;display:none;" >
+                                                                        <%=lib_translate("Save")%>  <i class ="fa fa-spinner fa-spin"> </i>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <% end %>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                <%# end form xử lý thông tin %>
+            </div>
+            <div class= "tab2">
+                <!-- positionjob table -->
+                <div class="card mb-3">
+                    <div class="card-body pt-0">
+                        <div class="tab-content">
+                            <table id="positonjob" class="table table-bordered fs--1 mb-0 table-hover" style="margin-top: 0px !important; margin-bottom: 0px !important">
+                                            <thead class ="bg-200 text-900">
+                                                <tr>
+                                                    <th class="sort" style="text-align: center;width:3%">STT</th>
+
+                                                    <th class="sort" data-sort="Name_POS" style="text-align: center;">
+                                                    <%= lib_translate('Work_name')%></th>
+
+                                                    <th class="sort" data-sort="Scode_POS" style="text-align: center;">
+                                                    <%= lib_translate('Job_Scode')%></th>
+
+                                                    <th class="sort" data-sort="Department_POS" style="text-align: center;">
+                                                    <%= lib_translate('Department_name')%></th>
+
+                                                    <th class="sort" data-sort="Create_by_POS"
+                                                    style="text-align: center;"><%= lib_translate('Created_by')%></th>
+
+                                                    <th class="sort" data-sort="Status_POS"
+                                                    style="text-align: center; width:11%"><%= lib_translate('Status')%></th>
+                                                    <% if is_access(session["user_id"], "POSITIONJOBS","DEL") %> 
+                                                        <th class="no-sort" style=" width:11%" data-sort="Action_POS" ></th>
+                                                    <% end  %>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="list">
+                                                <% @positionjobs.order("created_at DESC").each_with_index do |oPositionjobs,index| %>
+                                                    <tr>
+                                                        <td valign="middle" style="text-align: center;"><%= index+1 %></td>
+                                                        <td  style="text-align: center;" class="Name_POS">
+                                                            <%= oPositionjobs.name %>
+                                                        </td>
+
+                                                        <td  style="text-align: center;" class="Scode_POS">
+                                                            <%= oPositionjobs.scode %>
+                                                        </td>
+
+                                                        <td   style="text-align: center;" class="Department_POS">
+                                                            <%= (if oPositionjobs.department.nil?
+
+                                                                else 
+                                                                    oPositionjobs.department.name
+                                                                end )
+                                                            %>
+                                                        </td>
+
+                                                        <td  style="text-align: center;text-transform: capitalize;" class="Create_by_POS">
+                                                            <% oUser =User.where(id: oPositionjobs.created_by).first 
+                                                            if !oUser.nil? %>
+                                                                <%= oUser.last_name%>
+                                                                <%= oUser.first_name%>
+                                                            <%end%>
+                                                            
+                                                        </td>
+
+                                                        <td  style="text-align: center;" class="Status_POS">
+                                                            <%= (if oPositionjobs.status=="ACTIVE" 
+                                                                    lib_translate("ac_icon")
+                                                                else 
+                                                                    lib_translate("inac_icon")
+                                                                end )
+                                                            %>
+                                                        </td>
+                                                        <% if is_access(session["user_id"], "POSITIONJOBS","DEL") %> 
+                                                        <td style="text-align: center;">
+                                                        <!-- 
+                                                            <a style="cursor:pointer; color:#2C7BE5;" onclick="openFormUpdatePositionJobs('<%= oPositionjobs.id %>','<%= oPositionjobs.name %>','<%= oPositionjobs.scode %>','<%= oPositionjobs.note %>','<%= oPositionjobs.department_id %>','<%= oPositionjobs.created_by %>','<%= oPositionjobs.status %>')" >
+                                                                <span class="far fa-edit me-2"></span>
+                                                            </a>
+                                                            -->
+                                                            <a data-bs-toggle="modal" data-bs-target="#delete_item_positionjob" style="color: red;cursor:pointer" onclick="clickDeletePositionjob('<%= oPositionjobs.id %>','<%= oPositionjobs.name %>')">
+                                                                <span class="far fa-trash-alt" ></span>
+                                                            </a>
+                                                        </td>
+                                                        <% end %>
+                
+                                                    </tr>
+                                                <% end %>
+                                            </tbody>
+                                        </table>
+                        </div>
+                    </div>
+                </div>
+                <!-- end table -->
+            </div>
+        <%# end tab 2 %>
+        </section>
+  </div>
+</div>
+<script>
+    let err_blank_scode="<%= lib_translate('Field_Scode_is_not_blank')%>";
+    let err_blank_name = "<%= lib_translate('Field_Name_is_not_blank')%>";
+    let mes_update_positionjob="<%= lib_translate('Update_work_successfully')%>";
+    let job_name = "<%= lib_translate('Work_name')%> ";
+    let scode_name = "<%= lib_translate('Job_Scode')%>";
+    let err_already_in_department = " <%= lib_translate('Already_exist_in_the_department') %> ";
+    let err_blank_create_by = "<%= lib_translate('Field_Create_by_is_not_blank')%>";
+    let name_assign = "<%= lib_translate('assign_job_position_to_position')%>";
+    let update_responsible_path="<%= positionjob_update_responsible_path%>";
+    let positonjob_edit_path = "<%=positionjob_edit_path%>";
+    let href_positionjob = '<%= url_for(action: :del)%>';
+    let mess_del_positionjob = " <%= lib_translate('Are_you_sure_you_want_to_delete_this_job')%> ";
+    let srtMr = "<%= lib_translate('Mr')%>";
+    let srtMrs = "<%= lib_translate('Mrs')%>";
+    let positionjob_id= "<%=session[:positionjob_id]%>";
+    let Select_Position_Job = "<%= lib_translate('Select_Position_Job')%>";
+</script>
+<%= javascript_include_tag '/assets/myjs/grap-drop.js'%>
+

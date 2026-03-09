@@ -1,0 +1,434 @@
+@charset "UTF-8";
+/* line 4, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform {
+  overflow-x: hidden;
+}
+
+/* line 7, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_menu ul li {
+  border-right: none;
+}
+
+/* line 10, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_menu {
+  clear: left;
+  top: -20px;
+  height: 28px;
+  position: relative;
+  z-index: 500;
+  background: url("/mywork/assets/mplatform/navigation/bg_main_menu-c3c1f44ded39a8bff93bc2d096e5c37e451b4f87fbdef5311f6945a07677f780.gif") repeat-x;
+  width: 100%;
+  color: #454545;
+  -webkit-box-shadow: none !important;
+          box-shadow: none !important;
+}
+
+/* line 22, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_menu ul {
+  display: block;
+  text-decoration: none;
+  text-align: center;
+  line-height: 28px;
+  white-space: nowrap;
+  color: #1a69b3;
+  float: left;
+  margin: 0;
+  padding-left: 26px;
+}
+
+/* line 33, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_menu ul li {
+  display: block;
+  float: left;
+}
+
+/* line 37, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_menu ul a:hover ul, .body-mplatform .navi_header_menu ul a:hover a:hover ul, .body-mplatform .navi_header_menu ul a:hover a:hover a:hover ul {
+  display: block;
+}
+
+/* line 40, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_menu ul a {
+  display: block;
+  vertical-align: middle;
+  padding: 0 30px;
+  color: #454545;
+  text-decoration: none;
+  text-align: left;
+}
+
+/* line 49, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_menu ul li a {
+  background-image: url("/mywork/assets/mplatform/navigation/main_menu_item-45435d53bb72a98247ac4de7716b35a98661c2de146794e92b6887591b8d0449.gif");
+  background-repeat: no-repeat;
+  background-position: right center;
+  padding: 0px 20px;
+  display: block;
+  position: relative;
+  /* for IE6 */
+  color: #454545;
+  text-decoration: none;
+  font-weight: normal;
+}
+
+/* line 60, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_menu ul ul li a {
+  background-image: none;
+  color: #fff;
+}
+
+/* line 64, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_menu ul li a.active_menu_header {
+  color: white !important;
+  background-image: url("/mywork/assets/mplatform/navigation/bg-8a47745cf1bc245bd4273e2bd0742b834b6f4ba2daf806811cdccec79ddf3bae.gif");
+  background-repeat: repeat-x;
+  height: 28px;
+}
+
+/* line 70, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_menu ul ul li a.active_menu_header {
+  background-image: url("/mywork/assets/mplatform/navigation/bg_sub-c7015c01f18b733d6f612b04910f67b281b4d5b4a238203cd0ebe8012a3522f1.gif") !important;
+  border-left: 1px solid #618fca;
+}
+
+/* line 74, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_menu ul li a:hover {
+  color: white;
+  background-image: url("/mywork/assets/mplatform/navigation/bg-8a47745cf1bc245bd4273e2bd0742b834b6f4ba2daf806811cdccec79ddf3bae.gif");
+  background-repeat: repeat-x;
+  margin-left: 0 !important;
+}
+
+/* ClearFix */
+/* line 81, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_menu ul {
+  _height: 1px;
+  min-height: 1px;
+  /*¥*/
+     /*/
+height: 1px;
+overflow: hidden;
+/**/
+}
+
+/* line 90, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_menu ul:after {
+  height: 0;
+  visibility: hidden;
+  content: ".";
+  display: block;
+  clear: both;
+}
+
+/* line 98, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_menu ul li a:hover {
+  background: url("/mywork/assets/mplatform/navigation/bg-8a47745cf1bc245bd4273e2bd0742b834b6f4ba2daf806811cdccec79ddf3bae.gif") repeat-x;
+  height: 28px;
+  cursor: pointer;
+  color: #fff;
+}
+
+/* line 104, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_menu ul li:hover {
+  /*position:relative;*/
+}
+
+/* line 107, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_menu ul li a:hover {
+  position: relative;
+  color: #ffffff;
+  text-decoration: none;
+  margin-left: 0px;
+  height: 28px;
+}
+
+/* line 114, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_menu ul li:hover > a {
+  background: url("/mywork/assets/mplatform/navigation/bg-8a47745cf1bc245bd4273e2bd0742b834b6f4ba2daf806811cdccec79ddf3bae.gif") repeat-x;
+  color: #ffffff;
+  text-decoration: none;
+  margin-left: 0px !important;
+  line-height: 28px;
+  padding: 0 20px !important;
+}
+
+/********* [START] SUB FEATURES MENU [START] **********/
+/* line 126, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_menu ul li ul li {
+  margin: 0;
+  padding: 0;
+  float: left;
+  text-align: center;
+  height: 100%;
+  /* IE 7 */
+}
+
+/*------ul li ul li a:hover*/
+/* line 134, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_menu ul li ul li a {
+  background-repeat: no-repeat;
+  background-position: right center;
+  padding: 0px 20px;
+  display: block;
+  position: relative;
+  /* for IE6 */
+  color: white;
+  text-decoration: none;
+  background: none;
+  border-right: 1px solid #5780b1;
+}
+
+/* line 146, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_menu ul li ul li:last-child {
+  border-right: none;
+}
+
+/* line 149, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_menu ul li ul li a:hover {
+  background-image: url("/mywork/assets/mplatform/navigation/sub_main_menu_item_current-57bc5f52269e707a471fa6eb64c60de2904abef4013e95b66311755b2ea2b61f.gif");
+  background-repeat: repeat-x;
+  color: #001535;
+  background-color: #FFF;
+}
+
+/* line 158, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_menu ul li ul li a.active_menu_header {
+  background-image: url("/mywork/assets/mplatform/navigation/sub_main_menu_item_current-57bc5f52269e707a471fa6eb64c60de2904abef4013e95b66311755b2ea2b61f.gif");
+  background-repeat: repeat-x;
+  color: #001535;
+  background-color: #FFF;
+  margin-left: -10px;
+}
+
+/********* [END] SUB FEATURES MENU [END] **********/
+/*color link ul li*/
+/* line 172, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_menu ul li a {
+  text-decoration: none;
+  color: #454545;
+}
+
+/*------ul ul--------*/
+/* line 177, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_menu ul ul {
+  width: 100%;
+  position: absolute;
+  top: 100;
+  background: url("/mywork/assets/mplatform/navigation/bg_sub-c7015c01f18b733d6f612b04910f67b281b4d5b4a238203cd0ebe8012a3522f1.gif");
+  left: 0px;
+  padding-left: 5px;
+  margin: 0;
+  font-size: 13px;
+  border-bottom: 2px #1868B2 solid;
+}
+
+/* line 191, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .bg2_navi_header_menu {
+  position: absolute;
+  top: 100;
+  background: url("/mywork/assets/mplatform/navigation/bg_navi_header_menu_ul-1f7d3b5c854f5be511192659b49df65ae08f22aafc4b509310886656187d1e2c.gif");
+  padding-left: 5px;
+  margin: 0;
+}
+
+/* line 198, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_menu ul ul li {
+  list-style: none;
+  text-align: left;
+  display: block;
+}
+
+/* line 204, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_menu ul ul a {
+  line-height: 28px;
+}
+
+/* line 211, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_menu ul ul, .body-mplatform .navi_header_menu ul a:hover ul ul {
+  display: none;
+  z-index: 99999;
+}
+
+/* line 215, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_menu ul ul li {
+  background: none;
+}
+
+/* line 218, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_menu ul li:hover > ul {
+  display: block;
+}
+
+/* line 226, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_top_menu {
+  clear: left;
+  top: -20px;
+  height: 28px;
+  position: relative;
+  z-index: 500;
+  background: url("/mywork/assets/mplatform/navigation/bg-nav-header-d1cc3546ab159237fee6c0bb199a3da3da1e64fb9d1807a535e1d9f5e1118246.gif") repeat-x;
+  width: 100%;
+  font: bold 14px Arial;
+}
+
+/* line 236, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_top_menu ul {
+  display: block;
+  text-decoration: none;
+  text-align: center;
+  line-height: 28px;
+  white-space: nowrap;
+  color: #1a69b3;
+  float: left;
+  margin: 0;
+  padding-left: 26px;
+}
+
+/* line 247, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_top_menu ul li {
+  display: block;
+  float: left;
+}
+
+/* line 251, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_top_menu ul a:hover ul, .body-mplatform .navi_header_top_menu ul a:hover a:hover ul, .body-mplatform .navi_header_top_menu ul a:hover a:hover a:hover ul {
+  display: block;
+}
+
+/* line 254, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_top_menu ul a {
+  display: block;
+  vertical-align: middle;
+  padding: 0 30px;
+  color: #444444;
+  text-decoration: none;
+  text-align: left;
+}
+
+/****
+.body-mplatform .active_menu_header{
+  background:url(asset-path('mplatform/navigation/main_menu_item_current.gif')) repeat-x;
+  text-decoration:none;
+  line-height:28px;
+  color:#ffffff;
+}
+*****/
+/* line 270, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_top_menu ul li a:hover {
+  background: url("/mywork/assets/mplatform/navigation/main_menu_item_current-8a47745cf1bc245bd4273e2bd0742b834b6f4ba2daf806811cdccec79ddf3bae.gif") repeat-x;
+  height: 28px;
+  cursor: pointer;
+  color: #fff;
+}
+
+/* line 276, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_top_menu ul li:hover {
+  /*position:relative;*/
+}
+
+/* line 279, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_top_menu ul li a:hover {
+  position: relative;
+  color: #ffffff;
+  text-decoration: none;
+  margin-left: 0px;
+  height: 28px;
+}
+
+/* line 286, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_top_menu ul li:hover > a {
+  background: url("/mywork/assets/mplatform/navigation/main_menu_item_current-8a47745cf1bc245bd4273e2bd0742b834b6f4ba2daf806811cdccec79ddf3bae.gif") repeat-x;
+  color: #ffffff;
+  text-decoration: none;
+  margin-left: 0px;
+  line-height: 28px;
+}
+
+/* line 294, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_top_menu ul li ul li {
+  background: none;
+}
+
+/*------ul li ul li a:hover*/
+/* line 298, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_top_menu ul li ul li a {
+  background: none;
+}
+
+/* line 301, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_top_menu ul li ul li a:hover {
+  font-weight: normal;
+  color: #ffffff;
+  background: red;
+  background: url("/mywork/assets/mplatform/navigation/main_menu_item_current-8a47745cf1bc245bd4273e2bd0742b834b6f4ba2daf806811cdccec79ddf3bae.gif");
+  border: none;
+  line-height: 28px;
+  padding: 0 10px;
+}
+
+/*color link ul li*/
+/* line 311, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_top_menu ul li a {
+  text-decoration: none;
+  color: #1868B2;
+}
+
+/*------ul ul--------*/
+/* line 316, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_top_menu ul ul {
+  width: 100%;
+  position: absolute;
+  top: 100;
+  background: url("/mywork/assets/mplatform/navigation/main_menu_item_current-8a47745cf1bc245bd4273e2bd0742b834b6f4ba2daf806811cdccec79ddf3bae.gif");
+  left: 0px;
+  padding-left: 5px;
+  margin: 0;
+  font-size: 13px;
+  border-bottom: 2px #1868B2 solid;
+}
+
+/* line 330, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .bg2_navi_header_menu {
+  position: absolute;
+  top: 100;
+  background: url("/mywork/assets/mplatform/navigation/bg_navi_header_menu_ul-1f7d3b5c854f5be511192659b49df65ae08f22aafc4b509310886656187d1e2c.gif");
+  padding-left: 5px;
+  margin: 0;
+}
+
+/* line 337, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_top_menu ul ul li {
+  list-style: none;
+  text-align: left;
+  display: block;
+}
+
+/* line 343, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_top_menu ul ul a {
+  line-height: 28px;
+}
+
+/* line 346, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_top_menu ul li ul li a {
+  padding: 0 8px;
+  font-weight: normal;
+  color: #ffffff;
+  text-align: left;
+  font-size: 90%;
+}
+
+/* line 354, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_top_menu ul ul, .navi_header_top_menu ul a:hover ul ul {
+  display: none;
+  z-index: 99999;
+}
+
+/* line 358, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_top_menu ul ul li {
+  background: none;
+}
+
+/* line 361, /apps/platform/app/assets/stylesheets/mnavigation.scss */
+.body-mplatform .navi_header_top_menu ul li:hover > ul {
+  display: block;
+}

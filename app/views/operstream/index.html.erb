@@ -1,0 +1,244 @@
+<% content_for :head do %>
+  <%= javascript_include_tag '/assets/myjs/flatpickr.js' %>
+  <%= javascript_include_tag '/assets/myjs/flatpickr_local/vn.js' %>
+  <%= stylesheet_link_tag '/assets/mystyle/flatpickr.min.css' %>
+<% end %>
+<% content_for :bottombody do %>
+    
+    <%= javascript_include_tag '/assets/lib_hrm/moment-with-locales.js' %>  
+    <%= javascript_include_tag '/assets/lib_hrm/bootstrap-datetimepicker.min.js' %>
+<% end %>
+<style>
+  #loading_operstream{
+    position: fixed;
+    z-index: 9999;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%; 
+    background: rgb(0 0 0 / 51%);
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+</style>
+<div style="display: none" id="loading_operstream">
+    <div class="spinner_handle"></div>
+    <p style="color: var(--falcon-avatar-status-border-color);"><%= lib_translate("Inprogress_handle")  %>...</p>
+</div>
+<div class="bmtu_header_dashboard">
+    <h3 class="mt-2 overview_text"><%= lib_translate("List_operstream")%></h3>
+
+    <div class="card mb-3">
+        <div class="card-body pt-0">
+            <div class="tab-content">
+                <div class="tab-pane preview-tab-pane active" role="tabpanel" aria-labelledby="tab-dom-5a3c857c-8deb-4307-af64-a62f27089443" id="dom-5a3c857c-8deb-4307-af64-a62f27089443" >
+                    <div class="table-responsive scrollbar mt-3">
+                        <table id="table_operstream" class="table table-bordered fs--1 mb-0 table-hover">
+                            <thead class="bg-200 text-900">
+                                <tr>
+                                    <th><%= lib_translate("Function")%></th>
+                                    <th><%= lib_translate("Organization")%></th>
+                                    <th><%= lib_translate("Stream")%></th>
+                                    <th style="width:15%"><%= lib_translate("Valid_from")%></th>
+                                    <th style="width:15%"><%= lib_translate("Valid_to")%></th>
+                                    <th style="width:10%"></th>
+                                </tr>
+                            </thead>
+                            <tbody >
+                                <tr>
+                                    <%= form_for Operstream.new, :url=> operstream_update_path, html: {method: :post, id:"form_operstream", class:'col-12' } do |o| %>
+                                        <td>
+                                            <div class="row mb-3" style="display:none;">
+                                                <%= o.label :id, class: "col-sm-3 col-form-label" %>
+                                                <div class="col-sm-8 col-lg-9">
+                                                    <%= o.text_field :id, class: 'form-control' , name: 'operstream_id', id:  'operstream_id' %>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 d-flex flex-row">
+                                                <%= o.select_tag :function_id, options_for_select(@functions.map { |f| [f.sname, f.id] }), include_blank: "Chọn Function", class: "form-select", id: "function_id", data: {url: operstream_index_path} %>
+                                                <div class="ms-2 d-flex align-items-center">
+                                                    <span class="fas fa-sync-alt" style="cursor: pointer;" id="functions-reload-btn" onclick="clickRefreshOption(this,'get_functions_form')"></span>
+                                                </div>
+                                                <a class="ms-2 pe-auto d-flex align-items-center" href="<%= functions_index_path()%>" target="_blank"><span style="width:10px; color:#98a7b9" class="fas fa-database"></span></a>                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="col-12 d-flex flex-row">
+                                                <%= o.select_tag :organization_id, options_for_select(@organizations.map { |o| [o.name, o.id] }), include_blank: "Chọn Organization", class: "form-select", id: "organization_id" %>
+                                                <div class="ms-2 d-flex align-items-center">
+                                                    <span class="fas fa-sync-alt" style="cursor: pointer;" id="organizations-reload-btn" onclick="clickRefreshOption(this,'get_organizations_form')"></span>
+                                                </div>
+                                                <a class="ms-2 pe-auto d-flex align-items-center" href="<%= organization_index_path()%>" target="_blank"><span style="width:10px; color:#98a7b9" class="fas fa-database"></span></a>   
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="col-12 d-flex flex-row">
+                                                <%= o.select_tag :stream_id, options_for_select(@streams.map { |s| [s.name, s.id] }), include_blank: "Chọn Stream", class: "form-select", id: "stream_id" %>
+                                                <div class="ms-2 d-flex align-items-center">
+                                                    <span class="fas fa-sync-alt" style="cursor: pointer;" id="streams-reload-btn" onclick="clickRefreshOption(this,'get_streams_form')"></span>
+                                                </div>
+                                                <a class="ms-2 pe-auto d-flex align-items-center" href="<%= department_streams_path()%>" target="_blank"><span style="width:10px; color:#98a7b9" class="fas fa-database"></span></a>   
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="col-12 form-group position-relative">
+                                                <input type="date" class="form-control flatpickr-date" name="valid_from" id="valid_from" onchange="calculateValidTo()">
+                                                <span class="far fa-calendar-alt position-absolute" style="right: 10px; top: 10px;pointer-events: none;"></span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="col-12 form-group position-relative">
+                                                <input type="date" class="form-control flatpickr-date_valid_to" name="valid_to" id="valid_to">
+                                                <span class="far fa-calendar-alt position-absolute" style="right: 10px; top: 10px;pointer-events: none;"></span>
+                                            </div>
+                                        </td>
+                                        <td style="text-align: center;">  
+                                            <% if is_access(session["user_id"], "OPERSTREAM","ADD") %>                                          
+                                                <%= o.submit lib_translate("ADD"), type: "submit", id: "add_operstream", class: "btn btn-success border-red border-pink-600 cls-bmtu-text-red md:group-hover:bg-pink-50 btn-block btn-block text-uppercase" %>
+                                            <%end%>
+                                        </td>
+                                    <%end%>
+                                </tr>   
+
+                            </tbody>
+                            <tbody id="table_operstream_body">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<div>
+
+<%= form_tag operstream_get_operlist_path(), remote: true, id: "form_submit_oper_list" do %>                                                
+<% end %>
+<div class="modal fade" id="modal-operstream" tabindex="-1" role="dialog" aria-hidden="true" data-bs-focus="false">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content position-relative">
+      <div class="position-absolute top-0 end-0 mt-2 me-2 z-index-1">
+        <button id="close_form" class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base " data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0">
+        
+        <div class="rounded-top-lg py-3 ps-4 pe-6 bg-light">
+          <h4 class="mb-1" id="cls_bmtu_form_operstream"><%= lib_translate("update_operstream")  %></h4>
+        </div>
+        <div class="p-4 pb-0">
+          <div id="error_explanation" class="text-danger" style="text-align: center;font-size: 13px;"></div>
+            <div class="form-operstream">
+                <%= form_for Operstream.new, :url=> operstream_update_path, html: {method: :post, id:"form_operstream_update",class:'col-12' } do |oper| %>
+                    <div class="row mb-3" id="error-oper">
+                        <span id="valid_to_error" class="text-danger" style="display:none; border: 1px solid red; background:rgb(255 54 54 / 16%);border-radius: 5px;padding:10px">Lỗi: Đã tồn tại trong hệ thống</span>
+                    </div>
+                    <div class="row mb-3" style="display:none;">
+                        <%= oper.label :id, class: "col-sm-3 col-form-label" %>
+                        <div class="col-sm-8 col-lg-9">
+                            <%= oper.text_field :id, class: 'form-control' , name: 'operstream_id', id:  'operstream_id_update' %>
+                        </div>
+                    </div>
+                    <div class="row mb-3"> 
+                        <label class="col-sm-4 col-lg-3 col-form-label" for=""><%= lib_translate("Function")%> :</label>
+                        <div class="col-12 d-flex flex-row">
+                            <select class="form-select" name="function_id" id="function_id_update">
+                                <%@functions.each do |function|%>
+                                    <option value="<%=function.id%>"><%=function.sname%></option>                                
+                                <%end%>
+                            </select>
+                        </div>
+                    </div> 
+                    <div class="row mb-3"> 
+                        <label class="col-sm-4 col-lg-3 col-form-label" for=""><%= lib_translate("Organization")%> :</label>                    
+                        <div class="col-12 d-flex flex-row">
+                            <select class="form-select" name="organization_id" id="organization_id_update">
+                                <%@organizations_update.each do |organization|%>
+                                    <option value="<%=organization.id%>"><%=organization.name%></option>                                
+                                <%end%>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3"> 
+                        <label class="col-sm-4 col-lg-3 col-form-label" for=""><%= lib_translate("Stream")%> :</label>                    
+                    
+                        <div class="col-12 d-flex flex-row">
+                            <select class="form-select" name="stream_id" id="stream_id_update">
+                                <%@streams_update.each do |stream|%>
+                                    <option value="<%=stream.id%>"><%=stream.name%></option>                                
+                                <%end%>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-3"> 
+                    <label class="col-sm-4 col-lg-3 col-form-label" for=""><%= lib_translate("Valid_from")%> :</label>
+                    
+                        <div class="col-12 form-group position-relative">
+                            <input type="date" class="form-control flatpickr-date" name="valid_from" id="valid_from_update">
+                            <span class="far fa-calendar-alt position-absolute" style="right: 30px; top: 10px;pointer-events: none;"></span>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                    <label class="col-sm-4 col-lg-3 col-form-label" for=""><%= lib_translate("Valid_to")%> :</label> 
+                    
+                        <div class="col-12 form-group position-relative">
+                            <input type="date" class="form-control flatpickr-date_valid_to" name="valid_to" id="valid_to_update">
+                            <span class="far fa-calendar-alt position-absolute" style="right: 30px; top: 10px;pointer-events: none;"></span>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 p-0 mb-2">
+                        <%= oper.submit lib_translate("EDIT") , type:"submit" , id:"update_operstream", class: "btn btn-warning border-red border-pink-600 cls-bmtu-text-red md:group-hover:bg-pink-50 btn-block btn-block text-uppercase " %>
+                    </div>
+                <% end %>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<%= form_tag url_for(controller: 'operstream', action: 'get_all_functions'),method:'GET',id:'get_functions_form',remote:true,authenticity_token: true do %>
+<%  end %>
+<%= form_tag url_for(controller: 'operstream', action: 'get_all_organizations'),method:'GET',id:'get_organizations_form',remote:true,authenticity_token: true do %>
+<%  end %>
+<%= form_tag url_for(controller: 'operstream', action: 'get_all_streams'),method:'GET',id:'get_streams_form',remote:true,authenticity_token: true do %>
+<%  end %>
+<div class="modal fade" id="error-modal-operstream" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 500px">
+    <div class="modal-content position-relative">
+      <div class="position-absolute top-0 end-0 mt-2 me-2 z-index-1">
+        <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div class="rounded-top-lg py-3 ps-4 pe-6 bg-light">
+          <h4 class="mb-1" id="modalExampleDemoLabel"><%= lib_translate("Notifications")%></h4>
+        </div>
+        <div class="modal-body">
+            <p><%= lib_translate("Data_already_exists_in_the_system")%>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+var organizations_path = '<%=organizations_path%>'
+var streams_path = '<%=streams_path%>'
+var operstream_get_operlist_path = '<%=operstream_get_operlist_path%>'
+var check_operstream_exists_path = '<%=check_operstream_exists_path%>'
+// datepick local
+<%= session[:lang] == "vi" ? 'flatpickr.localize(flatpickr.l10ns.vn);'.html_safe : "" %>
+  document.addEventListener('DOMContentLoaded', function() {
+      flatpickr(".flatpickr-date", {
+      dateFormat: "d/m/Y",
+      defaultDate: new Date()
+      });
+      flatpickr(".flatpickr-date_valid_to", {
+      dateFormat: "d/m/Y",
+      defaultDate: new Date().setFullYear(new Date().getFullYear() + 50)
+      });
+});
+var currrent_function_id = "<%=session[:current_function]%>";
+</script>
+<%= javascript_include_tag '/assets/lib_hrm/moment-with-locales.js' %>
+<%= javascript_include_tag '/assets/myjs/operstream.js' %>
+<%= javascript_include_tag '/assets/lib_hrm/popper.min.js'%>
+
+<%= javascript_include_tag '/assets/lib_hrm/bootstrap.min.js'%> 

@@ -1,0 +1,15 @@
+<%= breadcrumbs([
+  { title: 'Trang chủ', path: root_path },  
+  { title: "Trả lời khảo sát", current: true }
+]) %>
+<div class="card card-body">
+    <h4 class="mb-4"> Khảo sát về <%= @appointsurvey&.appointment&.title %></h4>
+    <div id="survey-container"></div>
+    <input type="hidden" id="appointsurvey-id" value="<%= @appointsurvey.id %>">
+</div>
+
+  <script>
+    var root_path = '<%= root_path %>'; // Đường dẫn gốc cho fetch
+    var appointment_path =  '<%=  appointment_path(@appointsurvey.appointment.id) %>';
+  </script>
+<%= javascript_include_tag '/assets/myjs/answer_index.js'%>

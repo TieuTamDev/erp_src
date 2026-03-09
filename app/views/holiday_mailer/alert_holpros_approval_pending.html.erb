@@ -1,0 +1,56 @@
+<p>Kính gửi thầy/cô,</p>
+<p style="color:#ff0000">Hệ thống ERP cảnh báo Đơn xin nghỉ của nhân sự dưới đây chưa được duyệt:</p>
+
+<% @datas.each do |data| %>
+  <h4>Nhân sự: <%= data[:user_sender][:name] %> (<%= data[:user_sender][:sid] %>)</h4>
+  <p>
+    <strong>Phòng ban:</strong> <%= data[:user_sender][:name_department] %><br>
+    <strong>Vị trí công việc:</strong> <%= data[:user_sender][:name_positionjob] %><br>
+    <strong>Tổng thời gian nghỉ:</strong> <%= data[:total] %> ngày<br>
+    <strong>Ngày gửi đơn:</strong> <span style="color:#ff0000"><%= data[:date_uhandle] %></span><br>
+    <strong>Trạng thái đơn:</strong> <span style="color:#ff0000"><%= data[:status] %></span>
+  </p>
+  <table border="1" cellspacing="0" cellpadding="6" style="border-collapse:collapse; width:100%;">
+    <thead style="background-color:#f2f2f2;">
+      <tr>
+        <th>Loại đơn</th>
+        <th>Thời gian nghỉ</th>
+        <th>Cá nhân hỗ trợ</th>
+        <th>Địa điểm</th>
+        <th>Địa chỉ</th>
+        <th>Lý do</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% data[:details].each do |detail| %>
+        <tr>
+          <td><%= detail[:sholtype] %></td>
+          <td><%= detail[:details] %></td>
+          <td><%= detail[:handover_receiver] %></td>
+          <td><%= detail[:place] %></td>
+          <td><%= detail[:address] %></td>
+          <td><%= detail[:notes] %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+  <br><br>
+<% end %>
+
+<p style="color:#ff0000">Thầy/cô cần truy cập <a href="https://erp.bmtu.edu.vn/"><strong>Hệ thống ERP</strong></a> để duyệt đơn xin nghỉ của nhân sự được nêu trên.</p>
+<p>Mọi vấn đề cần giải đáp, thầy/cô vui lòng liên hệ:</p>
+<% if @uorg_code.include?("BMTU") || @uorg_code.include?("BMU") %>
+  <p>- CN. Nguyễn Thị Mỹ Linh (Nhân viên nhân sự) - SĐT: 0399 519 163</p>
+<% end %>
+
+<% if @uorg_code.include?("BUH") %>
+  <p>1. CN. Lê Thị Phương Thảo (Nhân viên tiền lương và chế độ) - SĐT: 0977 160 172</p>
+  <p>2. CN. Nguyễn Đoàn Thu Uyên (Nhân viên tiền lương và chế độ) - SĐT: 0942 947 997</p>
+<% end %>
+
+<% if (@uorg_code & ["BMU","BMTU","BUH"]).empty? %>
+  <p>1. CN. Nguyễn Thị Mỹ Linh (Nhân viên nhân sự) - SĐT: 0399 519 163 (BMU)</p>
+  <p>2. CN. Lê Thị Phương Thảo (Nhân viên tiền lương và chế độ) - SĐT: 0977 160 172 (BUH)</p>
+  <p>3. CN. Nguyễn Đoàn Thu Uyên (Nhân viên tiền lương và chế độ) - SĐT: 0942 947 997 (BUH)</p>
+<% end %>
+<p>Trân trọng./</p>

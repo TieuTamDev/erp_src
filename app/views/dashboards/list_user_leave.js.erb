@@ -1,0 +1,67 @@
+$("#table_dashboard_management_view_leave").empty();
+$("#page_leave").empty();
+$("#table_dashboard_management_view_leave").append(`
+    <tr id="loading-leave-spinner" style="display:none;">
+        <td colspan="6" class="text-center py-3">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Đang tải dữ liệu...</span>
+        </div>
+        </td>
+    </tr>
+  `);
+<% @data_tab&.each do |user| %>
+  <% details = user[:detail_rows] || [] %>
+  <% rowspan = details.size > 0 ? details.size : 1 %>
+
+  <% details.each_with_index do |detail, idx| %>
+    $("#table_dashboard_management_view_leave").append(`
+      <tr>
+        <% if idx == 0 %>
+          <td class="align-middle" rowspan="<%= rowspan %>"><%= j user[:nhom] %></td>
+          <td class="align-middle" rowspan="<%= rowspan %>"><%= j user[:sender] %></td>
+          <td class="align-middle" rowspan="<%= rowspan %>"><%= j user[:department] %></td>
+        <% end %>
+        <td class="align-middle" style="padding-left: 21px;"><%= j detail[:hinh_thuc_nghi] %></td>
+        <td class="align-middle"><%= j detail[:thoi_gian_nghi] %></td>
+        <td class="text-center"><%= detail[:tong_so_ngay] %></td>
+      </tr>
+    `);
+  <% end %>
+
+  <% if details.empty? %>
+    $("#table_dashboard_management_view_leave").append(`
+      <tr>
+        <td class="text-center align-middle"><%= j user[:nhom] %></td>
+        <td class="align-middle"><%= j user[:sender] %></td>
+        <td class="align-middle"><%= j user[:department] %></td>
+        <td colspan="3" class="text-center text-muted">Không có chi tiết nghỉ phép</td>
+      </tr>
+    `);
+  <% end %>
+<% end %>
+
+
+$("#page_leave").html(`
+<% if @total_pages > 1 %>
+  <nav>
+    <ul class="pagination mb-0">
+      <% (1..@total_pages).each do |page| %>
+        <li class="page-item <%= 'active' if page == @page %>">
+          <a href="javascript:void(0)" class="page-link pagination-link" data-page="<%= page %>"><%= page %></a>
+        </li>
+      <% end %>
+    </ul>
+  </nav>
+<%end%>
+<% if @per_page > 10 %>
+  <label class="me-2 mb-0">Hiển thị:</label>
+  <select id="per_page" class="form-select form-select-sm w-auto">
+    <% [10, 20, 50, 100].each do |option| %>
+      <option value="<%= option %>" <%= 'selected' if option == @per_page.to_i %>><%= option %></option>
+    <% end %>
+  </select>
+<% end %>
+`);
+$("#loading-leave-spinner").hide();
+$("#leader_count").html("<%=@leader_count%>");
+$("#staff_count").html("<%=@staff_count%>");

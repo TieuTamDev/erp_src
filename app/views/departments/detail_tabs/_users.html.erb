@@ -1,0 +1,421 @@
+
+<style>
+    .task-option {
+        text-align: center;
+        padding: 2rem 1rem;
+        border-radius: 25px;
+        border: 1px solid #dee2e6;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .task-option:hover {
+        border-color: #0d6efd;
+        box-shadow: 0 0 10px rgba(13, 110, 253, 0.2);
+    }
+
+    .task-option.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        background-color: #f1f1f1;
+    }
+
+    .task-option:hover:not(.disabled) {
+        background-color: #f8f9fa;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .task-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        margin: 0 auto 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .modal-content {
+        border-radius: 16px;
+    }
+    
+    .modal-header {
+        border-bottom: none;
+        padding: 1.5rem 1.5rem 0.5rem;
+    }
+    
+    .modal-title {
+        width: 100%;
+        text-align: left;
+        font-size: 1.5rem;
+        font-weight: 500;
+    }
+    
+    .modal-body {
+        padding: 1rem 1.5rem 2rem;
+    }
+    
+    .modal-footer {
+        border-top: none;
+    }
+    .select2-container .select2-selection--multiple .select2-selection__rendered {
+        display: flex;
+    }
+    .select2-container--bootstrap-5 .select2-dropdown .select2-results__options .select2-results__option.select2-results__option--disabled, .select2-container--bootstrap-5 .select2-dropdown .select2-results__options .select2-results__option[aria-disabled=true] {
+        color: #e3e3e3;
+    }
+    .select2-invalid{
+        box-shadow: 0px 0px 1px 1px red;
+    }
+    .true-hide{
+        display:none !important;
+    }
+</style>
+<div class="mt-1 d-flex">
+    <div class="form-control me-auto" style="width: fit-content;">
+        <input type="text" placeholder="Tên, mã NV, email" style="outline: none;border: none;min-width: 274px;" oninput="onSearchUser(this)"/>
+        <span class="fas fa-search" style="color:#999999"></span>
+    </div>
+    <% if is_access(session["user_id"], "APPOINTMENT-CREATE", "ADD") %>
+        <button class="btn btn-primary mr-1" type="button" data-bs-toggle="modal" data-bs-target="#taskSelectionModal">
+            <span class="fas fa-plus mr-2" data-fa-transform="shrink-3"></span>Tác vụ
+        </button>
+    <% end %>
+</div>
+<div class="mt-2">
+    <table id="table_users" class="table table-customs table-bordered fs--1 mb-0" style="margin-top: 15px !important; margin-bottom: 0px !important">
+        <thead>
+            <tr style="background-color: #EFF2F1;">
+                <th class="no-sort" style="font-size: 16px; width: 100%;">Vị trí công việc</th>
+            </tr>
+        </thead>
+    </table>
+
+    <% @positionjob_groups.each do |id,positionjob|
+        view_id = "positionjob-#{id}"
+    %>
+        <div data-wrap-table="<%=view_id%>">
+            <div class="d-flex align-items-center mt-3" data-collapse-btn="target-<%=view_id%>" id="<%=view_id%>" onclick="loadPositionjob(<%=id%>,'<%=view_id%>')" data-bs-toggle="collapse" style="cursor: pointer;user-select: none;">
+                <span class="fas fa-angle-right collapse-icon me-3 ms-3" style="font-size: 20px;"></span>
+                <span style="color:#2C7BE5;font-weight: bold;"><%= positionjob[:name]%></span>
+                <span class="ms-2 r-count r-count-<%=id%>"><%= positionjob[:users].size%> / <%= positionjob[:amount]%></span>
+                <%if positionjob[:users].size < positionjob[:amount].to_i%>
+                    <span class="fas fa-exclamation-triangle ms-2 warning-amount-<%=id%>" style="color:#FFCC00"></span>
+                <%end%>
+            </div>
+            <div class="collapse show mt-2 mb-2" data-collapse-table="<%=view_id%>" id="target-<%=view_id%>">
+                <div style="background:#EFEFEF;position: relative;" class="mt-1">
+                    <div id="loading-<%=view_id%>" class="pt-4 pb-3" style="display: none;align-items: center;position: absolute;justify-content: center;width: 100%;height: 100%;z-index: 999;background-color: #d9d9d9;"></div>
+                    <div class="p-2">
+                        <table class="table p-0 m-0" style="background:white" id="table-<%=view_id%>">
+                            <thead>
+                                <tr style="background: #F9FBFC;height: 38px;vertical-align: middle;">
+                                    <th scope="col" style="width:64px;text-align: center;">STT</th>
+                                    <th scope="col">Họ và tên</th>
+                                    <th scope="col">Mã NV</th>
+                                    <th scope="col">Năm sinh</th>
+                                    <th scope="col">Trình độ</th>
+                                    <th scope="col">Email</th>
+                                    <th scope="col">Số điện thoại</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <%
+                                    next_index = 0
+                                    positionjob[:users].each_with_index do |user,index|
+                                        next_index = index + 1
+                                %>
+                                    <tr data-user-row id="user-<%=user[:id]%>">
+                                        <td style="text-align: center;"><%=next_index%></td>
+                                        <td><%=user[:last_name]%> <%=user[:first_name]%></td>
+                                        <td><%=user[:sid]%></td>
+                                        <td><%=user[:birthday]&.strftime("%d/%m/%Y")%></td>
+                                        <td><%=user[:education]%></td>
+                                        <td><%=user[:email]%></td>
+                                        <td><%=user[:mobile] || user[:phone] || ""%></td>
+                                    </tr>
+                                <%end%>
+                                <%
+                                count = positionjob[:amount].to_i - positionjob[:users].size
+                                count.times do |_|
+                                    next_index = next_index + 1
+                                %>
+                                    <tr data-extra-row>
+                                        <td style="text-align: center;"><%=next_index%></td>
+                                        <td style='color:red'>Cần bổ sung</td>
+                                        <td>-</td>
+                                        <td>-</td>
+                                        <td>-</td>
+                                        <td>-</td>
+                                        <td>-</td>
+                                    </tr>
+                                <%end%>
+                            </tbody>
+                        </table>
+                        <div class="p-2 d-none" style="background-color: white;border-bottom-left-radius: 10px;border-bottom-right-radius: 10px;padding-left: 1.7rem !important;">
+                            <div onclick="ClickAddUser('<%=id%>','<%= view_id%>')" style="width: fit-content;cursor: pointer;">
+                                <span class="fas fa-plus"></span>
+                                <span class="ms-2" style="color: #111827;font-weight: 500;">Thêm nhân sự</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <%end%>
+
+    <%= form_tag departments_get_positionjob_users_path(),method:'GET',id:'form-get-positionjob-users',remote:true,authenticity_token: true do %>
+        <input type="hidden" style="display:none;" name="positionjob_id">
+        <input type="hidden" style="display:none;" name="view_id">
+    <%end%>
+</div>
+
+<!-- Modal tác vụ -->
+<div class="modal fade" id="taskSelectionModal" data-bs-keyboard="false" data-bs-backdrop="static" tabindex="-1" aria-labelledby="taskSelectionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="taskSelectionModalLabel">Chọn tác vụ</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <% if is_access(session[:user_id], "APPOINTMENT-CREATE","ADD")%>
+                        <div class="col">
+                            <a data-remote="true" class="handle_btn" href="<%= render_form_appointments_path('created', form: 'created',stype:"BO_NHIEM") %>">
+                                <div class="task-option">
+                                    <img class="task-icon" src="<%= image_path("/assets/image/bonhiem.svg") %>">
+                                    <div>Bổ nhiệm</div>
+                                </div>
+                            </a>
+                        </div>
+                    <%end%>
+                    <% if is_access(session[:user_id], "APPOINTMENT-CREATE","ADD")%>
+                    <div class="col">
+                        <a data-remote="true" class="handle_btn" href="<%= render_form_appointments_path('created', form: 'created',stype:"MIEN_NHIEM") %>">
+                            <div class="task-option">
+                                <img class="task-icon" src="<%= image_path("/assets/image/miennhiem.svg") %>">
+                                <div>Miễn nhiệm</div>
+                            </div>
+                        </a>
+                    </div>
+                    <% end %>
+                    <div class="col">
+                        <div class="task-option disabled">
+                            <img class="task-icon" src="<%= image_path("/assets/image/phancong.svg") %>">
+                            <div>Phân công</div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="task-option disabled">
+                            <img class="task-icon" src="<%= image_path("/assets/image/dieuchuyen.svg") %>">
+                            <div>Điều chuyển</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal thêm vị trí công việc -->
+<div class="modal fade" id="modal-add-positionjob" tabindex="-1" role="dialog" aria-hidden="true" data-bs-focus="false">
+    <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 500px">
+        <div class="modal-content position-relative">
+            <div class="modal-body p-0">
+                <div
+                    class="rounded-top-3 py-3 ps-4 pe-3 pb-1 bg-body-tertiary d-flex align-items-center justify-content-between">
+                    <h4 class="mb-1" id="title-modal">Thêm nhân sự vào vị trí</h4>
+                    <button type="button"
+                            class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base"
+                            data-bs-dismiss="modal" aria-label="Close">
+                    </button>
+                </div>
+                <div class="p-4 pt-0 pb-0">
+                    <%= form_tag departments_add_user_positionjob_path, method: :post, class: "", id: "form-add-user-positionjob",remote:true, authenticity_token: true do %>
+                        <input type="hidden" name="positionjob_id">
+                        <div class="mb-4 position-relative">
+                            <label class="col-form-label" for="message-text">Chọn nhân sự </label>
+                            <select class="form-select" multiple name="user_ids[]" id="select-users"></select>
+                            <div id="user-error" class="invalid-feedback" style="display: none; position: absolute; top: 95%; left: 0;">
+                                Vui lòng chọn nhân sự.
+                            </div>
+                        </div>
+                    <% end %>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Đóng</button>
+                <button class="btn btn-primary" type="button" onclick="SubmitAddUserPositionjob()">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<% content_for :bottombody do %>
+    <script>
+        var current_view_id = "";
+        var positionjob_groups = <%= @positionjob_groups.to_json.html_safe%>;
+
+        $('#select-users').select2({
+            dropdownParent:$("#modal-add-positionjob"),
+            width: '100%',
+            theme: 'bootstrap-5',
+            closeOnSelect: false,
+            placeholder: "Vui lòng chọn nhân sự",
+            language: {
+                searching: function () {
+                    return 'Đang tìm kiếm...';
+                }
+            },
+            ajax: {
+                url: UrlSelectAjax,
+                delay: 250,
+                minimumInputLength: 1,
+                beforeSend: function() {
+                    $('li.select2-results__option:not(.loading-results)').remove();
+                },
+                data: function (params) {
+                    return {
+                        search: params.term
+                    };
+                },
+                processResults: function (data) {
+                    let results = data.items.map(function (item) {
+                        return { id: item.id, text: item.name };
+                    });
+
+                    return {
+                        results: results
+                    };
+                }
+            }
+        });
+
+        $('#select-users').on('select2:select', function (e) {
+            $('[name="user_ids[]"]').next('span').toggleClass("select2-invalid",false);
+            $("#user-error").hide();
+        });
+
+        function loadPositionjob(positionjob_id,view_id) {
+            let bOpen = toggleCollapse(view_id);
+            // let tbody = $(`#table-${view_id} tbody`);
+            // tbody.html("");
+            // if(bOpen){
+            //     SubmitReloadPositionjob(positionjob_id,view_id);
+            //     toggleLoadingTable(view_id,true);
+            // }else{
+            //     toggleLoadingTable(view_id,false);
+            // }
+        }
+
+        function toggleLoadingTable(view_id,bShow) {
+            let element = $("#loading-"+view_id);
+            if(bShow){
+                element.css("display","flex");
+                element.html(`
+                    <div class="spinner-border text-secondary" role="status"></div>
+                    <span class="ms-2" style="color: #748194">Đang tải dữ liệu...</span>`);
+            }else{
+                element.css("display","none");
+                element.html("");
+            }
+        }
+
+        function toggleCollapse(view_id) {
+            var collapse = $("#"+view_id);
+            var target = $("#target-"+view_id);
+            var bOpen = !collapse.hasClass("collapsed");
+            collapse.toggleClass("collapsed",bOpen);
+            target.toggleClass("show",!bOpen);
+            return !bOpen;
+        }
+
+        function ClickAddUser(positionjob_id,view_id) {
+            current_view_id = view_id;
+            let form = $("#form-add-user-positionjob");
+            form.find('[name="positionjob_id"]').val(positionjob_id);
+
+            form.find('[name="user_ids[]"]').next('span').toggleClass("select2-invalid",false);
+            $("#user-error").hide();
+
+            $('#select-users').val([]).trigger('change');
+            $("#modal-add-positionjob").modal('show');
+        }
+
+        function SubmitAddUserPositionjob() {
+            let form = $("#form-add-user-positionjob");
+            let input = form.find('[name="user_ids[]"]');
+            let user_ids = input.val();
+            if(user_ids.length == 0){
+                input.next('span').toggleClass("select2-invalid",true);
+                $("#user-error").show();
+            }
+
+            form.submit();
+            $("#modal-add-positionjob").modal('hide');
+            showLoadding(true);
+        }
+
+        function OnAddUserPositionjob(bSuccess,positionjob_id,data) {
+            showLoadding(false);
+            if(bSuccess){
+                showAlert("Thêm thành công!");
+                SubmitReloadPositionjob(positionjob_id,current_view_id);
+                toggleLoadingTable(current_view_id,true);
+            }else{
+                showAlert("Lỗi khi thêm nhân viên!","danger");
+            }
+        }
+        function SubmitReloadPositionjob(positionjob_id,view_id) {
+            let form = $("#form-get-positionjob-users");
+            form.find('[name="positionjob_id"]').val(positionjob_id);
+            form.find('[name="view_id"]').val(view_id);
+            form.submit();
+        }
+
+        function onSearchUser(input) {
+            $("[data-collapse-btn]").toggleClass("collapsed",false);
+            $("[data-collapse-table]").toggleClass("show",true);
+
+            var showIds = [];
+
+            let search = input.value.trim().toLowerCase();
+            search = search.toLowerCase();
+            if(search ==""){
+                $("[data-user-row]").show();
+                $("[data-extra-row]").show();
+                $("[data-collapse-btn]").toggleClass("collapsed",false);
+                $("[data-collapse-table]").toggleClass("show",true);
+                 $(`[data-wrap-table]`).show();
+            }else{
+                $("[data-user-row]").hide();
+                $("[data-extra-row]").hide();
+                $(`[data-wrap-table]`).hide();
+                Object.keys(positionjob_groups).forEach(key=>{
+                    positionjob_groups[key]["users"].forEach(user=>{
+                        let name = user.last_name + " " + user.first_name;
+                        if(name.toLowerCase().includes(search) || user.email.toLowerCase().includes(search) || user.sid.toLowerCase().includes(search))
+                        {
+                            let row = $(`#user-${user.id}[data-user-row]`);
+                            row.show();
+                            let collapse = row.closest('div[data-collapse-table]');
+                            showIds.push(collapse.attr("data-collapse-table"));
+                        }
+                    })
+                });
+                showIds = [...new Set(showIds)];
+                showIds.forEach(id=>{
+                    $(`[data-wrap-table="${id}"]`).show();
+                });
+            }
+
+        }
+
+        function UrlSelectAjax() {
+            let form = $("#form-add-user-positionjob");
+            let positionjob_id = form.find('[name="positionjob_id"]').val();
+            return `<%=request.base_url + root_path%>departments/get_users?positionjob_id=${positionjob_id}`;
+        }
+    </script>
+<%end%>

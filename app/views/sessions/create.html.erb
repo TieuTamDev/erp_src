@@ -1,0 +1,825 @@
+<style>
+.screen textarea:focus,
+.screen input:focus {
+    outline: none;
+}
+
+.screen * {
+    -webkit-font-smoothing: antialiased;
+    box-sizing: border-box;
+}
+
+.screen div {
+    -webkit-text-size-adjust: none;
+}
+
+.component-wrapper a {
+    display: contents;
+    pointer-events: auto;
+    text-decoration: none;
+}
+
+.component-wrapper * {
+    -webkit-font-smoothing: antialiased;
+    box-sizing: border-box;
+    pointer-events: none;
+}
+
+.component-wrapper a *,
+.component-wrapper input,
+.component-wrapper video,
+.component-wrapper iframe {
+    pointer-events: auto;
+}
+
+.component-wrapper.not-ready,
+.component-wrapper.not-ready * {
+    visibility: hidden !important;
+}
+
+.screen a {
+    display: contents;
+    text-decoration: none;
+}
+
+.full-width-a {
+    width: 100%;
+}
+
+.full-height-a {
+    height: 100%;
+}
+
+.container-center-vertical {
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    pointer-events: none;
+}
+
+.container-center-vertical>* {
+    flex-shrink: 0;
+    pointer-events: auto;
+}
+
+.container-center-horizontal {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    pointer-events: none;
+    width: 100%;
+}
+
+.container-center-horizontal>* {
+    flex-shrink: 0;
+    pointer-events: auto;
+}
+
+.auto-animated div {
+    --z-index: -1;
+    opacity: 0;
+    position: absolute;
+}
+
+.auto-animated input {
+    --z-index: -1;
+    opacity: 0;
+    position: absolute;
+}
+
+.auto-animated .container-center-vertical,
+.auto-animated .container-center-horizontal {
+    opacity: 1;
+}
+
+.overlay {
+    display: none;
+    height: 100%;
+    opacity: 0;
+    position: fixed;
+    top: 0;
+    width: 100%;
+}
+
+.overlay.animate-appear {
+    animation: reveal 0.3s ease-in-out 1 normal forwards;
+    display: block;
+    opacity: 0;
+}
+
+.overlay.animate-disappear {
+    animation: reveal 0.3s ease-in-out 1 reverse forwards;
+    display: block;
+    opacity: 1;
+    pointer-events: none;
+}
+
+.overlay.animate-disappear * {
+    pointer-events: none;
+}
+
+@keyframes reveal {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.animate-nodelay {
+    animation-delay: 0s;
+}
+
+.align-self-flex-start {
+    align-self: flex-start;
+}
+
+.align-self-flex-end {
+    align-self: flex-end;
+}
+
+.align-self-flex-center {
+    align-self: flex-center;
+}
+
+.valign-text-middle {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.valign-text-bottom {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+input:focus {
+    outline: none;
+}
+
+.listeners-active,
+.listeners-active * {
+    pointer-events: auto;
+}
+
+.hidden,
+.hidden * {
+    pointer-events: none;
+    visibility: hidden;
+}
+
+.smart-layers-pointers,
+.smart-layers-pointers * {
+    pointer-events: auto;
+    visibility: visible;
+}
+
+.listeners-active-click,
+.listeners-active-click * {
+    cursor: pointer;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+:root {
+    --accent: #2f4efd;
+    --black: #000000;
+    --body-dark: #595f69;
+    --body-light: #899099;
+    --heading: #3e4349;
+    --white: #ffffff;
+
+    --font-size-l: 15px;
+    --font-size-m: 14px;
+    --font-size-s: 12px;
+    --font-size-xl: 28px;
+    --font-size-xxl: 40px;
+
+    --font-family-poppins: "Poppins", Helvetica;
+}
+
+.h4 {
+    font-family: var(--font-family-poppins);
+    font-size: var(--font-size-xl);
+    font-style: normal;
+    font-weight: 500;
+    letter-spacing: 0px;
+}
+
+.bodyregular14 {
+    font-family: var(--font-family-poppins);
+    font-size: var(--font-size-m);
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: 0px;
+}
+
+.bodyregular12 {
+    font-family: var(--font-family-poppins);
+    font-size: var(--font-size-s);
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: 0px;
+}
+
+.bodymedium15 {
+    font-family: var(--font-family-poppins);
+    font-size: var(--font-size-l);
+    font-style: normal;
+    font-weight: 500;
+    letter-spacing: 0px;
+}
+
+:root {}
+
+
+/* screen - register-v-2 */
+
+.register-v-2 {
+    background-color: var(--accent);
+    border: 1px none;
+    height: 1024px;
+    mix-blend-mode: normal;
+    overflow: hidden;
+    overflow-x: hidden;
+    position: relative;
+    width: 1440px;
+}
+
+.register-v-2 .illustration-ZHgiHx {
+    background-color: transparent;
+    height: 589px;
+    left: 96px;
+    position: absolute;
+    top: 186px;
+    width: 580px;
+}
+
+.register-v-2 .create-account-ZHgiHx {
+    background-color: transparent;
+    border: 1px none;
+    height: 884px;
+    left: 770px;
+    mix-blend-mode: normal;
+    position: absolute;
+    top: 70px;
+    width: 600px;
+}
+
+.register-v-2 .elements-container-zaxYNq {
+    background-color: transparent;
+    border: 1px none;
+    height: 884px;
+    left: 0px;
+    position: absolute;
+    top: 0px;
+    width: 600px;
+}
+
+.register-v-2 .bg-afAaUA {
+    background-color: transparent;
+    height: 932px;
+    left: -28px;
+    position: absolute;
+    top: -16px;
+    width: 648px;
+}
+
+.register-v-2 .already-have-an-account-login-zaxYNq {
+    background-color: transparent;
+    color: transparent;
+    font-style: normal;
+    font-weight: 400;
+    height: auto;
+    left: 188px;
+    line-height: normal;
+    position: absolute;
+    text-align: center;
+    top: 838px;
+    width: auto;
+}
+
+.register-v-2 .span0-FLkwgT {
+    color: var(--body-light);
+    font-style: normal;
+}
+
+.register-v-2 .span1-FLkwgT {
+    color: var(--accent);
+    font-style: normal;
+}
+
+.register-v-2 .buttons-primary40px-basic-zaxYNq {
+    background-color: transparent;
+    border: 1px none;
+    height: 40px;
+    left: 100px;
+    mix-blend-mode: normal;
+    position: absolute;
+    top: 714px;
+    width: 400px;
+}
+
+.register-v-2 .bg-9xTmCe {
+    background-color: transparent;
+    height: 40px;
+    left: 0px;
+    mix-blend-mode: normal;
+    position: absolute;
+    top: 0px;
+    width: 400px;
+}
+
+.register-v-2 .button-9xTmCe {
+    background-color: transparent;
+    color: var(--white);
+    font-style: normal;
+    font-weight: 500;
+    height: 23px;
+    left: 141px;
+    line-height: normal;
+    mix-blend-mode: normal;
+    position: absolute;
+    text-align: center;
+    top: 7px;
+    width: auto;
+}
+
+.register-v-2 .accept-zaxYNq {
+    background-color: transparent;
+    height: 21px;
+    left: 100px;
+    position: absolute;
+    top: 672px;
+    width: 241px;
+}
+
+.register-v-2 .i-accept-terms-and-conditions-xmIUCh {
+    background-color: transparent;
+    color: transparent;
+    font-style: normal;
+    font-weight: 400;
+    height: auto;
+    left: 24px;
+    line-height: normal;
+    position: absolute;
+    text-align: left;
+    top: 0px;
+    width: auto;
+}
+
+.register-v-2 .span0-x8uP08 {
+    color: var(--body-dark);
+    font-style: normal;
+}
+
+.register-v-2 .span1-x8uP08 {
+    color: var(--accent);
+    font-style: normal;
+}
+
+.register-v-2 .forms-checkbox-square-checked-xmIUCh {
+    background-color: transparent;
+    border: 1px none;
+    height: 16px;
+    left: 0px;
+    mix-blend-mode: normal;
+    position: absolute;
+    top: 2px;
+    width: 16px;
+}
+
+.register-v-2 .bg-x0qMAw {
+    background-color: transparent;
+    height: 16px;
+    left: 0px;
+    position: absolute;
+    top: 0px;
+    width: 16px;
+}
+
+.register-v-2 .checkbox-x0qMAw {
+    background-color: transparent;
+    height: 11px;
+    left: 1px;
+    mix-blend-mode: normal;
+    position: absolute;
+    top: 3px;
+    width: 14px;
+}
+
+.register-v-2 .forms-inputs-input-label-zaxYNq {
+    background-color: transparent;
+    border: 1px none;
+    height: 67px;
+    left: 100px;
+    position: absolute;
+    top: 583px;
+    width: 400px;
+}
+
+.register-v-2 .forms-inputs-basic-icon_r-Xly5Mp {
+    background-color: transparent;
+    border: 1px none;
+    height: 40px;
+    left: 0px;
+    mix-blend-mode: normal;
+    position: absolute;
+    top: 27px;
+    width: 400px;
+}
+
+.register-v-2 .border-zcOgCL {
+    background-color: transparent;
+    height: 40px;
+    left: 0px;
+    position: absolute;
+    top: 0px;
+    width: 400px;
+}
+
+.register-v-2 .text_label-zcOgCL {
+    background-color: transparent;
+    color: var(--heading);
+    font-family: var(--font-family-poppins);
+    font-size: var(--font-size-xxl);
+    font-style: normal;
+    font-weight: 500;
+    height: 60px;
+    left: 16px;
+    letter-spacing: 1.20px;
+    line-height: normal;
+    mix-blend-mode: normal;
+    position: absolute;
+    text-align: left;
+    top: -11px;
+    width: auto;
+}
+
+.register-v-2 .icons-basic-hide-zcOgCL {
+    background-color: transparent;
+    height: 20px;
+    left: 366px;
+    mix-blend-mode: normal;
+    position: absolute;
+    top: 10px;
+    width: 20px;
+}
+
+.register-v-2 .confirm-password-Xly5Mp {
+    background-color: transparent;
+    color: var(--body-light);
+    font-style: normal;
+    font-weight: 400;
+    height: auto;
+    left: 0px;
+    line-height: normal;
+    mix-blend-mode: normal;
+    position: absolute;
+    text-align: left;
+    top: -1px;
+    width: auto;
+}
+
+.register-v-2 .forms-inputs-input-label-wHQEIn {
+    background-color: transparent;
+    border: 1px none;
+    height: 67px;
+    left: 100px;
+    position: absolute;
+    top: 489px;
+    width: 400px;
+}
+
+.register-v-2 .forms-inputs-basic-icon_r-IkXHjz {
+    background-color: transparent;
+    border: 1px none;
+    height: 40px;
+    left: 0px;
+    mix-blend-mode: normal;
+    position: absolute;
+    top: 27px;
+    width: 400px;
+}
+
+.register-v-2 .border-O1qoM7 {
+    background-color: transparent;
+    height: 40px;
+    left: 0px;
+    position: absolute;
+    top: 0px;
+    width: 400px;
+}
+
+.register-v-2 .text_label-O1qoM7 {
+    background-color: transparent;
+    color: var(--heading);
+    font-family: var(--font-family-poppins);
+    font-size: var(--font-size-xxl);
+    font-style: normal;
+    font-weight: 500;
+    height: 60px;
+    left: 16px;
+    letter-spacing: 1.20px;
+    line-height: normal;
+    mix-blend-mode: normal;
+    position: absolute;
+    text-align: left;
+    top: -11px;
+    width: auto;
+}
+
+.register-v-2 .icons-basic-hide-O1qoM7 {
+    background-color: transparent;
+    height: 20px;
+    left: 366px;
+    mix-blend-mode: normal;
+    position: absolute;
+    top: 10px;
+    width: 20px;
+}
+
+.register-v-2 .password-IkXHjz {
+    background-color: transparent;
+    color: var(--body-light);
+    font-style: normal;
+    font-weight: 400;
+    height: auto;
+    left: 0px;
+    line-height: normal;
+    mix-blend-mode: normal;
+    position: absolute;
+    text-align: left;
+    top: -1px;
+    width: auto;
+}
+
+.register-v-2 .forms-inputs-input-label-6ieMS9 {
+    background-color: transparent;
+    border: 1px none;
+    height: 67px;
+    left: 100px;
+    position: absolute;
+    top: 395px;
+    width: 400px;
+}
+
+.register-v-2 .forms-inputs-basic-tX6VBN {
+    background-color: transparent;
+    border: 1px none;
+    height: 40px;
+    left: 0px;
+    mix-blend-mode: normal;
+    position: absolute;
+    top: 27px;
+    width: 400px;
+}
+
+.register-v-2 .border-HtolWh {
+    background-color: transparent;
+    height: 40px;
+    left: 0px;
+    position: absolute;
+    top: 0px;
+    width: 400px;
+}
+
+.register-v-2 .cooperexamplecom-HtolWh {
+    background-color: transparent;
+    color: var(--heading);
+    font-style: normal;
+    font-weight: 400;
+    height: 21px;
+    left: 16px;
+    line-height: normal;
+    mix-blend-mode: normal;
+    position: absolute;
+    text-align: left;
+    top: 9px;
+    width: auto;
+}
+
+.register-v-2 .email-tX6VBN {
+    background-color: transparent;
+    color: var(--body-light);
+    font-style: normal;
+    font-weight: 400;
+    height: auto;
+    left: 0px;
+    line-height: normal;
+    mix-blend-mode: normal;
+    position: absolute;
+    text-align: left;
+    top: -1px;
+    width: auto;
+}
+
+.register-v-2 .forms-inputs-input-label-bLOhiH {
+    background-color: transparent;
+    border: 1px none;
+    height: 67px;
+    left: 100px;
+    position: absolute;
+    top: 301px;
+    width: 400px;
+}
+
+.register-v-2 .forms-inputs-basic-fkyimj {
+    background-color: transparent;
+    border: 1px none;
+    height: 40px;
+    left: 0px;
+    mix-blend-mode: normal;
+    position: absolute;
+    top: 27px;
+    width: 400px;
+}
+
+.register-v-2 .border-G3otDr {
+    background-color: transparent;
+    height: 40px;
+    left: 0px;
+    position: absolute;
+    top: 0px;
+    width: 400px;
+}
+
+.register-v-2 .regina-cooper-G3otDr {
+    background-color: transparent;
+    color: var(--heading);
+    font-style: normal;
+    font-weight: 400;
+    height: 21px;
+    left: 16px;
+    line-height: normal;
+    mix-blend-mode: normal;
+    position: absolute;
+    text-align: left;
+    top: 9px;
+    width: auto;
+}
+
+.register-v-2 .full-name-fkyimj {
+    background-color: transparent;
+    color: var(--body-light);
+    font-style: normal;
+    font-weight: 400;
+    height: auto;
+    left: 0px;
+    line-height: normal;
+    mix-blend-mode: normal;
+    position: absolute;
+    text-align: left;
+    top: -1px;
+    width: auto;
+}
+
+.register-v-2 .or-login-with-email-zaxYNq {
+    background-color: transparent;
+    height: 18px;
+    left: 100px;
+    position: absolute;
+    top: 252px;
+    width: 402px;
+}
+
+.register-v-2 .elements-divider-nR11Lf {
+    background-color: transparent;
+    height: 1px;
+    left: 0px;
+    mix-blend-mode: normal;
+    position: absolute;
+    top: 9px;
+    width: 117px;
+}
+
+.register-v-2 .elements-divider-nR11Lf2 {
+    background-color: transparent;
+    height: 1px;
+    right: 0px;
+    mix-blend-mode: normal;
+    position: absolute;
+    top: 9px;
+    width: 117px;
+}
+
+.register-v-2 .elements-divider-Ve7MON {
+    background-color: transparent;
+    height: 1px;
+    left: 284px;
+    mix-blend-mode: normal;
+    position: absolute;
+    top: 9px;
+    width: 116px;
+}
+
+.register-v-2 .or-sign-up-with-email-nR11Lf {
+    background-color: transparent;
+    color: var(--body-light);
+    font-style: normal;
+    font-weight: 400;
+    height: 18px;
+    left: 133px;
+    line-height: normal;
+    mix-blend-mode: normal;
+    opacity: 0.6;
+    position: absolute;
+    text-align: center;
+    top: 0px;
+    width: auto;
+}
+
+.register-v-2 .sign-up-with-google-zaxYNq {
+    background-color: transparent;
+    border: 1px none;
+    height: 40px;
+    left: 100px;
+    mix-blend-mode: normal;
+    position: absolute;
+    top: 176px;
+    width: 400px;
+}
+
+.register-v-2 .border-uOxU6e {
+    background-color: transparent;
+    height: 40px;
+    left: 0px;
+    mix-blend-mode: normal;
+    position: absolute;
+    top: 0px;
+    width: 400px;
+}
+
+.register-v-2 .button-uOxU6e {
+    background-color: transparent;
+    color: var(--body-dark);
+    font-style: normal;
+    font-weight: 500;
+    height: 23px;
+    left: 125px;
+    line-height: normal;
+    mix-blend-mode: normal;
+    position: absolute;
+    text-align: center;
+    top: 7px;
+    width: auto;
+}
+
+.register-v-2 .google-icon-uOxU6e {
+    background-color: transparent;
+    height: 16px;
+    left: 14px;
+    mix-blend-mode: normal;
+    position: absolute;
+    top: 12px;
+    width: 15px;
+}
+
+.register-v-2 .title-zaxYNq {
+    background-color: transparent;
+    color: var(--heading);
+    font-style: normal;
+    font-weight: 500;
+    height: auto;
+    left: 189px;
+    line-height: normal;
+    mix-blend-mode: normal;
+    position: absolute;
+    text-align: center;
+    top: 88px;
+    width: auto;
+}
+
+.body-login {
+  margin: 0px;
+  background-image: url('<%= image_path('image_login_bg_capp.jpg') %>');
+  overflow-x: hidden;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+    </style>
+<div class="body-login" dark-scroll="" data-new-gr-c-s-check-loaded="14.1025.0" data-gr-ext-installed="">
+    <input type="hidden" id="anPageName" name="page" value="register-v-2">
+    <div class="container container-center-horizontal">
+        <div class="register-v-2 screen " data-id="3539:1319">
+        <%  if !session[:last_user_login].nil?
+            if session[:last_user_login].include?("BMTU") || session[:last_user_login].include?("BMU") %> 
+        <img class="illustration-ZHgiHx" src="<%= image_path("/assets/image/logo.svg")  %>"/>
+        <% else %>
+        <link rel="shortcut icon" type="image/x-icon" href="<%= image_path("buhlogowebsite.png") %>" />
+        <%= image_tag "buhlogo.png", class:"illustration-ZHgiHx"%>
+        <% end 
+            else %>
+        <link rel="shortcut icon" type="image/x-icon" href="<%= image_path("buhlogowebsite.png") %>" />
+        <%= image_tag "buhlogo.png", class:"illustration-ZHgiHx"%>
+        <% end %> 
+        </div>
+    </div>
+</div>

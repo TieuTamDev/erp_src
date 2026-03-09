@@ -1,0 +1,57 @@
+
+<% case step_info[:status]%>
+<% when "created"%> 
+    <div>
+        <%= link_to "Cập nhật", render_form_appointments_path(step_info[:status],form:step_info[:status], appointment_id: appointment_id, mandocuhandle_id: mandocuhandle_id), remote: true, class: "handle_btn btn btn-primary" %>
+        <%= link_to "Hủy bỏ", render_form_appointments_path(step_info[:status],form:"canceled", appointment_id: appointment_id, mandocuhandle_id: mandocuhandle_id), remote: true, class: "handle_btn btn btn-danger" %> 
+    </div>
+<% when "created_preview"%> 
+    <div>
+        <% if is_access(session[:user_id], "APPOINTMENT-CREATED-PREVIEW", "READ") %>
+            <%= link_to "Xem đề xuất", render_form_appointments_path(step_info[:status],form:step_info[:status], appointment_id: appointment_id), remote: true, class: "handle_btn btn btn-outline-primary" %>
+        <% end %>
+    </div>
+<% when "proposal_creation"%> 
+    <div>
+        <% if is_access(session[:user_id], "APPOINTMENT-APPROVE-PROPOSAL", "READ") %>
+            <%= link_to "Phân công", render_form_appointments_path(step_info[:status],form:"assign", result: "assign", appointment_id: appointment_id, mandocuhandle_id: mandocuhandle_id), remote: true, class: "handle_btn btn btn-outline-primary" %>
+        <% end %>
+        <%= link_to "Xử lý", render_form_appointments_path(step_info[:status],form:step_info[:status], appointment_id: appointment_id, mandocuhandle_id: mandocuhandle_id), remote: true, class: "handle_btn btn btn-primary" %> 
+    </div>
+<% when "department_approval"%> 
+    <div>
+        <%= link_to "Xử lý", render_form_appointments_path(step_info[:status],form:step_info[:status], appointment_id: appointment_id, mandocuhandle_id: mandocuhandle_id), remote: true, class: "handle_btn btn btn-primary" %> 
+    </div>
+<% when "principal_approval"%> 
+    <div>
+        <%= link_to "Xử lý", render_form_appointments_path(step_info[:status],form:step_info[:status], appointment_id: appointment_id, mandocuhandle_id: mandocuhandle_id), remote: true, class: "handle_btn btn btn-primary" %> 
+    </div>
+<% when "propose_creation"%> 
+    <div>
+        <% if is_access(session[:user_id], "APPOINTMENT-APPROVE-PROPOSAL", "READ") %>
+            <%= link_to "Phân công", render_form_appointments_path(step_info[:status],form:"assign", result: "assign", appointment_id: appointment_id, mandocuhandle_id: mandocuhandle_id), remote: true, class: "handle_btn btn btn-outline-primary" %>
+        <% end %>
+        <%= link_to "Xử lý đề xuất", render_form_appointments_path(step_info[:status],form:step_info[:status], appointment_id: appointment_id, mandocuhandle_id: mandocuhandle_id), remote: true, class: "handle_btn btn btn-primary" %> 
+    </div>
+<% when "proposal_creation_preview"%> 
+    <div>
+        <% if is_access(session[:user_id], "APPOINTMENT-PROPOSAL-CREATION-PREVIEW", "READ") %>
+            <%= link_to "Xem tờ trình", render_form_appointments_path(step_info[:status],form:step_info[:status], appointment_id: appointment_id), remote: true, class: "handle_btn btn btn-outline-primary" %>
+        <% end %>
+    </div>
+<% when "evaluation"%> 
+    <div> 
+        <% if is_access(session[:user_id], "APPOINTMENT-EVALUATION-SUMMARY-PREVIEW", "READ") && is_survey %> 
+            <%= link_to "Xem kết quả tổng hợp", render_form_appointments_path(step_info[:status],form:'evaluation_summary', appointment_id: appointment_id), remote: true, class: "handle_btn btn btn-outline-secondary" %> 
+            <%= link_to step_info[:name], render_form_appointments_path(step_info[:status],form:step_info[:status], appointment_id: appointment_id, mandocuhandle_id: mandocuhandle_id), remote: true, class: "handle_btn btn btn-primary" %>
+        <% end %>
+    </div>
+<% when "evaluation_preview"%> 
+    <div> 
+        <% if is_access(session[:user_id], "APPOINTMENT-EVALUATION-SUMMARY-PREVIEW", "READ") && is_survey %> 
+            <%= link_to "Xem kết quả tổng hợp", render_form_appointments_path(step_info[:status],form:'evaluation_summary', appointment_id: appointment_id), remote: true, class: "handle_btn btn btn-outline-secondary" %> 
+        <% end %>
+    </div>
+<%else%>
+    <%= link_to step_info[:name], render_form_appointments_path(step_info[:status],form:step_info[:status], appointment_id: appointment_id, mandocuhandle_id: mandocuhandle_id), remote: true, class: "handle_btn btn btn-primary" %>
+<%end%>

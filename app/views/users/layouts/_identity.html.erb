@@ -1,0 +1,713 @@
+<style>
+  .edit_identity {
+    cursor: pointer;
+    text-decoration: none;
+  }
+  #form_add_identity{
+    margin: 0 auto;
+  }
+
+  #id_add_identity:hover, #id_cancel_add_identity:hover{
+    color: var(--falcon-btn-falcon-success-color) !important;
+
+  }
+  .disable-identity{
+    pointer-events: none;
+    background-color: var(--falcon-btn-bg: #2c7be5) !important;
+  }
+  .line_upload .item-file-process{
+    width: 15% !important;
+  }
+</style>
+<div class="row">
+    <div class="col-12 col-sm-12 col-md-12 col-lg-8 col-xl-8 col-xxl-8 tag d-flex align-items-center title mt-3">
+        <div class="title mt-3">
+    <h4 class="mb-1" style="color: var(--falcon-btn-falcon-success-active-color);"><%= lib_translate("Identity") %></h4>
+    <h6 class="m-0" style="color: var(--falcon-badge-soft-secondary-color);"> <%= lib_translate("CMND_CCCD_passport") %></h6>
+</div>
+
+    </div>
+                <% 
+                arrayStypeIdentityADD = []
+                @identitys.each do |identity|
+                arrayStypeIdentityADD.push(identity.stype ? identity.stype : "")
+                %>
+                <% end %>
+    <div class="col-12 col-sm-12 col-md-12 col-lg-4 col-xl-4 col-xxl-4 action-right-top d-flex align-items-center justify-content-end">
+  <% if is_access(session["user_id"], request.env["PATH_INFO"] == "/user/details" ? "USER-DETAILS" : request.env["PATH_INFO"] == "/user/profile" ? "USER-PROFILE" : "","ADD") && request.env["PATH_INFO"] != "/user/profile" %> 
+        <a id="id_add_identity" class="nav-link pe-2 " role="button" onclick="openFormAddIdentity('<%= arrayStypeIdentityADD  %>')" style="font-size: 13px; font-weight: 700;color: var(--falcon-orange)"   class="btn btn-primary mt-3" data-bs-toggle="collapse" data-bs-target="#collapse_form_add_identity" aria-expanded="false" aria-controls="collapse_form_add_identity">
+          <%= lib_translate("New_Identity") %> </a> 
+  <% end %>
+        <a id="id_cancel_add_identity" class=" nav-link ps-2 pe-2 border-end border-2"  style="display:none; font-size: 13px; font-weight: 700;color: var(--falcon-orange)" data-bs-toggle="collapse" href="#collapse_form_add_identity" role="button" aria-expanded="false" aria-controls="collapse_form_add_identity">
+          <%= lib_translate("Cancle") %> 
+        </a> 
+    </div>
+</div>
+<hr class="mt-4 mb-3" style="width: 100%; height: 4px; background:  var(--falcon-badge-soft-secondary-background-color);">
+<div class="mb-2">
+    <div class="collapse" id="collapse_form_add_identity">
+      <div class="card p-3 capp-form-bg" >
+        <div class="d-flex justify-content-end" >
+        
+        </div>
+          <div class="form_add">
+            <%= form_for @identity, :url=> user_identity_update_path, html: {method: :post,id:"form_add_identity" } do |f| %>
+              <div class="d-flex justify-content-center">
+                <h3 class="m-0" id="cls_bmtu_form_add_identity_title">
+                    <%= lib_translate("New_Identity") %>
+                </h3>
+              </div> 
+              <div class="erro_lable_indentity">
+                <p style=" display: none; color: rgb(197 82 82); border: 1px solid rgb(199 136 136 / 23%); background: rgb(255 54 54 / 16%); border-radius: 5px; padding: 10px;" id="erro_lable_indentity" ></p>
+              </div> 
+              <div class="form-group" style="display:none;">
+                <%= f.label :id %> <span class="red">* </span>
+                <%= f.text_field :id, class: 'form-control' , name: 'identity_id', id: 'identity_id' %>
+              </div>
+              <div class="form-group" id="id_add_sid" style="display: none;">
+                <%= f.label :user_id %>
+                <span style="color: red" class="red">* </span>
+                <%= f.text_field :user_id, class: 'form-control' ,name:'identity_user_id', :value => @user.id %>
+              </div>
+              <div class="row">
+                <div class="col-xl-6 col-sm-12">
+                  <div class="form-group">
+                    <%= f.label lib_translate("Identity_stype") %> <span style="color:red;" class="red">* </span>
+                    <%= f.select_tag :stype, options_for_select([["",""] ,[ lib_translate("CMND"),"CMND"] , [ lib_translate("CCCD"),"CCCD"], [ lib_translate("GPLX"),"GPLX"],[ lib_translate("Passport1"),"PASSPORT"]]), :class=> "form-control", :name=> 'sel_stype', :id=> 'sel_stype', onchange:"selectChanged(this)"%>
+                  </div>                  
+                  <div class="form-group">
+                    <%= f.label lib_translate("Issued_by")%>
+                      <%= f.text_field :issued_by , class: 'form-control' ,:id=> "identity_issued_by",:name=>"identity_issued_by" %>
+                  </div>
+                  <div class="form-group">
+                    <%= f.label lib_translate("Issued_date")%>
+                      <div id="datepicker-container" class="datepicker-container">
+                          <span style="position: relative;" class="outline-element-container"> <input id="identity_issued_date" maxlength="10" type="text" name="identity_issued_date" class="form-control datepicker openemr-datepicker input-textbox outline-element incorrect" placeholder="Type Name" objtype="7" name="action_element" objindex=""  aria-label="Select Date"> <span class="correct-incorrect-icon"> </span></span>
+                          <div id="datepicker"></div>
+                      </div>  
+                  </div>
+                </div>
+                <div class="col-xl-6 col-sm-12">                   
+                  <div class="form-group">
+                    <%= f.label lib_translate("Identifier_Number"),id:"show_message" %>
+                    <%= f.text_field :name, class: 'form-control' , name: 'identity_name',  id: 'identity_name'%>
+                  </div>  
+                  <div class="form-group">
+                    <%= f.label lib_translate("Issued_place")%>
+                      <%= f.text_field :issued_place , class: 'form-control' ,:id=>"identity_issued_place",:name=> "identity_issued_place" %>
+                  </div>
+                  <div class="form-group">
+                    <%= f.label lib_translate("Issued_expired")%>
+                    <div id="datepicker-container" class="datepicker-container">
+                          <span style="position: relative;" class="outline-element-container"> <input id="identity_issued_expired" maxlength="10" type="text" name="identity_issued_expired" class="form-control datepicker openemr-datepicker input-textbox outline-element incorrect" placeholder="Type Name" objtype="7" name="action_element" objindex=""  aria-label="Select Date"> <span class="correct-incorrect-icon"> </span></span>
+                          <div id="datepicker"></div>
+                      </div>  
+                  </div>                  
+                </div>
+                  <div class="mt-3" style="display: flex; flex-direction: row; ">
+                      <%= f.label lib_translate("Status_1") %>
+                          <div style="font-size: 14px">
+                                   <input checked type="radio" id="sel_identity_status_active" class="form-check-input ms-3 me-1" value="ACTIVE" name="sel_status"/>
+                                <label class="form-check-label" for="sel_identity_status_active" style="cursor: pointer"> ACTIVE</label>
+                              
+                                <input  type="radio" id="sel_identity_status_inactive" class="form-check-input ms-3 me-1" value="INACTIVE" name="sel_status"/> 
+                                <label class="form-check-label" for="sel_identity_status_inactive" style="cursor: pointer"> INACTIVE</label>
+                          </div>
+                  </div>
+                
+              </div>
+           
+                <%= f.submit "" , type:"button" , id:"btn_add_new_identity", class: "btn btn-primary mt-3 border-red border-pink-600 cls-bmtu-text-red md:group-hover:bg-pink-50 btn-block btn-block text-uppercase d-none ", style: "width: 100%;" %>
+                
+            <% end %>
+            <label onclick="clickCollapseIdentity(this)" id="button-identity-file" class= "card p-2 mt-3 d-flex" style= "width: 100%; background: var(--falcon-badge-soft-dark-background-color); flex-direction: row; align-items: center; justify-content: space-between;" type="button" data-bs-toggle="collapse" data-bs-target="#add-file-medias" aria-expanded="false" aria-controls="add-file-medias">
+                        <%=lib_translate("List_Identity")%> 
+                    <span id="colapse-icon-identity" class="fas fa-chevron-circle-down"></span>
+                    </label>  
+                     <%# Upload media view %>
+                        <div class="collapse" id="add-file-medias" >
+                            <div class="card">
+                                <div class="card-header">
+                                <h5 class="mb-0"><%=lib_translate("Upload_files")%></h5>
+                                </div>
+                                <div class="card-body bg-light" id="upload_file_identity">
+                                
+                                </div>
+                            </div>
+                        </div>
+                        <%# ==== %>
+                    <div class="collapse" id="form-list-file-identity">
+                        <div  id="card-upload-mediafile">
+                            <div class="p-3">
+                            <div id="table-file-idedntity" >
+                                <div class="table-responsive scrollbar">
+                                <table class="table table-bordered  fs--1 mb-0 ">
+                                    <thead class="bg-200 text-900">
+                                    <tr>
+                                        <th class="sort" data-sort="name" style="text-align:center"><%=lib_translate("File_name")%></th>
+                                        <th class="sort" data-sort="create_date" style="text-align:center"><%=lib_translate("Create_date")%></th>
+                                        <th class="sort" data-sort="owner" style="text-align:center"><%=lib_translate("Created_by")%></th>
+                                        <th data-sort="age"></th>
+                                    </tr>
+                                    </thead>
+                                    <tbody class="" id="list-mediafile-identity">
+                                    
+                                    </tbody>
+                                </table>
+                                </div>
+                                
+                            </div>
+                            <div class="d-flex justify-content-end mt-2">
+                                <button class="btn btn-primary" style="background: var(--falcon-orange);color: white;border: none;" 
+                                type="button" data-bs-toggle="collapse" data-bs-target="#add-file-medias" aria-expanded="false" aria-controls="add-file-medias"><%=lib_translate("Add_doccuments")%></button>
+                            </div>  
+                            </div>
+                        </div> 
+                       
+                        
+                    </div>
+
+                     <label id="name-btn-identity" for="btn_add_new_identity" class= "btn btn-primary mt-3  border-red border-pink-600 cls-bmtu-text-red md:group-hover:bg-pink-50 btn-block text-uppercase" style= "width: 100%;">
+           
+                    </label>
+                    <div id="loading_button_identity" class= "btn btn-primary mt-3 mb-5 border-red border-pink-600 cls-bmtu-text-red md:group-hover:bg-pink-50 btn-block text-uppercase" style="opacity: 0.8;width: 100%; display:none;" >
+                        <i class ="fa fa-spinner fa-spin"> </i>  <%=lib_translate("Save")%> 
+                    </div>  
+          </div>
+      </div>
+    </div>
+</div>
+<div class="mb-3">
+  <div class="pt-0">
+    <div class="tab-content">
+      <table id="table_identity" class="table table-bordered fs--1 mb-0 " style="margin-top: 0px !important; margin-bottom: 0px !important" >
+              <thead class="bg-200 text-900">
+                <tr>
+                  <th class="sort" style="text-align: center; width:17% " data-sort="identity_name"><%= lib_translate("Identity_name")  %></th>
+                  <th class="sort" style="text-align: center; width:12%" data-sort="identity_name"><%= lib_translate("Identifier_Number")  %></th>
+                  <th class="sort" style="text-align: center;" data-sort="identity_issued_date"><%= lib_translate("Issued_date")  %></th>
+                  <th class="sort" style="text-align: center;" data-sort="identity_issued_by"><%= lib_translate("Issued_by")  %></th>
+                  <th class="sort" style="text-align: center; width:5%" data-sort="identity_stype"><%= lib_translate("Identity_stype")  %></th>
+                  <th class="sort" style="text-align: center;" data-sort="identity_status"><%= lib_translate("Status")  %></th> 
+                  <% if (is_access(session["user_id"], request.env["PATH_INFO"] == "/user/details" ? "USER-DETAILS" : request.env["PATH_INFO"] == "/user/profile" ? "USER-PROFILE" : "","EDIT") || is_access(session["user_id"], request.env["PATH_INFO"] == "/user/details" ? "USER-DETAILS" : request.env["PATH_INFO"] == "/user/profile" ? "USER-PROFILE" : "","DEL")) && (request.env["PATH_INFO"] != "/user/profile") %> 
+                    <th class="no-sort" style="text-align: center;white-space:nowrap;"></th>
+                  <% end %>
+                </tr>
+              </thead>
+              <tbody class="list">
+                <% @identitys.each do |identity| %>
+                  <tr myidIdentity='<%= identity.id %>' id="id_iden_btn">
+                    <td style="cursor: pointer; text-align: center; vertical-align: middle;"  class="identity_stype">
+                      <%= ( if identity.stype=="CMND"
+                            lib_translate("Identity_card")
+                            elsif identity.stype=="CCCD"
+                            lib_translate("Citizen_Identification")
+                            elsif identity.stype=="GPLX"
+                            lib_translate("Driving_License")
+                            else identity.stype=="PASSPORT" 
+                            lib_translate("Passport1") 
+                            end ) %>
+                    </td>
+                    <td style="cursor: pointer; text-align: center; vertical-align: middle;"  class="identity_name">
+                      <%= identity.name %>                          
+                    </td>
+                    <td style="cursor: pointer; text-align: center; vertical-align: middle;"  class="identity_issued_date">
+                      <%= identity.issued_date&.strftime('%d/%m/%Y') %>
+                    </td>
+                    <td style="cursor: pointer; text-align: center; vertical-align: middle;"  class="identity_issued_by">
+                      <%= identity.issued_by %>
+                    </td>
+                  
+                    <td style="cursor: pointer; text-align: center; vertical-align: middle;"  class="identity_stype">
+                      <%= identity.stype %>
+                    </td>
+                    <td style="cursor: pointer; text-align: center; vertical-align: middle;"  class="identity_status">
+                      <%= (if identity.status=="ACTIVE" 
+                          lib_translate("ac_icon")
+                        else 
+                          lib_translate("inac_icon")
+                        end )
+                          %>
+                    </td>  
+                  <% if (is_access(session["user_id"], request.env["PATH_INFO"] == "/user/details" ? "USER-DETAILS" : request.env["PATH_INFO"] == "/user/profile" ? "USER-PROFILE" : "","EDIT") || is_access(session["user_id"], request.env["PATH_INFO"] == "/user/details" ? "USER-DETAILS" : request.env["PATH_INFO"] == "/user/profile" ? "USER-PROFILE" : "","DEL")) && (request.env["PATH_INFO"] != "/user/profile") %> 
+                    <td style="text-align: center; white-space: nowrap; vertical-align: middle;">
+                        <% if is_access(session["user_id"], request.env["PATH_INFO"] == "/user/details" ? "USER-DETAILS" : request.env["PATH_INFO"] == "/user/profile" ? "USER-PROFILE" : "","EDIT") && request.env["PATH_INFO"] != "/user/profile" %> 
+                          <a  class="edit_identity" myidIdentity='<%= identity.id %>' style="text-decoration: none; cursor:pointer;" data-bs-toggle="collapse" data-bs-target="#collapse_form_add_identity" aria-expanded="false" aria-controls="collapse_form_add_identity" onclick="openFormUpdateIdentity( '<%= identity.id %>',
+                                                                                      `<%= identity.user_id %>`,
+                                                                                      `<%= identity.name %>`,
+                                                                                      `<%= identity.issued_date&.strftime('%d/%m/%Y') %>`,
+                                                                                      `<%= identity.issued_by %>`, 
+                                                                                      `<%= identity.issued_place %>`, 
+                                                                                      `<%= identity.issued_expired&.strftime('%d/%m/%Y') %>`,
+                                                                                      `<%= identity.stype %>`, 
+                                                                                      `<%= identity.status %>`,
+                                                                                      `<%= arrayStypeIdentityADD %>`,
+                                                                                      `<%= session[:id_identity_user] = identity.id %>`)">
+                            <span class="text-primary far fa-edit me-2"></span>
+                          </a>
+                        <% end %>
+                          <% if is_access(session["user_id"], request.env["PATH_INFO"] == "/user/details" ? "USER-DETAILS" : request.env["PATH_INFO"] == "/user/profile" ? "USER-PROFILE" : "","DEL") && request.env["PATH_INFO"] != "/user/profile" %> 
+                            <a onclick="clickDeleteIdentity(`<%= identity.id %>`,`<%= identity.name %>`,`<%= identity.user_id %>`)" style="cursor: pointer" >
+                              <span class="text-danger fas fa-trash "  style="width: 12px" ></span>
+                            </a>
+                          <% end %>
+                          <% if is_access(session["user_id"], request.env["PATH_INFO"] == "/user/details" ? "USER-DETAILS" : request.env["PATH_INFO"] == "/user/profile" ? "USER-PROFILE" : "","EDIT") && request.env["PATH_INFO"] != "/user/profile" %> 
+                          <a id="openuploadmedia" onclick="clickEditMediaIdentity(`<%= identity.id%>`,<%= identity.user_id%>)" href="#file-identity-<%= identity.id  %>" role="button" aria-expanded="false" aria-controls="file-identity-<%= identity.id  %>" data-bs-toggle="collapse" data-bs-target="#upload_identity-<%= identity.id  %>" aria-expanded="false" aria-controls="upload_identity-<%= identity.id  %>" class="m-0 ms-2">
+                              <span class="fas fa-folder-open icon text-warning"></span>
+                          </a> 
+                        <% end %>
+                          <%# thêm ở đây %>
+                    </td> 
+                <% end %>
+                  </tr>
+                  
+                  <%# sửa ở đây %>
+                    <% if is_access(session["user_id"], request.env["PATH_INFO"] == "/user/details" ? "USER-DETAILS" : request.env["PATH_INFO"] == "/user/profile" ? "USER-PROFILE" : "","EDIT") && request.env["PATH_INFO"] != "/user/profile" %> 
+                      <tr style="background: var(--falcon-border-color);" class="collapse" id="upload_identity-<%= identity.id  %>" >
+                        <td style="display:none;"  class="identity_stype">
+                          <%= ( if identity.stype=="CMND"
+                                lib_translate("Identity_card")
+                                elsif identity.stype=="CCCD"
+                                lib_translate("Citizen_Identification")
+                                elsif identity.stype=="GPLX"
+                                lib_translate("Driving_License")
+                                else identity.stype=="PASSPORT" 
+                                lib_translate("Passport1") 
+                                end ) %>
+                        </td>
+                        <td style="display:none;"  class="identity_name">
+                          <%= identity.name %>                          
+                        </td>
+                        <td style="display:none;"  class="identity_issued_date">
+                          <%= identity.issued_date&.strftime('%d/%m/%Y') %>
+                        </td>
+                        <td style="display:none;"  class="identity_issued_by">
+                          <%= identity.issued_by %>
+                        </td>
+                        <td style=" display: none"  class="identity_issued_place">
+                          <%= identity.issued_place %>
+                        </td>
+                        <td style=" display: none"  class="identity_issued_expired">
+                            <%= identity.issued_expired&.strftime('%d/%m/%Y') %>
+                          </td>
+                        <td style="display:none;"  class="identity_stype">
+                          <%= ( if identity.stype=="CMND"
+                                lib_translate("CMND")
+                                elsif identity.stype=="CCCD"
+                                lib_translate("CCCD")
+                                elsif identity.stype=="GPLX"
+                                lib_translate("GPLX")
+                                else identity.stype=="PASSPORT" 
+                                lib_translate("PASSPORT") 
+                                end ) %>
+                        </td>
+                        <td style="display:none;"  class="identity_status">
+                          <%= (if identity.status=="0" 
+                              lib_translate("ac_icon")
+                            else 
+                              lib_translate("inac_icon")
+                            end )
+                              %>
+                        </td> 
+                          <td colspan="7" class="line_upload">
+                            <div id="file-upload-identity-<%= identity.id  %>"></div>
+                          </td>
+                      </tr>
+                    <% end %>
+                  <% end %>
+              </tbody>
+            </table>
+    </div>
+  </div>
+</div>
+<%# modal delete identity details %>
+<div class="modal fade" id="identity-confirm" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <%= lib_translate("Message") %>
+        </h5>
+        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close" style="border: none; background: none">
+          <span aria-hidden="true" style="font-size: 20px">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <%= lib_translate("confirm_delete_message") %>
+        <span id="modal-mesasge-delete-name" style="font-weight: bold; color: red"></span>?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="button_close_delete"> <%= lib_translate("Close") %> </button>
+        <a class="btn btn-danger" id="button_delete" rel="nofollow" data-method="delete" href="#"><%=lib_translate("Delete")%></a>
+        <div id="loading_button_delete_identity_details" class= "btn btn-danger" style="opacity: 0.8; width: 100%; display:none;" >
+          <i class ="fa fa-spinner fa-spin"> </i>  <%=lib_translate("Deleting")%> 
+        </div>
+      </div> 
+    </div>
+  </div>
+</div>
+  <!-- Identity -->
+<script> 
+    // datepicker
+      $( ".datepicker" ).datepicker({
+          showButtonPanel: true,
+          dateFormat: "dd/mm/yy",
+          changeMonth: true,
+          changeYear: true,
+          yearRange: "c-100:c+10",
+          // defaultDate: +1,
+          buttonImageOnly: true,
+          buttonImage: "<%= image_path('icon-calender-datepicker.png') %>",
+          showOn: "button",
+          buttonText: "<%= lib_translate("Choose_date") %>",
+          closeText: "<%= lib_translate("closeText") %>",
+          prevText: "<%= lib_translate("prevText") %>",
+          nextText: "<%= lib_translate("nextText") %>",
+          currentText: "<%= lib_translate("currentText") %>",
+          monthNamesShort: ["<%= lib_translate("Jan") %>", "<%= lib_translate("Feb") %>", "<%= lib_translate("Mar") %>", "<%= lib_translate("Apr") %>",
+          "<%= lib_translate("May") %>", "<%= lib_translate("Jun") %>", "<%= lib_translate("Jul") %>", "<%= lib_translate("Aug") %>", 
+          "<%= lib_translate("Sep") %>", "<%= lib_translate("Oct") %>", "<%= lib_translate("Nov") %>", "<%= lib_translate("Dec") %>"],
+          dayNamesMin: ["<%= lib_translate("Sun") %>", "<%= lib_translate("Mon") %>", "<%= lib_translate("Tue") %>", "<%= lib_translate("Wed") %>", 
+          "<%= lib_translate("Thu") %>", "<%= lib_translate("Fri") %>", "<%= lib_translate("Sat") %>"],
+          firstDay: 1,
+          isRTL: false,
+          showMonthAfterYear: false,
+          yearSuffix: "",
+      });
+      $(function () {
+          $(".datepicker").on('keydown', function (e) {
+              IsNumeric(this, e.keyCode);
+          });
+          var isShift = false;
+          var seperator = "/";
+          function IsNumeric(input, keyCode) {
+              if (keyCode == 16) {
+                  isShift = true;
+              }
+              //Allow only Numeric Keys.
+              if (((keyCode >= 48 && keyCode <= 57) || keyCode == 8 || keyCode <= 37 || keyCode <= 39 || (keyCode >= 96 && keyCode <= 105)) && isShift == false) {
+                  if ((input.value.length == 2 || input.value.length == 5) && keyCode != 8) {
+                      input.value += seperator;
+                  }
+                  return true;
+              }
+              else {
+                  return false;
+              }
+          };
+          $(".datepicker").keyup(function(e) {
+            // var datecheck = /^([1-9]|0[1-9]|[12][0-9]|3[0-1])\/([1-9]|0[1-9]|1[0 -2])\/\d{4}$/g;
+            var datecheck = /^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]|(?:Jan|Mar|May|Jul|Aug|Oct|Dec)))\1|(?:(?:29|30)(\/|-|\.)(?:0?[1,3-9]|1[0-2]|(?:Jan|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec))\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)(?:0?2|(?:Feb))\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9]|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep))|(?:1[0-2]|(?:Oct|Nov|Dec)))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$/g;
+            var textcheck = /[A-Za-z]/g;
+            var special = /[!"`'#%&.,:;<>=@{}~\$\(\)\*\+\-\\\?\[\]\^\|]+/;
+            var unikey = /^[a-zA-Z_ÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ]+$/;
+              if (!datecheck.test(this.value))
+                {
+                  this.value = this.value.replace(textcheck, '');
+                  this.value = this.value.replace(special, '');
+                  this.value = this.value.replace(unikey, '');
+                }
+                // else if (textcheck.test(this.value) || special.test(this.value) || unikey.test(this.value)) {
+                //   this.value = this.value.replace(textcheck, '');
+                //   this.value = this.value.replace(special, '');
+                //   this.value = this.value.replace(unikey, '');
+                // }
+                else {
+                  // return false;
+                }
+            // }
+          });       
+  
+      });
+    // end datepicker
+    function selectChanged(obj) {
+        var erro_lable_identity = document.getElementById('erro_lable_indentity');  
+        var identity_name_error = document.getElementById('sel_stype');
+        
+        var message = document.getElementById('show_message');
+        var value = obj.value;
+        if (value === ''){
+            message.innerHTML = "";
+        }
+        else if (value === 'CMND'){
+            message.innerHTML = "<%= lib_translate('Identity_card_number')  %> ";
+            erro_lable_identity.style.display = "none";
+            identity_name_error.style.border = "1px solid #ced4da";  
+        }
+        else if (value === 'CCCD'){
+            message.innerHTML = "<%= lib_translate('Citizen_ID_No')  %> ";
+            erro_lable_identity.style.display = "none";
+            identity_name_error.style.border = "1px solid #ced4da";  
+        }
+        else if (value === 'GPLX'){
+            message.innerHTML = "<%= lib_translate('Driving_license_number')  %> ";
+            erro_lable_identity.style.display = "none";
+            identity_name_error.style.border = "1px solid #ced4da";  
+        }
+        else {
+            message.innerHTML = "<%= lib_translate('Passport_#')  %> ";
+            erro_lable_identity.style.display = "none";
+            identity_name_error.style.border = "1px solid #ced4da";  
+        }
+    } 
+    document.getElementById("id_cancel_add_identity").onclick = function() {
+      document.getElementById("id_add_identity").style.display = "block";
+      document.getElementById("id_cancel_add_identity").style.display = "none";
+    }
+    
+
+    function clickCollapseIdentity(element){
+        document.getElementById('colapse-icon-identity').style.rotate = element.className.includes('collapsed') ? "unset" : "90deg";
+    } 
+    function openFormAddIdentity(arrayStypeIdentity) {
+            document.getElementById("id_add_identity").style.display = "none";
+            document.getElementById("id_cancel_add_identity").style.display = "block";
+            let selectElement = document.getElementById("sel_stype");
+            let options =  selectElement.options;
+            for (let i = 0; i < options.length; i++) {
+              const option = options[i];
+              if (arrayStypeIdentity.includes(option.value)) {
+                option.classList.add("d-none");
+              }
+            }
+        $('#form_add_identity').trigger("reset");
+
+          var date = new Date();
+          var day = date.getDate();
+          var month = date.getMonth() + 1;
+          var year = date.getFullYear();
+
+          if (month < 10) month = "0" + month;
+          if (day < 10) day = "0" + day;
+
+          var today = day + "/" + month + "/" + year;
+          var today1 = day + "/" + month + "/" + (year+40);
+
+          document.getElementById("identity_issued_date").value = today;
+          document.getElementById("identity_issued_expired").value = today1;
+          document.getElementById("sel_identity_status_active").checked = true;
+          document.getElementById("identity_issued_by").value = "";
+          document.getElementById("identity_issued_place").value = "";
+          document.getElementById("identity_name").value = "";
+
+          document.getElementById("cls_bmtu_form_add_identity_title").innerHTML = "<%= lib_translate('New_Identity')  %> ";
+          document.getElementById("name-btn-identity").innerHTML = "<%= lib_translate('New_Identity')  %>";
+          document.getElementById("button-identity-file").classList.add("d-none");
+          document.getElementById("form-list-file-identity").classList.add("d-none");
+    
+        }
+    
+    function openFormUpdateIdentity(id, user_id, name, issued_date, issued_by, issued_place, issued_expired, stype, status, arrayStypeIdentity, session_id_identity) {
+            $("html, body").animate({scrollTop: 0}, 100);
+            document.getElementById("collapse_form_add_identity").classList.add("show");
+            document.getElementById("id_add_identity").style.display = "none";
+            document.getElementById("id_cancel_add_identity").style.display = "block";
+            document.getElementById("sel_stype").value = stype;
+            var message = document.getElementById('show_message');
+            if (stype === ''){
+            message.innerHTML = "";
+            }
+            else if (stype === 'CMND'){
+                message.innerHTML = "<%= lib_translate('Identity_card_number')  %> ";
+            }
+            else if (stype === 'CCCD'){
+                message.innerHTML = "<%= lib_translate('Citizen_ID_No')  %> ";
+            }
+            else if (stype === 'GPLX'){
+                message.innerHTML = "<%= lib_translate('Driving_license_number')  %> ";
+            }
+            else {
+                message.innerHTML = "<%= lib_translate('Passport_#')  %> ";
+            }
+            document.getElementById("list-mediafile-identity").value = "";
+            let arridentityFile  = [];
+            document.getElementById("form-list-file-identity").classList.remove("d-none");
+            document.getElementById("button-identity-file").classList.remove("d-none");
+            $("#list-mediafile-identity tr").remove();
+            let selectElement = document.getElementById("sel_stype");
+            let options =  selectElement.options;
+            for (let i = 0; i < options.length; i++) {
+              const option = options[i];
+              if (arrayStypeIdentity.includes(option.value)) {
+                option.classList.add("d-none");
+              }
+               
+            }
+            document.getElementById('erro_lable_indentity').style.display = "none";  
+            document.getElementById("identity_name").style.border = "";
+            document.getElementById('sel_stype').style.border = "1px solid #d8e2ef";
+
+
+            document.getElementById("cls_bmtu_form_add_identity_title").innerHTML = "<%= lib_translate('Update_Identity')  %>"
+            document.getElementById("name-btn-identity").innerHTML = "<%= lib_translate('Update_Identity')  %>"
+            document.getElementById("name-btn-identity").disabled = false;
+            if(status == "ACTIVE"){
+              document.getElementById("sel_identity_status_active").checked = true;
+            }
+            else {
+              document.getElementById("sel_identity_status_inactive").checked = true;
+            }
+
+            document.getElementById("identity_id").value = id;
+            document.getElementById("identity_name").value = name;
+            document.getElementById("identity_issued_date").value = issued_date;
+            document.getElementById("identity_issued_by").value = issued_by;
+            document.getElementById("identity_issued_place").value = issued_place;
+            document.getElementById("identity_issued_expired").value = issued_expired;            
+
+            let action_upload_identity = '<%= url_for(action: :identity_upload_mediafile)%>';
+      
+          formMediaIdentity.setAction(action_upload_identity + "?identity_id="+ id);
+          let idIdentity = document.getElementById("id_iden_btn").getAttribute("myidIdentity");
+          // ở đây sửa form
+          // start show filemedia list
+              $.ajax({
+                type: "GET",
+                url: "<%= user_identity_edit_path%>",
+                data: { idIdentity: session_id_identity },
+                dataType: "JSON",
+                success: function (response) {
+                    formMediaIdentity.removeTableItemAll();
+                    formMediaIdentity.tableAddItems(response.docs);
+                }
+            });
+            
+    }
+      // ở đây thêm mới
+    function clickEditMediaIdentity(identity_id, user_id){
+      
+      if($('#file-upload-identity-'+identity_id).html().length == 0){
+
+        let action_upload = '<%= url_for(action: :identity_upload_mediafile)%>';
+          var formmedia_edit_doc = new FormMedia("file-upload-identity-" + identity_id);
+          formmedia_edit_doc.setAction(action_upload + "?identity_id="+ identity_id);
+          formmedia_edit_doc.setIconPath('<%= root_path%>assets/image/');
+          formmedia_edit_doc.setTranslate(media_trans);
+          formmedia_edit_doc.init();
+          formmedia_edit_doc.addEventListener("confirmdel",(data)=>{
+            deleteDoc(data.id, user_id);
+          });
+              
+            $.ajax({
+              type: "GET",
+              url: "<%= user_identity_edit_path%>",
+              data: { idIdentity: identity_id },
+              dataType: "JSON",
+              success: function (response) {
+                  formmedia_edit_doc.removeTableItemAll();
+                  formmedia_edit_doc.tableAddItems(response.docs);
+              }
+          });
+        }else{
+
+        }
+
+    }
+    // ở đây thêm mới
+    function deleteDoc(doc_id,user_id){
+      let action = '<%= url_for(action: :identity_del, ck_action: "document")%>';
+      action += `&did=${doc_id}&uid=${user_id}`;
+      let link = document.createElement('a');
+      link.setAttribute('data-action',"delete");
+      link.setAttribute('href',action);
+      link.click();
+    }
+
+    var erro_lable_identity = document.getElementById('erro_lable_indentity');
+
+    document.getElementById("identity_name").addEventListener("keyup", function () {
+      var identity_name_error = document.getElementById('identity_name');
+      var identity_name = document.getElementById('identity_name').value;
+      var pId = document.getElementById('identity_id').value;
+
+      jQuery.ajax({
+          data: { check_idenname: identity_name, identity_id: pId},
+          type: 'GET',
+          url: "<%= user_check_unique_iden_path%>",
+          dataType:"JSON",
+          success: function (response) {
+                  if (response.msg == 'true' && response.scode !='') {
+                      erro_lable_identity.innerHTML= "<%= lib_translate('Identity_already_exists')  %>";
+                      erro_lable_identity.style.display = "block";
+                      identity_name_error.style.border="1px solid red";
+                      // document.getElementById("name-btn-identity").disabled = true;
+                      document.getElementById("name-btn-identity").classList.add("disable-identity");
+                  }else if (response.results == 'true'){
+                      erro_lable_identity.innerHTML= "<%= lib_translate('Identity_already_exists')  %>";
+                      erro_lable_identity.style.display = "block";
+                      identity_name_error.style.border="1px solid red";
+                      // document.getElementById("name-btn-identity").disabled = true;
+                      document.getElementById("name-btn-identity").classList.add("disable-identity");
+                  }else if (response.result == 'false'){
+                      // document.getElementById('name-btn-identity').submit();
+                  }else if(response.results == 'false'){
+                      // document.getElementById('name-btn-identity').submit();
+                  }else {
+                      // document.getElementById('name-btn-identity').submit();
+                  }
+          }
+        });
+      erro_lable_identity.style.display = "none";
+      identity_name_error.style.border = "1px solid #ced4da";
+      // document.getElementById("name-btn-identity").disabled = false;
+      document.getElementById("name-btn-identity").classList.remove("disable-identity");
+    });
+    function delete_loading_identity(element){
+      element.style.display = "none"
+      element.previousElementSibling.style.display = "none"
+      element.nextElementSibling.style.display = "block"
+    }
+
+    document.getElementById('btn_add_new_identity').onclick = function () {
+      var stype_iden = document.getElementById('sel_stype').value;
+      var stype_scode_error = document.getElementById('sel_stype');
+      if (stype_iden == "") {
+          erro_lable_identity.innerHTML = "<%= lib_translate("Please_select_identifier_type")  %>";
+          erro_lable_identity.style.display = "block";
+          stype_scode_error.style.border = "1px solid red";
+          return;
+      } else {
+          stype_scode_error.style.border = "1px solid #d8e2ef";
+          erro_lable_identity.style.display = "none";    
+      }
+
+      document.getElementById("name-btn-identity").style.display = "none";
+      document.getElementById("loading_button_identity").style.display = "block";
+      document.getElementById("btn_add_new_identity").type = "submit";
+    };
+
+    const formMediaIdentity = new FormMedia("upload_file_identity");
+    formMediaIdentity.setIconPath('<%= root_path%>assets/image/');
+    formMediaIdentity.setTranslate(media_trans);
+    formMediaIdentity.init();
+
+    // ở đây thay đổi
+    formMediaIdentity.addEventListener("confirmdel",(data)=>{
+        deleteDoc(data.id, data.uid);
+    });
+
+
+    function showModalDeleteIdentity(element) {
+        let href = element.getAttribute("data-action");
+        let name = element.getAttribute("data-name");
+        $("#identity-confirm").find('#button_delete').attr('href',href);
+        $("#identity-confirm").find('#modal-mesasge-delete-name').text(name);
+        // show modal
+        $("#identity-confirm").modal('show');
+
+    }
+    function clickDeleteIdentity(id,name,user_id){
+      let href = '<%= url_for(action: :identity_del)%>';
+      href += `?id=${id}&uid=${user_id}`;
+
+      let html = `<%= lib_translate("confirm_delete_message")%>  <span style="font-weight: bold; color: red">${name}</span>?`
+      openConfirmDialog(html,(result )=>{
+        if(result){
+          doClick(href,'delete')
+        }
+      });
+
+    }
+</script>
+<!-- end Identity -->
+  

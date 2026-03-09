@@ -1,0 +1,17 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  apply: one
+  mediafile: one
+  name: MyString
+  stype: MyString
+  status: MyString
+  note: MyText
+
+two:
+  apply: two
+  mediafile: two
+  name: MyString
+  stype: MyString
+  status: MyString
+  note: MyText

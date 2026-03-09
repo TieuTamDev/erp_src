@@ -1,0 +1,21 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  department: one
+  dtstart: 2022-12-12 21:32:52
+  dtend: 2022-12-12 21:32:52
+  dtsigned: 2022-12-12 21:32:52
+  signedby: MyString
+  note: MyText
+  status: MyString
+
+two:
+  user: two
+  department: two
+  dtstart: 2022-12-12 21:32:52
+  dtend: 2022-12-12 21:32:52
+  dtsigned: 2022-12-12 21:32:52
+  signedby: MyString
+  note: MyText
+  status: MyString

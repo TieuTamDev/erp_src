@@ -1,0 +1,399 @@
+<%= javascript_include_tag '/assets/myjs/pdf/pdf.min.js' %>
+<%= javascript_include_tag '/assets/myjs/pdf/pdf.worker.min.js' %>
+<style>
+    .dataTables_filter{
+        display: none !important;
+    }
+
+    .pdf-container{
+        margin:0 auto;
+        position:relative;
+    }
+    .pdf-sign-list{
+        padding: 5px;
+        border: 1px solid #c1c1c1;
+        overflow: hidden;
+        background: #858585;
+    }
+    .pdf-sign-list .pdf-sign-image{
+        cursor: grab;
+        max-width: 130px;
+        margin-bottom:4px;
+    }
+    .pdf-sign-list .pdf-sign-image:hover{
+        box-shadow: 0px 0px 6px 0px #6e6d6d;
+        border-radius: 5px;
+    }
+    .pdf-page-list{
+        display:flex;
+        flex-direction:column;
+        background: #8f8f8f;
+        padding: 12px;
+        max-height: 700px;
+        overflow-y: scroll;
+        border: 1px solid #c1bdbd;
+    }
+    .pdf-page-wrap{
+        position:relative;
+        width: fit-content;
+    }
+    .pdf-page-space{
+        height:5px;
+    }
+    .pdf-canvas{
+
+    }
+    .pdf-page-edit-wrap{
+        position: absolute;
+        top:0;
+        left:0;
+        z-index:1;
+        width:100%;
+        height:100%;
+    }
+    .pdf-page-edit-area{
+        position:relative;
+        width:100%;
+        height:100%;
+        overflow: hidden;
+    }
+    .grap-preview{
+        position:absolute;
+        top:0;
+        left:0;
+        z-index: 1;
+        pointer-events: none;
+        box-shadow: 0px 0px 0px 2px #dfa43d;
+    }
+    .pdf-edit-element{
+        position:absolute;
+        top:0;
+        left:0;
+        cursor:move;
+    }
+
+    .pdf-edit-element-container{
+        display:flex;
+    }
+    .pdf-edit-element-wrap{
+        position: relative;
+    }
+    .element-selected .pdf-edit-element-wrap{
+        box-shadow: 0px 0px 0px 2px #3edf3d;
+    }
+    .pdf-edit-element-tool-wrap{
+        display:none;
+    }
+    .element-selected .pdf-edit-element-tool-wrap{
+        display: flex;
+        margin-bottom: 4px;
+        align-items: baseline;
+        width: fit-content;
+        position: absolute;
+        top: -29px;
+    }
+    .element-selected .scale-button{
+        display:flex;
+    }
+    .scale-button{
+        display:none;
+        justify-content: center;
+        align-items: center;
+        position: absolute;
+        top: 100%;
+        left: 100%;
+        transform: translate(-50%, -50%);
+        cursor: nwse-resize;
+    }
+    .tool-delete{
+        background: #ef5656;
+        border: 1px solid #db8585;
+        display: flex;
+        color: white;
+        font-size: 13px;
+        cursor: pointer;
+        padding:5px;
+        border-radius: 5px;
+        justify-content: center;
+        align-items: center;
+    }
+    .page-state, .page-state-dx, .page-state-planpayment, .page-state-acceptance{
+        display: flex;
+        position: absolute;
+        top: 0;
+        left: 20.2%;
+        padding: 5px 5px 5px 5px;
+        border-bottom-right-radius: 5px;
+        justify-content: center;
+        align-items: center;
+        background: #28272794;
+        color: white;
+        z-index: 3;
+        pointer-events: none;
+    }
+    .page-state{
+        left: 0 !important
+    }
+    .hidden-style{
+        display:none;
+    }
+</style>
+<div class="col-12 mb-3">
+    <div class="card h-lg-100">
+    <div class="card-body d-flex align-items-center">
+        <div class="w-100">
+            <h4 class="mb-3 text-800">Thông báo bàn giao tài sản</h4>
+            <div class="row">
+                
+            </div>
+            <div class="table-responsive scrollbar">
+                <div class="col-md-auto d-flex justify-content-end">
+                    <!-- <div class="layout_select me-3">
+                        <select class="form-select form-select-sm" name="sel-tag" id="">
+                            <option value="ALL">Tất cả</option>
+                            <% Tag.all&.order(sname: :asc)&.each do |tag| %>
+                                <option value="<%= tag.id %>">
+                                    <%= tag&.sname %>
+                                </option>
+                            <% end %>
+                        </select>
+                    </div> -->
+                    <div class="layout_search">
+                        <input class="form-control form-control-sm" type="text" id="input_search" placeholder="Tìm tài sản...">
+                    </div>
+                </div>
+                <table class="table table-bordered mb-0" id="table-instance">
+                    <thead>
+                        <tr>
+                            <th class="sort align-middle" style="width: 2%" data-bs-toggle="tooltip" data-bs-placement="top" title="Số thứ tự">STT</th>
+                            <th class="sort align-middle" data-bs-toggle="tooltip" data-bs-placement="top" title="Người bàn giao"><%= lib_translate("Người bàn giao") %></th>
+                            <th class="sort align-middle text-center" style="width: 13%" data-bs-toggle="tooltip" data-bs-placement="top" title="Đơn vị bàn giao"><%= lib_translate("Đơn vị bàn giao") %></th>
+                            <th class="sort align-middle text-center" style="width: 13%" data-bs-toggle="tooltip" data-bs-placement="top" title="Phòng sử dụng"><%= lib_translate("Phòng sử dụng") %></th>
+                            <th class="sort align-middle text-center no-sort" style="width: 13%" data-bs-toggle="tooltip" data-bs-placement="top" title="Người nghiệm thu"><%= lib_translate("Người nghiệm thu") %></th>
+                            <th class="sort align-middle text-center no-sort" style="width: 13%" data-bs-toggle="tooltip" data-bs-placement="top" title="Đơn vị nghiệm thu"><%= lib_translate("Đơn vị nghiệm thu") %></th>
+                            <th class="sort align-middle text-center no-sort" style="width: 13%" data-bs-toggle="tooltip" data-bs-placement="top" title="Ngày bàn giao"><%= lib_translate("Ngày bàn giao") %></th>
+                            <th class="sort align-middle text-center no-sort" style="width: 13%" data-bs-toggle="tooltip" data-bs-placement="top" title=""></th>
+                        </tr>
+                    </thead>
+                    <tbody class="list">
+
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer mt-3 d-none">
+                <button class="btn btn-danger me-3" type="button" id="btn-deny">Từ chối</button>
+                <button class="btn btn-primary" type="button" id="btn-accept">Xác nhận</button>
+            </div>
+        </div>
+    </div>
+    </div>
+</div>
+<div class="modal fade" id="modal-confirm-deny" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="modal-confirm-deny" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title d-flex align-items-center fw-bold"><div class="bg-warning me-2 icon-item"><span class="fas fa-exclamation-circle text-white fs-3"></span></div><%= lib_translate("Are_you_sure")%></h5>
+          <button type="button" class="btn-close btn-close-confirm-deny" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form class="form-valid" id="form-confirm-deny" action="<%= consumable_items_deny_transfer_path %>" method="post">
+            <input type="hidden" name="sigdoc_id" id="sigdoc_id" value=""/>
+            <div class="modal-body">
+                <input type="hidden" name="instance_id[]">
+                <span id="item-deny">Bạn có đồng ý từ chối xác nhận nghiệm thu?</span>
+                <label for="" class="form-label fw-bold fs-0">Nhập lí do từ chối: <span class="text-danger">*</span></label>
+                <textarea class="form-control input-valid" name="reason_deny"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger btn-del" id="btn-confirm-deny" type="button"><%= lib_translate("Đồng ý") %></button>
+                <button type="button" class="btn btn-secondary btn-close-confirm-delete" data-bs-dismiss="modal"><%= lib_translate("Close")  %></button>
+            </div>
+        </form>
+      </div>
+    </div>
+</div>
+<!-- modal ký -->
+<div class="modal fade" id="modal_sign" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="modal-confirm-delete" aria-modal="true" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: fit-content;">
+        <div class="modal-content">
+            <div class="tab-content">
+                <div class="modal-header">
+                    <h3 class="mb-3 text-nowrap py-2 py-xl-0" id="title_sigdoc">Ký biên bản bàn giao</h3>
+                    <button type="button" class="btn-close btn-close-confirm-delete" onclick="closeSignForm()" aria-label="Close"></button>
+                </div>
+                <div class="modal-body px-5">
+                    <div class="mt-2">
+                        <div id="pdf-container" class="pdf-container">
+                            <div class="d-flex align-items-center justify-content-end mb-2">
+                                <button class="btn btn-primary me-2" type="button" onclick="AddSignToPage()" id="sign-btn"><span class="fas fa-feather-alt"></span> Ký</button>
+                                <button class="btn btn-success me-2" type="button" onclick="saveSign()" id="save-sign-btn">Hoàn tất</button>
+                                <button class="btn btn btn-warning d-none" data-sigdoc="2" type="button" onclick="clickPreview(this)">
+                                    <span class="fas fa-file-pdf"></span> Preview
+                                </button>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-center" style="position: relative;">
+                                <div id="page-state" class="page-state hidden-style"> Trang 1</div>
+                                <div id="page-list" class="pdf-page-list hidden-style" onscroll="getPageOnScroll(this)">
+                                </div>
+                            </div>
+                            <div id="sign-temp-element" style="display:none;" class="d-none"></div>
+                        </div>
+                    </div>
+                </div>
+                <%= form_tag sign_document_get_user_signs_path,method:'POST',id:'form-get-user-signs',remote:true,authenticity_token: true do %>
+                    <input name="user_id" hidden value="<%= session[:user_id_login]%>">
+                    <input name="sigdoc_id" hidden>
+                <%end%>
+                <%# Lưu chữ ký %>
+                <%= form_tag sign_document_update_sign_path,method:'POST',id:'form-save-signs',remote:true,authenticity_token: true do %>
+                    <textarea name="signs" hidden></textarea>
+                    <input name="sigdoc_id" hidden>
+                <%end%>
+            </div>
+        </div>
+    </div>
+</div>
+<%= form_tag consumable_items_accept_transfer_path, method:'POST', multipart: true, id:'form_accept_transfer', authenticity_token: true do %>
+    <input type="hidden" name="sigdoc_id" id="sigdoc_id" value=""/>
+<% end %>
+<%= form_tag consumable_items_update_data_transfer_path, method:'POST', multipart: true, id:'form_update_data_transfer', authenticity_token: true do %>
+    <input type="hidden" name="sigdoc_id" id="sigdoc_id" value=""/>
+<% end %>
+<%= javascript_include_tag '/assets/myjs/sign_document.js' %>
+<script>
+    $(document).ready(function() {
+        var tableInstance = $('#table-instance').DataTable({...optionTable,...{
+            searching: true,
+            paging: true,
+            info: true,
+            "processing": true,
+            "serverSide": true,
+            "ajax": {
+                "url": ROOT_PATH + "/consumable_items/get_notifications?", 
+                "type": "GET",
+                "data": function(d) {
+                    d.page = d.start / d.length + 1;
+                    d.per_page = d.length; 
+                    if (d.order.length > 0) {
+                        d.order_column = d.columns[d.order[0].column].data 
+                        d.order_dir = d.order[0].dir;
+                    }
+                    d.search = $('.dataTables_filter input[type="search"]').val(); 
+                    console.log("A");
+                    
+                }
+            },
+            columns: [
+                { data: null,
+                    render: function(data, type, row, index) {
+                        return index.row + 1;
+                    }
+                },
+                { data: "transfer_name"},
+                { data: "transfer_department"},
+                { data: "room_user"},
+                { data: "acceptor_name"},
+                //{ data: "price"},
+                { data: "acceptor_department"},
+                { data: "dt_transfer"},
+                { data: "handle_btn"},
+            ]
+        }});
+        $('select[name="sel-tag"]').on('change', function() {
+            var value = $(this).val();
+            tableInstance.ajax.url(ROOT_PATH + "/consumable_items/get_instances?tag_scode=" + value).load();
+        });
+        $('#input_search').on('keyup', function () {
+            tableInstance.search(this.value).draw();
+        });
+    });
+    function deny_transfer(e, instance_id, title){
+        $('#item-deny').html(`Bạn có đồng ý từ chối nhận bàn giao tài sản: ${title}`);
+        $('#form-confirm-deny').find('input[name="instance_id[]').remove();
+        $('#form-confirm-deny').append(`<input type="hidden" name="instance_id[]" value="${instance_id}">`);
+        $('#btn-confirm-deny').click(function(){
+            $(e).parent().parent().remove();
+        })
+    }
+    $('#btn-deny').click(function(){
+        let get_instances = $('input[name="instance_id"]:checked');
+        let arr_instances = [];
+        $('textarea[name="reason_deny"]').removeClass('d-none');
+        $('textarea[name="reason_deny"]').prev().removeClass('d-none');
+        $('#form-confirm-deny').attr('action', "<%= consumable_items_deny_transfer_path %>");
+        if (get_instances.length > 0){
+            $('#form-confirm-deny').find('input[name="instance_id[]').remove();
+            for(let i = 0; i < get_instances.length; i++){
+                $('#form-confirm-deny').append(`<input type="hidden" name="instance_id[]" value="${$(get_instances[i]).val()}">`);
+            }
+            $('#item-deny').html(`Bạn có đồng ý từ chối nhận bàn giao các tài sản đã chọn?`);
+            $('#modal-confirm-deny').modal("show");
+        }else{
+            alert('Bạn chưa chọn tài sản muốn từ chối nhận bàn giao!');
+        }
+    })
+    $('#btn-accept').click(function(){
+        let get_instances_checked = $('input[name="instance_id"]:checked');
+        $('#form-confirm-deny').attr('action', "<%= consumable_items_accept_transfer_path %>");
+        $('#item-deny').html(`Bạn có đồng ý xác nhận bàn giao tài sản?`);
+        $('textarea[name="reason_deny"]').addClass('d-none');
+        $('textarea[name="reason_deny"]').prev().addClass('d-none');
+        if (get_instances_checked.length > 0){
+            $('#modal-confirm-deny').modal("show");
+            for(let i = 0; i < get_instances_checked.length; i++){
+                $('#form-confirm-deny').append(`<input type="hidden" name="instance_id[]" value="${$(get_instances_checked[i]).val()}">`);
+            }
+        }else{
+            //let get_instances = $('input[name="instance_id"]');
+            //for(let i = 0; i < get_instances.length; i++){
+            //    $('#form-confirm-deny').append(`<input type="hidden" name="instance_id[]" value="${$(get_instances[i]).val()}">`);
+            //}
+            alert('Bạn chưa chọn tài sản muốn xác nhận bàn giao!')
+        }
+    })
+    function rejectTransfer(sigdoc_id) {
+        $('#modal-confirm-deny').modal("show");
+        $("#form-confirm-deny #sigdoc_id").val(sigdoc_id); 
+    }
+    $("#btn-confirm-deny").click(function(){
+        reason_deny = $("textarea[name='reason_deny']").val()
+        if (reason_deny == "" || reason_deny.trim() == "") {
+            alert("Vui lòng nhập lí do từ chối")
+        }else{
+            reason_deny.trim()
+            $("#form-confirm-deny").submit()
+        }
+    })
+    let typeSubmit = false;
+    function onAcceptTransfer(sigdoc_id, type_submit) {
+        LoadSigndocById(sigdoc_id);
+        $("#form_accept_transfer #sigdoc_id").val(sigdoc_id);
+        $("#form_update_data_transfer #sigdoc_id").val(sigdoc_id);
+        typeSubmit = type_submit;
+    }
+    function onSignDocLoaded() {
+        $("#modal_sign").modal("show");
+    }
+    
+    function closeSignForm() {
+        $('#modal_sign').modal('hide');
+            if (editElementList.length > 0) {
+            let message = "Bạn có muốn lưu chữ ký không?";
+            showConfirm("confirm-action",message,(result)=>{
+                if (result) {
+                    saveSign();
+                }else{
+                    $('#modal_sign').modal('hide');
+                }
+            })
+        }
+    }
+    function onSignDone(success) {
+        if (success) {
+            if (typeSubmit) {
+                $("#form_update_data_transfer").submit();
+            } else {
+                $("#form_accept_transfer").submit();
+            }
+        }
+    }
+</script>

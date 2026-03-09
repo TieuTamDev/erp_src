@@ -1,0 +1,35 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  stype: MyString
+  sholtype: MyText
+  dtfrom: 2025-04-25 14:05:47
+  dtto: 2025-04-25 14:05:47
+  handover_receiver: MyText
+  details: MyText
+  status: MyString
+  priority: MyString
+  issued_place: MyText
+  holpros: one
+  result: MyString
+  itotal: MyText
+  note: MyText
+  issued_national: MyString
+  place_before_hol: MyText
+
+two:
+  stype: MyString
+  sholtype: MyText
+  dtfrom: 2025-04-25 14:05:47
+  dtto: 2025-04-25 14:05:47
+  handover_receiver: MyText
+  details: MyText
+  status: MyString
+  priority: MyString
+  issued_place: MyText
+  holpros: two
+  result: MyString
+  itotal: MyText
+  note: MyText
+  issued_national: MyString
+  place_before_hol: MyText

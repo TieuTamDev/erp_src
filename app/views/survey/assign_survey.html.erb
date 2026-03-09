@@ -1,0 +1,119 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "select2-bootstrap-5-theme.min" %>
+  <%= stylesheet_link_tag "select2.min" %>
+  <%= javascript_include_tag 'select2.min.js'%>
+<% end %>
+<style>
+  .select2-selection__choice__display{
+    margin-left: 10px;
+  }
+  .select2-selection__choice__remove{
+    padding-top: 5px !important;
+    background-color: !important;
+  }
+  .date-picker-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .date-picker-item {
+    display: flex;
+    align-items: center;
+  }
+
+  .date-picker-item label {
+    min-width: 120px; /* Đảm bảo label không quá ngắn */
+    margin-bottom: 0; /* Loại bỏ margin mặc định của form-label */
+  }
+
+  .date-picker-item input {
+    width: 150px; /* Giới hạn chiều rộng của input */
+  }
+
+</style>
+<% fullname = @appointment&.user&.last_name + " " + @appointment&.user&.first_name 
+    maxdate = @appointment&.trust_collection_period&.strftime("%Y-%m-%d")
+%>
+  <input type="hidden" id="appointments-id" value="<%= params[:appointments_id] %>">
+  <input type="hidden" id="mandocuhandle_id" value="<%= params[:mandocuhandle_id] %>">
+  <%= breadcrumbs([
+      { title: 'Trang chủ', path: root_path }, 
+      { title: 'Bổ nhiệm', path: appointments_path }, 
+      { title: @appointment.title, path: appointment_path(@appointment) }, 
+      { title: "Phân công khảo sát", current: true }
+  ]) %>
+  <div class="card card-body">
+    <div class="error-message mb-2" id="date-error" style="display: none; color: red; margin-top: 10px;"></div>
+    <div class="d-flex justify-content-between mb-4 align-items-end">
+      <div class="date-picker-container">
+        <div class="date-picker-item">
+          <label for="start-date" class="form-label me-2">Hạn đánh giá từ</label>
+          <input type="date" class="form-control" id="start-date" value="<%= Date.today.strftime('%Y-%m-%d') %>" placeholder="dd/mm/yyyy" >
+        </div>
+        <div class="date-picker-item">
+          <label for="end-date" class="form-label ">Đến ngày</label>
+          <input type="date" class="form-control" id="end-date"  max="<%=maxdate%>">
+        </div>
+        <div class="date-picker-item">
+          <label class="form-label me-2">Chọn khảo sát</label>
+          <select class="form-select" id="survey_select">
+            <%@assignSurveys.each do |survey|%>
+              <option value="<%=survey.id%>"><%=survey.name%> </option>
+            <%end%> 
+          </select>
+        </div>
+
+      </div>
+      <button class="btn" id="btn-publish-modal" style="background: #2C7BE5; color: white;" data-bs-toggle="modal" data-bs-target="#publish-modal">Xuất bản</button>
+    </div>
+  </div>
+
+<div class="card card-body mt-2" style="background:#F9FAFD">
+  <div class="container">
+    <h3><%=@appointment.title%></h3>
+    <p>(Ứng viên <%=fullname%>)</p>        
+  </div>
+  <div class="container survey-preview">
+  </div>
+</div>
+<div class="modal fade" id="publish-modal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 500px">
+    <div class="modal-content position-relative">
+      <!-- Giữ nguyên header và nút đóng -->
+      <div class="modal-body p-0">
+        <div class="rounded-top-lg py-3 ps-4 pe-6 bg-light">
+          <h4 class="mb-1" id="modalExampleDemoLabel">Xác nhận xuất bản phiếu khảo sát</h4>
+        </div>
+        <div class="p-4 pb-0">
+          <div class="mb-3">
+            <label class="col-form-label" for="departments">Chọn phòng ban liên quan:</label>
+            <select id="departments" name="departments[]" class="multiple" multiple>
+              <%@departments.each do |department|%>
+                <option value="<%=department.id%>"><%=department.name%></option>             
+              <%end%>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="col-form-label" for="users">Chọn nhân sự liên quan:</label>
+            <select id="users" name="users[]" class="multiple" multiple>
+              <%@users.each do |user|%>
+                <option value="<%=user.id%>"><%=user.last_name%> <%=user.first_name%> (<%=user.sid%>)</option>             
+              <%end%>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Hủy</button>
+        <button class="btn btn-primary" onclick="publishSurvey()" type="button">Xuất bản </button>
+      </div>      
+    </div>
+  </div>
+</div>
+<script>
+    var appointment_path =  '<%=  appointment_path(@appointment) %>';
+    var root_path = '<%= @ROOT_PATH%>';
+</script>
+
+<%= javascript_include_tag '/assets/myjs/assign_survey.js' %>

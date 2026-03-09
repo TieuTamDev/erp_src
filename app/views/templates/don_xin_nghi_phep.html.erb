@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đơn xin nghỉ phép</title>
+    <style>
+        @font-face {
+            font-family: 'Times';
+            font-weight: normal;
+            src: url("<%= Rails.root.join('app', 'assets', 'fonts', 'times.svg') %>") format('svg')
+
+        }
+        @font-face {
+            font-family: 'Times-bold';
+            font-weight: normal;
+            src: url("<%= Rails.root.join('app', 'assets', 'fonts', 'times-bold.svg') %>") format('svg')
+        }
+        @font-face {
+            font-family: 'Times-italic';
+            font-weight: normal;
+            src: url("<%= Rails.root.join('app', 'assets', 'fonts', 'times-italic.svg') %>") format('svg')
+        }
+        .bold{
+            font-family:"Times-bold";
+            font-weight: bold
+        }
+        .nomal_form{
+            font-family:"Times";
+            font-weight: normal
+        }
+        .italic{
+            font-family:"Times-italic"
+        }
+        .margin-y-auto{
+            margin-left: auto;
+            margin-right: auto;
+        }
+      
+        thead {
+            display: table-header-group;
+        }
+        tfoot {
+            display: table-footer-group;
+        }
+        thead {
+            display: table-row-group;
+        }
+        /* tạo khoảng cách để ký */
+        .page-break-inside-avoid{
+            min-height: 200px;
+            page-break-inside: avoid;
+        }
+        .underline::after {
+            content: "";
+            display: block;
+            width: 40%;
+            height: 1px;
+            background-color: black;
+            margin: 0 auto;
+            margin-top: 3px;
+        }
+
+        ul{
+            list-style: none;
+            list-style-type: none;
+        }
+        /* Thêm dãn cách dòng và hàng */
+        p, li, td, th {
+            line-height: 1.6; /* Tương đương khoảng 18pt cho font-size 12px, đảm bảo khoảng cách trên dưới mỗi dòng */
+            margin-bottom: 1.5pt; /* Dãn cách giữa các hàng */
+        }
+        table {
+            page-break-inside: avoid !important;
+        }
+
+        tr, td, th {
+            page-break-inside: avoid !important;
+            page-break-after: auto;
+        }
+        .no-border-table {
+            border-collapse: collapse;
+            border: none !important;
+        }
+
+        .no-border-table td,
+            .no-border-table th {
+            border: none !important;
+        }
+    </style>
+    <link rel="stylesheet" href="<%= Rails.root.join('public', 'assets', 'mystyle', 'bootstrap.min.css') %>">
+</head>
+<body>
+    <%
+        header = ""
+        dear = ""
+
+        if data[:organization].first == "BUH"
+            if data[:department_name] === "Phòng Tổ chức - Hành chính - Quản trị"
+                department_name = ""
+                class_department_name = "d-none"
+            else
+                department_name = data[:department_name]
+                class_department_name = ""
+            end
+            header = "
+                <div class='' style='font-size: 12px !important;'>TRƯỜNG ĐẠI HỌC Y DƯỢC BUÔN MA THUỘT</div>
+                <div class='underline bold' style='font-size: 12px !important;'>BỆNH VIỆN ĐẠI HỌC Y DƯỢC BUÔN MA THUỘT</div>
+            "
+            dear = "
+                <li>- Ban Giám đốc - Bệnh viện Đại học Y Dược Buôn Ma Thuột</li>
+                <li class='#{class_department_name}'>- #{department_name}</li>
+                <li>- Phòng Tổ chức - Hành chính - Quản trị</li>
+            "
+            reason = "<p class='mb-2'>Tôi làm đơn này xin phép Ban Giám đốc, Lãnh đạo khoa/phòng cho tôi được nghỉ:</p>"
+        elsif data[:organization].first == "BMU"
+            if data[:department_name] === "Phòng Tổ chức - Hành chính"
+                department_name = ""
+                class_department_name = "d-none"
+            else
+                department_name = data[:department_name]
+                class_department_name = ""
+            end
+            header = "
+                <div class='' style='font-size: 12px !important;'>BỘ GIÁO DỤC VÀ ĐÀO TẠO</div>
+                <div class=' bold' style='font-size: 12px !important;'>TRƯỜNG ĐẠI HỌC Y DƯỢC BUÔN MA THUỘT</div>
+            "
+            dear = "
+                <li>- Ban Giám hiệu - Trường Đại học Y Dược Buôn Ma Thuột</li>
+                <li class='#{class_department_name}'>- #{department_name}</li>
+                <li>- Phòng Tổ chức - Hành chính</li>
+            "
+            reason = "<p class='mb-2'>Tôi làm đơn này xin phép Ban Giám hiệu và Lãnh đạo khoa/phòng cho tôi được nghỉ:</p>"
+        else
+            if data[:department_name] === "Phòng Tổ chức - Hành chính"
+                department_name = ""
+                class_department_name = "d-none"
+            else
+                department_name = data[:department_name]
+                class_department_name = ""
+            end
+            header = "
+                <div class='' style='font-size: 12px !important;'>TRƯỜNG ĐẠI HỌC Y DƯỢC BUÔN MA THUỘT</div>
+                <div class='underline bold' style='font-size: 12px !important;'>#{data[:department_name]}</div>
+            "
+            dear = "
+                <li>- Ban Giám hiệu - Trường Đại học Y Dược Buôn Ma Thuột</li>
+                <li class='#{class_department_name}'>- #{department_name}</li>
+                <li>- Phòng Tổ chức - Hành chính</li>
+            "
+            reason = "<p class='mb-2'>Tôi làm đơn này xin phép Lãnh đạo nhà trường cho tôi được nghỉ:</p>"
+        end
+    %>
+    <div class="container mt-4" id="pdf-content" style="margin-top: 40px !important;">
+        <div class="text-center" style="width: 100%;font-size: 0; margin-top: 40px !important;">
+            <div class="" style="width: 52%;display: inline-block;vertical-align: top;">
+                <%= header.html_safe %>
+            </div>
+            <div class="bold" style="width: 48%;display: inline-block;vertical-align: top;">
+                <div class="" style="font-size: 12px !important;">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</div>
+                <div class="underline" style="font-size: 12px !important;">Độc lập - Tự do - Hạnh phúc</div>
+            </div>
+        </div>
+        <%
+            # Tạo title động nếu là BMU
+            if data[:organization].first == "BMU" || data[:organization].first == "BMTU"
+                holtype_names = data[:holdetails].map do |h|
+                    hol = Holtype.find_by(code: h.sholtype)
+                    hol&.name&.strip
+                end.compact.uniq
+
+                # Viết hoa toàn bộ
+                holtype_title = holtype_names.map(&:upcase).join(", ")
+
+                # Nếu không có gì thì fallback như cũ
+                final_title = "ĐƠN XIN #{holtype_title.presence || 'NGHỈ PHÉP'}"
+            else
+                final_title = "ĐƠN XIN NGHỈ PHÉP / NGHỈ KHÔNG LƯƠNG / NGHỈ CHẾ ĐỘ"
+            end
+        %>
+        <h4 class="text-center mt-3 bold"><%= final_title %></h4>
+        
+        <p class="col-11 margin-y-auto mb-0 nomal_form" style="font-size: 13px !important;">Kính gửi:</p>
+        <ul class="col-10 margin-y-auto nomal_form" style="font-size: 13px !important;"><%= dear.html_safe %></ul>
+        <div class="col-11 margin-y-auto nomal_form" style="font-size: 13px !important;">
+            <p class="mb-0">Tên tôi là: <span class='bold ms-3'><%= data[:user].last_name %> <%= data[:user].first_name %></span></p>
+            <p class="mb-0">Mã số nhân viên: <span class='bold ms-3'><%= data[:user].sid %></span> </p>
+            <p class="mb-0">Chức vụ (Chức danh): <span class='bold ms-3'><%= data[:positionjob] %></span></p>
+            <p class="mb-0">Đơn vị công tác: <span class='bold ms-3'><%= data[:department_name] %> </span></p>
+            <p class="mb-0">Số điện thoại liên hệ khi cần: <span class='bold ms-3'><%= data[:user].mobile %></span> </p>
+            <p class="mb-0">Tổng số ngày nghỉ theo đơn: <span class='bold ms-3'><%= data[:dttotal].present? ? data[:dttotal] : "Không xác định" %> ngày</span> </p>
+            <%= reason.html_safe %>
+        </div>
+        <table class="col-11 margin-y-auto table table-bordered mb-2">
+            <thead class="text-center">
+                <tr>
+                    <th class="bold align-middle" style="font-size: 13px !important;width: 15%;">Loại nghỉ</th>
+                    <th class="align-middle" style="font-size: 13px !important;width: 20%;"><span class="bold">Thời gian nghỉ</span></th>
+                    <th class="align-middle" style="font-size: 13px !important;width: 10%;"><span class="bold">Tổng số ngày</span></th>
+                    <th class="bold align-middle" style="font-size: 13px !important;width: 20%;">Người hỗ trợ công việc</th>
+                    <th class="bold align-middle" style="font-size: 13px !important;width: 17%;">Lý do nghỉ</th>
+                    <th class="bold align-middle" style="font-size: 13px !important;width: 18%;">Nơi đăng ký</th>
+                </tr>
+            </thead>
+            <tbody>
+                <%
+                    time_labels = {
+                        "AM"  => "Buổi sáng",
+                        "PM"  => "Buổi chiều",
+                        "ALL" => "Cả ngày"
+                    }
+
+                    # Parse & sort theo ngày
+                    detail_items = h.details.to_s.split('$$$').map do |item|
+                        date_str, session = item.split('-')
+                        # Đảm bảo parse đúng dạng dd/mm/yyyy
+                        date = Date.strptime(date_str.strip, '%d/%m/%Y') rescue Date.parse(date_str.strip)
+                        { date: date, session: session }
+                    end.sort_by { |d| d[:date] }
+
+                    # Gom nhóm các đoạn liên tục
+                    segments = []
+                    current_segment = []
+
+                    detail_items.each do |entry|
+                        if current_segment.empty?
+                        current_segment << entry
+                        else
+                        prev = current_segment.last
+                        # liên tiếp 1 ngày và cùng session ALL
+                        if entry[:date] == prev[:date] + 1 && entry[:session] == 'ALL' && prev[:session] == 'ALL'
+                            current_segment << entry
+                        else
+                            segments << current_segment
+                            current_segment = [entry]
+                        end
+                        end
+                    end
+                    segments << current_segment unless current_segment.empty?
+
+                    # Build HTML
+                    details = segments.map do |segment|
+                        # Nếu >= 3 ngày liên tục ALL => gộp
+                        if segment.size >= 3 && segment.all? { |e| e[:session] == 'ALL' }
+                        from = segment.first[:date].strftime('%d/%m/%Y')
+                        to   = segment.last[:date].strftime('%d/%m/%Y')
+                        "<p class='mb-0'>Từ #{from} đến #{to} (#{time_labels['ALL']})</p>"
+                        else
+                        # Còn lại: in từng ngày
+                        segment.map do |e|
+                            label = time_labels[e[:session]] || e[:session]
+                            "<p class='mb-0'>#{e[:date].strftime('%d/%m/%Y')} (#{label})</p>"
+                        end.join
+                        end
+                    end.join.html_safe
+                %>
+
+                <%
+                    # --------------------------
+                    # XỬ LÝ NƠI ĐĂNG KÝ + ĐỊA CHỈ
+                    # --------------------------
+                    place_before_hol = h&.place_before_hol.presence || ""
+
+                    issued_place_text = ""
+
+                    if h.issued_place == "IN-COUNTRY"
+                        # Trong nước
+                        issued_place_text = "Trong nước"
+
+                        # Nếu có địa chỉ, thêm xuống dòng
+                        if place_before_hol.present?
+                            issued_place_text += "<br><span><b>Địa chỉ:</b> #{place_before_hol}</span><br>"
+                        end
+
+                    else
+                        # Nước ngoài
+                        parts = h.issued_place.split("$$$")
+                        nationality = Nationality.where(scode: parts[0]).first
+                        foreign_address = parts[1] || ""
+
+                        issued_place_text = "Nước ngoài (#{nationality&.name})"
+
+                        # Địa chỉ trước lưu trú ở nước ngoài
+                        if place_before_hol.present?
+                            issued_place_text += "<br><span><b>Địa chỉ:</b> #{place_before_hol}</span><br>"
+                        end
+
+                        # Địa chỉ trước khi xuất cảnh là địa chỉ thường trú
+                        # if data[:address].present?
+                        #     # issued_place_text += "<br><span>Địa chỉ trước khi xuất cảnh: #{data[:address]}</span>"
+                        #     issued_place_text += "<br><span><b>Địa chỉ:</b> #{data[:address]}</span><br>"
+                        # end
+                    end
+                %>
+
+                <tr>
+                    <td class="nomal_form" style="font-size: 13px !important;"><%= holtype&.name %></td>
+                    <td class="nomal_form" style="font-size: 13px !important;"><%= details %></td>
+                    <td class="nomal_form" style="font-size: 13px !important;"><%= h.itotal.present? ? h.itotal : "-" %> ngày</td>
+                    <td class="nomal_form" style="font-size: 13px !important;"><%= handover_receiver %></td>
+                    <td class="nomal_form" style="font-size: 13px !important;"><%= h&.note %></td>
+                    <td class="nomal_form" style="font-size: 13px !important;"><%= issued_place_text.html_safe %></td>
+                </tr>
+                <% end %>
+            </tbody>
+        </table>
+        <div class="col-11 margin-y-auto">
+            <p class="mb-0 nomal_form" style="font-size: 13px !important;">Tôi có trách nhiệm bàn giao lại công việc và tài liệu cho ông (bà) nêu trên, nhằm đảm bảo công việc trong thời gian nghỉ.</p>
+            <p class="mb-0 nomal_form" style="font-size: 13px !important;">Kính đề nghị <%= data[:organization].first == "BUH" ? 'Ban Giám đốc' : 'Ban Giám hiệu'%>, Lãnh đạo khoa/phòng xem xét giải quyết cho tôi theo nguyện vọng trên. </p>
+            <p class="mb-0 nomal_form" style="font-size: 13px !important;">Tôi xin chân thành cảm ơn./.</p>
+        </div>
+        <%
+        department_name_upercase = ""
+        if data[:organization].first == "BUH"
+            if data[:department_name] === "Phòng Tổ chức - Hành chính - Quản trị"
+                department_name_upercase = ""
+            else
+                department_name_upercase = data[:department_name]
+            end
+        else
+            if data[:department_name] === "Phòng Tổ chức - Hành chính"
+                department_name_upercase = ""
+            else
+                department_name_upercase = data[:department_name]
+            end
+        end
+        %>
+        <table class="no-border-table col-11 margin-y-auto" style="border:0px white !important; outline:0 !important; box-shadow:none !important;">
+            <tr style="border: none !important;">
+                <td colspan="3" style="text-align: right; font-size: 13px; border: none !important;">
+                    <p class="text-end italic nomal_form" style="font-size: 13px !important;">Đắk Lắk, <%= data[:date_created]%></p>
+                </td>
+            </tr>
+            <tr style="border: none !important;">
+                <td style="width: 33%; text-align: center; font-size: 13px; border: none !important;">
+                <h6 class="bold">PHÒNG <%= data[:organization].first == "BUH" ? 'TCHCQT' : 'TC-HC'%></h6>
+                </td>
+
+                <td style="width: 33%; text-align: center; font-size: 13px; border: none !important;">
+                <h6 class="bold text-uppercase"><%= department_name_upercase %></h6>
+                </td>
+
+                <td style="width: 33%; text-align: center; font-size: 13px; border: none !important;">
+                <h6 class="bold">NGƯỜI LÀM ĐƠN</h6>
+                </td>
+            </tr>
+
+            <tr style="border: none !important;">
+                <td colspan="3" style="text-align: center; padding-top: 150px; font-size: 13px; border: none !important;">
+                <h6 class="bold">
+                    DUYỆT CỦA <%= data[:organization].first == "BUH" ? 'BAN GIÁM ĐỐC' : 'BAN GIÁM HIỆU'%>
+                </h6>
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>

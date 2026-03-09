@@ -1,0 +1,15 @@
+<script defer>
+    $("#loading").css("display", "flex");
+    <%
+        doman = request.base_url + "/sftraining/lms/"
+        surl = ""
+        case @notice.stype {
+            when "LMS_HEAD_APPROVE_SCHEDULE":
+                url = "#{doman}department_training_plan?lang=#{session[:lang]}"
+            when "LMS_LECTURE_SCHEDULE":
+                url = "#{doman}index?lang=#{session[:lang]}"
+            end
+        }
+    %>
+    window.location.href = "<%= surl %>";
+</script>

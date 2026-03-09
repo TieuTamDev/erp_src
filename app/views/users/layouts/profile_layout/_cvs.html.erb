@@ -1,0 +1,104 @@
+<% content_for :style_profile do %>
+      <!-- Bỏ style vào đây nhé! thanks -->
+<% end %>
+
+<% content_for :javascript_profile do %> 
+      <!-- Bỏ Javascript vào đây nhé! thanks -->
+<% end %>
+<style>
+
+  #title_Cvs{
+    color: var(--falcon-orange) !important;
+  }
+  #title_Cvs:hover{
+    color: var(--falcon-btn-falcon-success-color) !important;
+  }
+  /* #id_cancel_cvs{
+    color: var(--falcon-orange) !important;
+  }
+  #id_cancel_cvs:hover{
+    color: var(--falcon-btn-falcon-success-color) !important;
+  } */
+</style>
+<hr class="mt-4 mb-3" style="width: 100%; height: 4px; background:  var(--falcon-badge-soft-secondary-background-color);">
+<div class="row">
+  <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 col-xxl-12 tag d-flex align-items-center">
+    <h5 class="m-0 mb-2" style="font-size: 17px;"><%= lib_translate("Archived_CVs") %></h5> 
+  </div>
+  <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 col-xxl-12 action-right-top d-flex align-items-center justify-content-end">
+    <a class="nav-link ps-2 pe-2 border-end border-2" id="title_Cvs" role="button" style="font-size: 13px; font-weight: 600;" data-bs-toggle="collapse" data-bs-target="#collapse_cvs" aria-expanded="false" aria-controls="collapse_cvs">
+      <%= lib_translate("Open") %> 
+    </a>
+    <a id="id_cancel_cvs" class=" nav-link ps-2 pe-2 border-end border-2"  style="display:none; font-size: 13px; font-weight: 600;" data-bs-toggle="collapse" href="#collapse_cvs" role="button" aria-expanded="false" aria-controls="collapse_cvs">
+      <%= lib_translate("Close") %> 
+    </a> 
+    <a class="nav-link ms-3 me-2" data-bs-toggle="collapse" href="#collapse_cvs" role="button" aria-expanded="false" aria-controls="collapse_cvs" onclick="clickCollapseCV(this)">
+          <span class="fas fa-caret-down" id="collapse-icon-cv"></span>
+    </a>
+  </div>
+</div>
+<%# Upload media view %>
+<div class="card mt-3">
+  <div class="collapse" id="collapse_cvs">
+      <div class="card">
+        <div class="card-body bg-light" id="upload_file_adoc"></div>
+      </div>
+  </div>
+</div>
+<%# ==== %>
+
+<script>
+   function clickCollapseCV(element){
+    document.getElementById('collapse-icon-cv').style.rotate = element.className.includes('collapsed') ? "90deg" : "unset";
+  }
+
+  $('#title_Cvs').click(function(){
+    $("#title_Cvs").html("<%= lib_translate("Close") %>");
+
+    $('#title_Cvs').css({"display": "none"});
+
+    $('#id_cancel_cvs').css({"display": "block"});
+  });
+
+  $('#id_cancel_cvs').click(function(){
+    $("#title_Cvs").html("<%= lib_translate("Open") %>");
+
+    $('#title_Cvs').css({"display": "block"});
+
+    $('#id_cancel_cvs').css({"display": "none"});
+  });
+
+
+  function deleteaDoc(id_adoc){
+      let action = '<%= url_for(action: :adoc_del)%>';
+      action += `?aid=${id_adoc}`;
+      let link = document.createElement('a');
+      link.setAttribute('data-action',"delete");
+      link.setAttribute('href',action);
+      link.click();
+  }
+  <% 
+    listDocs = []
+    @user.applies[0].adocs.each do |doc|
+      listDocs.push({
+        id: doc.id,
+        relative_id: doc.apply_id,
+        file_name: doc.mediafile.file_name,
+        created_at: doc.created_at.strftime("%d/%m/%Y"),
+        file_owner: doc.mediafile.owner
+      })
+    end
+  %>
+  var listDocs = <%= listDocs.to_json.html_safe%>;
+  const formMediaAdoc = new FormMedia("upload_file_adoc");
+  formMediaAdoc.setIconPath('<%= root_path%>assets/image/');
+  formMediaAdoc.setAction('<%= url_for(action: :adoc_upload_mediafile, id: @user.id)%>');
+  formMediaAdoc.setTranslate(media_trans);
+  formMediaAdoc.init();
+  
+  formMediaAdoc.addEventListener("confirmdel",(data)=>{
+    deleteaDoc(data.id);
+  });
+  formMediaAdoc.tableAddItems(listDocs);
+
+</script>

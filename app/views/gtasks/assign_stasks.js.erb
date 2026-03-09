@@ -1,0 +1,13 @@
+$('#popupMediumModal .modal-content').html("<%= j(render 'assign_stasks_modal') %>");
+$('#popupMediumModal .modal-content').prepend("<%= j(render 'shared/new_modal_title', title: 'Thêm công việc vào nhóm') %>");
+$('#popupMediumModal').attr('data-bs-focus', false);
+$('#popupMediumModal').modal('show');
+showLoadding(false);
+
+// Khởi tạo select2 cho multiple select
+$(document).ready(function() {
+  $('.select2-multiple').select2({
+    placeholder: "Chọn các công việc",
+    width: '100%'
+  });
+});

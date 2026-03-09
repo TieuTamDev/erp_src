@@ -1,0 +1,45 @@
+<%= breadcrumbs([
+  { title: 'Thư viện công việc', path: works_index_path }
+]) %>
+
+<div class="card mb-3">
+    <div class="card-body pt-0">
+        <div class="tab-content">
+            <div class="row">
+                <div class="col-12 title d-flex align-items-center mt-3">
+                    <h4 class="mb-1">Thư viện công việc</h4>
+                </div>
+            </div>
+
+            <div class="card-body position-relative" style="padding-left: 0px;">
+                <ul class="nav nav-tabs" role="tablist" style="border-bottom: 2px solid #E2E2E2;"> 
+                    <% @tab_names.each do |tab, name| %>
+                        <li class="nav-item pe-4">
+                            <%= link_to works_index_path(tab: name, lang: session[:lang]),
+                                        class: "nav-link #{@current_tab == name ? 'active' : ''}",
+                                        style: "font-size: 18px; font-weight: 400 !important;",
+                                        role: "tab" do %>
+                            <span class="d-block text-center">
+                                <%= name %>
+                                <% if tab != :works && @tab_counts[tab].to_i > 0 %>
+                                    <span class="ms-1" style="color: #4E606E; font-size: 16px; font-weight: 700;">
+                                        <%= @tab_counts[tab] %>
+                                    </span>
+                                <% end %>
+                            </span>
+                            <% end %>
+                        </li>
+                    <% end %>
+                </ul>
+            </div>
+
+            <div class="tab-content" style="color: #000;">
+                <%= render partial: 'works/index/works' if @current_tab == @tab_names[:works] %>
+                <%= render partial: 'works/index/functions' if @current_tab == @tab_names[:functions] %>
+                <%= render partial: 'works/index/dueties' if @current_tab == @tab_names[:dueties] %>
+                <%= render partial: 'works/index/tasks' if @current_tab == @tab_names[:tasks] %>
+                <%= render partial: 'works/index/gtasks' if @current_tab == @tab_names[:gtasks] %>
+            </div>
+        </div>
+    </div>
+</div>

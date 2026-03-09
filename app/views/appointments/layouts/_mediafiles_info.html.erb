@@ -1,0 +1,76 @@
+<ul class="list-group pt-0 pb-3" id="file_detail"></ul>
+
+<script>
+    var mediafiles = <%= @form_data[:mediafiles].to_json.html_safe %>;
+    if (mediafiles.length > 0) {
+        mediafiles.forEach(mediafile => {
+            let file_type = getFileType(mediafile.file_type, mediafile.file_name.split('.').pop());
+            btnPreview = `<a href="#" onclick="clickViewFile('${mediafile.file_name}','${mediafile.file_type}')" class="me-4" data-bs-toggle="tooltip" data-bs-placement="top" title="Xem trực tiếp"><span class="fas fa-eye"></span></a>`;
+            $('#file_detail').append(`
+                <li class="list-group-item d-flex align-items-center">
+                    <div style="width: 40px;text-align: center;" class="me-2"><img src="${ERP_PATH}assets/image/${file_type}.png" alt="file" style="width: 100%"></div>
+                    <div class="d-column" style="width: 100%;">
+                        <h6 style="font-weight: bold; white-space: normal;" class="mb-1">${mediafile.file_name}</h6>
+                        <h6 class="mb-0" style="opacity: 0.5;">${formatBytes(mediafile.file_size)}</h6>
+                    </div>
+                    <div class="d-flex">
+                        ${btnPreview}
+                        <a href="${ROOT_PATH}/mdata/hrm/${mediafile.file_name}" class="me-3" download data-bs-toggle="tooltip" data-bs-placement="top" title="Tải xuống"><span class="fas fa-download text-primary"></span></a>
+                    </div>
+                </li>
+            `);
+        });
+    } else {
+        $('#file_detail').html("<div style='width: 100%; text-align: center'>Chưa có tài liệu đính kèm</div>");
+    }
+
+    function formatBytes(a,b=2,k=1024){
+        let d=Math.floor(Math.log(a)/Math.log(k));
+        return 0 == a ? "0 Bytes" : parseFloat((a/Math.pow(k,d)).toFixed(Math.max(0,b)))+" "+["Bytes","KB","MB","GB","TB","PB","EB","ZB","YB"][d]
+    }
+
+    function getFileType(type,ext) {
+        if(type != "" && type.trim().length != 0){
+        let types = {
+            "photo":"image/png image/jpg image/jpeg image/webp image/gif image/tiff",
+            "doc":"application/msword application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "excel":"application/vnd.ms-excel application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "power-point":"application/vnd.ms-powerpoint application/vnd.openxmlformats-officedocument.presentationml.presentation",
+            "text":"text/plain",
+            "pdf":"application/pdf",
+            "video":"video/mp4 video/avi video/x-ms-wmv video/quicktime",
+            "zip":"application/zip application/x-zip-compressed"
+        }
+        for (var key in types){
+            if(types[key].includes(type)){
+            return key;
+            }
+        }
+        }else{
+        if(ext == "rar"){
+            return "zip";
+        }
+        return "file";
+        }
+        return "file"
+    }
+
+    function clickViewFile(file_name,type) {
+        var type = getFileType(type,"");
+        let file_url = window.location.origin + "/mdata/hrm/" + file_name;
+        switch (type) {
+        case "photo":
+            window.open(file_url, '_blank');
+            break;
+        case "doc":
+            let viewerUrl = `https://view.officeapps.live.com/op/view.aspx?src=${file_url}`;
+            window.open(viewerUrl, '_blank');
+            break;
+        case "pdf":
+            window.open(file_url, '_blank');
+            break;
+        default:
+            break;
+        }
+    }
+</script>

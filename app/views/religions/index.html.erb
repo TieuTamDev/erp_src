@@ -1,0 +1,240 @@
+<% content_for :head do %>
+    <%= stylesheet_link_tag '/assets/mystyle/religions.css'%>
+<% end %>
+
+<%
+=begin%>
+ <%Mandoc.destroy_all%>
+<%Mandocdhandle.destroy_all%>
+<%Mandocuhandle.destroy_all%> 
+<%
+=end%>
+<br>
+
+<%=Mandoc.all.to_json%>
+<br>
+<br>
+<%=Mandocdhandle.all.to_json%>
+<br>
+<br>
+<%=Mandocuhandle.all.to_json%>
+<br>
+<br>
+<%
+list_Trpp_helps = []
+works = ''
+positionjob_ids_list = Positionjob.where("department_id = ? AND (scode LIKE ? OR scode LIKE ?)", 103, "%TRUONG%", "%PHO%")
+                    if !positionjob_ids_list.nil?
+                        positionjob_ids_list.each do |positionjob|
+                            works = Work.where(positionjob_id: positionjob.id)
+                            if !works.nil?
+                                works.each do |work|
+                                
+                                    oUser = User.where(id: work.user_id).first
+                                    if !oUser.nil?
+                                        list_Trpp_helps.push(oUser.id)
+                                    end
+                                end 
+                            end 
+                        end 
+                        
+                        list_Trpp_helps.uniq
+                    end %>
+<br>
+<br>
+<%=positionjob_ids_list.to_json%>
+<br>
+<br>
+<%=works.to_json%>
+<br>
+<br>
+
+<%=User.where(id: list_Trpp_helps).to_json%>
+
+
+<div class="list_RELIGIONS">
+  <div class="bmtu_header_dashboard">
+    <h3 class="mt-2 overview_text"><%= lib_translate("List_religions")  %></h3>
+  </div>
+  <div class="card mb-3">
+    <div class="card-body pt-0">
+      <div class="tab-content">
+                <% if is_access(session["user_id"], "RELIGIONS","ADD") %>
+                  <button onclick="openFormAddreligions()" class="btn btn-primary btn-add-user mt-3" id="btn-add-user" data-bs-toggle="modal" data-bs-target="#modal-religions">
+                  <%= lib_translate("Add_religions")  %>
+                  </button>
+                <% end %>
+              <%= render_search_pagination(religions_index_path()).html_safe %>
+              <table id="table_religions" class="table table-bordered fs--1 mb-0 table-hover" style="margin-top: 0px !important; margin-bottom: 0px !important">
+                <thead class="bg-200 text-900">
+                  <tr>
+                    
+                    <th class="sort" data-sort="name" style="text-align: center; cursor: pointer;"><%= lib_translate("Name")  %></th>
+                    <th class="sort" data-sort="scode" style="text-align: center; cursor: pointer;"><%= lib_translate("Code")  %></th>
+                    <th style="text-align: center; cursor: pointer;" class="sort" data-sort="status"><%= lib_translate("Status")  %></th>
+                  <% if (is_access(session["user_id"], "RELIGIONS","EDIT") || is_access(session["user_id"], "RELIGIONS","DEL")) %>
+
+                    <th class="no-sort" style="text-align: center"></th>
+                    <% end %>
+                  </tr>
+                </thead>
+                <tbody class="list">
+                  <% @religions.each do |religions| %>
+                      <tr>
+                          
+                          <td class="name">
+                              <%= religions.name %>
+                          </td>
+                          <td class="scode">
+                              <%= religions.scode %>
+                          </td>                        
+                          <td style="text-align: center" class="status">
+                          
+                            <%= (if religions.status=="ACTIVE" 
+                              lib_translate("ac_icon")
+                            else 
+                              lib_translate("inac_icon")
+                            end ) %>
+                          </td>
+                          <% if (is_access(session["user_id"], "RELIGIONS","EDIT") || is_access(session["user_id"], "RELIGIONS","DEL")) %>
+                          <td style="min-width: 100px; text-align: center;">
+                               <% if is_access(session["user_id"], "RELIGIONS","EDIT") %>
+                                  <a class="edit_religions" style="text-decoration: none;"
+                                      onclick="openFormUpdatereligions('<%= religions.id %>', '<%= religions.name %>','<%= religions.scode %>','<%= religions.status %>')" data-bs-toggle="modal" data-bs-target="#modal-religions">
+                                      <span class="text-primary fas fa-edit me-3" style="width: 15px"></span>
+                                  </a>                                  
+                                <% end %>
+
+                                 <% if is_access(session["user_id"], "RELIGIONS","DEL") %>
+                                   <!-- Button trigger modal -->
+                                  <a data-toggle="modal" data-target="#modal-religions-delete-<%= religions.id %>" style="cursor: pointer;">
+                                  <span class="text-danger fas fa-trash" style="width: 12px;"></span>
+                                  </a>
+                                <% end %>
+                             
+                              <!-- Modal -->
+                              <div class="modal fade" id="modal-religions-delete-<%= religions.id %>" tabindex="-1" role="dialog"
+                              aria-labelledby="exampleModalLabel" aria-hidden="true">
+                              <div class="modal-dialog" role="document">
+                                  <div class="modal-content">
+                                  <div class="modal-header">
+                                      <h5 class="modal-title" id="exampleModalLabel"><%= lib_translate("Message")  %></h5>
+                                      <button type="button" class="close" data-dismiss="modal" aria-label="Close" style=" border: none;background: none;">
+                                      <span aria-hidden="true" style="font-size: 20px;">&times;</span>
+                                      </button>
+                                  </div>
+                                  <div class="modal-body">
+                                      <%= lib_translate("Confirm_delete")  %><span style="font-weight:bold; color:red;"> <%= religions.name %> </span>?
+                                  </div>
+                                  <div class="modal-footer">
+                                      <button type="button" class="btn btn-secondary" data-dismiss="modal"><%= lib_translate("Close")  %></button>
+                                      <%= link_to lib_translate("Delete"), url_for(action: :del, id: religions.id), method: :delete, class: "btn btn-danger", id: "btn_delete_religions", onclick: "delete_loading_religions(this)" %>
+                                      <div id="loading_button_delete_religions" class= "btn btn-danger" style="opacity: 0.8; display:none;" >
+                                        <i class ="fa fa-spinner fa-spin"> </i>  <%=lib_translate("Deleting")%> 
+                                      </div>
+                                  </div>
+                                  </div>
+                              </div>
+                              </div>
+                          </td>
+                          <% end %>
+                      </tr>
+                  <% end %>
+                </tbody>
+              </table>
+              <%= render_pagination_limit_offset(religions_index_path(lang: session[:lang], per_page: session[:per_page], search: session[:search]), 10, @religions.count).html_safe %>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="modal fade" id="modal-religions" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+      <div class="modal-content position-relative">
+        <div class="position-absolute top-0 end-0 mt-2 me-2 z-index-1">
+          <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-0">
+          
+          <div class="rounded-top-lg py-3 ps-4 pe-6 bg-light">
+            <h4 class="mb-1" id="cls_bmtu_form_add_title"><%= lib_translate("CREATE_religions")  %></h4>
+          </div>
+          <div class="p-4 pb-0">
+
+            <div class="form-add-religions">
+              <%= form_for @religion, :url=> religions_update_path, html: {method: :post, id:"form_add_religions", class:'col-12' } do |f| %>
+                <div class="erro_labble mb-2">
+                    <p style="display:none; color: rgb(197 82 82);border: 1px solid rgb(199 136 136 / 23%);background: rgb(255 54 54 / 16%);border-radius: 5px;padding: 10px"
+                    id="erro_labble_content">
+                    </p>
+                </div>
+                <div class="row mb-3" style="display:none;">
+                  <%= f.label :id, class: "col-sm-3 col-form-label" %>
+                  <div class="col-sm-9">
+                        <%= f.text_field :id, class: 'form-control' , name: 'religions_id_add' %>
+                  </div>
+                </div>
+                <div class="row mb-3"> 
+                    <label class="col-sm-4 col-lg-3 col-form-label" ><%= lib_translate("Religion_name") %>:</label>
+                  <div class="col-sm-8 col-lg-9">
+                    <%= f.text_field :name, class: 'form-control',  name:'religions_name_add' , id:"religions_name"%>
+                  </div>
+                </div>
+                <div class="row mb-3"> 
+                      <label class="col-sm-4 col-lg-3 col-form-label" ><%= lib_translate("Code") %>:</label>
+                  <div class="col-sm-8 col-lg-9">
+                    <%= f.text_field :scode, class: 'form-control' , name: 'religions_scode_add' %>
+                  </div>
+                </div>                
+                <fieldset>
+                  <div class="row mb-3" style="align-items: center;">
+                    <label class="col-sm-4 col-lg-3 col-form-label" ><%= lib_translate("Status") %>:</label>
+                    <div class="col-sm-8 col-lg-9">
+                      <div class="row">
+                        <div class="col-auto">
+                          <input checked type="radio" id="religions_status_active" class="form-check-input" value="ACTIVE" name="religions_status_add" /> <label class="form-check-label" for="religions_status_active" style="cursor: pointer"> ACTIVE</label>
+                        </div>
+                        <div class="col-auto">
+                          <input  type="radio" id="religions_status_inactive" class="form-check-input" value="INACTIVE" name="religions_status_add" /> <label class="form-check-label" for="religions_status_inactive" style="cursor: pointer"> INACTIVE</label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </fieldset>
+                
+                <div class="modal-footer border-0 p-0 mb-2">
+                  <%= f.submit lib_translate("Save") , type:"submit" , id:"btn_add_new_religions_buttton",
+                    class: "btn btn-warning  border-red border-pink-600 cls-bmtu-text-red md:group-hover:bg-pink-50 btn-block btn-block text-uppercase " %>
+                    <div id="loading_button_religions" class= "btn btn-warning border-red border-pink-600 cls-bmtu-text-red md:group-hover:bg-pink-50 btn-block btn-block text-uppercase " style="opacity: 0.8;display:none;" >
+                          <i class ="fa fa-spinner fa-spin"> </i>  <%=lib_translate("Save")%> 
+                    </div>
+                </div>
+              <% end %>
+            <div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+
+
+  
+</div>
+
+
+<% content_for :bottombody do %>
+<!-- Hoàng Tuấn Đạt  -->
+<script>
+// Từ khóa dịch
+let strCreateReligions = "<%= lib_translate("CREATE_religions")%>";
+let strUpdateReligions = "<%= lib_translate("UPDATE_religions")%>";
+</script>
+<%= javascript_include_tag '/assets/myjs/religions.js'%>
+
+  
+<% end %>
+<!-- Lê Ngọc Huy -->
+<%= javascript_include_tag '/assets/lib_hrm/jquery-3.2.1.slim.min.js', integrity: 'sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN', crossorigin: 'anonymous' %>
+<%= javascript_include_tag '/assets/lib_hrm/popper.min.js', integrity: 'sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q', crossorigin: 'anonymous' %>
+<%= javascript_include_tag '/assets/lib_hrm/bootstrap.min.js', integrity: 'sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl', crossorigin: 'anonymous'%>

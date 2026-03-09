@@ -1,0 +1,237 @@
+<% content_for :head do %>
+  <%= javascript_include_tag '/assets/lib_hrm/bootstrap.min.js' %>
+  <%= stylesheet_link_tag '/assets/mystyle/flatpickr.min.css' %>
+  <%= javascript_include_tag '/assets/myjs/flatpickr.js' %>
+  <%= javascript_include_tag '/assets/myjs/flatpickr_local/vn.js' %>
+  <%= stylesheet_link_tag '/assets/mystyle/flatpickr.min.css' %>
+<% end %>
+<div class="bmtu_header_dashboard">
+  <h3 class="mt-2 overview_text"><%= lib_translate("Workshift") %></h3>
+  <div class="card mb-3">
+    <div class="card-body pt-0">
+      <div class="tab-content">
+        <% if is_access(session["user_id"], "WORKSHIFT-INDEX", "ADD") %>
+          <button onclick="openFormAddWorkshift()" class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#modal-workshifts">
+            <%= lib_translate("New_workshift") %>
+          </button>
+        <% end %>
+        <div class="tab-pane preview-tab-pane active" role="tabpanel">
+          <div class="table-responsive scrollbar">
+            <%= render_search_pagination(workshifts_index_path()).html_safe %>
+            <table id="table_workshift" class="table table-bordered fs--1 mb-0 table-hover dataTable no-footer">
+              <thead class="bg-200 text-900">
+              <tr>
+                <th class="sort" data-sort="name" style="text-align: center; cursor: pointer;"><%= lib_translate("Workshift") %> </th>
+                <th class="sort" data-sort="start_time" style="text-align: center; cursor: pointer;"><%= lib_translate("Start_time") %></th>
+                <th class="sort" data-sort="end_time" style="text-align: center; cursor: pointer;"><%= lib_translate("End_time") %></th>
+                <th class="sort" data-sort="checkin_start" style="text-align: center; cursor: pointer;"><%= lib_translate("Checkin_start") %></th>
+                <th class="sort" data-sort="checkout_end" style="text-align: center; cursor: pointer;"><%= lib_translate("Checkout_end") %></th>
+                <% if (is_access(session["user_id"], "WORKSHIFT-INDEX", "EDIT") || is_access(session["user_id"], "WORKSHIFT-INDEX", "DEL")) %>
+                  <th class="no-sort" style="text-align: center"></th>
+                <% end %>
+              </tr>
+              </thead>
+              <tbody class="list">
+              <% @workshifts.each do |item| %>
+                <tr>
+                  <td style="white-space: nowrap;">
+                    <%= item.name %>
+                  </td>
+                  <td style="text-align: center;min-width: 100px;">
+                    <%= item.start_time %>
+                  </td>
+                  <td style="text-align: center;min-width: 100px;">
+                    <%= item.end_time %>
+                  </td>
+                  <td style="text-align: center;min-width: 100px;">
+                    <%= item.checkin_start %>
+                  </td>
+                  <td style="text-align: center;min-width: 100px;">
+                    <%= item.checkout_end %>
+                  </td>
+                  <% if (is_access(session["user_id"], "WORKSHIFT-INDEX", "EDIT") || is_access(session["user_id"], "WORKSHIFT-INDEX", "DEL")) %>
+                    <td style="text-align: center; min-width: 110px">
+                      <% if is_access(session["user_id"], "WORKSHIFT-INDEX", "EDIT") %>
+                        <a style="cursor:pointer;" onclick="openFormUpdateWorkshift('<%= item.id %>',
+                          '<%= item.name %>',
+                          '<%= item.start_time %>',
+                          '<%= item.end_time %>',
+                          '<%= item.checkin_start %>',
+                          '<%= item.checkout_end %>')" data-bs-toggle="modal" data-bs-target="#modal-workshifts">
+                          <span class="text-primary fas fa-edit me-3"></span>
+                        </a>
+                      <% end %>
+                      <% if is_access(session["user_id"], "WORKSHIFT-INDEX", "ADM") %>
+                        <% if Workshift.exists?(id: item.id) %>
+                          <a data-toggle="modal" data-target="#deleteModal-<%= item.id %>" style="cursor: pointer;">
+                            <span class="text-danger fas fa-trash" style="width : 15px"></span>
+                          </a>
+                        <% end %>
+                      <% end %>
+                      <div class="modal fade" id="deleteModal-<%= item.id %>" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                          <div class="modal-content">
+                            <div class="modal-header">
+                              <h5 class="modal-title" id="deleteModalLabel"><%= lib_translate("Are_you_sure") %>
+                              </h5>
+                              <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="border: none; background: none">
+                                <span aria-hidden="true" style="font-size: 20px">&times;</span>
+                              </button>
+                            </div>
+                            <div class="modal-body">
+                              <%= lib_translate("confirm_delete_message") %>
+                              :<span style="font-weight:bold; color:red;"> <%= item.name %> </span>?
+                            </div>
+                            <div class="modal-footer">
+                              <button type="button" class="btn btn-secondary" data-dismiss="modal"><%= lib_translate("Close") %></button>
+                              <%= link_to lib_translate("Delete"), url_for(action: :destroy, id: item.id), method: :delete, class: "btn btn-danger", onclick: "delete_loading_workshift(this)" %>
+                              <div id="loading_button_delete_workshift" class="btn btn-danger" style="opacity: 0.8; display:none;">
+                                <i class="fa fa-spinner fa-spin"> </i>  <%= lib_translate("Deleting") %>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                  <% end %>
+                </tr>
+              <% end %>
+              </tbody>
+            </table>
+            <%= render_pagination_limit_offset(workshifts_index_path(lang: session[:lang], per_page: session[:per_page], search: session[:search]), 10, @workshifts.count).html_safe %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal create/edit -->
+<div class="modal fade" id="modal-workshifts" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content position-relative">
+      <div class="position-absolute top-0 end-0 mt-2 me-2 z-index-1">
+        <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div class="rounded-top-lg py-3 ps-4 pe-6 bg-light">
+          <h4 class="mb-1" id="form_add_workshift_title"></h4>
+        </div>
+        <div class="p-4 pb-0">
+          <div id="error_explanation" class="text-danger" style="text-align: center;font-size: 13px;"></div>
+          <div class="form-add-workshift">
+            <%= form_for Workshift.new, :url => workshifts_update_path, html: { method: :post, id: "form_add_workshift", class: 'col-12' } do |f| %>
+              <div class="row mb-3" style="display:none;">
+                <%= f.label :id, class: "col-sm-4 col-lg-3 col-form-label" %>
+                <div class="col-sm-8 col-lg-9">
+                  <%= f.text_field :id, class: 'form-control', name: 'workshift_id', id: 'workshift_id' %>
+                </div>
+              </div>
+              <div class="row mb-3">
+                <label class="col-lg-4 col-form-label" for="workshift"><%= lib_translate("Workshift") %>
+                  :</label>
+                <div class="col-lg-7">
+                  <%= f.text_field :name, class: 'form-control', name: 'workshift_name', id: 'workshift_name' %>
+                </div>
+              </div>
+              <div class="row mb-3">
+                <label class="col-lg-4 col-form-label" for="start_time"><%= lib_translate("Start_time") %>
+                  :</label>
+                <div class="col-lg-7">
+                  <%= f.text_field :start_time, class: 'form-control timepicker', name: 'workshift_start_time', id: 'workshift_start_time' %>
+                </div>
+              </div>
+              <div class="row mb-3">
+                <label class="col-lg-4 col-form-label" for="end_time"><%= lib_translate("End_time") %>:</label>
+                <div class="col-lg-7">
+                  <%= f.text_field :end_time, class: 'form-control timepicker', name: 'workshift_end_time', id: 'workshift_end_time' %>
+                </div>
+              </div>
+              <div class="row mb-3">
+                <label class="col-lg-4 col-form-label" for="checkin_start"><%= lib_translate("Checkin_start") %>
+                  :</label>
+                <div class="col-lg-7">
+                  <%= f.text_field :checkin_start, class: 'form-control timepicker', name: 'workshift_checkin_start', id: 'workshift_checkin_start' %>
+                </div>
+              </div>
+              <div class="row mb-3">
+                <label class="col-lg-4 col-form-label" for="checkout_end"><%= lib_translate("Checkout_end") %>
+                  :</label>
+                <div class="col-lg-7">
+                  <%= f.text_field :checkout_end, class: 'form-control timepicker', name: 'workshift_checkout_end', id: 'workshift_checkout_end' %>
+                </div>
+              </div>
+              <div class="modal-footer border-0 p-0 mb-2">
+                <%= f.submit "Add workshift", type: "button", id: "btn_add_new_workshift", class: "btn btn-warning border-red border-pink-600 cls-bmtu-text-red md:group-hover:bg-pink-50 btn-block btn-block text-uppercase " %>
+                <div id="loading_button_workshift" class="btn btn-warning border-red border-pink-600 cls-bmtu-text-red md:group-hover:bg-pink-50 btn-block btn-block text-uppercase " style="opacity: 0.8;display:none;">
+                  <i class="fa fa-spinner fa-spin"> </i>  <%= lib_translate("Save") %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- End modal create/edit -->
+
+<script>
+    let newFunc = "<%= lib_translate("New_workshift")  %>";
+    let updateFunc = "<%= lib_translate("Update_workshift")  %>";
+
+    flatpickr(".timepicker", {
+        enableTime: true,
+        noCalendar: true,
+        dateFormat: "H:i",
+        time_24hr: true
+    });
+
+    function openFormAddWorkshift() {
+        document.getElementById("form_add_workshift_title").innerHTML = newFunc;
+        document.getElementById("btn_add_new_workshift").value = newFunc;
+        document.getElementById("workshift_name").value = "";
+        document.getElementById("workshift_start_time").value = "";
+        document.getElementById("workshift_end_time").value = "";
+        document.getElementById("workshift_checkin_start").value = "";
+        document.getElementById("workshift_checkout_end").value = "";
+    }
+
+    function openFormUpdateWorkshift(id, name, start_time, end_time, checkin_start, checkout_end) {
+        document.getElementById("workshift_name").addEventListener("keyup", function () {
+        });
+        document.getElementById("form_add_workshift_title").innerHTML = updateFunc;
+        document.getElementById("btn_add_new_workshift").value = updateFunc;
+        document.getElementById("workshift_id").value = id;
+        document.getElementById("workshift_name").value = name;
+
+        // Gán giá trị qua Flatpickr instance nếu đã có
+        setFlatpickrValue("workshift_start_time", start_time);
+        setFlatpickrValue("workshift_end_time", end_time);
+        setFlatpickrValue("workshift_checkin_start", checkin_start);
+        setFlatpickrValue("workshift_checkout_end", checkout_end);
+    }
+
+    function setFlatpickrValue(inputId, value) {
+        const inp = document.getElementById(inputId);
+        if (inp && inp._flatpickr) {
+            inp._flatpickr.setDate(value, true, "H:i");
+        } else if (inp) {
+            inp.value = value || "";
+        }
+    }
+
+    function delete_loading_workshift(element) {
+        element.style.display = "none"
+        element.previousElementSibling.style.display = "none"
+        element.nextElementSibling.style.display = "block"
+    }
+
+    document.getElementById('btn_add_new_workshift').onclick = function () {
+        document.getElementById("btn_add_new_workshift").style.display = "none";
+        document.getElementById("loading_button_workshift").style.display = "block";
+        document.getElementById("btn_add_new_workshift").type = "submit";
+        document.getElementById("btn_add_new_workshift").disabled = false;
+    };
+
+</script>

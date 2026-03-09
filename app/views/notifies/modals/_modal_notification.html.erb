@@ -1,0 +1,6 @@
+<div class="modal-body px-4">
+    <%= @notice.contents.html_safe %>
+</div>
+<div class="modal-footer border-1 px-4 pb-3">
+    <a type="button" class="btn btn-secondary" data-bs-dismiss="modal" href="<%= notifies_show_path(isShow: @isShow) %>" data-remote="true">Đóng</a>
+</div>

@@ -1,0 +1,1589 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "select2-bootstrap-5-theme.min" %>
+  <%= stylesheet_link_tag "select2.min" %>
+  <%= stylesheet_link_tag "https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" %>
+<% end %>
+
+<% content_for :bottombody do %>
+  <%= javascript_include_tag "https://cdn.jsdelivr.net/npm/flatpickr" %>
+  <%= javascript_include_tag '/assets/lib_hrm/moment-with-locales.js' %>
+  <%= javascript_include_tag 'select2.full.min' %>
+  <%= javascript_include_tag 'select2.min.js' %>
+<% end %>
+<style>
+  .is-invalid {
+    border-color: red;
+    box-shadow: 0 0 0 0.2rem rgba(255, 0, 0, 0.25);
+  }
+</style>
+<style>
+  .modal-content {
+    border: 1px solid #E0E0E0;
+    border-radius: 8px;
+  }
+
+  .modal-header {
+    border-bottom: 1px solid #E0E0E0;
+  }
+
+  .modal-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #005FBE;
+  }
+
+  .modal-body {
+    padding: 20px;
+  }
+
+  .info-section {
+    margin-bottom: 16px;
+  }
+
+  .info-label {
+    font-size: 14px;
+    margin-bottom: 8px;
+    color: #333;
+  }
+
+  .info-label span {
+    font-size: 14px;
+    color: #333;
+    font-weight: normal;
+  }
+
+  .info-label::before {
+    content: attr(data-label);
+    font-weight: bold;
+    margin-right: 4px;
+  }
+
+  .leave-details {
+    border: 1px solid #E0E0E0;
+    padding: 16px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .leave-details h5 {
+    font-size: 14px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 12px;
+  }
+
+  .leave-details p {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 8px;
+  }
+
+  .leave-details .sub-details {
+    margin-left: 20px;
+    padding-left: 0;
+    list-style: none;
+  }
+
+  .leave-details .sub-details li {
+    font-size: 14px;
+    color: #6C757D;
+    margin-bottom: 4px;
+  }
+
+  .stimeline-title {
+    font-size: 14px;
+    font-weight: bold;
+    color: #333;
+    border-bottom: 1px solid #E0E0E0;
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+  }
+  .stimeline-title-cancel {
+    font-size: 14px;
+    font-weight: bold;
+    color: #333;
+    border-bottom: 1px solid #E0E0E0;
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+  }
+
+  .stimeline {
+    list-style: none;
+    padding-left: 0;
+    position: relative;
+    margin: 0;
+  }
+
+  .stimeline li {
+    position: relative;
+    padding-left: 80px;
+    margin-bottom: 16px;
+    min-height: 40px;
+  }
+
+  /* Circle */
+  .stimeline li::before {
+    content: '';
+    position: absolute;
+    left: 74px;
+    top: 23%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: #6C757D;
+    z-index: 1;
+  }
+
+  /* Status colors */
+  .stimeline li.DONE::before,
+  .stimeline li.REFUSE::before {
+    background-color: rgb(14 165 233);
+  }
+  .stimeline li.PENDING::before {
+    background-color: #6C757D;
+  }
+
+  /* Vertical line per step */
+  .stimeline li:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 81px;
+    top: 33%;
+    transform: translateY(0);
+    width: 2px;
+    height: 100%;
+    background-color: #E0E0E0;
+    z-index: 0;
+  }
+
+  /* Colored line for completed steps */
+  .stimeline li.DONE:not(:last-child)::after,
+  .stimeline li.REFUSE:not(:last-child)::after {
+    background-color: rgb(14 165 233);
+  }
+
+  .stimeline .stimeline__date {
+    position: absolute;
+    left: 0;
+    top: 32%;
+    transform: translateY(-50%);
+    width: 62px;
+    font-size: 12px;
+    color: #6C757D;
+    line-height: 1.2;
+    text-align: right;
+  }
+
+  .stimeline .stimeline__content {
+    background: #fff;
+    padding: 8px 12px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    position: relative;
+    margin-left: 20px;
+  }
+
+  .stimeline .stimeline__content .stimeline__title {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 4px;
+  }
+
+  .stimeline .stimeline__content .stimeline__title i {
+    margin-left: 5px;
+  }
+
+  .stimeline .stimeline__content .stimeline__description {
+    font-size: 14px;
+    color: #333;
+  }
+
+  .stimeline .stimeline__content .stimeline__description .name {
+    color: #005FBE;
+    font-weight: bold;
+  }
+
+
+  .modal-footer {
+    border-top: 1px solid #E0E0E0;
+    padding: 16px;
+  }
+
+  .btn-custom {
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 4px;
+    padding: 8px 16px;
+  }
+
+  .btn-primary.btn-custom {
+    background-color: #005FBE;
+    border-color: #005FBE;
+  }
+
+  .btn-primary.btn-custom:hover {
+    background-color: #004A9F;
+    border-color: #004A9F;
+  }
+
+  .btn-secondary.btn-custom {
+    background-color: #6C757D;
+    border-color: #6C757D;
+  }
+
+  .btn-secondary.btn-custom:hover {
+    background-color: #5A6268;
+    border-color: #5A6268;
+  }
+
+  .sholtype-tag {
+    display: inline-block;
+    padding: 5px 12px;
+    background-color: #F0F1F2;
+    border-radius: 5px;
+    font-size: 14px;
+    color: #333;
+    font-weight: 500;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    white-space: nowrap;
+  }
+</style>
+
+<div class="list_users">
+  <div class="card mb-3">
+    <div class="card-body pt-0">
+      <div class="tab-content">
+        <div class="row">
+          <div class="col">
+            <h3 class="mt-2 overview_text"><%= lib_translate("Danh sách nghỉ phép") %></h3>
+          </div>
+        </div>
+
+        <div class="mt-3">
+          <!-- Nav tabs -->
+          <ul class="nav nav-tabs <%= current_user.uorgs.count > 1 ? '' : 'd-none' %>" role="tablist">
+            <li class="nav-item">
+              <a id="man_in_tab_1" 
+                 class="nav-link <%= @uorg_scode == 'BMU' || @uorg_scode == 'BMTU' ? 'active' : '' %>" 
+                 data-bs-toggle="tab" 
+                 href="#manager_leave_bmu" 
+                 onclick='changeTab("BMU")'>
+                <%= lib_translate("BMU") %>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a id="man_in_tab_2" 
+                 class="nav-link <%= @uorg_scode == 'BUH' ? 'active' : '' %>" 
+                 data-bs-toggle="tab" 
+                 href="#manager_leave_buh" 
+                 onclick='changeTab("BUH")'>
+                <%= lib_translate("BUH") %>
+              </a>
+            </li>
+          </ul>
+           
+          <div class="tab-content">
+                <div class="row justify-content-end">
+                  <div class="dropdown font-sans-serif" style="height: 5px; width: 90px;">
+                        <a style="cursor: pointer;" class="navbar-toggler-humburger-icon navbar-vertical-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span class="navbar-toggle-icon"><span class="toggle-line"></span></span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="dropdownMenuLink" style="width: max-content;">
+                            <div style="display: flex; flex-direction: column;">
+                                <%= button_to '📄 Mẫu file', manager_leave_export_excel_path, method: :get, class: 'btn btn-outline-primary', form: { target: '_blank', class: 'btn ' } %>
+                                <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#importModal">📥 Import Excel</button>
+                                <button type="button" class="btn btn-outline-info mt-1" onclick="exportExcelYear('<%=@uorg_scode%>')">TH Nghỉ theo năm</button>
+                                <button type="button" class="btn btn-outline-info mt-1" onclick="exportExcelMonth('<%=@uorg_scode%>')">TH Nghỉ phép theo tháng</button>
+                                <button type="button" class="btn btn-outline-info mt-1" onclick="exportExcelDate('<%=@uorg_scode%>')">TH Nghỉ theo ngày</button>
+                                <button type="button" class="btn btn-outline-info mt-1 d-none" onclick="exportExcelUser('<%=@uorg_scode%>')">TH Theo nhân viên</button>
+                                <button type="button" class="btn btn-outline-info mt-1" onclick="exportExcelCountry('<%=@uorg_scode%>')">TH Đi nước ngoài</button>
+                                <button type="button" class="btn btn-outline-info mt-1" onclick="exportExcelStatus('<%=@uorg_scode%>')">TH Theo trạng thái</button>                                
+                                <button type="button" class="btn btn-outline-info mt-1" onclick="exportExcelTimesheet('<%=@uorg_scode%>')">Bảng chấm công tháng</button>
+                                <% if is_access(session["user_id"], "REVIEW-TON-DEV","READ") %>
+                                  <%= link_to "Xuất Excel Preview phép 2026",
+                                              manager_leave_holiday_2026_preview_path(format: :xlsx, managing_org_code: "BUH"),
+                                              class: "btn btn-success",
+                                              data: { confirm: "Bạn muốn xuất file preview phép năm 2026 BUH?" } %>                         
+                                  <%= link_to "Xuất Excel Preview phép 2026",
+                                              manager_leave_holiday_2026_preview_path(format: :xlsx, managing_org_code: "BMU"),
+                                              class: "btn btn-success",
+                                              data: { confirm: "Bạn muốn xuất file preview phép năm 2026 BMU?" } %>                         
+                                <%end%>        
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <div id="manager_leave_bmu" class="tab-pane fade <%= @uorg_scode == 'BMU' || @uorg_scode == 'BMTU' ? 'show active' : '' %>">
+              <form action='<%= manager_leave_manager_holiday_path() %>' accept-charset='UTF-8' method='get'>
+                <div id='positonjob_table_filter' class='dataTables_filter'>
+                  <input name='utf8' type='hidden' value='✓'>
+                  <input class="d-none" name="uorg_scode" value="BMU">
+                  <input class='d-none' name='lang' value='vi'>
+                  <% if !params[:per_page].nil?  %>
+                  <input class='d-none' name='per_page' value='<%= params[:per_page] %>'>
+                  <% end %>
+                  <input type='submit' hidden>
+                  <div class="row justify-content-start">
+                    <div class="me-1" style="width: 500px;">
+                        <label style="margin-bottom: 0px !important;"><%= lib_translate("Phòng ban") %></label>
+                        <select class="select-form selectpicker" name="department_bmu" id="department_bmu_select" onchange="this.form.submit()">
+                          <option value="">Tất cả phòng ban</option>
+                          <% @departments_bmu&.each do |department| %>
+                            <option value="<%= department&.id %>" <%= params[:department_bmu] == department&.id.to_s ? 'selected' : '' %>>
+                              <%= department&.name %>
+                            </option>
+                          <% end %>
+                        </select>
+                    </div>
+                    <div class="ms-1" style="width: 300px;">
+                        <label style="margin-bottom: 0px !important;"><%= lib_translate("Loại phép") %></label>
+                          <select class="select-form selectpicker" name="holtype_bmu" id="holtype_bmu_select" onchange="this.form.submit()">
+                            <option value="">Tất cả</option>
+                            <% @holtypes.each do |holtype| %>
+                              <option value="<%= holtype&.code %>" <%= params[:holtype_bmu] == holtype&.code.to_s ? 'selected' : '' %>>
+                                <%= holtype&.name %>
+                              </option>
+                            <% end %>
+                          </select>
+                    </div>
+                    <div class="ms-1" style="width: 300px;">
+                        <label style="margin-bottom: 0px !important;"><%= lib_translate("Địa điểm") %></label>
+                        <select class="select-form selectpicker" name="country_bmu" id="country_bmu_select" onchange="this.form.submit()">
+                          <option value="">Tất cả</option>
+                          <option value="IN-COUNTRY" <%= params[:country_bmu] == "IN-COUNTRY" ? 'selected' : '' %>>Trong nước</option>
+                          <option value="OUT-COUNTRY" <%= params[:country_bmu] == "OUT-COUNTRY" ? 'selected' : '' %>>Nước ngoài</option>
+                        </select>
+                    </div>
+                    <div class="ms-1" style="width: 300px;">
+                      <label style="margin-bottom: 0px !important;"><%= lib_translate("Trạng thái") %></label>
+                      <select class="select-form selectpicker" name="status" id="status_bmu_select" onchange="this.form.submit()">
+                        <option value="" <%= params[:status].blank? ? "selected" : "" %>>Tất cả</option>
+                        <option value="PENDING" <%= params[:status] == "PENDING" ? "selected" : "" %>>Chờ duyệt</option>
+                        <option value="PROCESSING" <%= params[:status] == "PROCESSING" ? "selected" : "" %>>Đang xử lý đơn</option>
+                        <option value="DONE" <%= params[:status] == "DONE" ? "selected" : "" %>>Đã duyệt</option>
+                        <option value="REFUSE" <%= params[:status] == "REFUSE" ? "selected" : "" %>>Đơn từ chối</option>
+                        <option value="CANCEL" <%= params[:status] == "CANCEL" ? "selected" : "" %>>Đơn bị hủy</option>
+                        <option value="CANCEL-DONE" <%= params[:status] == "CANCEL-DONE" ? "selected" : "" %>>Đã duyệt(điều chỉnh)</option>
+                      </select>
+                    </div>
+                    <div class="btn_fillter d-none">
+                        <div>
+                            <button type="submit" class="btn btn-primary"><%= lib_translate("Tìm kiếm")  %></button>
+                        </div>
+                    </div>
+                  </div>
+                  <div class="row justify-content-end pb-2 mt-2">
+                    <div style="width: 500px;" >
+                        <input type='text' name='search' id='search_user' value='<%= params[:search] %>' placeholder='<%= lib_translate('Search') %>' class='form-control form-control-sm'>
+                        <input class='d-none' name='lang' value='vi'><input type='submit' hidden>
+                    </div>
+                  </div>
+                </div>
+              </form>
+              <div class="table-responsive scrollbar"> 
+                <table id="user_bmu" class="table table-bordered fs--1 mb-0" style="margin-top: 0px !important; margin-bottom: 0px !important">
+                  <thead class="bg-200 text-900">
+                    <tr>
+                      <th class="sort" style="width:4%; text-align: center;"><%= lib_translate("STT") %></th>
+                      <th class="sort"><%= lib_translate("Tên nhân viên") %></th>
+                      <th class="sort"><%= lib_translate("Đơn vị") %></th>
+                      <th class="sort text-center"><%= lib_translate("Loại ngày nghỉ") %></th>
+                      <th class="sort text-center"><%= lib_translate("Tổng ngày nghỉ") %></th>
+                      <th class="sort text-center"><%= lib_translate("Người duyệt") %></th>
+                      <th class="sort text-center"><%= lib_translate("Trạng thái") %></th>
+                      <th class="no-sort text-center"></th>
+                    </tr>
+                  </thead>
+                  <tbody class="list_user_bmu">
+                    <% @results.each_with_index do |holpro, index| %>
+                      <tr>
+                        <td class="text-center"><%= (index + 1) + (@page - 1) * @per_page %></td>
+                        <td><%= holpro['user_fullname'] %> (<%= holpro['user_sid'] %>)</td>
+                        <td><%= holpro['department_name'] %></td>
+                        <td class="text-center"><%= @holpro_types[holpro['holpro_id']] || "" %></td>
+                        <td class="text-center"><%= holpro['holiday_total_days'] %> ngày</td>
+                        <td class="text-center">
+                          <% approvers = @holpro_approvers[holpro['holpro_id']] || [] %>
+                          <%= approvers.map { |a| a[:name] }.join(", ") %>
+                        </td>
+                        <td class="text-center">
+                          <% if holpro['holiday_status'] == "TEMP" %>
+                            <span class="text-secondary">Lưu nháp</span>
+                          <% elsif holpro['holiday_status'] == "DONE" %>
+                            <span class="text-success">Đã duyệt</span>
+                          <% elsif holpro['holiday_status'] == "PENDING" %>
+                            <span class="text-warning">Chờ duyệt</span>
+                          <% elsif holpro['holiday_status'] == "REFUSE" %>
+                            <span class="text-danger">Từ chối</span>
+                          <% elsif holpro['holiday_status'] == "CANCEL" %>
+                            <span class="text-danger">Đã hủy</span>
+                          <% elsif holpro['holiday_status'] == "CANCEL-DONE" %>
+                            <span class="text-success">Đã duyệt(điều chỉnh)</span>
+                          <% else %>
+                            <span class="text-warning">Đang xử lý đơn</span>
+                          <% end %>
+                        </td>
+                        <td class="text-center">
+                          <button class="btn btn-sm btn-outline-primary detail-btn" data-bs-toggle="modal" data-bs-target="#holidayDetailsModal" data-uorg-scode="BMU" data-holpro-id="<%= holpro['holpro_id'] %>"  data-holpro-status="<%= holpro['holiday_status'] %>">
+                            Chi tiết
+                          </button>
+                        </td>
+                      </tr>
+                    <% end %>
+                  </tbody>
+                </table>
+
+                <% if @results_total > 0 %>
+                  <div class="d-flex justify-content-center mt-3">
+                    <div class="col-auto">
+                      <nav aria-label="Page navigation">
+                        <ul class="pagination mb-0">
+                          <li class="page-item <%= @page == 1 ? 'disabled' : '' %>">
+                            <%= link_to "«", manager_leave_manager_holiday_path(page: @page - 1, per_page: @per_page, lang: session[:lang], search: params[:search], uorg_scode: @uorg_scode, department_bmu: params[:department_bmu], country_bmu: params[:country_bmu], holtype_bmu: params[:holtype_bmu]), class: "page-link" %>
+                          </li>
+                          <% (1..@total_pages).each do |i| %>
+                            <li class="page-item <%= @page == i ? 'active' : '' %>">
+                              <%= link_to i.to_s, manager_leave_manager_holiday_path(page: i, per_page: @per_page, lang: session[:lang], search: params[:search], uorg_scode: @uorg_scode, department_bmu: params[:department_bmu], country_bmu: params[:country_bmu], holtype_bmu: params[:holtype_bmu]), class: "page-link" %>
+                            </li>
+                          <% end %>
+                          <li class="page-item <%= @page == @total_pages ? 'disabled' : '' %>">
+                            <%= link_to "»", manager_leave_manager_holiday_path(page: @page + 1, per_page: @per_page, lang: session[:lang], search: params[:search], uorg_scode: @uorg_scode, department_bmu: params[:department_bmu], country_bmu: params[:country_bmu], holtype_bmu: params[:holtype_bmu]), class: "page-link" %>
+                          </li>
+                        </ul>
+                      </nav>
+                    </div>
+                    <div class="col-auto ms-2">
+                      <form action="<%= manager_leave_manager_holiday_path %>" accept-charset="UTF-8" method="get">
+                        <select class="form-select" name="per_page" id="per_page_select" onchange="this.form.submit()">
+                          <option value="25" <%= @per_page == 25 ? 'selected' : '' %>>25</option>
+                          <option value="50" <%= @per_page == 50 ? 'selected' : '' %>>50</option>
+                          <option value="100" <%= @per_page == 100 ? 'selected' : '' %>>100</option>
+                          <option value="200" <%= @per_page == 200 ? 'selected' : '' %>>200</option>
+                        </select>
+                        <input class="d-none" name="lang" value="<%= session[:lang] %>">
+                        <input class="d-none" name="search" value="<%= params[:search] %>">
+                        <input class="d-none" name="page" value="1">
+                        <input class="d-none" name="uorg_scode" value="<%= @uorg_scode %>">
+                        <input class="d-none" name="country_bmu" value="<%= params[:country_bmu] %>">
+                        <input class="d-none" name="holtype_bmu" value="<%= params[:holtype_bmu] %>">
+                        <input class="d-none" name="department_bmu" value="<%= params[:department_bmu] %>">
+                      </form>
+                    </div>
+                  </div>
+                <% else %>
+                  <p class="text-center mt-3">Không có dữ liệu để hiển thị.</p>
+                <% end %>
+              </div>
+            </div>
+            <div id="manager_leave_buh" class="tab-pane fade <%= @uorg_scode == 'BUH' ? 'show active' : '' %>">
+              <form action='<%= manager_leave_manager_holiday_path() %>' accept-charset='UTF-8' method='get'>
+                <div id='positonjob_table_filter' class='dataTables_filter'>
+                  <input name='utf8' type='hidden' value='✓'>
+                  <input class="d-none" name="uorg_scode" value="BUH">
+                  <input class='d-none' name='lang' value='vi'>
+                  <% if !params[:per_page].nil?  %>
+                  <input class='d-none' name='per_page' value='<%= params[:per_page] %>'>
+                  <% end %>
+                  <input type='submit' hidden>
+                  <div class="row justify-content-start">
+                    <div class="me-1" style="width: 500px;">
+                        <label style="margin-bottom: 0px !important;"><%= lib_translate("Phòng ban") %></label>
+                        <select class="select-form selectpicker" name="department_buh" id="department_buh_select" onchange="this.form.submit()">
+                          <option value="">Tất cả phòng ban</option>
+                          <% @departments_buh&.each do |department| %>
+                            <option value="<%= department&.id %>" <%= params[:department_buh] == department&.id.to_s ? 'selected' : '' %>>
+                              <%= department&.name %>
+                            </option>
+                          <% end %>
+                        </select>
+                    </div>
+                    <div class="ms-1" style="width: 300px;">
+                        <label style="margin-bottom: 0px !important;"><%= lib_translate("Loại phép") %></label>
+                          <select class="select-form selectpicker" name="holtype_buh" id="holtype_buh_select" onchange="this.form.submit()">
+                            <option value="">Tất cả</option>
+                            <% @holtypes.each do |holtype| %>
+                              <option value="<%= holtype&.code %>" <%= params[:holtype_buh] == holtype&.code.to_s ? 'selected' : '' %>>
+                                <%= holtype&.name %>
+                              </option>
+                            <% end %>
+                          </select>
+                    </div>
+                    <div class="ms-1" style="width: 300px;">
+                        <label style="margin-bottom: 0px !important;"><%= lib_translate("Địa điểm") %></label>
+                        <select class="select-form selectpicker" name="country_buh" id="country_buh_select" onchange="this.form.submit()">
+                          <option value="">Tất cả</option>
+                          <option value="IN-COUNTRY" <%= params[:country_buh] == "IN-COUNTRY" ? 'selected' : '' %>>Trong nước</option>
+                          <option value="OUT-COUNTRY" <%= params[:country_buh] == "OUT-COUNTRY" ? 'selected' : '' %>>Nước ngoài</option>
+                        </select>
+                    </div>
+                    <div class="ms-1" style="width: 300px;">
+                      <label style="margin-bottom: 0px !important;"><%= lib_translate("Trạng thái") %></label>
+                      <select class="select-form selectpicker" name="status" id="status_buh_select" onchange="this.form.submit()">
+                        <option value="" <%= params[:status].blank? ? "selected" : "" %>>Tất cả</option>
+                        <option value="PENDING" <%= params[:status] == "PENDING" ? "selected" : "" %>>Chờ duyệt</option>
+                        <option value="PROCESSING" <%= params[:status] == "PROCESSING" ? "selected" : "" %>>Đang xử lý đơn</option>
+                        <option value="DONE" <%= params[:status] == "DONE" ? "selected" : "" %>>Đã duyệt</option>
+                        <option value="REFUSE" <%= params[:status] == "REFUSE" ? "selected" : "" %>>Đơn từ chối</option>
+                        <option value="CANCEL" <%= params[:status] == "CANCEL" ? "selected" : "" %>>Đơn bị hủy</option>
+                        <option value="CANCEL-DONE" <%= params[:status] == "CANCEL-DONE" ? "selected" : "" %>>Đã duyệt(điều chỉnh)</option>
+                      </select>
+                    </div>
+                    <div class="btn_fillter d-none">
+                        <div>
+                            <button type="submit" class="btn btn-primary"><%= lib_translate("Tìm kiếm")  %></button>
+                        </div>
+                    </div>
+                  </div>
+                  <div class="row justify-content-end pb-2 mt-2">
+                    <div style="width: 500px;" >
+                        <input type='text' name='search' id='search_user' value='<%= params[:search] %>' placeholder='<%= lib_translate('Search') %>' class='form-control form-control-sm'>
+                        <input class='d-none' name='lang' value='vi'><input type='submit' hidden>
+                    </div>
+                  </div>
+                </div>
+              </form>
+              
+              <div class="table-responsive scrollbar"> 
+                <table id="user_buh" class="table table-bordered fs--1 mb-0" style="margin-top: 0px !important; margin-bottom: 0px !important">
+                  <thead class="bg-200 text-900">
+                    <tr>
+                      <th class="sort" style="width:4%; text-align: center;"><%= lib_translate("STT") %></th>
+                      <th class="sort"><%= lib_translate("Tên nhân viên") %></th>
+                      <th class="sort"><%= lib_translate("Đơn vị") %></th>
+                      <th class="sort text-center"><%= lib_translate("Loại ngày nghỉ") %></th>
+                      <th class="sort text-center"><%= lib_translate("Tổng ngày nghỉ") %></th>
+                      <th class="no-sort text-center"><%= lib_translate("Chi tiết ngày") %></th>
+                      <th class="sort text-center"><%= lib_translate("Người duyệt") %></th>
+                      <th class="sort text-center"><%= lib_translate("Trạng thái") %></th>
+                      <th class="no-sort text-center"></th>
+                    </tr>
+                  </thead>
+                  <tbody class="list_user_buh">
+                    <% @results.each_with_index do |holpro, index| %>
+                      <tr>
+                        <td class="text-center"><%= (index + 1) + (@page - 1) * @per_page %></td>
+                        <td><%= holpro['user_fullname'] %> (<%= holpro['user_sid'] %>)</td>
+                        <td><%= holpro['department_name'] %></td>
+                        <td class="text-center"><%= @holpro_types[holpro['holpro_id']] || "" %></td>
+                        <td class="text-center"><%= holpro['holiday_total_days'] %> ngày</td>
+                        <td class="text-start">
+                          <span title="<%= holpro['details_holpros'] %>">
+                            <%= truncate(holpro['details_holpros'], length: 50) %>
+                          </span>
+                        </td>
+                        <td class="text-center">
+                          <% approvers = @holpro_approvers[holpro['holpro_id']] || [] %>
+                          <%= approvers.map { |a| a[:name] }.join(", ") %>
+                        </td>
+                        <td class="text-center">
+                          <% if holpro['holiday_status'] == "TEMP" %>
+                            <span class="text-secondary">Lưu nháp</span>
+                          <% elsif holpro['holiday_status'] == "DONE" %>
+                            <span class="text-success">Đã duyệt</span>
+                          <% elsif holpro['holiday_status'] == "PENDING" %>
+                            <span class="text-warning">Chờ duyệt</span>
+                          <% elsif holpro['holiday_status'] == "REFUSE" %>
+                            <span class="text-danger">Từ chối</span>
+                          <% elsif holpro['holiday_status'] == "CANCEL" %>
+                            <span class="text-danger">Đã hủy</span>
+                          <% elsif holpro['holiday_status'] == "CANCEL-DONE" %>
+                            <span class="text-success">Đã duyệt(điều chỉnh)</span>
+                          <% else %>
+                            <span class="text-warning">Đang xử lý đơn</span>
+                          <% end %>
+                        </td>
+                        <td class="text-center">
+                          <button class="btn btn-sm btn-outline-primary detail-btn" data-bs-toggle="modal" data-bs-target="#holidayDetailsModal" data-uorg-scode="BUH" data-holpro-id="<%= holpro['holpro_id'] %>" data-holpro-status="<%= holpro['holiday_status'] %>">
+                            Chi tiết
+                          </button>
+                        </td>
+                      </tr>
+                    <% end %>
+                  </tbody>
+                </table>
+                <% if @results_total > 0 %>
+                  <div class="d-flex justify-content-center mt-3">
+                    <div class="col-auto">
+                      <nav aria-label="Page navigation">
+                        <ul class="pagination mb-0">
+                          <li class="page-item <%= @page == 1 ? 'disabled' : '' %>">
+                            <%= link_to "«", manager_leave_manager_holiday_path(page: @page - 1, status: params[:status], per_page: @per_page, lang: session[:lang], search: params[:search], uorg_scode: @uorg_scode, department_buh: params[:department_buh], country_buh: params[:country_buh], holtype_buh: params[:holtype_buh]), class: "page-link" %>
+                          </li>
+                          <% (1..@total_pages).each do |i| %>
+                            <li class="page-item <%= @page == i ? 'active' : '' %>">
+                              <%= link_to i.to_s, manager_leave_manager_holiday_path(page: i, status: params[:status], per_page: @per_page, lang: session[:lang], search: params[:search], uorg_scode: @uorg_scode, department_buh: params[:department_buh], country_buh: params[:country_buh], holtype_buh: params[:holtype_buh]), class: "page-link" %>
+                            </li>
+                          <% end %>
+                          <li class="page-item <%= @page == @total_pages ? 'disabled' : '' %>">
+                            <%= link_to "»", manager_leave_manager_holiday_path(page: @page + 1, status: params[:status], per_page: @per_page, lang: session[:lang], search: params[:search], uorg_scode: @uorg_scode, department_buh: params[:department_buh], country_buh: params[:country_buh], holtype_buh: params[:holtype_buh]), class: "page-link" %>
+                          </li>
+                        </ul>
+                      </nav>
+                    </div>
+                    <div class="col-auto ms-2">
+                      <form action="<%= manager_leave_manager_holiday_path %>" accept-charset="UTF-8" method="get">
+                        <select class="form-select" name="per_page" id="per_page_select" onchange="this.form.submit()">
+                          <option value="25" <%= @per_page == 25 ? 'selected' : '' %>>25</option>
+                          <option value="50" <%= @per_page == 50 ? 'selected' : '' %>>50</option>
+                          <option value="100" <%= @per_page == 100 ? 'selected' : '' %>>100</option>
+                          <option value="200" <%= @per_page == 200 ? 'selected' : '' %>>200</option>
+                        </select>
+                        <input class="d-none" name="lang" value="<%= session[:lang] %>">
+                        <input class="d-none" name="search" value="<%= params[:search] %>">
+                        <input class="d-none" name="page" value="1">
+                        <input class="d-none" name="uorg_scode" value="<%= @uorg_scode %>">
+                        <input class="d-none" name="country_buh" value="<%= params[:country_buh] %>">
+                        <input class="d-none" name="status" value="<%= params[:status] %>">
+                        <input class="d-none" name="holtype_buh" value="<%= params[:holtype_buh] %>">
+                        <input class="d-none" name="department_buh" value="<%= params[:department_buh] %>">
+                      </form>
+                    </div>
+                  </div>
+                <% else %>
+                  <p class="text-center mt-3">Không có dữ liệu để hiển thị.</p>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<!-- Modal -->
+<!-- FORM BÊN NGOÀI -->
+<%= form_tag import_excel_manager_leave_path,
+              method: :post,
+              id: 'import-form',
+              multipart: true,
+              authenticity_token: true,
+              class: "d-none" do %>
+  <%= hidden_field_tag :uorg_scode, params[:uorg_scode], id: 'uorg_scode_input' %>
+<% end %>
+
+<!-- MODAL -->
+<div class="modal fade" id="importModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="importModalLabel">📁 Import Danh sách Ngày nghỉ</h5>
+        <button type="button" class="btn-close" id="btn-close-import" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <!-- INPUT TƯƠNG TÁC -->
+        <input type="file" name="file" id="file_input" class="form-control" accept=".xlsx" required>
+        <input type="hidden" id="modal_uorg_scode" value="<%= params[:uorg_scode] %>">
+
+        <button id="submit-import-btn" class="btn btn-success mt-3">📥 Xác nhận Import</button>
+        <div id="import-result" class="mt-3"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal nằm ngoài bảng -->
+<div class="modal fade" id="holidayDetailsModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="holidayDetailsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="holidayDetailsModalLabel">Thông tin đơn</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body row">
+        <!-- Cột trái: Thông tin nhân sự và chi tiết đơn -->
+        <input type="hidden" id="holpro_id_form_detail" value="">     
+        <input type="hidden" id="uorg_scode_form_detail" value="">     
+        <div class="col-md-6">
+          <div class="info-section">
+            <p class="info-label">Nhân sự: <span class="fw-bold" id="modal-user-fullname">Không xác định</span> (<span class="fw-bold" id="modal-user-sid">Không xác định</span>)</p>
+            <p class="info-label">Phòng ban: <span class="fw-bold" id="modal-department-name">Không xác định</span></p>
+            <p class="info-label">Vị trí công việc: <span class="fw-bold" id="modal-positionjob-name">Không xác định</span></p>
+            <p class="info-label">Tổng thời gian nghỉ: <span class="fw-bold" id="modal-dttotal">Không xác định</span></p>
+          </div>
+          <div id="leaveDetailsContainer"></div>
+        </div>
+        <!-- Cột phải: Quá trình xử lý -->
+        <div class="col-md-6">
+          <h6 class="stimeline-title-cancel d-none">Quá trình điều chỉnh</h6>
+          <ul class="stimeline__create-cancel d-none" id="processDetailsCancel"></ul>
+          <br>
+          <h6 class="stimeline-title">Quá trình xử lý</h6>
+          <ul class="stimeline__create" id="processTimeline"></ul>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary btn-custom d-none" id="print_holpros">In phép</button>
+        <button type="button" class="btn btn-secondary btn-custom" data-bs-dismiss="modal">Đóng</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%# In đơn%>
+<%= form_tag manager_leave_generated_leave_request_path, id: "generated_leave_request_form", method: :get, class: "d-none", authenticity_token: true do %>
+    <input type="text" id="holpro_id_form" name="holpro_id" value="">     
+    <input type="text" id="uorg_scode_form" name="uorg_scode" value="">     
+<% end %>
+
+<%# Xuất báo cáo theo năm%>
+  <div class="modal" id="export_data_excel_year" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="holidayDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="max-width: 20%;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Xuất tổng hợp nghỉ theo năm</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <%= form_tag setting_holidays_export_data_holiday_year_path, id: "export_data_holiday_year_form", method: :get, authenticity_token: true do %>
+            <input type="hidden" id="uorg_code_id" name="uorg_code">
+            <div class="row mt-2 d-flex flex-direction-row">
+              <div class="col-md-7">
+                <div class="d-flex align-items-end" style="flex-wrap: wrap;">
+                  <div class="me-1">
+                  <label style="margin-bottom: 0px !important;"><%= lib_translate("Loại nghỉ") %></label>
+                    <select class="select-form selectpicker" name="holtype_year_export" id="holtype_year_select">
+                      <% @holtypes.each do |holtype| %>
+                        <option value="<%= holtype&.code %>">
+                          <%= holtype&.name %>
+                        </option>
+                      <% end %>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-5">
+                <div class="d-flex align-items-end" style="flex-wrap: wrap;">
+                  <div class="me-1">
+                    <label style="margin-bottom: 0px !important;"><%= lib_translate("Năm") %></label>
+                    <select class="select-form selectpicker" name="year_export" id="year_export_select">
+                      <% current_year = Date.today.year %>
+                      <% year_range = (current_year - 2..current_year + 2).to_a %>
+                      <%= options_for_select(year_range.map { |y| [y, y] }, selected: current_year) %>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+          <button type="button" class="btn btn-primary" onclick="submitExportExcelYear()">Xác nhận</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function exportExcelYear(uorg_code) {
+      $('#export_data_holiday_year_form #uorg_code_id').val(uorg_code);
+      $('#export_data_excel_year').modal('show');
+    }
+
+    function submitExportExcelYear() {
+      $('#export_data_excel_year').modal('hide');
+      $('#export_data_holiday_year_form').submit();    
+    }
+  </script>
+<%# END Xuất excel theo năm %>
+
+<%# Xuất báo cáo theo tháng%>
+  <div class="modal" id="export_data_excel_month" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="holidayDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="max-width: 15%;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Xuất TH nghỉ theo tháng</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <%= form_tag setting_holidays_export_data_holiday_month_path, id: "export_data_holiday_month_form", method: :get, authenticity_token: true do %>
+            <input type="hidden" id="stype_uorg_id" name="stype_uorg">
+            <div class="row mt-2 d-flex flex-direction-row">
+              <div class="col-md-6">
+                <div class="d-flex align-items-end" style="flex-wrap: wrap;">
+                  <div class="me-1">
+                    <label style="margin-bottom: 0px !important;"><%= lib_translate("Năm") %></label>
+                    <select class="select-form selectpicker" name="year_month_export" id="year_month_export_select">
+                      <% current_year = Date.today.year %>
+                      <% year_range = (current_year - 2..current_year + 2).to_a %>
+                      <%= options_for_select(year_range.map { |y| [y, y] }, selected: current_year) %>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="d-flex align-items-end" style="flex-wrap: wrap;">
+                  <div class="me-1">
+                    <label style="margin-bottom: 0px !important;"><%= lib_translate("Tháng") %></label>
+                    <select class="select-form selectpicker" name="month_export" id="month_export_select">
+                      <%= options_for_select((1..12).map { |m| [m, m] }, selected: Date.today.month) %>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+          <button type="button" class="btn btn-primary" onclick="submitExportExcelMonth()">Xác nhận</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function exportExcelMonth(uorg_code) {
+      $('#export_data_holiday_month_form #stype_uorg_id').val(uorg_code);
+      $('#export_data_excel_month').modal('show');
+    }
+
+    function submitExportExcelMonth() {
+    
+      // Ẩn modal
+      $('#export_data_holiday_month_form').submit();   
+      $('#export_data_excel_month').modal('hide');
+      
+    }
+  </script>
+<%# END Xuất báo cáo theo tháng%>
+
+<%# Xuất báo cáo theo ngày%>
+  <div class="modal" id="export_data_excel_date" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="holidayDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="max-width: 13%;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Xuất TH nghỉ theo ngày</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <%= form_tag setting_holidays_export_data_holiday_date_path, id: "export_data_holiday_date_form", method: :get, authenticity_token: true do %>
+            <input type="hidden" id="stype_uorg_id" name="stype_uorg">
+            <div class="row mt-2 d-flex flex-direction-row">
+              <div class="col-md-12">
+                <div class="d-flex align-items-end" style="flex-wrap: wrap;">
+                  <div class="me-1">
+                    <label style="margin-bottom: 0px !important;"><%= lib_translate("Ngày") %></label>
+                    <input class="form-control datetimepicker" id="date_export_select" name="date_export" type="text" data-options='{"disableMobile":true}' />
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+          <button type="button" class="btn btn-primary" onclick="submitExportExcelDate()">Xác nhận</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function exportExcelDate(uorg_code) {
+      const today = new Date().toISOString().slice(0, 10); // yyyy-mm-dd
+      const formattedToday = today.split('-').reverse().join('/'); // dd/mm/yyyy
+
+      // Set ngày hiện tại vào ô input
+      $('#export_data_holiday_date_form #date_export_select').val(formattedToday);
+
+      // Set uorg_code
+      $('#export_data_holiday_date_form #stype_uorg_id').val(uorg_code);
+
+      // Hiện modal
+      $('#export_data_excel_date').modal('show');
+    }
+
+    function submitExportExcelDate() {
+      $('#export_data_holiday_date_form').submit();   
+      $('#export_data_excel_date').modal('hide');
+
+      // Reset lại ngày sau submit (đề phòng mở lại form)
+      const today = new Date().toISOString().slice(0, 10);
+      const formattedToday = today.split('-').reverse().join('/');
+      $('#export_data_holiday_date_form #date_export_select').val(formattedToday);
+    }
+  </script>
+<%# END Xuất báo cáo theo ngày%>
+
+<%# Xuất báo cáo theo nhân sự TODO %>
+  <div class="modal" id="export_data_excel_user" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="holidayDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="max-width: 23%;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Xuất tổng hợp nghỉ theo nhân sự</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <%= form_tag setting_holidays_export_data_holiday_user_path, id: "export_data_holiday_user_form", method: :get, authenticity_token: true do %>
+            <input type="hidden" id="stype_uorg_id" name="stype_uorg">
+            <div class="row mt-2 d-flex flex-direction-row">
+              <div class="col-md-5">
+                <div class="d-flex align-items-end" style="flex-wrap: wrap;">
+                  <div class="me-1">
+                    <label style="margin-bottom: 0px !important;"><%= lib_translate("Năm") %></label>
+                    <select class="select-form selectpicker" name="year_user_export" id="year_user_export_select">
+                      <% current_year = Date.today.year %>
+                      <% year_range = (current_year - 2..current_year + 2).to_a %>
+                      <%= options_for_select(year_range.map { |y| [y, y] }, selected: current_year) %>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-7">
+                <div class="d-flex align-items-end" style="flex-wrap: wrap;">
+                  <div class="me-1">
+                    <label style="margin-bottom: 0px !important;"><%= lib_translate("Mã nhân sự") %></label>
+                    <input class="form-control" id="user_sid_export_input" name="user_sid_export" type="text" />
+                    <small id="sid_error_message" class="text-danger" style="display: none;">Vui lòng nhập mã nhân sự.</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+          <button type="button" class="btn btn-primary" onclick="submitExportExcelUser()">Xác nhận</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function exportExcelUser(uorg_code) {
+      $('#export_data_holiday_user_form #stype_uorg_id').val(uorg_code);
+      $('#export_data_excel_user').modal('show');
+    }
+
+    function submitExportExcelUser() {
+      const userInput = $('#export_data_holiday_user_form #user_sid_export_input');
+      const sid = userInput.val().trim();
+
+      // Xóa class lỗi cũ (nếu có)
+      userInput.removeClass('is-invalid');
+
+      // Nếu không nhập mã nhân sự thì cảnh báo
+      if (!sid) {
+        userInput.addClass('is-invalid');
+        $('#sid_error_message').show();
+        return;
+      } else {
+        $('#sid_error_message').hide();
+      }
+
+      // Nếu hợp lệ thì submit form
+      $('#export_data_holiday_user_form').submit();
+
+      // Reset ô nhập mã sau khi submit
+      userInput.val('');
+      $('#export_data_excel_user').modal('hide');
+    }
+  </script>
+<%# END Xuất báo cáo theo nhân sự%>
+
+<%# Xuất báo cáo theo địa điểm nước ngoài%>
+  <div class="modal" id="export_data_excel_country" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="holidayDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="max-width: 20%;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Xuất TH Đi nước ngoài</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <%= form_tag setting_holidays_export_data_holiday_country_path, id: "export_data_holiday_country_form", method: :get, authenticity_token: true do %>
+            <input type="hidden" id="stype_uorg_id" name="stype_uorg">
+            <div class="row mt-2 d-flex flex-direction-row">
+              <div class="col-md-6">
+                <div class="d-flex align-items-end" style="flex-wrap: wrap;">
+                  <div class="me-1">
+                  <label style="margin-bottom: 0px !important;"><%= lib_translate("Loại nghỉ") %></label>
+                    <select class="select-form selectpicker" name="holtype_country_export" id="holtype_country_select">
+                      <option value="">Tất cả</option>
+                      <% @holtypes.each do |holtype| %>
+                        <option value="<%= holtype&.code %>">
+                          <%= holtype&.name %>
+                        </option>
+                      <% end %>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-5">
+                <div class="d-flex align-items-end" style="flex-wrap: wrap;">
+                  <div class="me-1">
+                    <label style="margin-bottom: 0px !important;"><%= lib_translate("Năm") %></label>
+                    <select class="select-form selectpicker" name="year_country_export" id="year_country_export_select">
+                      <% current_year = Date.today.year %>
+                      <% year_range = (current_year - 2..current_year + 2).to_a %>
+                      <%= options_for_select(year_range.map { |y| [y, y] }, selected: current_year) %>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+          <button type="button" class="btn btn-primary" onclick="submitExportExcelCountry()">Xác nhận</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function exportExcelCountry(uorg_code) {
+      $('#export_data_holiday_country_form #stype_uorg_id').val(uorg_code);
+      $('#export_data_excel_country').modal('show');
+    }
+
+    function submitExportExcelCountry() {
+      // Ẩn modal
+      $('#export_data_holiday_country_form').submit();      
+      $('#export_data_excel_country').modal('hide');
+      $('#export_data_holiday_country_form #holtype_country_select').val("");
+    }
+
+  </script>
+<%# END Xuất báo cáo theo địa điểm%>
+
+<%# Xuất báo cáo theo trạng thái đơn%>
+  <div class="modal" id="export_data_excel_status" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="holidayDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="max-width: 20%;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Xuất TH theo trạng thái</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <%= form_tag setting_holidays_export_data_holiday_status_path, id: "export_data_holiday_status_form", method: :get, authenticity_token: true do %>
+            <input type="hidden" id="stype_uorg_id" name="stype_uorg">
+            <div class="row mt-2 d-flex flex-direction-row">
+              <div class="col-md-7">
+                <div class="d-flex align-items-end" style="flex-wrap: wrap;">
+                  <div class="me-1">
+                    <label style="margin-bottom: 0px !important;"><%= lib_translate("Trạng thái đơn") %></label>
+                    <select class="select-form selectpicker" name="status_export" id="status_hol_select">
+                      <option value="DONE">Đã duyệt</option>
+                      <option value="PENDING">Chờ duyệt</option>
+                      <option value="TEMP">Lưu nháp</option>
+                      <option value="PROCESSING">Đang xử lý đơn</option>
+                      <option value="CANCEL">Đơn bị hủy</option>
+                      <option value="CANCEL-DONE">Đã duyệt(điều chỉnh)</option>
+                      <option value="REFUSE">Đơn từ chối</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-5">
+                <div class="d-flex align-items-end" style="flex-wrap: wrap;">
+                  <div class="me-1">
+                    <label style="margin-bottom: 0px !important;"><%= lib_translate("Năm") %></label>
+                    <select class="select-form selectpicker" name="year_status_export" id="year_status_export_select">
+                      <% current_year = Date.today.year %>
+                      <% year_range = (current_year - 2..current_year + 2).to_a %>
+                      <%= options_for_select(year_range.map { |y| [y, y] }, selected: current_year) %>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+          <button type="button" class="btn btn-primary" onclick="submitExportExcelStatus()">Xác nhận</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function exportExcelStatus(uorg_code) {
+      $('#export_data_holiday_status_form #stype_uorg_id').val(uorg_code);
+      $('#export_data_excel_status').modal('show');
+    }
+
+    function submitExportExcelStatus() {
+      // Ẩn modal
+      $('#export_data_holiday_status_form').submit();  
+      $('#export_data_excel_status').modal('hide');
+    }
+
+  </script>
+<%# END Xuất báo cáo theo trạng thái đơn%>
+
+<%# Xuất bảng chấm công%>
+  <div class="modal" id="export_data_timesheet" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="holidayDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="max-width: 15%;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Xuất bảng chấm công</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <%= form_tag setting_holidays_export_data_timesheet_path, id: "export_data_timesheet_form", method: :get, authenticity_token: true do %>
+            <input type="hidden" id="uorg_code_id" name="uorg_code">
+            <div class="row mt-2 d-flex flex-direction-row">
+              <div class="col-md-6">
+                <div class="d-flex align-items-end" style="flex-wrap: wrap;">
+                  <div class="me-1">
+                    <label style="margin-bottom: 0px !important;"><%= lib_translate("Năm") %></label>
+                    <select class="select-form selectpicker" name="year_timesheet_export" id="year_timesheet_export_select">
+                      <% current_year = Date.today.year %>
+                      <% year_range = (current_year - 2..current_year + 2).to_a %>
+                      <%= options_for_select(year_range.map { |y| [y, y] }, selected: current_year) %>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="d-flex align-items-end" style="flex-wrap: wrap;">
+                  <div class="me-1">
+                    <label style="margin-bottom: 0px !important;"><%= lib_translate("Tháng") %></label>
+                    <select class="select-form selectpicker" name="month_timesheet_export" id="month_timesheet_export_select">
+                      <%= options_for_select((1..12).map { |m| [m, m] }, selected: Date.today.month) %>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+          <button type="button" class="btn btn-primary" onclick="submitExportExcelTimesheet()">Xác nhận</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function exportExcelTimesheet(uorg_code) {
+      $('#export_data_timesheet_form #uorg_code_id').val(uorg_code);
+      $('#export_data_timesheet').modal('show');
+    }
+
+    function submitExportExcelTimesheet() {
+      $('#export_data_timesheet_form').submit();    
+      $('#export_data_timesheet').modal('hide');
+    }
+  </script>
+<%# END Xuất bảng chấm công%>
+
+<script>
+  $(document).ready(function () {
+    flatpickr(".datetimepicker", {
+      dateFormat: "d/m/Y", // Định dạng ngày hiển thị
+      disableMobile: true  // Không dùng native picker trên mobile
+    });
+    // Hàm định dạng ngày thành dd/MM/yyyy
+    function formatDate(date) {
+      const d = new Date(date);
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const year = d.getFullYear();
+      return `${day}/${month}/${year}`;
+    }
+
+    // Hàm định dạng giờ thành HH:mm
+    function formatTime(date) {
+      const d = new Date(date);
+      const hours = String(d.getHours()).padStart(2, '0');
+      const minutes = String(d.getMinutes()).padStart(2, '0');
+      return `${hours}:${minutes}`;
+    }
+
+    // Chọn tất cả các nút "Chi tiết"
+    $('.detail-btn').on('click', function () {
+
+      const holproId = $(this).data('holpro-id');
+      const holproStatus = $(this).data('holpro-status');
+      const uorgScode = $(this).data('uorg-scode');
+
+      $('#holidayDetailsModal #holpro_id_form_detail').val(holproId);
+      $('#holidayDetailsModal #uorg_scode_form_detail').val(uorgScode);
+
+      $('#generated_leave_request_form #holpro_id_form').val(holproId);
+      $('#generated_leave_request_form #uorg_scode_form').val(uorgScode);
+
+      if (["DONE", "CANCEL-DONE"].includes(holproStatus) && uorgScode == "BUH"){
+        $('#print_holpros').removeClass("d-none");
+      }else {
+        $('#print_holpros').addClass("d-none");
+      }
+
+      // Dữ liệu từ controller, sử dụng .to_json với escape_html
+      const results = <%= @results.to_json.html_safe %>;
+      const mandocDetails = <%= @mandoc_details.to_json.html_safe %>;
+      const mandocDetailsCancel = <%= @mandoc_details_cancel.to_json.html_safe %>;
+      const holprosdetailsData = <%= @holprosdetails_data.to_json.html_safe %>;
+      const holtypesMap = <%= @holtypes_map.to_json.html_safe %>;
+      const holproHandoverNames = <%= @holpro_handover_names.to_json.html_safe %>;
+      const holproTypes = <%= @holpro_types.to_json.html_safe %>;
+      const holproLocations = <%= @holpro_locations.to_json.html_safe %>;
+
+      const holpro = results.find(r => r.holpro_id === parseInt(holproId));
+
+      if (holpro) {
+        
+        // Hiển thị thông tin nhân sự
+        $('#modal-user-fullname').text(holpro.user_fullname || "Không xác định");
+        $('#modal-user-sid').text(holpro.user_sid || "Không xác định");
+        $('#modal-positionjob-name').text(holpro.positionjob_name || "Không xác định");
+        $('#modal-dttotal').text((holpro.holiday_total_days || "Không xác định") + " ngày");
+        $('#modal-department-name').text(holpro.department_name || "Không xác định");
+
+        const infoSection = $(".info-section");
+        // Xóa trước nếu đã có (tránh thêm trùng)
+        infoSection.find(".status-row, .reason-row").remove();
+        if (holpro.holiday_status === "REFUSE") {
+          const statusRow = `<p class="info-label status-row">Trạng thái đơn: <span class="fw-bold text-danger">Từ chối</span></p>`;
+          const reasonRow = `<p class="info-label reason-row">Lý do: <span class="fw-bold">${holpro.note || "Không có"}</span></p>`;
+          // Thêm vào ngay sau dòng "Vị trí công việc"
+          infoSection.find("#modal-dttotal").closest("p").after(statusRow + reasonRow);
+        } 
+        if (holpro.holiday_status === "CANCEL" ) {
+          const statusRow = `<p class="info-label status-row">Trạng thái đơn: <span class="fw-bold text-danger">Đã hủy</span></p>`;
+          const reasonRow = `<p class="info-label reason-row">Lý do: <span class="fw-bold">${holpro.note || "Không có"}</span></p>`;
+          // Thêm vào ngay sau dòng "Vị trí công việc"
+          infoSection.find("#modal-dttotal").closest("p").after(statusRow + reasonRow);
+        } 
+
+
+
+        // Hiển thị chi tiết đơn nghỉ phép (riêng cho từng holprosdetails)
+        $('#leaveDetailsContainer').empty();
+        const holidayDetails = holprosdetailsData.filter(detail => detail.holpros_id === parseInt(holproId));
+        if (holidayDetails.length > 0) {
+          $.each(holidayDetails, function (index, detail) {
+            const holprosdetailsId = detail.id; // Sử dụng id của holprosdetails
+
+            // Định dạng ngày dtfrom và dtto
+            const dtFrom = detail.dtfrom ? formatDate(detail.dtfrom) : "Không xác định";
+            const dtTo = detail.dtto ? formatDate(detail.dtto) : "Không xác định";
+
+            // Chỉ hiển thị dtFrom nếu dtFrom = dtTo
+            const timeRange = dtFrom === dtTo ? dtFrom : `${dtFrom} - ${dtTo}`;
+
+            // Xử lý chuỗi chi tiết nghỉ (details)
+            const detailSegments = detail.details ? detail.details
+                  .split('$$$') // Tách chuỗi thành mảng
+                  .sort((a, b) => {
+                    // Chuyển đổi định dạng ngày dd/mm/yyyy thành đối tượng Date để so sánh
+                    const dateA = new Date(a.split("-")[0].split("/").reverse().join("-"));
+                    const dateB = new Date(b.split("-")[0].split("/").reverse().join("-"));
+                    return dateA - dateB; // Sắp xếp tăng dần
+                  })
+              : [];
+            const detailFormatted = detailSegments.length > 0 ? detailSegments.map(segment => {
+              const [datePart, statusPart] = segment.split('-');
+              const dateMatch = datePart.match(/\d{2}\/\d{2}\/\d{4}/);
+              const date = dateMatch ? dateMatch[0] : "Không xác định";
+              const status = statusPart ? statusPart.replace(/\(|\)/g, '') : "Không xác định";
+              const statusMapping = {
+                'ALL': 'Cả ngày',
+                'AM': 'Buổi sáng',
+                'PM': 'Buổi chiều'
+              };
+              return `${date} (${statusMapping[status] || status})`;
+            }).join('<br>') : "Không có chi tiết nghỉ";
+
+            // Lấy thông tin từ holproHandoverNames, holproTypes, holproLocations dựa trên holprosdetails_id
+            const receiverFormatted = holproHandoverNames[holprosdetailsId] || "Không có người nhận bàn giao";
+            const typeName = holproTypes[holprosdetailsId] || holtypesMap[detail.sholtype] || "Không xác định";
+            const locationType = detail.issued_place === "IN-COUNTRY" ? "Trong nước" : "Nước ngoài";
+            const nameLocation = detail.issued_place !== "IN-COUNTRY" ? holproLocations[holprosdetailsId] || "Nước ngoài không xác định" : "";
+            
+
+            const note = detail.note || "Không có nội dung";
+
+            const leaveDetailHtml = `
+              <div class="leave-details">
+                <h5 class="sholtype-tag">${typeName}</h5>
+                <div class="col-12 d-flex justify-contend-space-between">
+                  <div class="col-4">
+                    <p>Thời gian nghỉ:</p>
+                  </div>
+                  <div class="sub-details col-8 fw-bold" style="font-size: 14px; color: #333; margin-left: 0;">
+                    ${detailFormatted}
+                  </div>
+                </div>
+                <p>Cá nhân hỗ trợ công việc: <span class="fw-bold">${receiverFormatted}</span></p>
+                <p>Địa điểm: <span class="fw-bold">${locationType}</span></p>
+                ${nameLocation ? `<p id="national_place">Quốc gia: <span class="fw-bold">${nameLocation}</span></p>` : '<p id="national_place" class="d-none"></p>'}
+                <p>Lý do: <span class="fw-bold">${note}</span></p>
+              </div>
+            `;
+            $('#leaveDetailsContainer').append(leaveDetailHtml);
+          });
+        } else {
+          $('#leaveDetailsContainer').html('<p>Không có thông tin.</p>');
+        }
+
+        // Hiển thị quá trình xử lý (chung cho holproId)
+        $('#processTimeline').empty();
+        $('#processDetailsCancel').empty();
+        const processDetails = mandocDetails[holproId] || [];
+        const processDetailsCancel = mandocDetailsCancel[holproId] || [];
+        console.log(processDetails);
+        console.log(processDetailsCancel);
+        
+        if (processDetails.length > 0) {
+          $('#processTimeline').addClass('stimeline'); // Thêm class timeline
+          const ul = $('<ul style="list-style: none;"></ul>').appendTo('#processTimeline');
+          $.each(processDetails, function (index, step) {
+            const dateTime = new Date(step.updated_at);
+            const date = formatDate(dateTime); // Định dạng ngày
+            const time = formatTime(dateTime); // Định dạng giờ
+            
+            let status = "";
+            let statusClass = "";
+            let iconHtml = "";
+            let titleUserHandle = "";
+
+            if (index === 0) {
+              // Người đầu tiên: Đăng ký nghỉ phép
+              status = "Đăng ký nghỉ";
+              statusClass = "DONE"; // Đã xử lý nên có màu xanh dương
+              iconHtml = '';
+              titleUserHandle = 'Người làm đơn: ';
+            } else if (index === processDetails.length - 1) {
+              titleUserHandle = 'Người xử lý: ';
+              if (step.status === "DAXULY") {
+                // Người cuối cùng: Dựa trên holproStatus
+                if (holproStatus === "DONE" || holproStatus === "CANCEL-DONE") {
+                  status = "Đã xử lý";
+                  statusClass = "DONE";
+                  iconHtml = '<i class="fas fa-check-circle" style="color: green; margin-left: 5px;"></i>';
+                } else if (holproStatus === "REFUSE") {
+                  status = "Đã xử lý";
+                  statusClass = "REFUSE";
+                  iconHtml = '<i class="fas fa-check-circle" style="color: green; margin-left: 5px;"></i>';
+                } else if (holproStatus === "CANCEL") {
+                  status = "Đã xử lý";
+                  statusClass = "CANCEL";
+                  iconHtml = '<i class="fas fa-check-circle" style="color: green; margin-left: 5px;"></i>';
+                }
+                 else if (holproStatus === "PENDING" || holproStatus === "CANCEL-PENDING" || holproStatus === "PROCESSING") {
+                  status = "Đang chờ xử lý";
+                  statusClass = "PENDING";
+                  iconHtml = '';
+                } else {
+                  status = holproStatus || "Không xác định";
+                  statusClass = "";
+                  iconHtml = '';
+                }
+              } else {
+                status = "Đang chờ xử lý";
+                statusClass = "PENDING";
+                iconHtml = '';
+              }
+              if (processDetailsCancel.length > 0) {
+                status = "Đã xử lý";
+                statusClass = "DONE";
+                iconHtml = '<i class="fas fa-check-circle" style="color: green; margin-left: 5px;"></i>';
+              }
+            } else {
+              // Những người trung gian: Duyệt đơn cấp phòng
+              status = "Đã xử lý";
+              statusClass = "DONE";
+              iconHtml = '<i class="fas fa-check-circle" style="color: green; margin-left: 5px;"></i>';
+              titleUserHandle = 'Người xử lý: ';
+            }
+
+            const userPosition = step.user_position || "Không xác định";
+            const li = $('<li></li>').addClass(statusClass).appendTo(ul);
+            li.html(`
+              <div class="stimeline__date">
+                <span>${date}</span>
+                <span>${time}</span>
+              </div>
+              <div class="stimeline__content">
+                <div class="stimeline__title fw-bold">${status}${iconHtml}</div>
+                <div class="stimeline__description">
+                  <span>${titleUserHandle}</span><span class="name">${step.handler_name}</span><br>
+                  <span>Chức vụ: </span><span>${userPosition}</span>
+                </div>
+              </div>
+            `);
+          });
+        } else {
+          $('#processTimeline').html('<li>Không có thông tin xử lý.</li>');
+        }
+        if (processDetailsCancel.length > 0) {
+          $('#processDetailsCancel').addClass('stimeline'); // Thêm class timeline
+          $('.stimeline-title-cancel').removeClass('d-none');
+          $('.stimeline__create-cancel').removeClass('d-none');
+
+          const ul = $('<ul style="list-style: none;"></ul>').appendTo('#processDetailsCancel');
+          $.each(processDetailsCancel, function (index, step) {
+            const dateTime = new Date(step.updated_at);
+            const date = formatDate(dateTime); // Định dạng ngày
+            const time = formatTime(dateTime); // Định dạng giờ
+            
+            let status = "";
+            let statusClass = "";
+            let iconHtml = "";
+            let titleUserHandle = "";
+
+            if (index === 0) {
+              // Người đầu tiên: Đăng ký nghỉ phép
+              status = "Đăng ký nghỉ";
+              statusClass = "DONE"; // Đã xử lý nên có màu xanh dương
+              iconHtml = '';
+              titleUserHandle = 'Người làm đơn: ';
+            } else if (index === processDetailsCancel.length - 1) {
+              titleUserHandle = 'Người xử lý: ';
+              if (step.status === "DAXULY") {
+                // Người cuối cùng: Dựa trên holproStatus
+                if (holproStatus === "DONE" || holproStatus === "CANCEL-DONE") {
+                  status = "Đã xử lý";
+                  statusClass = "DONE";
+                  iconHtml = '<i class="fas fa-check-circle" style="color: green; margin-left: 5px;"></i>';
+                } else if (holproStatus === "REFUSE") {
+                  status = "Đã xử lý";
+                  statusClass = "REFUSE";
+                  iconHtml = '<i class="fas fa-check-circle" style="color: green; margin-left: 5px;"></i>';
+                } else if (holproStatus === "CANCEL") {
+                  status = "Đã xử lý";
+                  statusClass = "CANCEL";
+                  iconHtml = '<i class="fas fa-check-circle" style="color: green; margin-left: 5px;"></i>';
+                }
+                 else if (holproStatus === "PENDING" || holproStatus === "CANCEL-PENDING" || holproStatus === "PROCESSING") {
+                  status = "Đang chờ xử lý";
+                  statusClass = "PENDING";
+                  iconHtml = '';
+                } else {
+                  status = holproStatus || "Không xác định";
+                  statusClass = "";
+                  iconHtml = '';
+                }
+              } else {
+                status = "Đang chờ xử lý";
+                statusClass = "PENDING";
+                iconHtml = '';
+              }
+            } else {
+              // Những người trung gian: Duyệt đơn cấp phòng
+              status = "Đã xử lý";
+              statusClass = "DONE";
+              iconHtml = '<i class="fas fa-check-circle" style="color: green; margin-left: 5px;"></i>';
+              titleUserHandle = 'Người xử lý: ';
+            }
+
+            const userPosition = step.user_position || "Không xác định";
+            const li = $('<li></li>').addClass(statusClass).appendTo(ul);
+            li.html(`
+              <div class="stimeline__date">
+                <span>${date}</span>
+                <span>${time}</span>
+              </div>
+              <div class="stimeline__content">
+                <div class="stimeline__title fw-bold">${status}${iconHtml}</div>
+                <div class="stimeline__description">
+                  <span>${titleUserHandle}</span><span class="name">${step.handler_name}</span><br>
+                  <span>Chức vụ: </span><span>${userPosition}</span>
+                </div>
+              </div>
+            `);
+          });
+        } else {
+          $('.stimeline-title-cancel').addClass('d-none');
+          $('.stimeline__create-cancel').addClass('d-none');
+        }
+      }
+    });
+  });
+</script>
+
+<script>
+  function changeTab(uorg_scode) {
+    document.body.style.cursor = 'wait';
+    const urlParams = new URLSearchParams(window.location.search);
+    urlParams.set('uorg_scode', uorg_scode);
+    urlParams.set('page', '1');
+    // Giữ nguyên department hiện tại nếu có
+    if (uorg_scode === 'BMU' || uorg_scode === 'BMTU') {
+      urlParams.set('department_bmu', urlParams.get('department_bmu') || '');
+      urlParams.set('country_bmu', urlParams.get('country_bmu') || '');
+      urlParams.set('holtype_bmu', urlParams.get('holtype_bmu') || '');
+    } else if (uorg_scode === 'BUH') {
+      urlParams.set('department_buh', urlParams.get('department_buh') || '');
+      urlParams.set('country_buh', urlParams.get('country_buh') || '');
+      urlParams.set('holtype_buh', urlParams.get('holtype_buh') || '');
+    }
+    window.location.href = '<%= manager_leave_manager_holiday_path %>?' + urlParams.toString();
+  }
+  $(document).ready(function() {
+    $('#importModal').on('show.bs.modal', function () {
+      $('#file_input').val('');
+      $('#modal_uorg_scode').val('');
+      $('#import-result').html('');
+    });
+  });
+  $(document).ready(function () {
+    $('#submit-import-btn').click(function (e) {
+      e.preventDefault();
+
+      const fileInput = $('#file_input')[0].files[0];
+      const uorg_scode = $('#modal_uorg_scode').val();
+
+      if (!fileInput) {
+        alert("Vui lòng chọn file Excel trước khi import!");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('file', fileInput);
+      formData.append('uorg_scode', uorg_scode);
+
+      $.ajax({
+        url: $('#import-form').attr('action'),
+        type: 'POST',
+        data: formData,
+        contentType: false,
+        processData: false,
+        dataType: 'json',
+        success: function (response) {
+          pushSuccess(response);
+        },
+        error: function (xhr) {
+          try {
+            const res = JSON.parse(xhr.responseText);
+            pushError(res);
+          } catch (e) {
+            alert("Lỗi không xác định!");
+          }
+        }
+      });
+    });
+  });
+  let importSuccess = false;
+  function pushSuccess(data) {
+    $('#import-result').html('<div class="alert alert-success">' + data.msg + '</div>');
+    $('#file_input').val('');
+    importSuccess = true;
+  }
+  function pushError(data) {
+    $('#import-result').html('<div class="alert alert-danger">' + data.msg + '</div>');
+    $('#file_input').val('');
+  }
+  $('#btn-close-import').on('click', function () {
+  if (importSuccess) {
+    importSuccess = false; // reset về lại ban đầu
+    location.reload(); // reload lại trang
+  }
+});
+</script>
+
+<script>
+  // in đơn
+  $('#print_holpros').on('click', function () {
+    $('#generated_leave_request_form').submit();
+  });
+
+</script>

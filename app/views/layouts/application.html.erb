@@ -1,0 +1,571 @@
+<!-- Le Ngoc Huy is in charge -->
+<!DOCTYPE html>
+<html lang="en-US" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <% if @user_info.present? && @user_info[:organizations]&.any? { |scode| %w[BMU BMTU].include?(scode) } %>
+    <%= favicon_link_tag "logowebsite.png" %>
+    <title>BMU - Quản lý nhân sự</title>
+  <% elsif @user_info.present? && @user_info[:organizations]&.any? { |scode| %w[BUH].include?(scode) } %>
+    <%= favicon_link_tag "buhlogowebsite.png" %>
+    <title>BUH - Quản lý nhân sự</title>
+  <% else %>
+    <%= favicon_link_tag "logowebsite.png" %>
+    <title>BMU - Quản lý nhân sự</title>
+  <% end %>
+  <meta property="og:image" content="<%= image_path("/assets/image/logo_bmtu_buh_url.png") %>">
+  <meta property="og:image:secure_url" content="<%= image_path("/assets/image/logo_bmtu_buh_url.png") %>" />
+  <meta property="og:image:type" content="image/*" />
+  <meta property="og:image:alt" content="Phần mềm quản lý nhân sự của BMU, BUH" />
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#ffffff">
+  <script>
+    var noDataTable = '<%= lib_translate("No_data_available_in_table")%>';
+    var loadingTable = '<%= lib_translate("Loading")%>';
+    var searchTable = '<%= lib_translate("Search")%>';
+    var noMatchingTable = '<%= lib_translate("No_matching_records_found")%>';
+    var firstTable = '<%= lib_translate("First")%>';
+    var lastTable = '<%= lib_translate("Last")%>';
+    var nextTable = '<%= lib_translate("Next")%>';
+    var previousTable = '<%= lib_translate("Previous")%>';
+    var translate_excel = '<%= lib_translate("Excel")%>';
+    var translate_cop = '<%= lib_translate("Copy")%>';
+    var translate_pdf = '<%= lib_translate("Pdf")%>';
+    var translate_print = '<%= lib_translate("Print")%>';
+    var translate_cvs = '<%= lib_translate("Cvs")%>';
+    let ROOT_PATH = '<%= request.base_url %>';
+    let ERP_PATH = '<%= @ERP_PATH %>';
+    let CSVC_PATH = '<%= @CSVC_PATH %>';
+    let BUH_CSVC_PATH = '<%= @BUH_CSVC_PATH %>';
+    let PMDT_PATH = '<%= @PMDT_PATH %>';
+  </script>
+  <%= csrf_meta_tags %>  <!-- Add by: Hoang Vu 28/11/2022 -->
+  <%= stylesheet_link_tag "application"  %>
+  <!--Stylesheets-->
+  <%= stylesheet_link_tag "simplebar.min"  %>
+  <%= stylesheet_link_tag "theme-rtl.min", id: "style-rtl"%>
+  <%= stylesheet_link_tag "theme.min", id: "style-default"  %>
+  <%= stylesheet_link_tag "user-rtl.min", id: "user-style-rtl" %>
+  <%= stylesheet_link_tag "user.min" , id: "user-style-default"  %>
+  <!---->
+  <%= stylesheet_link_tag "/assets/lib_hrm/font-google-open-sancss.css?family=Open+Sans:300,400,500,600,700%7cPoppins:300,400,500,600,700,800,900&amp;display=swap", rel: "stylesheet"%>
+  <%= javascript_include_tag 'jquery.min' %>
+  <%= javascript_include_tag '/assets/lib_hrm/highcharts.js'%>
+  <%= javascript_include_tag '/assets/lib_hrm/exporting.js'%>
+  <%= javascript_include_tag '/assets/lib_hrm/export-data.js'%>
+  <%= javascript_include_tag '/assets/lib_hrm/accessibility.js'%>
+  <%= javascript_include_tag '/assets/lib_hrm/jszip.min.js'%>
+  <!-- ============================ -->
+  <%= javascript_include_tag 'config'%>
+  <%= javascript_include_tag 'simplebar.min'%>
+  <%= javascript_include_tag '/assets/myjs/jquery_ujs.js' %>
+  <%= javascript_include_tag 'list.min'%>
+  <%= javascript_include_tag '/assets/myjs/moment.min.js'%>
+  <%= stylesheet_link_tag '/assets/mystyle/dataTables-bootstrap5.min.css' %>
+  <%#= javascript_include_tag '/assets/myjs/application.js'%>
+  <!-- ============================ -->
+  <%= javascript_include_tag 'popper.min'%>
+  <%= javascript_include_tag 'bootstrap.min' %>
+  <%= javascript_include_tag 'anchor.min'%>
+  <%= javascript_include_tag 'is.min'%>
+  <%= javascript_include_tag 'echarts.min'%>
+  <%= javascript_include_tag 'lottie.min'%>
+  <%= javascript_include_tag 'all.min'%>
+  <%= javascript_include_tag 'lodash.min'%>
+  <%= javascript_include_tag 'theme'%>
+  <%= javascript_include_tag '/assets/myjs/jquery-dataTables.min.js' %>
+  <%= javascript_include_tag '/assets/myjs/dataTables-bootstrap5.min.js' %>
+  <%= javascript_include_tag '/assets/myjs/tabledatabase.js'%>
+  <%= javascript_include_tag '/assets/myjs/resizableColumns.js'%>
+  <%= stylesheet_link_tag '/assets/mystyle/flatpickr.min.css' %>
+  <%= javascript_include_tag '/assets/myjs/flatpickr2.js'%>
+  <%= yield :head %>
+  <%= stylesheet_link_tag '/assets/mystyle/application_css.css' %>
+
+  <style>
+    .i_dashboard {
+        background-image: url('<%= image_path("/assets/image/Dashboard.svg") %>');
+    }
+    .ithong_bao{
+      background-image: url('<%= image_path("/assets/image/thong_bao.svg") %>');
+    }
+    .popup_system_erp{
+        background-image: url('<%= image_path("/assets/image/system_ERP.svg") %>');
+    }
+    .popup_system_pmdt{
+        background-image: url('<%= image_path("/assets/image/system_PMDT.svg") %>');
+    }
+    .popup_system_csvc{
+        background-image: url('<%= image_path("/assets/image/system_CSVC.svg") %>');
+    }
+    .iquan_ly_van_ban{
+      background-image: url('<%= image_path("/assets/image/quan_ly_van_ban.svg") %>');
+    }
+    .ico_cau_to_chuc{
+      background-image: url('<%= image_path("/assets/image/co_cau_to_chuc.svg") %>');
+    }
+    .idon_vi{
+      background-image: url('<%= image_path("/assets/image/don_vi.svg") %>');
+    }
+    .icong_viec{
+      background-image: url('<%= image_path("/assets/image/cong_viec.svg") %>');
+    }
+    .iphong_ban{
+      background-image: url('<%= image_path("/assets/image/phong_ban.svg") %>');
+    }
+    .ikiem_nghiem{
+      background-image: url('<%= image_path("/assets/image/kiem_nghiem.svg") %>');
+    }
+    .ivi_tri_cong_viec{
+      background-image: url('<%= image_path("/assets/image/vi_tri_cong_viec.svg") %>');
+    }
+    .iso_do_to_chuc{
+      background-image: url('<%= image_path("/assets/image/so_do_to_chuc.svg") %>');
+    }
+    .ibo_nghiem{
+      background-image: url('<%= image_path("/assets/image/bo_nghiem.svg") %>');
+    }
+    .ivan_ban_den{
+      background-image: url('<%= image_path("/assets/image/van_ban_den.svg") %>');
+    }
+    .ivan_ban_di{
+      background-image: url('<%= image_path("/assets/image/van_ban_di.svg") %>');
+    }
+    .ivan_ban_can_xu_ly{
+      background-image: url('<%= image_path("/assets/image/van_ban_can_xu_ly.svg") %>');
+    }
+    .iloai_so{
+      background-image: url('<%= image_path("/assets/image/loai_so.svg") %>');
+    }
+    .iloai_van_ban{
+      background-image: url('<%= image_path("/assets/image/loai_van_ban.svg") %>');
+    }
+    .ilich_su_ban_hanh{
+      background-image: url('<%= image_path("/assets/image/lich_su_ban_hanh.svg") %>');
+    }
+    .ilich_su_van_ban_di{
+      background-image: url('<%= image_path("/assets/image/lich_su_van_ban_di.svg") %>');
+    }
+    .ilich_su_van_ban_den{
+      background-image: url('<%= image_path("/assets/image/lich_su_van_ban_den.svg") %>');
+    }
+    .iquan_ly_website{
+      background-image: url('<%= image_path("/assets/image/quan_ly_website.svg") %>');
+    }
+    .iBMU{
+      background-image: url('<%= image_path("/assets/image/CSVS BMU.svg") %>');
+    }
+    .iBUH{
+      background-image: url('<%= image_path("/assets/image/CSVC BUH.svg") %>');
+    }
+    
+
+  </style>
+
+  <script>
+    var isRTL = JSON.parse(localStorage.getItem('isRTL'));
+    if (isRTL) {
+      var linkDefault = document.getElementById('style-default');
+      var userLinkDefault = document.getElementById('user-style-default');
+      linkDefault.setAttribute('disabled', true);
+      userLinkDefault.setAttribute('disabled', true);
+      document.querySelector('html').setAttribute('dir', 'rtl');
+    } else {
+      var linkRTL = document.getElementById('style-rtl');
+      var userLinkRTL = document.getElementById('user-style-rtl');
+      linkRTL.setAttribute('disabled', true);
+      userLinkRTL.setAttribute('disabled', true);
+    }
+    $(window).on('load', function() {
+      $("#loading").css("display", "none");
+    });
+    function getTimeWork(dob, current) {
+      var years = current.diff(dob, 'year');
+      dob.add(years, 'years');
+      var months = current.diff(dob, 'months');
+      dob.add(months, 'months');
+      var days = current.diff(dob, 'days');
+      data = "";
+      if (years != 0) {
+        data += `${years} <%= lib_translate("year") %> `
+      }
+      if (months != 0 || years != 0) {
+        data += `${months} <%= lib_translate("month") %> `
+      }
+      if (days != 0) {
+        data += `${days} <%= lib_translate("day") %>`
+      } else {
+        data += `${days} <%= lib_translate("day") %>`
+      }
+      return data;
+    }
+  </script>
+</head>
+<body data-show-system="<%= session[:show_system] ? 'true' : 'false' %>">
+  <%= render partial: "layouts/partial/loading"%>
+
+  <!-- ===============================================-->
+  <!--    Main Content-->
+  <!-- ===============================================-->
+  <%= Gon::Base.render_data %>
+  <%= render 'shared/new_modals' %>
+
+  <main class="main" id="top">
+    <div class="container" data-layout="container">
+      <% unless session[:show_system] %>
+        <%= render partial: "layouts/partial/menu_left"%>
+      <% end %>
+
+      <div class="content">
+        <%= render partial: "layouts/partial/menu_top"%>
+
+        <%= render partial: "shared/flash"%>
+
+        <% unless session[:show_system] %>
+          <%= yield %>
+        <% end %>
+
+        <%= javascript_include_tag '/assets/myjs/application.js', defer: true %>
+        <% unless session[:show_system] %>
+          <%= yield :page_js %>
+        <% end %>
+
+        <footer class="footer">
+          <div class="row g-0 justify-content-between fs--1 mt-4 mb-3">
+            <div class="col-12 col-sm-auto text-center">
+              <p class="mb-0 text-600" style="font-weight: 600;">ERP BMU&copy; - <%= Time.now.strftime('%Y')%></p>
+            </div>
+            <div class="col-12 col-sm-auto text-center">
+              <p class="mb-0 text-600"><a href="https://bmu.edu.vn/" style="color: red !important;">www.bmu.edu.vn</a></p>
+            </div>
+          </div>
+        </footer>
+      </div>
+    </div>
+  </main>
+  <!-- ===============================================-->
+  <!--    End of Main Content-->
+  <!-- ===============================================-->
+
+  <!-- Show phân hệ  -->
+  <%# if is_access(session["user_id"], "SFTRAINING", "READ") == true || is_access(session["user_id"], "ASSETS", "READ" ) == true ||  is_access(session["user_id"], "HASSETS", "READ" ) == true %>
+    <% if session[:show_system] == true %>
+      <div class="modal fade" id="popup_show_system" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: fit-content">
+          <div class="modal-content position-relative" style="border-radius: 24px !important;">
+            <div class="modal-body p-4">
+              <div class="text-center">
+                <h3 class="pb-3">Chọn phân hệ mà bạn muốn truy cập </h3>
+              </div>
+              <div class="row justify-content-around">
+
+                  <div class="col">
+                    <form action="<%= redirect_to_erp_path %>" method="post" id="form_show_popup_erp">
+                      <button style="border: none; background: unset;" type="submit" id="btn_erp" class="btn_erp">
+                        <div class="card overflow-hidden p-4 card_system" >
+                          <div class="card-img-top text-center">
+                            <img class="img-fluid image_system" src="<%= image_path("/assets/image/system_ERP.svg") %>" />
+                          </div>
+                          <div class="card-body p-0 mt-4">
+                            <h4 class=" text-center">Hệ thống ERP</h4>
+                          </div>
+                        </div>
+                      </button>
+                    </form>
+                  </div>
+
+                <% if is_access(session["user_id"], "SFTRAINING","READ") %>
+                  <div class="col">
+                    <form action="<%= redirect_to_straining_path %>" method="post">
+                      <button type="submit" style="border: none; background: unset;" class="btn_training">
+                        <div class="card overflow-hidden p-4 card_system" >
+                          <div class="card-img-top text-center">
+                            <!-- <img class="img-fluid pt-2" src="<%= image_path("/assets/image/sft_system_img.svg") %>" /> -->
+                            <img class="img-fluid image_system" src="<%= image_path("/assets/image/system_PMDT.svg") %>" />
+                          </div>
+                          <div class="card-body p-0 mt-4" >
+                            <h4 class=" text-center">Quản lý đào tạo</h4>
+                          </div>
+                        </div>
+                      </button>
+                    </form>
+                  </div>
+                <%end%>
+
+                <% if is_access(session["user_id"], "SFTRAINING-LMS","READ") %>
+                  <div class="col">
+                    <form action="<%= redirect_to_straining_path(system: 'sftraining-lms') %>" method="post">
+                      <button type="submit" style="border: none; background: unset;" class="btn_training_lms">
+                        <div class="card overflow-hidden p-4 card_system" >
+                          <div class="card-img-top text-center">
+                            <!-- <img class="img-fluid pt-2" src="<%= image_path("/assets/image/sft_system_img.svg") %>" /> -->
+                            <img class="img-fluid image_system" src="<%= image_path("/assets/image/lms.svg") %>" />
+                          </div>
+                          <div class="card-body p-0 mt-4" >
+                            <h4 class=" text-center">LMS</h4>
+                          </div>
+                        </div>
+                      </button>
+                    </form>
+                  </div>
+                <%end%>
+
+                <% if is_access(session["user_id"], "ASSETS","READ") %>
+                  <div class="col">
+                    <form action="<%= redirect_to_assets_path %>" method="post">
+                      <input type="hidden" name="system" value="masset">
+                      <input type="hidden" name="resource" value="ASSETS">
+                      <button type="submit" style="border: none; background: unset;" class="btn_assets">
+                        <div class="card overflow-hidden p-4 card_system" >
+                          <div class="card-img-top text-center">
+                            <img class="img-fluid image_system" src="<%= image_path("/assets/image/system_CSVC.svg") %>" />
+                          </div>
+                          <div class="card-body p-0 mt-4">
+                            <h4 class=" text-center"><%= lib_translate("ASSETS")%> (BMU)</h4>
+                          </div>
+                        </div>
+                      </button>
+                    </form>
+                  </div>
+                <%end%>
+                <% if is_access(session["user_id"], "HASSETS","READ") %>
+                  <div class="col">
+                    <form action="<%= redirect_to_assets_path %>" method="post">
+                      <input type="hidden" name="system" value="hasset">
+                      <input type="hidden" name="resource" value="HASSETS">
+                      <button type="submit" style="border: none; background: unset;" class="btn_assets">
+                        <div class="card overflow-hidden p-4 card_system" >
+                          <div class="card-img-top text-center">
+                            <img class="img-fluid image_system" src="<%= image_path("/assets/image/system_hasset.svg") %>" />
+                          </div>
+                          <div class="card-body p-0 mt-4">
+                            <h4 class=" text-center"><%= lib_translate("ASSETS")%> (BUH)</h4>
+                          </div>
+                        </div>
+                      </button>
+                    </form>
+                  </div>
+                <%end%>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+    <%end%>
+  <%#end%>
+
+  <%= render partial: "layouts/partial/modal"%>
+
+  <%= yield :modal %>
+  <%= yield :bottombody %>
+
+  <!-- Translate -->
+  <script>
+    $(document).ready(function() {
+      
+      const isFluid = JSON.parse(localStorage.getItem('isFluid'));
+      if (isFluid) {
+        $('[data-layout]')
+          .removeClass('container')
+          .addClass('container-fluid');
+      }
+
+      // Auto collapse menu by localStorage
+      const navbarStyle = localStorage.getItem('navbarStyle');
+      if (navbarStyle && navbarStyle !== 'transparent') {
+        $('.navbar-vertical').addClass(`navbar-${navbarStyle}`);
+      }
+
+      // Show system popup
+      $('#form_show_popup_erp').on('click', function() {
+        $('#popup_show_system').modal('hide');
+      });
+
+      // Toggle chat box
+      $('#chat-icon').on('click', function() {
+        $('#chat-box').toggle();
+      });
+
+      // Set table paging option
+      const $optionsTable = $('#number_paging_table');
+      if ($optionsTable.length) {
+        $optionsTable.val('<%= session[:number_paging_table] || "" %>');
+      }
+
+      // Show loading on handle button click
+      $(document).on('click', '.handle_btn', function() {
+        $('#loading_handle').css('display', 'flex');
+      });
+
+      // Scroll to active menu item
+      const currentUrl = window.location.href;
+      if($('.active').length > 0){
+        if (!/resource|permissions|organization|religions|education|academicrank|ethnic|nationality|tbusertype|tbuserstatus|tbhospitals/.test(currentUrl)) {
+          $('#left_menu_application').animate({
+            scrollTop: $('.active').first().offset().top
+          }, 1000);
+        }
+      }
+    });
+
+    // Clear current tab
+    function clearCurrentTab() {
+      localStorage.removeItem('currentTab');
+    }
+
+    // Language handling
+    const rootPath = '<%= root_path %>';
+    const urlParams = new URLSearchParams(window.location.search);
+    let pathParams = window.location.pathname;
+    const langParam = urlParams.get('lang');
+    const ckLanguage = sessionStorage.getItem('ses_ckLanguage');
+    const $langSelect = $('#select_lang');
+
+    // Map detail paths to session keys
+    const detailPaths = {
+      'user/details': '<%= session[:id_detal_user] || "" %>',
+      'department/details': '<%= session[:id_detal_department] || "" %>',
+      'user/holiday/details': '<%= session[:id_detal] || "" %>',
+      'user/contract/details': '<%= session[:id_detal] || "" %>',
+      'user/review/details': '<%= session[:id_detal] || "" %>',
+      'user/address/details': '<%= session[:id_detal] || "" %>',
+      'user/archive/details': '<%= session[:id_detal] || "" %>',
+      'user/identity/details': '<%= session[:id_detal] || "" %>',
+      'user/benefit/details': '<%= session[:id_detal] || "" %>',
+      'documents/history': '<%= session[:iddoc] || "" %>'
+    };
+
+    // Update pathParams for detail pages
+    for (const [path, id] of Object.entries(detailPaths)) {
+      if (pathParams === `${rootPath}${path}` && id) {
+        pathParams = `${rootPath}${path}?id=${id}`;
+        break;
+      }
+    }
+
+    // Handle language redirection
+    if (!langParam) {
+      window.location.href = `${pathParams}?lang=${ckLanguage || 'vi'}`;
+    } else if (langParam === 'en' || langParam === 'vi') {
+      sessionStorage.setItem('ses_ckLanguage', langParam);
+    } else {
+      window.location.href = `${pathParams}?lang=${ckLanguage || 'vi'}`;
+    }
+
+    // Set language select value
+    if ($langSelect.length) {
+      $langSelect.val(sessionStorage.getItem('ses_ckLanguage') || 'vi');
+    }
+
+    // Change language
+    function checkLanguage() {
+      const lang = $langSelect.val();
+      sessionStorage.setItem('ses_ckLanguage', lang);
+      const separator = pathParams.includes('?') ? '&' : '?';
+      window.location.href = `${pathParams}${separator}lang=${lang}`;
+    }
+
+    // Force change password
+    const showChangePw = <%= session[:force_change_pw] || false %>;
+
+    // Two-factor authentication toggle
+    function changeTwoFA(element) {
+      const $el = $(element);
+      const isOn = $el.val() === 'on';
+      $el.val(isOn ? 'off' : 'on').next()
+        .text(isOn ? 'Tắt' : 'Bật')
+        .css('color', isOn ? 'red' : 'green');
+      $('#twofa_ckb').val(isOn ? 'NO' : 'YES');
+
+      $('#btn-submit-change-password').css({
+        'pointer-events': 'none',
+        'opacity': '0.6'
+      });
+
+      $('#form_update_twofa').submit();
+    }
+
+    // TwoFA success notification
+    function succesTwoFA(message) {
+      const $alert = $('.alert_show');
+      const alertHtml = `
+        <div class="alert_show alert alert-success alert-dismissible fade show" role="alert">
+          <span class="me-5">${message}</span>
+          <button class="btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      `;
+
+      if ($alert.length) {
+        $alert.attr('class', 'alert_show alert alert-success alert-dismissible fade show')
+          .html(`<span class="me-5">${message}</span><button class="btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>`)
+          .show();
+      } else {
+        $('main').prepend(alertHtml);
+      }
+
+      setTimeout(() => $('.alert_show').hide(), 3000);
+      location.reload();
+    }
+
+    // Handle 401 unauthorized
+    $(document).ajaxComplete(function(event, xhr) {
+      if (xhr.status === 401) {
+        try {
+          const response = JSON.parse(xhr.responseText);
+          if (response.login_url) {
+            alert('Phiên làm việc của bạn đã hết hạn, vui lòng đăng nhập lại');
+            window.location.href = response.login_url;
+          }
+        } catch (e) {
+          console.error('Error parsing 401 response:', e);
+        }
+      }
+    });
+
+    // Disable DataTable error alerts
+    $.fn.dataTable.ext.errMode = 'none';
+
+    // fix click browser click back
+    window.addEventListener('pageshow', (event) => {
+      if (event.persisted) {
+        $(".modal").toggleClass('show',false);
+        $(".modal").modal('hide');
+        $(".modal").hide();
+        $(".modal-backdrop").remove();
+        $("#loading").hide();
+        showLoadding(false);
+      }
+    });
+
+  // type : success | warning | danger | info
+  function showAlert(message,type = 'success'){
+    let alert = $(".alert_show");
+    if(!["success","warning","danger","info"].includes(type)){
+      type = 'info';
+    }
+
+    if (alert.length) {
+      alert.attr("class",`alert_show alert alert-${type} alert-dismissible fade show`);
+      alert.find(".alert-message").html(message);
+      alert.show();
+    }else{
+      $('main').prepend(`
+      <div class="alert_show alert alert-${type} alert-dismissible fade show" role="alert">
+          <span class="me-5 alert-message">${message}</span>
+          <button class="btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+      `);
+      alert.show();
+    }
+    setTimeout(function(){
+      $(".alert_show").hide();
+    }, 5000);
+
+  }
+  </script>
+
+</body>
+</html>

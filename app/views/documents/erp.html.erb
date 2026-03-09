@@ -1,0 +1,11 @@
+<div class="card mb-3">
+    <div class="card-body pt-0">
+        <div style="width: 100%; text-align: center">
+            <h3 class="mt-2 overview_text"><%= lib_translate("User_manual")%></h3>
+        </div>
+        <hr>
+        <div class="tab-content" style="padding-top: 6px">
+            <%= @oContent&.content.html_safe%>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,1997 @@
+<% content_for :head do %>
+  <%= javascript_include_tag '/assets/lib_hrm/bootstrap.min.js'%>
+  <%= javascript_include_tag '/assets/lib_hrm/formmedia.js' %>
+  <%= stylesheet_link_tag '/assets/lib_hrm/formmedia.css' %>
+  <%= stylesheet_link_tag '/assets/mystyle/outgoing_index.css'%>
+  <%= stylesheet_link_tag "select2-bootstrap-5-theme.min" %>
+  <%= stylesheet_link_tag "select2.min" %>
+  <%= javascript_include_tag 'jquery-ui.js'%>
+  <%= stylesheet_link_tag 'jquery-ui.css' %>
+  <%= javascript_include_tag '/assets/myjs/flatpickr.js' %>
+  <%= stylesheet_link_tag '/assets/mystyle/flatpickr.min.css' %>
+  <%= javascript_include_tag '/assets/myjs/flatpickr_local/vn.js' %>
+  <%= stylesheet_link_tag '/assets/mystyle/choices.min.css'%>
+  <%= javascript_include_tag '/assets/myjs/choices.js' %>
+  <%= javascript_include_tag '/assets/lib_hrm/moment-with-locales.js' %>
+
+  <%= javascript_include_tag '/assets/myjs/tinymcev6.min.js' %>
+<% end %>
+<% content_for :bottombody do %>
+  <%= javascript_include_tag 'select2.full.min'%>
+  <%= javascript_include_tag 'select2.min.js'%>
+  <%= javascript_include_tag '/assets/lib_hrm/bootstrap-datetimepicker.min.js' %>
+  <%= javascript_include_tag '/assets/myjs/outgoing_index.js' %>
+
+<% end %>
+
+<style>
+          .hide-responsive-mobile {
+            display: none;
+        }
+  input[name="search_terms"]{
+    min-width: -webkit-fill-available !important;
+    width: -webkit-fill-available !important;
+  }
+  p[aria-live="polite"] {
+    margin-top: 13px !important;
+    font-weight: 600 !important;
+  }
+  #loading_screen{
+    position: fixed;
+    z-index: 9999;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%; 
+    background: rgb(0 0 0 / 51%);
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+ table td{
+    white-space: normal !important;
+  }
+  .choices[data-type*=select-multiple] .choices__button, .choices[data-type*=text] .choices__button {
+    background-image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjEiIGhlaWdodD0iMjEiIHZpZXdCb3g9IjAgMCAyMSAyMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSIjMDAwIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0yLjU5Mi4wNDRsMTguMzY0IDE4LjM2NC0yLjU0OCAyLjU0OEwuMDQ0IDIuNTkyeiIvPjxwYXRoIGQ9Ik0wIDE4LjM2NEwxOC4zNjQgMGwyLjU0OCAyLjU0OEwyLjU0OCAyMC45MTJ6Ii8+PC9nPjwvc3ZnPg==) !important;
+  }
+
+  .select2-results__option.select2-results__option--disabled {
+    color: #c9c9c9 !important;
+    cursor: not-allowed;
+    font-style: italic;
+  }
+  .tox-tinymce {
+    border-radius: 5px !important;
+    border: 1px solid var(--falcon-input-border-color);
+  }
+  .dropdown-indicator:after {
+    right: 15px !important;
+  }
+  .btmu-notification-indicator-warning::before {
+    background-color: #e63757;
+  }
+  .btmu-notification-indicator::before {
+      position: absolute;
+      content: "";
+      margin-top: 2px;
+      margin-left: 10px;
+      height: 10px;
+      width: 10px;
+      border-radius: 50%;
+      border: 2px solid var(--falcon-notification-indicator-border-color);
+  }
+</style>
+<div style="display: none" id="loading_screen">
+    <div class="spinner_handle"></div>
+    <p style="color: var(--falcon-avatar-status-border-color);"><%= lib_translate("Inprogress_handle")  %>...</p>
+</div>
+
+<div class="list_users">
+  <div class="card mb-3">
+    <div class="card-body pt-0">
+      <div class="tab-content">
+        <div class="row">
+            <div class="col">
+                <h3 class="mt-2 overview_text"><%= lib_translate("MANDOCS-OUTGOING")%></h3>
+            </div>
+            <div class="col mt-2 ">
+              <% if is_access(session["user_id"], "MANDOCS-OUTGOING","ADD") %>
+                <button class="btn btn-primary float-end" data-bs-toggle="modal" data-bs-target="#staticBackdrop" onclick="openFormAddMandocPending()">
+                  <%= lib_translate("Text_editor")%>
+                </button>
+              <% end %>
+            </div>
+            <!-- form modal create new mandoc -->
+            <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="add_Form_Label" aria-hidden="true" data-bs-focus="false">
+              <div class="modal-dialog" style="min-width: 90%;" id="form_add_mandoc_pending">
+                <div class="modal-content border-0">
+                  <div class="position-absolute top-0 end-0 mt-3 me-3 z-index-1">
+                    <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close" id="btn_add_doc_pending_close"></button>
+                  </div>
+                  <div class="modal-body p-0">
+                    <div class="bg-light rounded-top-lg py-3 ps-4 pe-6">
+                      <h4 class="mb-1" id="add_Form_Label"><%= lib_translate('Add_outgoing_docs')%></h4>
+                    </div>
+                    <div class="p-3" >
+                      <div class="row">
+                        <%= form_for @mandoc, :url=> mandocs_outgoing_update_path, html: {method: :post, id:"form_add_document_infor", class:"mb-2 p-3" } do |f| %>
+                          <%= f.text_field :id, class: 'form-control d-none' , name:'id_mandoc', id: 'id_mandoc',autocomplete: 'off'  %>
+                          <div class="alert alert-warning border-2 align-items-center" role="alert" id="err_add" style="display:none">
+                          </div>
+                          <div class="row">
+                              <div class="col-6 d-flex flex-column">
+                                <!-- Loại sổ -->
+                                <div class="col-12 d-flex flex-row mt-3">
+                                  <div class="col-3 d-flex align-items-center justify-content-end me-3">
+                                    <%= f.label :type_book, lib_translate("Type_book") ,class:'fw-semi-bold m-0'%> 
+                                  </div>
+                                  <select class="form-select selectpicker" name="type_book" id="type_book">
+                                    <% @mandocbooks.each do |docbook| %>
+                                      <option value="<%= docbook.scode %>"><%= docbook.name %></option>
+                                    <% end %>
+                                  </select>
+                                  <div class="ms-2 d-flex align-items-center">
+                                    <span class="fas fa-sync-alt" style="cursor: pointer;" id="mandocbook-reload-btn" onclick="clickRefreshOption(this,'get_mandocbook_form')"></span>
+                                  </div>
+                                  <a class="ms-2 pe-auto d-flex align-items-center" href="<%= mandocbook_index_path()%>"><span style="width:10px; color:#98a7b9" class="fas fa-database"></span></a>
+                                </div>
+                                <%# Hiện tại theo quy trình thì ẩn mục này %>
+                                <!-- Số văn bản -->
+                                <div class="col-12 d-flex flex-row mt-3 d-none">
+                                  <div class="col-3 d-flex align-items-center justify-content-end me-3">
+                                    <%= f.label :number_book, lib_translate('Number_book') ,class:'fw-semi-bold m-0'%> 
+                                  </div>
+                                  <%= f.text_field :sno, class: 'form-control' , name:'sno', id:"sno" %>
+                                </div>
+                                <!-- Số/Ký hiệu -->
+                                <div class="col-12 d-flex flex-row mt-3 d-none">
+                                  <div class="col-3 d-flex align-items-center justify-content-end me-3">
+                                    <%= f.label :ssymbol, lib_translate("Sno_book") ,class:'fw-semi-bold m-0'%> 
+                                  </div>
+                                  <%= f.text_field :ssymbol, class: 'form-control' , name:'ssymbol',id:"ssymbol" %>
+                                </div>
+                                  <%#...  %>
+                                <!-- Loại văn bản -->
+                                <div class="col-12 d-flex flex-row mt-3">
+                                  <div class="col-3 d-flex align-items-center justify-content-end me-3">
+                                    <%= f.label :stype, lib_translate('Documents_type'),class:'fw-semi-bold m-0' %> 
+                                  </div>
+                                  <select class="form-select selectpicker" name="stype" id="stype">
+                                    <% @mandoctypes.each do |doctype| %>
+                                      <option value="<%= doctype.scode %>"><%= doctype.name %></option>
+                                    <% end %>
+                                  </select>
+                                  <div class="ms-2 d-flex align-items-center">
+                                    <span class="fas fa-sync-alt" style="cursor: pointer;" id="mandoctype-reload-btn" onclick="clickRefreshOption(this,'get_mandoctype_form')"></span>
+                                  </div>
+                                  <a class="ms-2 pe-auto d-flex align-items-center" href="<%= mandoctype_index_path() %>" ><span style="width:10px; color:#98a7b9" class="fas fa-database"></span></a>
+                                </div>
+                                <!-- Đơn vị tham mưu -->
+                                <div class="col-12 d-flex flex-row mt-3">
+                                  <div class="col-3 d-flex align-items-center justify-content-end me-3">
+                                    <%= f.label :mdepartment,lib_translate("Advisory_unit") ,class:'fw-semi-bold m-0' %> 
+                                  </div>
+                                  <div id="select_mdepartment" class="w-100">
+                                    <select class="form-select selectpicker"  name="mdepartment" id="mdepartment">
+                                      <% if !@oDeparment_logins.nil? 
+                                            @oDeparment_logins.each do |mdepartment| %>
+                                        <option value="<%= mdepartment.id %>"><%= mdepartment.name %></option>
+                                      <% end end %>
+                                    </select>
+                                  </div>
+                                  <div id="select_edit_mdepartment" class="w-100">
+                                    <select class="form-select selectpicker " name="mdepartment" id="mdepartment_edit">
+                                    </select>
+                                 </div>
+                                </div>
+                                <!-- Người ký -->
+                                <div class="col-12 d-flex flex-row mt-3 d-none">
+                                  <div class="col-3 d-flex align-items-center justify-content-end me-3">
+                                    <%= f.label :signed_by, lib_translate("Signed_by"),class:'fw-semi-bold m-0'%>
+                                  </div>
+                                  <select class="form-select" name="signed_by" id="signed_by">
+                                    <% if !@lists_leader_email.nil?
+                                      @lists_leader_email.uniq.each do |name_ld|
+                                      full_name_by_email = User.where(email: name_ld).first
+                                      if !full_name_by_email.nil?
+                                        fullname = full_name_by_email.last_name + " " + full_name_by_email.first_name
+                                        work_user = Work.where(user_id: full_name_by_email.id).last
+                                        if !work_user.nil?
+                                          positionjobU = Positionjob.where(id: work_user.positionjob_id).first
+                                          if !positionjobU.nil?
+                                    %>
+                                      <option value="<%= name_ld%>"> <b><%= fullname %></b> (<i><%= positionjobU.name %></i>)</option>
+                                    <%end end end end end%>
+                                  </select>
+                                </div>
+                                <!-- Liên kết văn bản -->
+                                <div class="col-12 d-flex flex-row mt-3">
+                                  <div class="col-3 d-flex align-items-center justify-content-end me-3">
+                                    <%= f.label :slink, lib_translate('Documents_link'),class:'fw-semi-bold m-0' %> <span class="red d-none">*</span>
+                                  </div>
+                                  <%= f.text_field :slink, class: 'form-control' , name: 'slink',id:'slink' %>
+                                </div>
+                              </div>
+                              <div class="col-6 d-flex flex-column" >
+                                <!-- Người soạn -->
+                                <div class="col-12 d-flex flex-row mt-3">
+                                  <div class="col-4 d-flex align-items-center justify-content-end me-3">
+                                    <%= f.label :created_by,lib_translate("Docs_Writer"), class:'fw-semi-bold m-0'%>
+                                  </div>
+                                  <input class= "form-control" id="created_by_view" value="<%=@user.last_name%> <%=@user.first_name%>" disabled/>
+                                  <%= f.text_field :created_by, class: 'form-control d-none' , name: 'created_by',id:'created_by',value: @user.last_name + " " + @user.first_name %>
+                                </div>
+                                <!--Ngày hiệu lực văn bản-->
+                                <div class="col-12 d-flex flex-row mt-3">
+                                  <div class="col-4 d-flex align-items-center justify-content-end me-3">
+                                    <%= f.label :received_at, lib_translate("Documents_date"),class:'fw-semi-bold m-0' %> 
+                                  </div>
+                                  <div id="datepicker-container" class="datepicker-container col-8 pe-3">
+                                    <span style="position: relative;" class="outline-element-container"> 
+                                      <input id="dt_document_date" type="text" name="received_at"  value="<%=Date.today.strftime('%d/%m/%Y')%>" class="form-control datepicker openemr-datepicker input-textbox outline-element incorrect" objtype="7" name="action_element" objindex=""  aria-label="Select Date"> 
+                                      <span class="correct-incorrect-icon"> </span>
+                                    </span>
+                                  <div id="datepicker"></div>
+                                  </div>
+                                </div>
+                                <!-- Độ khẩn -->
+                                <div class="col-12 d-flex flex-row mt-3">
+                                  <div class="col-4 d-flex align-items-center justify-content-end me-3">
+                                    <%= f.label :spriority, lib_translate('Urgency'),class:'fw-semi-bold m-0' %> 
+                                  </div>
+                                  <select class="form-select selectpicker" name="spriority" id="spriority">
+                                    <% @mandocpriorities.each do |mandocpriority| %>
+                                      <option value="<%= mandocpriority.name %>"><%= mandocpriority.name %></option>
+                                    <% end %>
+                                  </select>
+                                  <div class="ms-2 d-flex align-items-center">
+                                    <span class="fas fa-sync-alt" style="cursor: pointer;" id="mandocpriority-reload-btn" onclick="clickRefreshOption(this,'get_mandocpriority_form')"></span>
+                                  </div>
+                                  <a class="ms-2 pe-auto d-flex align-items-center" href="<%=mandocpriority_index_path() %>" ><span style="width:10px; color:#98a7b9" class="fas fa-database"></span></a>
+                                </div>
+                                <!-- Số trang -->
+                                <div class="col-12 d-flex flex-row mt-3">
+                                  <div class="col-4 d-flex align-items-center justify-content-end me-3">
+                                    <%= f.label :number_pages, lib_translate("Number_pages"),class:'fw-semi-bold m-0' %> 
+                                  </div>
+                                  <%= f.number_field :number_pages, class: 'form-control' , name: 'number_pages',id:'number_pages' %>
+                                </div>
+                                
+                              </div>  
+                            </div>
+                            <!-- Notes -->
+                            <div class="mb-3 mt-3">
+                                <%= f.label :notes ,lib_translate('Excerpts_from_content'),class:'fw-semi-bold' %><span class="red">*</span>
+                                <%= f.text_field :notes, class:'form-control',name:"notes",id:'notes'%>
+                            </div>
+                            <!-- Content -->
+                            <div class="mb-3 mt-3 d-none">
+                              <div id="collapse-control" class="collapse-control bg-300" onclick="clickCollapse(this)" data-bs-toggle="collapse" data-bs-target="#collapse-content-editer-1">
+                                <span class="fw-semi-bold form-label" ><%=lib_translate('Content')%></span>
+                                <i id="collapse-icon" style="font-size: 20px;pointer-events: none;transition: 200ms ease-in;rotate: -90deg" class="fas fa-chevron-circle-left"></i>
+                              </div>
+                              <div class="collapse show" id="collapse-content-editer-1">
+                                <%= f.text_area :contents, class:'form-control',name:"contents",id:'contents'%>
+                              </div>
+                            </div>
+                            <%# Upload media view %>
+                            <div class="row mt-3">
+                              <div class="collapse show" id="add-file-medias_mandocsfile">
+                                <div class="card">
+                                  <div class="card-header">
+                                    <h5 class="mb-0"><%= lib_translate('Attached_files')%><span class="red">*</span></h5>
+                                  </div>
+                                  <div class="card-body bg-light" id="upload_file_mandocfile"></div>
+                                </div>
+                              </div>
+                            </div>
+                            <input type="text" id="status_doc" name="status" value="INPROGRESS" hidden>
+                            <%# ==== %>
+                            <div class="row mt-3 m-auto">
+                              <div class="d-flex flex-row col-12 justify-content-center">
+                                <div class="m-2 element_add">
+                                  <button class="handle_file_btn ps-4 pe-4 btn btn-primary" type="button" id="btn_add_doc"><%=lib_translate('Save_and_send_to_unit_leader')%></button>
+                                  <div id="loading_button_add_doc_out" class= "ps-4 pe-4 btn btn-primary" style="opacity: 0.8;display:none;" >
+                                    <i class ="fa fa-spinner fa-spin"> </i>  <%=lib_translate("Save_and_send_to_unit_leader")%> 
+                                  </div>
+                                </div>
+                                <div class="m-2 element_add">
+                                  <button class="ps-6 pe-6 btn btn-info" id="btn_add_doc_pending" type="button"><%=lib_translate('Save_pending')%></button>
+                                  <div id="loading_button_add_doc_pending_out" class= "ps-6 pe-6 btn btn-info" style="opacity: 0.8;display:none;" >
+                                    <i class ="fa fa-spinner fa-spin"> </i> <span id="btn_add_label_mandoc"><%=lib_translate("Save_pending")%> </span> 
+                                  </div>
+                                </div>
+                                <div class="m-2 element_update">
+                                  <button class="handle_file_btn ps-4 pe-4 btn btn-primary" type="button" id="btn_update_doc"><%=lib_translate('Cập nhật')%></button>
+                                  <div id="loading_button_edit_doc_out" class= "ps-4 pe-4 btn btn-primary" style="opacity: 0.8; display:none;" >
+                                    <i class ="fa fa-spinner fa-spin"> </i>  <%=lib_translate("Cập nhật")%> 
+                                  </div>
+                                </div>
+                                <div class="m-2">
+                                  <button type="button" class="ps-4 pe-4 btn btn-danger" data-bs-dismiss="modal" aria-label="Close" id="btn_add_doc_pending_exit"><%=lib_translate('Close')%></button>
+                                </div>
+                              </div>
+                            </div>  
+                        <% end %>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+        </div>
+        <div class="mt-3">
+            <!-- Nav tabs -->
+            <ul class="nav nav-tabs" role="tablist">
+                <li onclick='save_current_tab("tab_1")' class="nav-item">
+                  <a id="out_going_tab_1" class="nav-link active" data-bs-toggle="tab" href="#page_documents_processed"><%= lib_translate("Documents_to_be_processed")%></a>
+                </li>
+                <li id="li_in_tab_2" class="nav-item">
+                  <a id="out_going_tab_2" class="nav-link" data-bs-toggle="tab" href="#page_process_2"><%= lib_translate("Status_doccuments")%></a>
+                </li>
+                <li onclick='save_current_tab("tab_3")' class="nav-item">
+                  <a id="out_going_tab_3" class="nav-link" data-bs-toggle="tab" href="#page_pending"><%= lib_translate("Document_pending")%></a>
+                </li>
+            </ul>
+            <!-- Tab panes -->
+            <div class="tab-content">
+                <div id="page_documents_processed" class="tab-pane active"><br>
+                    <div class="table-responsive scrollbar">
+                        <%= render_search_pagination(mandocs_outgoing_index_path()).html_safe %>
+ 
+                        <table id="documents_outgoing" class="table table-bordered fs--1 mb-0 " style="margin-top: 0px !important; margin-bottom: 0px !important">
+                            <thead class="bg-200 text-900" class="display: none;">
+                                <tr>
+                                    <th class="sort" style="width:4%; text-align: center;"><%= lib_translate("Oder")%></th>
+                                    <th class="sort" style="width:20%"><%= lib_translate("Received_date")%>/<%= lib_translate("Urgency")%></th>
+                                    <th class="sort" style="width:50%"><%= lib_translate("Content")%></th>
+                                    <th class="no-sort col-4 col-md-3 p-0" style="width: 40%;"></th>
+                                </tr>
+                            </thead>                         
+                            <tbody class="list">
+                                <% @arrMandoc.each_with_index do |mandoc, i| 
+                                strClassShow = ""
+                                if !mandoc.comment.nil? && mandoc.comment != ""
+                                    strClassShow = "btmu-notification-indicator-warning btmu-notification-indicator"
+                                end
+                                if mandoc.status == "INPROGRESS" 
+                                get_department_id=Node.where(nfirst: "YES").first&.department_id
+                                  if !get_department_id.nil?
+                                      get_name_department= Department.where(id: get_department_id).first&.name
+                                      get_id_department= Department.where(id: get_department_id).first&.id
+                                      if !get_name_department.nil? && !get_id_department.nil? %>
+                                     <% 
+                                          dhandle_last = ''
+                                          dhandle_last_department = ''
+                                          uhandle_last = ''
+                                          get_department_mail = ''
+                                          madhandle = Mandocdhandle.where(mandoc_id: mandoc.id).last
+                                          if !madhandle.nil?
+                                            dhandle_last = madhandle.id
+                                            dhandle_last_department = madhandle.department_id
+                                            mauhandle = Mandocuhandle.where(mandocdhandle_id: dhandle_last).last
+                                            if !mauhandle.nil?
+                                              uhandle_last = mauhandle.status
+                                            end
+                                            odeparment = Department.where(id: dhandle_last_department).first
+                                            if !odeparment.nil?
+                                              get_department_mail = odeparment.leader
+                                            end
+                                          end
+                                          %>
+                                      <% get_email_user_login = User.where(id: session[:user_id]).first&.email%>
+                                    <tr>  
+                                        <td style="vertical-align: middle; text-align: center;"><%= i+1 %></td>
+                                        <td style="vertical-align: middle;">
+                                            <div style="text-align: start; cursor:pointer; display: flex;flex-direction: column;">
+                                                <label style=" cursor:pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;font-weight: bold !important;" class="m-0 text-overlap"><%= lib_translate("Documents_type")%>:<span style="font-weight: normal;white-space: normal !important;"><%= mandoc.stype.present? ? Mandoctype.where(scode: mandoc.stype).first&.name : "" %> </span></label>
+                                                <label style=" cursor:pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;font-weight: bold !important;" class="m-0 text-overlap" ><%= lib_translate("Received_date")%>:<span style="font-weight: normal;white-space: normal !important;"> <%= mandoc.created_at.strftime('%k:%M %d/%m/%Y')%></span></label>
+                                                <label style=" cursor:pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;font-weight: bold !important;" class="m-0 text-overlap"><%= lib_translate("Urgency")%>: <span style="font-weight: bold; color: <%= Mandocpriority.where(name: mandoc.spriority).first.note%>"><%= mandoc.spriority%></span></label>
+                                            </div>
+                                        </td>
+                                        <%
+                                          uUser = User.where(email: mandoc.signed_by).first
+                                          if !uUser.nil?
+                                              fullnameU = uUser.last_name + " " + uUser.first_name
+                                          end
+                                        %>
+                                        <td style="vertical-align: middle;">
+                                            <div style="text-align: start; cursor:pointer; display: flex;flex-direction: column; ">
+                                                <label style=" cursor:pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;font-weight: bold !important;" class="m-0 text-overlap" ><%=lib_translate('Excerpts_from_content')%>: <span style="font-weight: normal; white-space: normal !important;"><%= mandoc.notes %></span></label>
+                                                <label style=" cursor:pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;font-weight: bold !important;" class="m-0 text-overlap" ><%=lib_translate('Department')%>: <span style="font-weight: normal; white-space: normal !important;"><%= mandoc.mdepartment %></span></label>
+                                                <label style=" cursor:pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;font-weight: bold !important;" class="m-0 text-overlap" ><%=lib_translate('Signed_by')%>: <span style="font-weight: normal; white-space: normal !important;"><%= fullnameU %></span></label>
+                                                <label style=" cursor:pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;font-weight: bold !important;" class="m-0 text-overlap" ><%=lib_translate('Docs_Writer')%>: <span style="font-weight: normal;white-space: normal !important;"><%= mandoc.created_by %></span></label>
+                                                <label style=" cursor:pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;font-weight: bold !important;" class="m-0 text-overlap"><%= lib_translate('Documents_date')%>: <span style="font-weight: normal;white-space: normal !important;"><%= mandoc.received_at&.in_time_zone('Asia/Ho_Chi_Minh')&.strftime('%d/%m/%Y') %></span>
+                                            </div>
+                                        </td>  
+                                          <td style="vertical-align: middle; text-align: center; padding:0" onclick="changeRead(<%= mandoc.id %>)"> 
+                                            <% if !is_access(session["user_id"], "SP-NHANVIEN","READ") || !is_access(session["user_id"], "SP-TRUONGPHONG","READ") || !is_access(session["user_id"], "SP-VANTHU","READ") %>
+                                                <%
+                                                  oMandocuhandleNS = Mandocuhandle.joins(:mandocdhandle).where("mandocdhandles.mandoc_id = ? AND mandocuhandles.user_id = ? AND mandocuhandles.srole = ? ", mandoc.id, session[:user_id], "TIEPNHAN").last 
+                                                  if @checkDirectorsHandle || !oMandocuhandleNS.nil? %>
+                                                  <button type="button" data-toggle="tooltip" data-placement="top" title="<%=lib_translate('Chỉnh sửa văn bản')%>" class="btn btn-light d-inline-block" data-bs-toggle="modal" data-bs-target="#staticBackdrop" onclick="openFormEditMandocHandle(<%= mandoc.id%>,'<%= mandoc.type_book %>','<%= mandoc.stype %>', '<%= mandoc.received_at&.strftime("%d/%m/%Y") %>', <%= Department.where(name: mandoc&.mdepartment).first&.id  %>, '<%= mandoc&.mdepartment%>', '<%= mandoc.spriority %>', '<%= mandoc.slink %>', '<%= mandoc.number_pages %>', '<%= mandoc.notes %>', '<%= mandoc.created_by %>')">
+                                                    <span class="text-primary fas fa-pen" ></span>
+                                                  </button>
+                                                <% end %>
+                                                <%# Nút xử lý của user %>
+                                                <% if mandoc.has_attribute?(:department_id)%>
+                                                <% oDhandle = Mandocdhandle.where(mandoc_id: mandoc.id, srole: "XULY").last 
+                                                    if !oDhandle.nil?
+                                                      oMandocUhandle = Mandocuhandle.where(mandocdhandle_id: oDhandle.id, user_id: @user.id).last
+                                                      if !oMandocUhandle.nil? && oMandocUhandle.status != "DAXULY"
+                                                        oMandocUhandle_content_value = ""
+                                                        if !oMandocUhandle.contents.nil?
+                                                          oMandocUhandle_content_value = URI.encode_www_form_component(oMandocUhandle.contents)
+                                                        end
+                                                        if oMandocUhandle.srole != 'TIEPNHAN' %>
+                                                          <%if oDhandleHD = Mandocdhandle.where(mandoc_id: mandoc.id, srole: "XULY").last 
+                                                          if !oDhandleHD.nil?
+                                                            oMandocUhandleHD = Mandocuhandle.where(mandocdhandle_id: oDhandleHD.id, user_id: session[:user_id]).last&.srole
+                                                            if oMandocUhandleHD == "XULY" && !@checkDirectorsHandle
+                                                            %>
+                                                            <% get_name = ""
+                                                              user_lead_assign = Mandoc.where(id: mandoc.id).first
+                                                              if !user_lead_assign.nil?
+                                                                  assign_to = User.where(email: user_lead_assign&.signed_by)&.first
+                                                                  if !assign_to.nil? 
+                                                                        work_user = Work.where(user_id: assign_to&.id)&.last
+                                                                        positionjobU = Positionjob.where(id: work_user&.positionjob_id)&.first
+                                                                    get_name = "#{assign_to&.last_name} #{assign_to&.first_name} (#{positionjobU&.name})"
+                                                                  end
+                                                              end%>
+                                                            <button class="btn btn-light update-mandocuhandle-out" data-placement="top" title="<%=lib_translate('Handle')%>" onclick="onOpenUserHandleForm(<%=mandoc.id%>,<%= oMandocUhandle.id%>,'<%=  oMandocUhandle_content_value%>', '<%=get_name%>')" id="checkRole"
+                                                            <% if !oMandocUhandle.deadline.nil? %>
+                                                              <%= oMandocUhandle.deadline.to_date < Time.now.to_date ? "disabled" : ""%>
+                                                            <% end %>>
+                                                            <span class="fas fa-edit"></span></button>
+                                                            <%end end end%>
+                                                    <%  end end end%>
+                                                <%# Hết nút xử lý của user %>
+                                          
+                                                <% if @checkDirectorsHandle %>
+                                                  <%#%>
+                                                  
+                                                  <% content_value = ""  
+                                                  if !mandoc.dhandle_contents.nil?
+                                                    content_value =  URI.encode_www_form_component(mandoc.dhandle_contents)
+                                                  end
+                                                  %>
+                                                  
+                                                      <button class="btn btn-light d-inline-block <%=strClassShow %> fa-icon-wait" onclick='onclickOpenModalVTAddComment(<%= mandoc.to_json %>)' type="button" data-bs-toggle="modal" data-bs-target="#VT_add_comment_modal"  data-toggle="tooltip" data-placement="top" title="Xem ghi chú"><span class="far fa-comment-alt" data-fa-transform="down-2" > </span></button>
+                                                    
+                                                  
+                                                  <button id="open_form_assign_<%= mandoc.id %>" class="btn btn-light" onclick="get_mandoc_info(`<%= mandoc.id %>`, `<%= content_value %>`
+                                                        , '<%= if !mandoc.received_at.nil?
+                                                              (mandoc.received_at + 15.days)&.strftime('%d/%m/%Y')
+                                                              end %>'
+                                                        , '<%= if !mandoc.effective_date.nil?
+                                                              (mandoc.effective_date + 15.days)&.strftime('%d/%m/%Y')
+                                                              end %>'
+                                                        , '<%=  oMandocdhandle = Mandocdhandle.where(mandoc_id: mandoc.id, department_id:  mandoc.department_id).last
+                                                              if !oMandocdhandle.nil?
+                                                                  oMandocuhandle = Mandocuhandle.where(mandocdhandle_id: oMandocdhandle.id, user_id: @user.id).last
+                                                                  if !oMandocuhandle.nil?
+                                                                      oMandocuhandle.id
+                                                                  end 
+                                                              end 
+                                                              %>', '<%= if !Department.where(name: mandoc.mdepartment).first&.nil?
+                                                                          Department.where(name: mandoc.mdepartment).first&.id
+                                                                        end
+                                                              %>','<%= if !mandoc.deadline.nil? 
+                                                                mandoc.deadline&.strftime('%d/%m/%Y')
+                                                                end
+                                                              %>'
+                                                              , '<%= oMandocdhandle = Mandocdhandle.where(mandoc_id: mandoc.id, department_id:  mandoc.department_id).last
+                                                                  if !oMandocdhandle.nil?
+                                                                      oMandocdhandle.id
+                                                                  end 
+                                                                  %>')" type="button" data-bs-toggle="modal" data-bs-target="#formchonxuly"data-toggle="tooltip" data-placement="top" title="<%=lib_translate('Handle')%>"><span class="fas fa-users-cog text-warning">
+                                                  </button>
+                                                  
+                                                  <%else%>
+                                                <%# Nút xử lý của đơn vị %>
+                                                  <% if !@user.nil? 
+                                                      oMandocdhandle = Mandocdhandle.where(mandoc_id: mandoc.id, department_id: mandoc.department_id).last
+                                                        if !oMandocdhandle.nil?
+                                                          oMandocdhandle_content_value =""
+                                                          if !oMandocdhandle.contents.nil?
+                                                          oMandocdhandle_content_value = URI.encode_www_form_component(oMandocdhandle.contents)
+                                                          end
+                                                          if @list_id_users_trp.include?(session[:user_id]) == true && oMandocdhandle.srole == "XULY" && mandoc.department_id!= get_id_department %>
+                                                          <%# Tai day check, neu la nhan vien vawn thu thi an nut xu li don vi%>
+                                                          <%
+                                                          if oDhandleHD = Mandocdhandle.where(mandoc_id: mandoc.id, srole: "XULY").last 
+                                                          if !oDhandleHD.nil?
+                                                            oMandocUhandleHD = Mandocuhandle.where(mandocdhandle_id: oDhandleHD.id, user_id: session[:user_id]).last&.srole
+                                                            if oMandocUhandleHD == "XULY"
+                                                            %>
+                                                            
+                                                              <button class="btn btn-light" data-bs-toggle="modal" data-id="<%= mandoc.id %>" 
+                                                                data-content="<%= oMandocdhandle_content_value %>"data-deadline="<%= oMandocdhandle&.deadline&.strftime('%d/%m/%Y')%>"
+                                                                data-id-dhandle="<%=oMandocdhandle.id %>"
+                                                                id="checkRole" data-bs-target="#xu_ly_process_DV" data-toggle="tooltip" data-placement="top" title="<%=lib_translate('Handling_units')%>">
+                                                                  <span class="fas fa-users-cog text-warning">
+                                                              </button> 
+                                                              <%end end end%>
+                                                        <% end
+                                                        end 
+                                                      end %>
+                                                  <%# Nút xử lý của đơn vị %>
+                                                <% end %>
+                                                <%# end nut %>      
+                                                <%# Nút gửi văn thư %>
+                                                <% 
+                                                  last_row = Mandocuhandle.where(mandocdhandle_id: dhandle_last).last
+                                                  if !last_row.nil?
+                                                    second_last_row = Mandocuhandle.where(mandocdhandle_id: dhandle_last).offset(1).last
+                                                    if !second_last_row.nil?
+                                                      second_user_id = second_last_row.user_id
+                                                      positionjob_ids =  Positionjob.where("department_id = #{dhandle_last_department}").pluck(:id)
+                                                      if !positionjob_ids.nil?
+                                                        works = Work.where(positionjob_id: positionjob_ids ).pluck(:user_id)
+                                                        if !works.nil?
+                                                          users_arr = User.select("id").where(id: works)
+                                                          if !users_arr.nil?
+                                                            arrUserid =  users_arr.ids
+                                                            check_user_department = arrUserid.include?(second_user_id)
+                                                          end
+                                                        end
+                                                      end
+                                                    end
+                                                  end
+                                                %> 
+                                                <% if !@user.nil? && check_user_department == false  || @list_id_users_trp.include?(session[:user_id]) == true
+                                                  oDhandleRole = Mandocdhandle.where(mandoc_id: mandoc.id, department_id: mandoc.department_id).last
+                                                    if !oDhandleRole.nil?
+                                                      if @list_id_users_trp.include?(session[:user_id]) == true && oDhandleRole.srole == "XULY" %>
+                                                      <% if @list_id_users_trp.include?(session[:user_id]) == true && second_user_id.nil?  %>
+                                                      <% content_value = ""  
+                                                        if !mandoc.dhandle_contents.nil?
+                                                          content_value =  URI.encode_www_form_component(mandoc.dhandle_contents)
+                                                        end
+                                                        %>
+                                                          <button id="btn_assgin_VT_<%= mandoc.id%>" class="btn btn-light" data-bs-toggle="modal" id="checkRole" data-bs-target="#xu_ly_process_PB_VT"
+                                                          onclick="open_form_assign_handle_department_outgoing(`<%= mandoc.id %>` ,`<%= content_value %>`
+                                                            , '<%= if !mandoc.received_at.nil?
+                                                                  (mandoc.received_at + 15.days)&.strftime('%d/%m/%Y')
+                                                                  else 
+                                                                  ''
+                                                                  end %>'
+                                                            , '<%= if !mandoc.effective_date.nil?
+                                                                  (mandoc.effective_date + 15.days)&.strftime('%d/%m/%Y')
+                                                                  else 
+                                                                  ''
+                                                                  end %>'
+                                                            , '<%= oMandocdhandle = Mandocdhandle.where(mandoc_id: mandoc.id, department_id:  mandoc.department_id).last
+                                                                if !oMandocdhandle.nil?
+                                                                    oMandocdhandle.id
+                                                                end 
+                                                                %>')"
+                                                          data-toggle="tooltip" data-placement="top" title="<%=lib_translate('Move_to_the_documentary_department')%>">
+                                                            <span class="fas fa-external-link-alt text-info">
+                                                        </button>
+                                                      <% end %>
+                                              <% end
+                                                    end 
+                                                      end %>
+                                                <%# Nút gửi văn thư %>
+
+                                                <%# Nút xem văn bản: tk department leader %>
+                                                  <% if @list_id_users_trp.include?(session[:user_id]) == true && uhandle_last != "DAXULY" && mandoc&.status != "PENDING" &&  last_row&.status != "DAXULY"
+                                                      # data for buttojn click-event
+                                                      received_at = ''
+                                                      effective_date = ''
+                                                      uhandle_id = ''
+                                                      dhandle_id = ''
+                                                      department_id = ''
+                                                      deadline = ''
+                                                      dhandle_content = ''
+                                                      if !mandoc.received_at.nil?
+                                                        received_at = (mandoc.received_at + 15.days)&.strftime('%d/%m/%Y')
+                                                      end
+                                                      if !mandoc.effective_date.nil?
+                                                        effective_date = (mandoc.effective_date + 15.days)&.strftime('%d/%m/%Y')
+                                                      end
+                                                      oMandocdhandle = Mandocdhandle.where(mandoc_id: mandoc.id, department_id:  mandoc.department_id).last
+                                                      dhandle_id = oMandocdhandle&.id
+                                                      dhandle_content = oMandocdhandle&.contents
+                                                      if !oMandocdhandle.nil?
+                                                          oMandocuhandle = Mandocuhandle.where(mandocdhandle_id: oMandocdhandle.id, user_id: @user.id).last
+                                                          uhandle_id = oMandocuhandle&.id
+
+                                                      end
+                                                      department_id = Department.where(name: mandoc.mdepartment).first&.id
+                                                      if !mandoc.deadline.nil? 
+                                                        deadline = mandoc.deadline&.strftime('%d/%m/%Y')
+                                                      else
+                                                        deadline = ''
+                                                      end
+                                                      #  data for form
+                                                      id_mandhandle = Mandocdhandle.where(mandoc_id: mandoc.id).last&.id
+                                                      last_uhandle_contents = Mandocuhandle.where(mandocdhandle_id: id_mandhandle).last&.contents
+                                                      list_file = Mandocfile.where(mandoc_id: mandoc.id)
+                                                      showUnapproval = false
+                                                      if !@user.nil? && mandoc.status != "PENDING"
+                                                        oDhandleRole = Mandocdhandle.where(mandoc_id: mandoc.id, department_id: mandoc.department_id).last
+                                                        if !oDhandleRole.nil?
+                                                          if oDhandleRole.srole == "XULY" && mandoc.department_id != get_id_department
+                                                            showUnapproval = true
+                                                          end
+                                                        end
+                                                      end
+                                                  %>
+                                                  <% content_value = ""  
+                                                    handle_content_value = ""
+                                                    dhandle_content_value = ""
+                                                  if !mandoc.dhandle_contents.nil?
+                                                    content_value =  URI.encode_www_form_component(mandoc.dhandle_contents)
+                                                  end
+                                                  if !last_uhandle_contents.nil?
+                                                    handle_content_value =  URI.encode_www_form_component(last_uhandle_contents)
+                                                  end
+                                                  if !dhandle_content.nil?
+                                                    dhandle_content_value =  URI.encode_www_form_component(dhandle_content)
+                                                  end
+                                                  %>
+                                                  <%
+                                                  if oDhandleHD = Mandocdhandle.where(mandoc_id: mandoc.id, srole: "XULY").last 
+                                                    if !oDhandleHD.nil?
+                                                      oMandocUhandleHD = Mandocuhandle.where(mandocdhandle_id: oDhandleHD.id, user_id: session[:user_id]).last&.srole
+                                                      if oMandocUhandleHD == "XULY"
+                                                      %>
+                                                      
+                                                    <button class="btn btn-light unapproval-button"
+                                                      onclick="clickLeaderHandle('<%= mandoc.id %>',`<%= content_value %>`,'<%=received_at%>','<%=effective_date%>','<%=uhandle_id%>','<%=department_id%>','<%=deadline%>','<%=dhandle_id%>','<%=handle_content_value%>','<%=dhandle_content_value%>',<%=showUnapproval%>)"
+                                                      data-bs-toggle="modal" data-bs-target="#leader-handle-form" data-toggle="tooltip" data-placement="top" title="<%=lib_translate('Handle_document')%>"> 
+                                                        <span class="fas fa-file-signature text-info">
+                                                    </button>
+                                                    <%end end end%>
+                                                <% end %>
+                                                <% end %>
+                                            <% end %>
+
+                                              <%# Nút xem văn bản %>                                  
+                                              <button class="btn btn-light preview-mandoc" data-id="<%= mandoc.id%>" data-toggle="tooltip" data-placement="top" title="<%=lib_translate('View_document')%>">
+                                                <span class="far fa-eye">
+                                              </button>
+                                              <%# Export %>
+                                                <% oFile = Mandocfile.where(mandoc_id: mandoc.id)
+                                                arrFileDowload = []
+                                                if !oFile.nil?
+                                                  oFile.each do |file_mandoc|
+                                                    oMefiafile = Mediafile.where(id: file_mandoc.mediafile_id).first
+                                                    if !oMefiafile.nil?  
+                                                      arrFileDowload.push("#{request.base_url}/mdata/hrm/#{oMefiafile.file_name}")
+                                                    end
+                                                  end
+                                                end %>
+                                              <a target="_blank" class="btn btn-light" data-toggle="tooltip" title="<%=lib_translate('Tải toàn bộ tài liệu')%>"
+                                                onclick="zipFileAfterDownload(<%= arrFileDowload %>, '<%= mandoc.notes %>')">
+                                                  <span class="fas fa-download">
+                                                </a>
+                                              <%# Nút xem tình trạng %>
+                                              <button class="btn btn-light"  onclick=openModal(this) data-target="#tinh_trang_outgoing_<%=mandoc.id%>" data-toggle="tooltip" data-placement="top" title="<%=lib_translate('View_status')%>">
+                                                  <span class="fas fa-list-ol text-success">
+                                              </button>
+                                              <div class="modal fade" id="tinh_trang_outgoing_<%=mandoc.id%>" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style=" background: rgba(0, 0, 0, 0.84); overflow-y: scroll;">
+                                                <div class="modal-dialog" style="max-width: 80%; width: 100%; display: flex; align-items: center;">
+                                                  <div class="modal-content p-3" style=" background: var(--falcon-avatar-status-border-color);">
+                                                      <div class="position-absolute top-0 end-0 mt-2 me-2 z-index-1">
+                                                      <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-header d-flex justify-content-left" >
+                                                      <p class="fs-1 fw-bold"><%= lib_translate("Document_processing") %></p> 
+                                          
+                                                    </div> 
+                                                    <div style=" background: var(--falcon-avatar-status-border-color);padding: 20px;">
+                                                      <h5 style="float:left; opacity: .5;"><span class="fw-bold"><%= lib_translate("Status") %>: </span>
+                                                            <% if mandoc.status != "INACTIVE"%>
+                                                                <span class="text-warning" ><%= lib_translate("Document_processing_status") %></span>
+                                                            <% else%>
+                                                                <span class="text-success"  ><%= lib_translate("Document_processed_status") %></span>
+                                                            <%end%>   
+                                                        </h5>
+                                                      <table class="table table-bordered fs-0 mb-0 table-hover " >
+                                                          <thead class="text-white" style="background: var(--falcon-bg-circle-shape-bg);">
+                                                                <tr>
+                                                                    <th ><%= lib_translate("Handler") %></th>
+                                                                    <th style="width: 6%;"><%= lib_translate("Role") %> <a id="onclick_customs_table" class="ms-3" tabindex="0" role="button" data-bs-toggle="popover" title="Cấu hình hiển thị vai trò xử lý" data-bs-content=" "><span class="fas fa-caret-down text-100"></span></a></th>
+                                                                    <th style="width: 12%;"><%= lib_translate("Day_Process") %></th>
+                                                                    <th style="width: 7%;"><%= lib_translate("Deadline_process") %></th>
+                                                                    <th style="width: 15%;"><%= lib_translate("Content_process") %></th>
+                                                                    <th style="width: 7%;"><%= lib_translate("Status") %></th>
+                                                                    <th style="width: 4%;"><%= lib_translate("Read") %></th>
+                                                                </tr>
+                                                          </thead>
+                                                          <tbody>
+                                                            <%  mandoc = Mandoc.where(id: mandoc.id).first
+                                                                    if !mandoc.nil? %>
+                                                                          <tr style="text-align: left" data-show="TIEPNHAN">
+                                                                            <td class="text-success"> <%= mandoc.created_by %> <b>[<%= if mandoc.sfrom.nil?
+                                                                              mandoc.mdepartment
+                                                                            else
+                                                                              id_department_first = Mandocdhandle.where(mandoc_id: mandoc.id).first&.department_id
+                                                                              Department.where(id: id_department_first).first&.name
+                                                                            end%>]</b></td>
+                                                                            <td><%= lib_translate("SOANTHAO")%></td>
+                                                                            <td><%= mandoc.created_at&.strftime("%k:%M %d/%m/%Y")%></td>
+                                                                            <td></td> 
+                                                                            <td><div style="white-space: pre-line;">Thiết lập văn bản</div></td>
+                                                                            <td><%= lib_translate("DAXULY")%></td>
+                                                                            <td><%= lib_translate("CO")%></td>
+                                                                          </tr>
+                                                                          <%
+                                                                            
+                                                                            mandoc&.mandocuhandles&.order(created_at: :asc).each do |uhan|
+                                    
+                                                                          %>  
+                                                                         
+                                                                          <tr style="text-align: left" data-show="<%= uhan.srole == "TIEPNHAN" ? "XULY" : uhan.srole %>">
+                                                                            <td style="white-space: pre-line;"> <span class="fas fa-grip-lines"></span><span class="fas fa-chevron-right"></span> <%= uhan.user.last_name%> <%= uhan.user.first_name%>  <b>[<%= uhan&.mandocdhandle&.department&.name%>]</b></td>
+                                                                            <td><%= uhan.srole == "XULY" ? lib_translate("XULY") : uhan.srole == "DEBIET" ? lib_translate("DEBIET") : uhan.srole == "PHOIHOPXL" ? lib_translate("PHOIHOPXL") : lib_translate("XULY")%></td>
+                                                                            <td><%= uhan.created_at&.strftime("%k:%M %d/%m/%Y")%></td>
+                                                                            <%if !uhan.deadline.nil?%>
+                                                                            <td><%= uhan.deadline&.strftime("%d/%m/%Y")%></td>
+                                                                            <%else%>
+                                                                              <td></td>
+                                                                            <%end%>
+                                                                            <td><div style="white-space: pre-line;"><%= uhan.contents %></div></td>
+                                                                            <td><%= uhan.sothers == "HUYBOXULY" ? "Thay thế" : uhan.status == "DAHUY" ? lib_translate("Cancel_handle") : uhan.status == "CHUAXULY" ? lib_translate("CHUAXULY") : uhan.status == "PHOIHOPXL" ? lib_translate("PHOIHOPXL") : uhan.status == "DAXULY" && uhan.srole != "PHOIHOPXL" ? lib_translate("DAXULY") : lib_translate("PHOIHOPXL") %></td> 
+                                                                            <td><%= uhan.sothers == "HUYBOXULY" ? "" : uhan.sread == "KHONG" ? lib_translate("KHONG") : uhan.sread == "CO" ? lib_translate("CO") : lib_translate("KHONG") %></td>  
+                                                                          </tr> 
+                        
+                                                                        <% end %>
+                                                                  <% end %>
+                                                          </tbody>
+                                                      </table>
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                              <%# Nút xem tình trạng %>
+
+                                            <% if !is_access(session["user_id"], "SP-NHANVIEN","READ") || !is_access(session["user_id"], "SP-TRUONGPHONG","READ") || !is_access(session["user_id"], "SP-VANTHU","READ") %>
+                                              <%if @checkDirectorsHandle%>
+                                                <%# Nút ban hành văn bản %>
+                                                <% 
+                                                
+                                                
+
+                                                organization_id = ''
+                                                oUserORG = Uorg.where(user_id: session[:user_id]).first
+                                                if !oUserORG.nil?
+                                                    organization_id = oUserORG.organization_id
+                                                end
+                                                value_sno_out = Mandoc.where(stype: mandoc.stype, status: "INACTIVE").where("sfrom is null AND YEAR(created_at) = YEAR(CURRENT_DATE())").where(organization_id: organization_id).order(updated_at: :ASC).last
+                                                count_out = value_sno_out&.sno.to_i + 1
+
+                                                ssymbol_VB = ""
+                                                ssymbol_note = Mandoctype.where(scode: mandoc.stype).first&.note
+                                                if @organization_scode == "BMTU"
+                                                    ssymbol_VB = "#{ssymbol_note}-YDBMT"
+                                                elsif @organization_scode == "BUH"
+                                                    ssymbol_VB = "#{ssymbol_note}-BVYDBMT"
+
+                                                end
+                                                %>
+                                                <button class="btn btn-light" onclick="openReleaseModal(<%=mandoc.id%>, <%= mandoc.sno.present? ? mandoc.sno : count_out %>, `<%= mandoc.stype.present? ? Mandoctype.where(scode: mandoc.stype).first&.name : '' %>`, `<%= mandoc.stype %>`, `<%= mandoc.ssymbol.present? ? mandoc.ssymbol : '' %>`, `<%=ssymbol_VB%>`)" data-toggle="tooltip" data-placement="top" title="<%=lib_translate('Ban_hanh_VB_VT')%>">
+                                                  <span class="fas fa-file-export text-danger">
+                                                </button>
+                                              <%end%>
+                                            <%end%>
+                                          </td>   
+                                    </tr>
+                                <% end end end end %>
+                            </tbody>
+                        </table>
+                        <%= render_pagination_limit_offset(mandocs_outgoing_index_path(lang: session[:lang], per_page: session[:per_page], search: session[:search]), 10, @arrMandoc.count).html_safe %>
+                    </div>
+                </div>
+                <%# TÌNH TRẠNG VĂN BẢN - QHAI 16/2/2023 %>
+                <div id="page_process_2" class="tab-pane fade"><br>
+                    <table id="documents_processed_follow_out" class="table table-bordered fs--1 mb-0 " style="margin-top: 0px !important; margin-bottom: 0px !important">
+                            <thead class="bg-200 text-900" class="display: none;">
+                                <tr>
+                                    <th class="sort" style="width: 4%; text-align: center;"><%= lib_translate("Oder")%></th>
+                                    <th class="sort" style="width: 15%; text-align: center;"><%= lib_translate("Received_date")%>/<%= lib_translate("Urgency")%></th>
+                                    <th class="sort" style="width: 30%; text-align: center;"><%= lib_translate("Content")%></th>
+                                    <th class="sort" style="width: 15%; text-align: center;"><%= lib_translate("Deadline_handle")%></th>
+                                    <th class="sort" style="width: 15%; text-align: center;"><%= lib_translate("Status_doccuments")%></th>
+                                    <th class="sort" style="width: 13%; text-align: center;"><%= lib_translate("Hành động")%></th>
+                                    <%# <th class="no-sort col-4 col-md-3 p-0" style="width: 20%;"></th> %>
+                                </tr>
+                            </thead>
+                            <tbody class="list">
+                             
+                            </tbody>
+                    </table>
+                </div>
+                <%# Pending tab mandoc Hai + Huy: 27/2/2023 %>
+                <div id="page_pending" class="tab-pane fade"><br>
+                    <div class="table-responsive scrollbar"> 
+                        <table id="documents_pending" class="table table-bordered fs--1 mb-0 " style="margin-top: 0px !important; margin-bottom: 0px !important">
+                            <thead class="bg-200 text-900" class="display: none;">
+                                <tr>
+                                    <th class="sort" style="width:4%; text-align: center;"><%= lib_translate("Oder")%></th>
+                                    <th class="sort" style="width:20%"><%= lib_translate("Received_date")%>/<%= lib_translate("Urgency")%></th>
+                                    <th class="sort" style="width:50%"><%= lib_translate("Content")%></th>
+                                    <th class="no-sort col-4 col-md-3 p-0" style="width: 30%;"></th>
+                                </tr>
+                            </thead>
+                            <tbody class="list">                               
+                                
+                                <% @arrMandocPending.each_with_index do |mandoc, i|                               
+                                
+                                get_department_id = Node.where(nfirst: "YES").first&.department_id
+                                  if !get_department_id.nil?
+                                      get_name_department= Department.where(id: get_department_id).first&.name
+                                      get_id_department= Department.where(id: get_department_id).first&.id
+                                      if !get_name_department.nil? && !get_id_department.nil? 
+                                        
+                                      %>
+                                    <tr>
+                                                                      
+                                        <td style="vertical-align: middle; text-align: center;"><%= i+1 %></td>
+                                        <td style="vertical-align: middle;">
+                                            <div style="text-align: start; cursor:pointer; display: flex;flex-direction: column;">
+                                                <label class="m-0 text-overlap" ><%= lib_translate("Received_date")%>:<span style="font-weight: normal;white-space: normal !important;"> <%= mandoc.created_at.strftime('%d/%m/%Y')%></span></label>
+                                                <label class="m-0 text-overlap"><%= lib_translate("Urgency")%>: <span style="font-weight: bold; color: <%= Mandocpriority.where(name: mandoc.spriority).first.note%>"><%= mandoc.spriority%></span></label>
+                                                <label style=" cursor:pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;font-weight: bold !important;white-space: normal !important;" class="m-0 text-overlap"><%= lib_translate("Documents_type")%>:
+                                                        <span style="font-weight: normal;">
+                                                          <% if mandoc.stype.present? && Mandoctype.where(scode: mandoc.stype).exists? %>
+                                                            <%= Mandoctype.where(scode: mandoc.stype).first&.name %>
+                                                          <% else %>
+                                                            
+                                                          <% end %>
+                                                        </span>
+                                                  </label>
+                                            </div>
+                                        </td>
+                                        <%
+                                          uUser = User.where(email: mandoc.signed_by).first
+                                          if !uUser.nil?
+                                              fullnameU = uUser.last_name + " " + uUser.first_name
+                                          end
+                                        %>
+                                        <td style="vertical-align: middle;">
+                                            <div style="text-align: start; cursor:pointer; display: flex;flex-direction: column;">
+                                                <label class="m-0 text-overlap" ><%=lib_translate('Content')%>: <span style="font-weight: normal; white-space: normal !important;"><%= mandoc.notes %></span></label>
+                                                <label class="m-0 text-overlap" ><%=lib_translate('Department')%>: <span style="font-weight: normal; white-space: normal !important;"><%= mandoc.mdepartment %></span></label>
+                                                <label class="m-0 text-overlap" ><%=lib_translate('Signed_by')%>: <span style="font-weight: normal; white-space: normal !important;"><%= fullnameU %></span></label>
+                                                <label class="m-0 text-overlap" ><%=lib_translate('Docs_Writer')%>: <span style="font-weight: normal; white-space: normal !important;"><%= mandoc.created_by %></span></label>
+                                                <label class="m-0 text-overlap"><%= lib_translate('Documents_date')%>: <span style="font-weight: normal; white-space: normal !important;"><%= mandoc.received_at&.in_time_zone('Asia/Ho_Chi_Minh')&.strftime('%d/%m/%Y') %></span>
+                                            </div>
+                                        </td>  
+                                        <td style="vertical-align: middle; text-align: center; padding:0" > 
+                                              <%  department_id = ""
+                                                  mandoc_content_value = ""
+                                                  oDeparment = Department.where(name: mandoc.mdepartment).first
+                                                  if !oDeparment.nil?
+                                                    department_id = oDeparment.id
+                                                  end
+                                                  if !mandoc.contents.nil?
+                                                    mandoc_content_value = URI.encode_www_form_component(mandoc.contents)
+                                                  end
+                                               %>
+                                               <a class="btn btn-light" data-toggle="modal" data-target="#modal-mandoc-pending-delete-<%= mandoc.id %>" onclick="clickDeleteMandocPending('<%= mandoc.id %>')" style="cursor: pointer;">
+                                                <span class="text-danger fas fa-trash" style="width: 12px;"></span>
+                                              </a> &nbsp;&nbsp;&nbsp;&nbsp;
+                                              <a class="btn btn-light edit_mandoc_pending" id="edit_mandoc_pending" style="text-decoration: none; cursor:pointer;" data-bs-toggle="modal" data-bs-target="#staticBackdrop" 
+                                               onclick="openFormUpdateMandocPending(    
+                                                  '<%= mandoc.id %>',
+                                                  '<%= mandoc.type_book %>',
+                                                  '<%= mandoc.sno %>',
+                                                  '<%= mandoc.ssymbol %>',
+                                                  '<%= mandoc.stype %>',
+                                                  '<%= mandoc.signed_by %>',
+                                                  '<%=  mandoc_content_value%>',
+                                                  '<%= mandoc.notes %>',
+                                                  '<%= mandoc.slink %>',
+                                                  '<%= mandoc.created_by %>',
+                                                  '<%= mandoc.received_at&.in_time_zone('Asia/Ho_Chi_Minh')&.strftime('%d/%m/%Y') %>',
+                                                  '<%= mandoc.effective_date&.strftime('%d/%m/%Y') %>',
+                                                  '<%= mandoc.spriority %>',
+                                                  '<%= mandoc.number_pages %>',
+                                                  '<%= department_id %>')">
+                                                <span class="text-primary far fa-edit" ></span>
+                                              </a>&nbsp;&nbsp;&nbsp;
+                                              <%# Nút xem văn bản %>
+                                              <button class="btn btn-light preview-mandoc d-none" data-id="<%= mandoc.id%>" data-toggle="tooltip" data-placement="top" title="<%=lib_translate('View_document')%>">
+                                                <span class="far fa-eye">
+                                              </button>
+                                              <%# Nút xem văn bản %>
+                                        </td>                        
+                                    </tr>
+                                <% end end end  %>
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal modal-lg fade" id="chosses_leader_department" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style=" background: rgba(0, 0, 0, 0.84); overflow-y: scroll;" data-bs-focus="false">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><%= lib_translate('Chosses_leader_department')%></h5>
+        <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div style="padding:20px">
+        <select class="form-select" id="signed_by_chosses_leader_department">
+          <% if !@lists_leader_email.nil?
+            @lists_leader_email.uniq.each do |name_ld|
+            full_name_by_email = User.where(email: name_ld).first
+            if !full_name_by_email.nil?
+              fullname = full_name_by_email.last_name + " " + full_name_by_email.first_name
+             work_user = Work.where(user_id: full_name_by_email.id).where("stask_id IS NULL").pluck(:positionjob_id)
+              if !work_user.nil?
+                positionjobU = Positionjob.where(id: work_user).first
+                if !positionjobU.nil?
+          %>
+            <option value="<%= name_ld%>"><b><%= fullname %></b> (<i><%= positionjobU.name %></i>)</option>
+          <%end end end end end%>
+        </select>
+      </div>
+      <div class="modal-footer" style="border: unset;">
+        <button class="btn btn-primary" type="button" id="confirm_form_chosses_leader_department"><%= lib_translate("Confirm")%></button>
+        <button class="btn btn-secondary" type="button" data-bs-dismiss="modal"><%= lib_translate("Close")%></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!----------------Form chon xu ly cua van thu------------------->
+<div class="modal fade" id="formchonxuly" role="dialog" data-bs-focus="false">
+  <div class="modal-dialog modal-dialog-centered" style="min-width: 90%">
+    <div class="modal-content border-0">
+      <div class="position-absolute top-0 end-0 mt-3 me-3 z-index-1">
+        <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" onclick="get_form_by_scode('CHOICE-FORM')" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div class="bg-light rounded-top-lg py-3 ps-4 pe-6" style="display: flex;align-items: center;">
+          <span name="back-icon" class="fas fa-arrow-left me-2" style="display:none;font-size: 1.4rem;cursor: pointer;" onclick="get_form_by_scode('CHOICE-FORM')"></span>
+          <h4 class="mb-1" name="modal-title"><%=lib_translate("Chon_don_vi_xu_ly")%></h4>
+        </div>
+        <div id="form-wrap" class="p-3">
+          <%# tab choice form %>
+          <div data-title="<%=lib_translate("Chon_don_vi_xu_ly")%>" id="CHOICE-FORM" class="tab-pane active px-sm-3 px-md-5">
+            <div class="row mb-3" style="align-items: center;">
+              <div class="col">
+                <div class="row" style="width: 70%; margin: 0 auto; justify-content: space-evenly;">
+                  <%if  @result == false%>
+                    <% @department_name_line.each do |department|%>
+                      <button style="height: 70px" class="col-5 btn btn-primary" onclick='get_form_by_scode("<%=department.forms%>")'> <%=Department.where(id: department.nend).first&.name%></button>
+                    <%end%>
+                  <%else%>
+                    <% @department_name_line_pb.each do |department|%>
+                      <button style="height: 70px" class="col-5 btn btn-primary" onclick='get_form_by_scode("<%=department.forms%>")'> <%=Department.where(id: department.nend).first&.name%></button>
+                    <%end%>
+                  <%end%>
+                </div>
+              </div>
+            </div>
+          </div>
+          <%# tab form assign BGD %>
+          <div data-title="<%=lib_translate(session[:organization] ? "Submit_to_the_Board_of_Directors_BMTU" : "Submit_to_the_Board_of_Directors")%>" id="FORM-ASSIGN-BLD" style="display:none;">
+            <%= form_for @newMandoc_dhandle, :url=> mandocs_assign_leader_path , html: {method: :post, id:"assign_leader_BLD" } do |f| %>
+              <input value="" type="text" id="mandoc_id_leader_outgoing" name="mandoc_id" class="d-none">
+              <input value="" type="text" id="iddhandle" name="id_dhandle" class="d-none"> 
+              <input value="<%=@department_leader_id_handel%>" type="text" id="department_id_leader" name="department_id" class="d-none">
+              <input value="" type="text" id="deadline_mandocs_leader_outgoing" name="deadline" class="d-none">
+              <input value="outgoing" type="text" id="" name="assign_leader_type" class="d-none">
+              <div class="form-group mt-3">
+                <label for="" class="form-label fw-bold"><%= lib_translate("Proposal_of_the_department") %></label>
+                <textarea style="min-height: 100px;" class="form-control" id="contents" name="contents" style="" placeholder="<%= lib_translate("Proposal_of_the_department") %>" ></textarea>
+              </div>
+              <div class="row mt-3">
+                <div class="col-xl-12">
+                  <div class="">
+                    <div class="col-xl-3">
+                      <label for="" class="form-label fw-bold"><%= lib_translate( session[:organization] ? "Opinion_of_the_administrator" : "Opinion_of_the_leadership") %></label>
+                    </div>
+                    <div class="col">
+                      <select class="form-select" id="assign_to" name="assign_to" aria-label="Default select example" style="">                 
+                      <% if !@users_leader_handle.nil? %>
+                        <% @users_leader_handle.each do |u| 
+                        positionjobUser = ""
+                      work_user = Work.joins(:positionjob).where("works.user_id = ? AND positionjobs.department_id = ?", u.id, @department_leader_id_handel).last ||  Work.where(user_id: u.id).last
+                        if !work_user.nil?
+                          positionjobU = Positionjob.where(id: work_user.positionjob_id).first
+                          if !positionjobU.nil?
+                            positionjobUser = positionjobU.name %>
+                          <option style="text-transform:capitalize;" value="<%= u.id %>"><%= u.last_name %>&nbsp<%= u.first_name %> (<%= positionjobUser %>)</option>                                    
+                        <% end end end end%>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="mb-3 mt-3 d-none">
+                <div id="collapse-control" class="collapse-control bg-300" onclick="clickCollapse(this)" data-bs-toggle="collapse" data-bs-target="#collapse-content-editer-2">
+                  <span class="fw-semi-bold form-label" ><%= lib_translate("Content")%></span>
+                  <i id="collapse-icon" style="font-size: 20px;pointer-events: none;transition: 200ms ease-in;rotate: -90deg" class="fas fa-chevron-circle-left"></i>
+                </div>
+                <div class="collapse show" id="collapse-content-editer-2 ">
+                  <textarea class="form-control" id="mandoc_content_leader" name="mandoc_content_leader"></textarea>
+                </div>
+              </div>
+              <div class="mb-3 mt-3">
+                <div id="collapse-control" class="collapse-control bg-300" onclick="clickCollapse(this)" data-bs-toggle="collapse" data-bs-target="#collapse-content-media-2">
+                  <span class="fw-semi-bold form-label" ><%= lib_translate("Attached_files")%></span>
+                  <i id="collapse-icon" style="font-size: 20px;pointer-events: none;transition: 200ms ease-in;rotate: -90deg" class="fas fa-chevron-circle-left"></i>
+                </div>
+                <div class="collapse show" id="collapse-content-media-2">
+                  <div id="media-assign-BGD" class="mt-3"></div>
+                </div>
+              </div>
+              <div class="d-flex justify-content-evenly mt-3">
+                <button type="button" id="user_vt_handle" class="btn btn-primary handle_btn handle_file_btn"><%= lib_translate("Handle")%></button> 
+                <button type="button" onclick="get_form_by_scode('CHOICE-FORM')" class="btn btn-warning pe-5 ps-5" data-bs-dismiss="modal"><%= lib_translate("Cancle") %></button>
+              </div>
+            <% end %>
+          </div>
+          <%# tab form assign department %>
+          <div data-title="<%=lib_translate("Go_to_unit")%>" id="FORM-ASSIGN-PB" style="display:none;">
+            <%= form_for @newMandoc_dhandle, :url=> mandocs_process_assign_departments_path, html: {method: :post, id:"form_add_mandoc_dhandle" } do |f| %>
+              <input value="" type="text" id="mandoc_id_dhandle" name="mandoc_id" class="d-none"> 
+              <input value="VT_PB" type="text"  name="assign_type" class="d-none"> 
+              <input value="" type="text" id="iduhandle_pb" name="id_uhandle" class="d-none">
+              <input style="min-height: 100px;" class="form-control d-none" id="mandoc_dhandle_Proposal_of_the_TC-HC_in"style="" placeholder="<%= lib_translate("Content_process") %>">
+              <div class="form-group mt-3">
+                <label for="" class="form-label fw-bold"><%= lib_translate("Content_process") %>:</label>
+                <textarea style="min-height: 100px;" class="form-control" id="mandoc_dhandle_Proposal_of_the_TC-HC" name="contents" style="" placeholder="<%= lib_translate("Content_process") %>" disabled></textarea>
+              </div>
+
+              <div class="form-group mt-3">
+                <label for="" class="form-label fw-bold">Văn thư chuyển phòng ban có ý kiến: </label>
+                <textarea style="min-height: 100px;" class="form-control" name="contents_VT_PB" style="" placeholder="<%= lib_translate("Content_process") %>" ></textarea>
+              </div>
+              <div class="row mt-3">
+                 <div class="col-xl-6">
+                    <div class="row">
+                        <div class="col-xl-4">
+                            <label for="" class="form-label fw-bold"><%= lib_translate("Editing_unit") %></label>
+                        </div>
+                        <div class="col">
+                            <select class="form-select selectpicker" id="department_id" name="department_id_asign" aria-label="Default select example" style="">
+                            <% @departments.each do |department| %>
+                                <option  value="<%= department.id %>"><%= department.name %></option>
+                            <%end%>
+                            </select>
+                        </div>
+                    </div>    
+                </div>
+                <div class="col-xl-6">
+                    <div class="row">
+                        <div class="col-xl-4">
+                            <label for="" class="form-label fw-bold"><%= lib_translate("Trưởng/Phó phòng") %>:</label>
+                        </div>
+                        <div class="col">
+                            <select class="form-select selectpicker" id="department_user" name="department_user" aria-label="Default select example" style="">
+                            
+                            </select>
+                        </div>
+                    </div>    
+                </div>
+                <div class="col-xl-6 mt-3">         
+                  <div class="row">
+                      <div class="col-xl-4">
+                          <label for="" class="form-label fw-bold"><%= lib_translate("Processing_time") %></label>
+                      </div>
+                      <div id="datepicker-container" class="datepicker-container col">
+                        <span style="position: relative;" class="outline-element-container"> 
+                            <input id="deadline" disabled type="text" class="form-control datepicker openemr-datepicker input-textbox outline-element incorrect" maxlength="10"  objtype="7" name="action_element" objindex=""  aria-label="Select Date"> 
+                            <input id="deadlines"  type="text" name="deadline" class="form-control datepicker openemr-datepicker input-textbox outline-element incorrect d-none" maxlength="10"  objtype="7" name="action_element" objindex=""  aria-label="Select Date"> 
+                            <span class="correct-incorrect-icon"> </span>
+                        </span>
+                        <div id="datepicker" ></div>
+                      </div>
+                  </div>
+                </div>
+                <div class="row align-items-center mt-3 m-0 p-0">
+                    <div class="col-2 ">
+                        <label for="" class="form-label fw-bold"><%= lib_translate("Coordination_Unit") %></label>
+                    </div>
+                    <div class="col" style="z-index: 5;">
+                        <select class="form-select js-choice-my" id="department_help_ids" multiple="multiple" size="1" name="department_help_ids[]" data-options='{"removeItemButton":true,"placeholder":true}'>
+                        <% @departments.each do |department| %>
+                            <option value="<%= department.id %>"><%= department.name %></option>
+                        <%end%>
+                        </select>
+                    </div>
+                </div>
+              </div>
+              <%# content editer %>
+              <div class="mb-3 mt-3 d-none">
+                <div id="collapse-control" class="collapse-control bg-300" onclick="clickCollapse(this)" data-bs-toggle="collapse" data-bs-target="#collapse-content-editer-3">
+                  <span class="fw-semi-bold form-label" ><%= lib_translate("Content")%></span>
+                  <i id="collapse-icon" style="font-size: 20px;pointer-events: none;transition: 200ms ease-in;rotate: -90deg" class="fas fa-chevron-circle-left"></i>
+                </div>
+                <div class="collapse show" id="collapse-content-editer-3">
+                  <textarea class="form-control" name="mandoc_content_department" id="mandoc_content_department"></textarea>
+                </div>
+              </div>
+              <%# media form %>
+              <div class="mb-3 mt-3">
+                <div id="collapse-control" class="collapse-control bg-300" onclick="clickCollapse(this)" data-bs-toggle="collapse" data-bs-target="#collapse-content-media-3">
+                  <span class="fw-semi-bold form-label" ><%= lib_translate('Attached_files')%></span>
+                  <i id="collapse-icon" style="font-size: 20px;pointer-events: none;transition: 200ms ease-in;rotate: -90deg" class="fas fa-chevron-circle-left"></i>
+                </div>
+                <div class="collapse show" id="collapse-content-media-3">
+                  <div id="media-assign-department"></div>
+                </div>
+              </div>
+              <div class="d-flex justify-content-evenly mt-3">
+                <button id="btn_submit_VT_PB" onclick="onclickSubmitVTPB()" type="button" class="btn btn-primary pe-5 ps-5 handle_file_btn "><%= lib_translate("Handle") %></button>
+                <div type="button " onclick="get_form_by_scode('CHOICE-FORM')" class="btn btn-warning  pe-5 ps-5" data-bs-dismiss="modal"><%= lib_translate("Cancle") %></div>
+              </div>
+            <% end %>
+          </div>
+          <%# tab form assign VT %>
+          <div data-title="<%=lib_translate("Go_to_Documentation")%>" id="FORM-ASSIGN-VT" style="display:none;">
+            <%= form_for @newMandoc_dhandle, :url=> mandocs_assign_handle_department_path , html: {method: :post, id:"new_mandocdhandle" } do |f| %>
+              <input value="" type="text" id="mandoc_id_handle_department_outgoing" name="mandoc_id" class="d-none">
+              <input value="outgoing" type="text" id="" name="assign_handle_department" class="d-none">
+              <input value="" type="text" id="iduhandle_vt" name="id_uhandle" class="d-none">
+              <input value="<%=@department_leader_id%>" type="text" id="department_id_leader" name="department_id" class="d-none">
+              <input value="" type="text" id="deadline_mandocs_leader_outgoing_2" name="deadline" class="d-none">
+              <div class="form-group mt-3">
+                  <label for="" class="form-label fw-bold"><%= lib_translate("Proposal_of_the_department") %></label>
+                  <textarea style="min-height: 100px;" class="form-control" id="contents" name="contents" style="" placeholder="<%= lib_translate("Proposal_of_the_department") %>" ></textarea>
+              </div>
+
+              <div class="d-flex justify-content-evenly mt-3">
+                <button type="button" id="user_handle" class="btn btn-primary handle_btn"><%= lib_translate("Handle")%></button> 
+                <div type="button" onclick="get_form_by_scode('CHOICE-FORM')"  class="btn btn-warning  pe-5 ps-5" data-bs-dismiss="modal"><%= lib_translate("Cancle") %></div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%
+=begin%>
+ <!------------------Form xu ly cua ban giam doc----------------->
+<div class="modal fade" id="xu_ly_process_BGD" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style=" background: rgba(0, 0, 0, 0.84); overflow-y: scroll;">
+  <div class="modal-dialog" style="max-width: 50%; width: 100%; height: 85%; display: flex; align-items: center; margin: 0 auto;">
+    <div class="modal-content position-relative">
+      <div class="position-absolute top-0 end-0 mt-2 me-2 z-index-1">
+        <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-header d-flex justify-content-center ">
+        <h5 class="modal-title fw-bold fs-3" id="exampleModalLabel"><%= lib_translate("Word_Processing") %></h5>
+      </div>
+      <div class="modal-body">
+        <%= form_for @newMandoc_dhandle, :url=> mandocs_process_assign_departments_path, html: {method: :post, id:"form_add_mandoc_dhandle" } do |f| %>
+          <input value="" type="text" id="mandoc_id_dhandle" name="mandoc_id" class="d-none"> 
+          <input value="" type="text" id="iduhandle_bgd" name="id_uhandle" class="d-none">
+          <input style="min-height: 100px;" class="form-control d-none" id="mandoc_dhandle_Proposal_of_the_TC-HC_in" name="contents" style="" placeholder="<%= lib_translate(session[:organization] ? "School_Administrator's_opinion" : "Management's_approval") %>">
+
+          <div class="form-group mt-3">
+              <label for="" class="form-label fw-bold"><%= lib_translate(session[:organization] ? "School_Administrator's_opinion" : "Management's_approval") %></label>
+              <p style="min-height: 100px;" class="form-control" id="mandoc_dhandle_Proposal_of_the_TC-HC"  style="" placeholder="<%= lib_translate(session[:organization] ? "School_Administrator's_opinion" : "Management's_approval") %>" ></p>
+          </div>
+          <div class="row mt-3">
+              <div class="col-xl-6">
+                  <div class="row">
+                      <div class="col-xl-4">
+                          <label for="" class="form-label fw-bold"><%= lib_translate("The_focal_point") %></label>
+                      </div>
+                      <div class="col">
+                          <select class="form-select " id="department_id" name="department_id_asign" aria-label="Default select example" style="">
+                          <% @departments.each do |department| %>
+                              <option value="<%= department.id %>"><%= department.name %></option>
+                          <%end%>
+                          </select>
+                      </div>
+                  </div>    
+              </div>
+              <div class="col-xl-6">         
+                  <div class="row">
+                      <div class="col-xl-4">
+                          <label for="" class="form-label fw-bold"><%= lib_translate("Processing_time") %></label>
+                      </div>
+                      <div id="datepicker-container" class="datepicker-container col">
+                        <span style="position: relative;" class="outline-element-container"> 
+                            <input id="deadline" disabled type="text" class="form-control datepicker openemr-datepicker input-textbox outline-element incorrect" maxlength="10"  objtype="7" name="action_element" objindex=""  aria-label="Select Date"> 
+                            <input id="deadlines"  type="text" name="deadline" class="form-control datepicker openemr-datepicker input-textbox outline-element incorrect d-none" maxlength="10"  objtype="7" name="action_element" objindex=""  aria-label="Select Date"> 
+                            <span class="correct-incorrect-icon"> </span>
+                        </span>
+                        <div id="datepicker" ></div>
+                      </div>
+                  </div>
+              </div>
+              <div class="row align-items-center mt-3 m-0 p-0">
+                  <div class="col-2 ">
+                      <label for="" class="form-label fw-bold"><%= lib_translate("Coordination_Unit") %></label>
+                  </div>
+                  <div class="col">
+                      <select class="form-select js-choice-my" id="department_help_ids" multiple="multiple" size="1" name="department_help_ids[]" data-options='{"removeItemButton":true,"placeholder":true}'>
+                      <% @departments.each do |department| %>
+                          <option value="<%= department.id %>"><%= department.name %></option>
+                      <%end%>
+                      </select>
+                  </div>
+              </div>
+          </div>
+          <div class="modal-footer d-flex justify-content-evenly mt-3 p-0 pt-3">
+            <button type="submit" class="btn btn-primary pe-5 ps-5 handle_btn"><%= lib_translate("Handle") %></button>
+            <button type="button" class="btn btn-warning  pe-5 ps-5" data-bs-dismiss="modal"><%= lib_translate("Cancle") %></button>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div> 
+<%
+=end%>
+
+<!-------- form xu ly chung-------->
+<div class="modal fade" id="xu_ly_process_THHC" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style=" background: rgba(0, 0, 0, 0.84); overflow-y: scroll;">
+  <div class="modal-dialog" style="max-width: 50%; width: 100%; height: 85%; display: flex; align-items: center;">
+    <div class="modal-content position-relative">
+      <div class="position-absolute top-0 end-0 mt-2 me-2 z-index-1">
+        <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-header d-flex justify-content-center ">
+        <h5 class="modal-title fw-bold fs-3" id="exampleModalLabel"><%= lib_translate(session[:organization] ? "Recommendations_to_the_administrator" : "Recommendations_to_the_board_of_directors") %></h5>
+      </div>
+      <div class="modal-body">
+      <%= form_for @newMandoc_dhandle, :url=> mandocs_assign_leader_path , html: {method: :post, id:"" } do |f| %>
+        <input value="" type="text" id="mandoc_id_leader_outgoing" name="mandoc_id" class="d-none">
+        <input value="" type="text" id="iddhandle" name="id_dhandle" class="d-none"> 
+        <input value="outgoing" type="text" id="" name="assign_leader_type" class="d-none">
+        <input value="<%=@department_leader_id_handel%>" type="text" id="department_id_leader" name="department_id"class="d-none" >
+        <input value="" type="text" id="deadline_mandocs_leader_outgoing" name="deadline" class="d-none">
+          <div class="form-group mt-3">
+              <label for="" class="form-label fw-bold"><%= lib_translate("De_xuat_cua_Phong_ban") %></label>
+              <p style="min-height: 100px;" class="form-control" id="contentsPBVT" name="contentsPB" style="" placeholder="<%= lib_translate("De_xuat_cua_Phong_ban") %>" ></p>
+          </div>
+          <div class="form-group mt-3">
+              <label for="" class="form-label fw-bold"><%= lib_translate("De_xuat_cua_Van_thu") %></label>
+              <textarea style="min-height: 100px;" class="form-control" id="contents" name="contents" style="" placeholder="<%= lib_translate("De_xuat_cua_Van_thu") %>" ></textarea>
+          </div>
+            <div class="row mt-3">
+                <div class="col-xl-12">
+                    <div class="">
+                        <div class="col-xl-3">
+                            <label for="" class="form-label fw-bold"><%= lib_translate( session[:organization] ? "Opinion_of_the_administrator" : "Opinion_of_the_leadership" ) %>:</label>
+                        </div>
+                        <div class="col">
+                            <select class="form-select" id="assign_to" name="assign_to" aria-label="Default select example" style=""> 
+                            <% if !@users_leader_handle.nil? %>
+                              <% @users_leader_handle.each do |u| %>
+                                <option style="text-transform:capitalize;" value="<%= u.id %>"><%= u.last_name %>&nbsp<%= u.first_name %></option>                                    
+                              <% end %>
+                            <% end %>  
+                            </select>
+                        </div>
+                    </div>    
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer d-flex justify-content-evenly mt-3 p-0 pt-3 pb-3">
+          <button type="submit" class="btn btn-primary pe-5 ps-5 handle_btn"><%= lib_translate("Handle") %></button>
+          <button type="button" class="btn btn-warning  pe-5 ps-5" data-bs-dismiss="modal"><%= lib_translate("Cancle") %></button>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<!-------- form xu ly PB - VT-------->
+<div class="modal fade" id="xu_ly_process_PB_VT" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style=" background: rgba(0, 0, 0, 0.84); overflow-y: scroll;">
+  <div class="modal-dialog" style="max-width: 50%; width: 100%; height: 85%; display: flex; align-items: center;">
+    <div class="modal-content position-relative">
+      <div class="position-absolute top-0 end-0 mt-2 me-2 z-index-1">
+        <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-header d-flex justify-content-center ">
+        <h5 class="modal-title fw-bold fs-3" id="exampleModalLabel"><%= lib_translate("Recommendations_to_the_board_of_VT") %></h5>
+      </div>
+      <div class="modal-body">
+      <%= form_for @newMandoc_dhandle, :url=> mandocs_assign_handle_department_path , html: {method: :post, id:"form_assign_VT" } do |f| %>
+        <input value="" type="text" id="mandoc_id_handle_department_outgoing_VT" name="mandoc_id" class="d-none">
+        <input value="" type="text" id="iddhandle_VT" name="id_dhandle" class="d-none"> 
+        <input value="outgoing" type="text" id="" name="assign_handle_department" class="d-none">
+        <input value="<%=@department_leader_id%>" type="text" id="department_id_leader" name="department_id" class="d-none">
+        <input value="" type="text" id="deadline_mandocs_leader_outgoing_VT" name="deadline" class="d-none">
+
+          <div class="form-group mt-3">
+              <label for="" class="form-label fw-bold"><%= lib_translate("Proposal_of_the_department") %></label>
+              <textarea style="min-height: 100px;" class="form-control" id="contents_VT" name="contents" style="" placeholder="<%= lib_translate("Proposal_of_the_department") %>" ></textarea>
+          </div>  
+                <div class="mb-3 mt-3">
+                <div id="collapse-control" class="collapse-control bg-300" onclick="clickCollapse(this)" data-bs-toggle="collapse" data-bs-target="#collapse-content-media-3-vt">
+                  <span class="fw-semi-bold form-label" ><%= lib_translate('Attached_files')%></span>
+                  <i id="collapse-icon" style="font-size: 20px;pointer-events: none;transition: 200ms ease-in;rotate: -90deg" class="fas fa-chevron-circle-left"></i>
+                </div>
+                <div class="collapse show" id="collapse-content-media-3-vt">
+                  <div id="media-assign-department-vt" class="mt-3"></div>
+                </div>
+              </div>
+        </div>
+        <div class="modal-footer d-flex justify-content-evenly mt-3 p-0 pt-3 pb-3">
+          <button type="submit" class="btn btn-primary pe-5 ps-5 handle_btn"><%= lib_translate("Handle") %></button>
+          <button type="button" class="btn btn-warning  pe-5 ps-5" data-bs-dismiss="modal"><%= lib_translate("Cancle") %></button>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<!-- Form handle leader -->
+<div class="modal fade" id="leader-handle-form" tabindex="-1" style=" background: rgba(0, 0, 0, 0.84); overflow-y: scroll;">
+  <div class="modal-dialog" style="max-width: 70%; width: 100%; display: flex;">
+    <div class="modal-content p-3" style=" background: var(--falcon-avatar-status-border-color);">
+      <div class="position-absolute top-0 end-0 mt-2 me-2 z-index-1">
+        <button id="btn_close_form_approve" class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="bg-light rounded-top-lg py-3 ps-4 pe-6">
+        <h3 class="mb-1" id="staticBackdropLabel"><%= lib_translate("Duyet_van_ban_tu_truong_PB")%></h3>
+      </div>
+      <form id="form_duyet_van_ban">
+      <div class="row">
+        <div class=" mt-3 d-none" style="text-align: left;">
+          <div>
+            <label for="" class="form-label fw-bold"><%= lib_translate("Content") %></label>
+          </div>
+          <div style="max-height:400px;min-height: 57px;" class="form-control mb-3 p-0 scrollbar preview-contents" id="contents" name="contents" style=""></div>
+        </div>
+        <div style="text-align: left;">
+          <div>
+              <h5 class="form-label fw-bold"><%= lib_translate("File_dinh_kemNV") %></h5>
+          </div>
+            <div class="card-body bg-light" id="media-leader-handle"></div>
+        </div>
+      </div>
+      <div class="modal-footer d-flex justify-content-evenly mt-3 p-0 pt-3 pb-3">
+        <button type="button" class="btn btn-primary pe-5 ps-5 handle_file_btn" data-bs-target="#formchonxuly" data-bs-toggle="modal" data-bs-dismiss="modal" ><%= lib_translate("Dong_y") %></button>
+        <button type="button" class="btn btn-warning pe-5 ps-5 unapproval-button" data-bs-toggle="modal" data-bs-target="#xu_ly_process_DV" data-toggle="tooltip" data-placement="top" title="<%= lib_translate("Khong_dong_y")%>"
+          data-id="" 
+          data-content="" 
+          data-id-dhandle="" 
+          data-deadline="">
+          <%= lib_translate("Khong_dong_y") %>
+        </button>
+      </div>
+    </form>
+    </div>
+  </div>
+</div>
+<!-------- form xu ly user-------->
+<div class="modal fade" id="xu_ly_user_assign">
+  <div class="modal-dialog" style="min-width: 90%;">
+    <div class="modal-content">
+      <div class="position-absolute top-0 end-0 mt-2 me-2 z-index-1">
+        <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="py-3 ps-4 pe-6">
+        <h4 class="mb-1" id="staticBackdropLabel"><%= lib_translate("Word_Processing")%></h4>
+      </div>
+     <%= form_tag mandocs_process_user_process_path, method: "POST",id:'form-user-process' do %>
+        <div class="modal-body modal-dialog-scrollable">
+          <div class="form-group mt-3">
+              <label for="" class="form-label fw-bold"><%= lib_translate("Opinion_of_department") %></label>
+              <textarea style="min-height: 100px;" class="form-control" id="content_department" style="" placeholder="<%= lib_translate("Opinion_of_department") %>" disabled ></textarea>
+          </div>
+          <div class="form-group">
+            <input class="mandoc_id_uhandle_user d-none" id="id_uhandle_user" name="id_uhandle" hidden/>
+            <input class="mandoc_id_uhandle_user d-none" id="mandoc_id" name="mandoc_id" hidden/>
+            <input class="user_assign_handle d-none" id="assign_name" name="assign_name" hidden/>
+            <label for="" class="form-label fw-bold"><%= lib_translate("Staff's_opinion") %>:</label>
+            <textarea style="min-height: 100px;" class="form-control" id="contents_user" name="contents" style="" placeholder="<%= lib_translate("Staff's_opinion") %>" ></textarea>
+          </div>
+
+          <div class="mb-3 mt-3 d-none">
+            <div id="collapse-control" class="collapse-control bg-300" onclick="clickCollapse(this)" data-bs-toggle="collapse" data-bs-target="#collapse-content-editer-4">
+              <span class="fw-semi-bold form-label" ><%= lib_translate("Content")%></span>
+              <i id="collapse-icon" style="font-size: 20px;pointer-events: none;transition: 200ms ease-in;rotate: -90deg" class="fas fa-chevron-circle-left"></i>
+            </div>
+            <div class="collapse show" id="collapse-content-editer-4">
+              <textarea class="form-control" type="text" name="user_process_mandoc_content" id="user_process_mandoc_content" disabled></textarea>
+            </div>
+          </div>
+
+          <div class="form-group mt-3" style=" background: var(--falcon-avatar-status-border-color);padding: 20px;border-radius: 20px;">
+            <%# Upload media view %>
+            <div class="row mt-3">
+              <div class="collapse show" id="add-file-medias_mandocsfile">
+                <div class="card">
+                  <div class="card-header">
+                    <h5 class="mb-0"><%= lib_translate('Attached_files')%><b class="text-danger">*</b></h5>
+                  </div>
+                  <div class="card-body bg-light" id="upload_file_mandocfile_user"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><%= lib_translate("Cancel")%></button>
+          <button type="button" id="user_pb_handle" class="handle_file_btn btn btn-primary" onclick="conFirmHandle()"><%= lib_translate("Handle_LD")%></button>
+        </div>  
+      <% end %>  
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="tooltippopovers" tabindex="-1" aria-labelledby="tooltippopoversLabel" aria-hidden="true">
+  <div class="modal-dialog mt-6" role="document">
+    <div class="modal-content border-0">
+      <div class="position-absolute top-0 end-0 mt-2 me-2 z-index-1">
+        <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div class="bg-light rounded-top-lg py-3 ps-4 pe-6">
+          <h4 class="mb-1" id="tooltippopoversLabel">Xác nhận đã xử lý văn bản</h4>
+        </div>
+        <div class="p-4 pb-0">
+          <div class="row">
+            <div class="col">
+              Văn bản sẽ được chuyển cho:<b id="inner_assign_handle" style="color: red"></b> xử lý
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><%= lib_translate("Cancel")%></button>
+          <button type="button" id="user_xn_handle" class="btn btn-primary handle_btn"><%= lib_translate("Xác nhận")%></button>
+        </div>  
+    </div>
+  </div>
+</div>
+<!--form xử lý -->
+<div class="modal fade" id="xu_ly_process_DV" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" data-bs-focus="false" style=" background: rgba(0, 0, 0, 0.84); overflow-y: scroll;">
+  <div class="modal-dialog" style="max-width: 70%; width: 100%; height: 100%; display: flex; align-items: center;">
+    <div class="modal-content ">
+      <div class="modal-header d-flex justify-content-center ">
+        <h5 class="modal-title fw-bold fs-3" id="exampleModalLabel"><%= lib_translate("Word_Processing")  %></h5>
+      </div> 
+      <%= form_tag mandocs_process_assign_users_path, method: "POST", id: 'form_assign_user' do %>
+        <div class="modal-body">
+        <div class="form-group" >
+        <div class="form-control" style="border-radius: 20px; min-height:150px;" hidden>
+        <input class="form-control" type="text" id="user_id_assign" name="check"  hidden/>
+        <input class="mandoc_id_assign" id="mandoc_id" name="mandoc_id" hidden/>
+        <input class="mandoc_deadline" id="mandoc_deadline" name="mandoc_deadline" hidden/>
+        <input class="id_dhandle_dv" id="id_dhandle_dv" name="id_dhandle_dv" hidden/>
+        </div>
+        </div>
+        <div class="form-group mt-3" style="border-radius: 20px; min-height:150px;">
+              <label for="" class="form-label fw-bold"><%= lib_translate("Opinion_of_department") %></label>
+              <textarea style="min-height: 100px;" class="form-control" id="content_bgd" style="" placeholder="<%= lib_translate("Opinion_of_department")  %>" disabled></textarea>
+        </div>
+        <h5 class="mt-4"><%= lib_translate("Processing_assignment")  %>: </h5>
+        <div class="table-responsive scrollbar" style="max-height: 400px; background: var(--falcon-avatar-status-border-color);">
+          <div class="d-flex justify-content-end">
+            <button class="btn btn-info mb-2" type="button" id="btn_add_all_staff"><%= lib_translate("Choose_all_staff_handle")  %></button>
+            <button class="btn btn-primary mb-2  ms-3" type="button" id="btn_add_staff"><%= lib_translate("Choose_staff_handle")  %></button>
+          </div>
+          <table class="table table-bordered fs--1 mb-0 table-hover " >
+            <thead class="bg-200 text-900">
+            <tr>
+                <th class="align-middle no-sort"><%= lib_translate("Staff") %></th>
+                <th class="align-middle no-sort">
+                  <%= lib_translate("Permission_process") %>
+                </th>
+                <th class="align-middle no-sort"><%= lib_translate("Deadline_process") %></th> 
+                <th class="align-middle no-sort"><%= lib_translate("Content_process") %></th> 
+                <th class="align-middle no-sort" style="width: 7%; text-align: center;"></th> 
+            </tr>
+            </thead>
+            <tbody class="table-assign-users-tbody" id="table_show_user_chosse">
+            </tbody>
+          </table>
+        </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><%= lib_translate("Cancel")%></button> 
+          <button type="button" class="btn btn-primary handle_btn" id="btn-submit-assign-user" ><%= lib_translate("Save")%></button> 
+
+        </div>  
+      <% end %>  
+    </div>
+  </div>
+</div>
+
+<!-- Modal xác nhận phân tất cả nhân sự xử lý -->
+<div class="modal modal-lg fade" tabindex="-1" id="modal_chosses_all_staff" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style=" background: rgba(0, 0, 0, 0.84); overflow-y: scroll;"  data-bs-focus="false">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><%= lib_translate("Xac_nhan")%></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p><%= lib_translate("Ban_co_dong_y_phan_xu_li_cho_tat_ca_nhan_su")%></p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" type="button" data-bs-dismiss="modal"><%= lib_translate("Close")%></button>
+        <button class="btn btn-primary" id="btn_save_all_staff_chosses" type="button" data-bs-dismiss="modal"><%= lib_translate("Xac_nhan")%></button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal chọn nhân sự xử lý -->
+<div class="modal modal-lg fade" id="modal_chosses_staff" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style=" background: rgba(0, 0, 0, 0.84); overflow-y: scroll;"  data-bs-focus="false">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><%= lib_translate("Choose_staff_handle")%></h5>
+        <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="form_chosses_user">
+          <label for="select_chosses_staff"><%= lib_translate("Staff")%></label>
+          <select class="form-select selectpicker" id="select_chosses_staff">
+            <% @users.each do |user| %> 
+            <% 
+            positionjobUser = ""
+            work_user = Work.joins(:positionjob).where("works.user_id = #{user.id}").where.not("positionjobs.department_id = #{@department_leader_id_handel&.to_i}").last || Work.where(user_id: user.id).last
+              if !work_user.nil?
+                positionjobU = Positionjob.where(id: work_user.positionjob_id).last
+                if !positionjobU.nil?
+                  positionjobUser = positionjobU.name
+                end
+              end
+            %>
+              <option value="<%= user.id %>"><b><%= user.last_name %> <%= user.first_name %></b> (<span style="font-style: italic;"><%= positionjobUser%></span>)</option>
+            <%end%>
+          </select>
+          <label class="mt-3" for="select_chosses_staff"><%= lib_translate("Permission_process")%></label>
+          <div class="d-flex">
+            <div class="">
+              <input class="submit-get form-check-input" id="To_know_chosses" type="radio" name="srole_chosses" value="DEBIET" checked=""/>
+              <label class="form-check-label m-0" for="To_know_chosses"><%= lib_translate("To_know") %></label>
+            </div>
+            <div class=" ms-3">
+              <input class="submit-get radio-receive form-check-input" id="Receive_chosses" type="radio" name="srole_chosses" value="XULY" />
+              <label class="form-check-label m-0" for="Receive_chosses"><%= lib_translate("Receive") %></label>
+            </div>
+            <div class=" ms-3">
+              <input class="submit-get form-check-input" id="PHOIHOPXL_chosses" type="radio" name="srole_chosses" value="PHOIHOPXL" />
+              <label class="form-check-label m-0" for="PHOIHOPXL_chosses"><%= lib_translate("PHOIHOPXL") %></label>
+            </div>
+          </div>
+          <label class="mt-3" for="select_chosses_staff"><%= lib_translate("Deadline_process")%></label>
+          <div class="form-group">
+            <div id="datepicker-container" class="datepicker-container" > 
+              <span style="position: relative;" class="outline-element-container"> 
+              <input id="dt_issued_date_dealine" type="text" name="deadline_chosses" value="<%=Time.now.strftime("%d/%m/%Y")%>" class="form-control openemr-datepicker input-textbox outline-element incorrect" objtype="7" maxlength="10" name="action_element" aria-label="Select Date"> 
+              <span class="correct-incorrect-icon"> </span>
+              </span>
+              <div id="datepicker" ></div>
+            </div>
+          </div>
+          <label class="mt-3" for="select_chosses_staff"><%= lib_translate("Content_process")%></label>
+          <textarea id="content_process_chosses" class="form-control" name="content"></textarea>
+        </form>
+      </div>
+      <div class="modal-footer" style="border: unset;">
+        <button class="btn btn-secondary" type="button" data-bs-dismiss="modal"><%= lib_translate("Close")%></button>
+        <button class="btn btn-primary" id="btn_save_staff_chosses" type="button" data-bs-dismiss="modal"><%= lib_translate("Xử ly")%></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="modal-release-mandoc" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style=" background: rgba(0, 0, 0, 0.84); overflow-y: scroll;" data-bs-focus="false">
+  <div class="modal-dialog" style="max-width: 80%; width: 100%; display: flex;">
+    <div class="modal-content p-3" style=" background: var(--falcon-avatar-status-border-color);">
+      <div class="position-absolute top-0 end-0 mt-2 me-2 z-index-1">
+        <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="py-3 ps-4 pe-6">
+        <h3 class="mb-1" id="staticBackdropLabel"><%= lib_translate("Ban_hanh_VB_VT")%></h3>
+      </div>
+      <div class="row choice-wrap" style="width: 60%; margin: 0 auto; justify-content: space-evenly;">                                                          
+        <button onclick="clickRelease()" type="submit" style="height: 70px" class="col-3 btn btn-primary"><%=lib_translate('Xac_nhan_ban_hanh')%></button>                                                            
+        <button type="submit" onclick="clickSaveRelease()" style="height: 70px" class="col-3 btn btn-success assign-button"><%=lib_translate('Save_not_issued')%></button>
+        <button type="submit" onclick="openFormAssign(this)" data-mandoc-id="0" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="modal-id-to-open" data-fa-transform="shrink-3"  style="height: 70px" class="col-3 btn btn-warning assign-button"><%=lib_translate('Khong_ban_hanh')%></button>
+      </div>
+      <%= form_for "", :url=> mandocs_release_docs_path , html: {method: :post, id:"form_release_mandoc" } do |f| %>
+        <input class="d-none" name="mandoc_id" value="">
+        <input value="outgoing" class="d-none" name="release_mandoc_type">
+        <div class="error_release" style="color: red;"></div>
+        <div class="mt-3">
+          <%= f.label :number_book, lib_translate('Outgoing_number') ,class:'fw-semi-bold m-0'%> <span class="red">*</span>
+          <%= f.text_field :sno, class: 'form-control', id:'release_sno' , name:'release_sno' %>
+        </div>
+        <%# Loại văn bản  %>
+        <div class="mt-3">
+          <%= f.label :stype, lib_translate('Mandoc_Type') ,class:'fw-semi-bold m-0'%> 
+          <div class="stype_mandoc_relase" style="border: 1px solid #d8e2ef;border-radius: 4px;padding: 7px;"></div>
+        </div>
+
+        <!-- Số/Ký hiệu -->
+        <div class="mt-3">
+          <%= f.label :ssymbol, lib_translate("Sno_book") ,class:'fw-semi-bold m-0'%> <span class="red">*</span>
+          <%= f.text_field :ssymbol, class: 'form-control' , name:'release_symbol'%>
+        </div>
+        <!--Ngày ban hành văn bản-->
+        <div class="mt-3">
+            <%= f.label :received_at, lib_translate("Ngay_ban_hanh"),class:'fw-semi-bold m-0' %> 
+          </div>
+          <div id="datepicker-container" class="datepicker-container pe-3">
+            <span style="position: relative;" class="outline-element-container"> 
+              <input type="text" name="received_at"  value="<%=Time.now.strftime('%d/%m/%Y')%>" class="form-control datepicker openemr-datepicker input-textbox outline-element incorrect" objtype="7" name="action_element" objindex=""  aria-label="Select Date"> 
+              <span class="correct-incorrect-icon"> </span>
+            </span>
+          <div id="datepicker"></div>
+        </div>
+        <!--Ngày hiệu lực văn bản-->
+        <div class="mt-3">
+            <%= f.label :effective_date, lib_translate("Documents_date"),class:'fw-semi-bold m-0' %> 
+          </div>
+          <div id="datepicker-container" class="datepicker-container pe-3">
+            <span style="position: relative;" class="outline-element-container"> 
+              <input type="text" name="effective_date"  value="<%=Time.now.strftime('%d/%m/%Y')%>" class="form-control datepicker openemr-datepicker input-textbox outline-element incorrect" objtype="7" name="action_element" objindex=""  aria-label="Select Date"> 
+              <span class="correct-incorrect-icon"> </span>
+            </span>
+          <div id="datepicker"></div>
+        </div>
+        <!-- Chọn phòng ban/đơn vị -->
+        <div class="mt-3" id="div_choose_release_department">
+          <%= f.label :ssymbol, lib_translate("Chọn đơn vị nhận email") ,class:'fw-semi-bold m-0'%> 
+          <select class="form-select selectpicker" id="select_release_department" multiple="multiple" size="1" name="select_release_department[]" data-options='{"removeItemButton":true,"placeholder":true}'>
+            <option value="all">Tất cả phòng ban <%= @organization_name != "" ? "[#{@organization_name}]" : "" %></option>
+            <% @departments.each do |department| %>
+              <option value="<%= department.id %>"><%= department.name %></option>
+            <% end %>
+          </select>
+        </div>
+        <!-- Chọn nhân sự -->
+        <div class="mt-3">
+          <%= f.label :ssymbol, lib_translate("Chọn nhân sự nhận email") ,class:'fw-semi-bold m-0'%> 
+          <select class="form-select selectpicker" multiple="multiple" size="1" id="select_release_staff" name="select_release_staff[]" data-options='{"removeItemButton":true,"placeholder":true}'>
+            <option value="all">Tất cả nhân sự <%= @organization_name != "" ? "[#{@organization_name}]" : "" %></option>
+            <% @list_users_uorg.each do |user| 
+                @name_department = ""
+                @job_name = ""
+                works = user.works
+                works.each do |work|
+                    if !work.positionjob.nil? && !work.positionjob.department.nil?
+                      @name_department = work.positionjob.department.name
+                      @job_name = work.positionjob.name
+                    end
+                end
+            %>
+              <option value="<%= user.id %>"><%= user.last_name %> <%= user.first_name %> <%= @name_department != "" ? "- [#{@name_department}]" : "" %></option>
+            <% end %>
+          </select>
+        </div>
+
+        <!-- Soạn thảo nội dung email -->
+        <div class="mt-3" style="background: var(--falcon-soft-primary); border-radius: 5px;">
+          <a class="nav-link dropdown-indicator" id="compose_email_content_collapse" href="#compose_email_content" role="button" data-bs-toggle="collapse"  aria-expanded="false" aria-controls="compose_email_content">
+            <div class="p-2 d-flex align-items-center"><span class="nav-link-icon"></span><span class="nav-link-text ps-1 text-600"><%= lib_translate("Compose_email_content")  %> </span>
+            </div>
+          </a>
+          <div class="p-3 pt-0 pb-0 collapse show" id="compose_email_content">
+            <div class="mt-2">
+              <% 
+                name_department = ""
+                works = @current_user.works.order(created_at: :desc)
+                works.each do |work|
+                    if !work&.positionjob.nil? && !work&.positionjob&.department.nil?
+                      name_department = work&.positionjob&.department&.name
+                    end
+                end
+              %>
+              <label for="subject_email"  style="font-size: 1rem" class="mb-0"><%= lib_translate("Gửi từ") %>: </label>
+              <select class="form-select selectpicker" name="department_send_email" id="department_send_email">
+                <option value="Hệ Thống Văn Bản ERP">Hệ Thống Văn Bản ERP</option>
+                <% @departments.each do |depart| %>
+                  <option value="<%= depart.name %>" <%= name_department.include?(depart.name) ? "selected" : "" %>><%= depart.name %></option>
+                <% end %>
+              </select>
+            </div>
+            <div class="mt-3"> 
+              <label for="subject_email"  style="font-size: 1rem" class="mb-0"><%= lib_translate("Subject_email") %>:</label>
+              <input type="text" class="form-control" id="subject_email" name="subject_email">
+            </div>
+            <div class="mt-3 pb-3"> 
+              <label for="content_email"  style="font-size: 1rem" class="mb-0"><%= lib_translate("Content_email") %>:</label>
+              <textarea name="content_email" id="content_email"></textarea>
+            </div>
+          </div>
+        </div>
+        <%# Upload media view %>
+        <div class="mt-3">
+          <h5 ><%= lib_translate('Attached_files')%> <b class="text-danger">*</b></h5>
+          <div id="medias-mandoc-release"></div>
+        </div>
+        <div class="mt-3 row " style="display: flex; justify-content: space-evenly;">
+          <button type="button" id="vt_ban_hanh" class="handle_file_btn btn btn-primary col-3"><%= lib_translate("Ban_Hanh")%></button>
+          <button class="btn btn-warning col-3" onclick="backOnFormRelease()" type="button"> <%=lib_translate("Cancel")%> </button>
+        </div>
+      <%end%>
+      <%= form_for "", :url=> mandocs_save_release_docs_path , html: {method: :post, id:"form_save_release_mandoc"} do |f| %>
+        <input class="d-none" name="mandoc_id" value="">
+        <input value="outgoing" class="d-none" name="release_mandoc_type">
+        <div class="error_release" style="color: red;"></div>
+        <div class="mt-3">
+          <%= f.label :number_book, lib_translate('Outgoing_number') ,class:'fw-semi-bold m-0'%> <span class="red">*</span>
+          <%= f.text_field :sno, class: 'form-control', id:'release_sno' , name:'release_sno' %>
+        </div>
+        <%# Loại văn bản  %>
+        <div class="mt-3">
+          <%= f.label :stype, lib_translate('Mandoc_Type') ,class:'fw-semi-bold m-0'%> 
+          <div class="stype_mandoc_relase" style="border: 1px solid #d8e2ef;border-radius: 4px;padding: 7px;"></div>
+        </div>
+
+        <!-- Số/Ký hiệu -->
+        <div class="mt-3">
+          <%= f.label :ssymbol, lib_translate("Sno_book") ,class:'fw-semi-bold m-0'%> <span class="red">*</span>
+          <%= f.text_field :ssymbol, class: 'form-control' , name:'release_symbol'%>
+        </div>
+
+        <%# Upload media view %>
+        <div class="mt-3">
+          <h5 ><%= lib_translate('Attached_files')%> <b class="text-danger">*</b></h5>
+          <div id="medias-mandoc-save-release"></div>
+        </div>
+
+        <div class="mt-3 row " style="display: flex; justify-content: space-evenly;">
+          <button type="button" id="save_no_release" class="btn btn-primary col-3"><%= lib_translate("Save_mandoc")%></button>
+          <button class="btn btn-warning col-3" onclick="backOnFormRelease()" type="button"> <%=lib_translate("Cancel")%> </button>
+        </div>
+      <%end%>
+    </div>
+  </div>
+</div>
+
+<%# Preview %>
+<div class="modal modal-lg fade" id="preview-modal" data-bs-keyboard="false" data-bs-backdrop="static">
+  <div class="modal-dialog" style="min-width: 90vw;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="preview-title"></h5>
+        <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div style="padding:20px">
+        <div id="preview-contents" class="modal-dialog-scrollable scrollbar mt-0 text-black d-none" style="border: 1px solid #d2d2d299;border-radius: 5px;max-height: 48vh;min-height: 25vh;"></div>
+        <div id="preview-files"></div>
+      </div>
+      <div class="modal-footer" style="border: unset;">
+        <button class="btn btn-secondary" type="button" data-bs-dismiss="modal"><%= lib_translate("Close")%></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%# Modal add comment văn thư %>
+
+<div class="modal fade" id="VT_add_comment_modal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 90%">
+    <div class="modal-content position-relative">
+      <div class="position-absolute top-0 end-0 mt-2 me-2 z-index-1">
+        <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div class="rounded-top-lg py-3 ps-4 pe-6 bg-light">
+          <h4 class="mb-1" id="modalExampleDemoLabel">Xem ghi chú </h4>
+        </div>
+        <div class="pb-0">
+        <%= form_for "", :url=> mandocs_vt_add_comment_path, html: {method: :post, id:"form_VT_add_comment", class:"mb-2 p-3" } do |f| %>
+            <input name="mandoc_id" class="d-none" id="mandoc_id_vt_add_comment">
+            <div class="form-group mt-3">
+                <label for="" class="form-label fw-bold">Thêm nội dung ghi chú: </label>
+                <textarea style="min-height: 150px;" class="form-control" name="comment_VT" style="" placeholder="Nhập nội dung ghi chú" ></textarea>
+            </div>
+            <div class="form-group mt-3">
+                <label for="" class="form-label fw-bold">Lịch sử ghi chú </label>
+                <div id="Mandoc_comment" style="max-height: 150px;" class="scrollbar" ></div>
+            </div>
+            
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Đóng</button>
+        <button onclick="onclickVTAddComment()" class="btn btn-primary" id="btn_add_VT_comment" type="button">Lưu </button>
+      </div>
+      <%end%>
+    </div>
+  </div>
+</div>
+
+<%# form remote get option data %>
+<%= form_tag url_for(controller: 'mandocbook', action: 'get_all'),method:'GET',id:'get_mandocbook_form',remote:true,authenticity_token: true do %>
+<%  end %>
+<%= form_tag url_for(controller: 'mandoctype', action: 'get_all'),method:'GET',id:'get_mandoctype_form',remote:true,authenticity_token: true do %>
+<%  end %>
+<%= form_tag url_for(controller: 'mandocpriority', action: 'get_all'),method:'GET',id:'get_mandocpriority_form',remote:true,authenticity_token: true do %>
+<%  end %>
+<%= form_tag 'find_one',controller: 'mandocs',method:'GET',id:'get_mandoc_form',remote:true,authenticity_token: true do %>
+  <input type="text" name="mandoc_id" hidden>
+  <input type="text" name="func_name" hidden>
+  <input type="text" name="fullname" hidden>
+<%  end %>
+
+<%= form_tag 'export',controller: 'mandocs',method:'GET',id:'export-pdf-form' do %>
+  <input type="text" name="mandoc_id" hidden>
+<%  end %>
+
+<%= form_tag url_for(controller: 'mandocs', action: 'get_mandocs_status_out'),method:'POST',id:'get_mandocs_status_out',remote:true,authenticity_token: true do %>
+  <button id="submit_form_mandocs_status_out" style="display:none;" type="submit"> </button>
+<%  end %>
+
+<%= form_tag url_for(controller: 'mandocs', action: 'get_list_users_with_depatment'),method:'POST',id:'get_list_users_with_depatment',remote:true,authenticity_token: true do %>
+  <input type="text" id="id_release_department" name="select_release_department" hidden>
+<%  end %>
+
+<%= form_tag url_for(controller: 'mandocs', action: 'check_duplicate_symboll'),method:'POST',id:'check_duplicate_symboll',remote:true,authenticity_token: true do %>
+  <input value="outgoing" type="hidden" name="check_mandoc_type">
+  <input type="hidden" id="check_mandoc_stype" name="release_mandoc_stype">
+  <input type="hidden" id="check_symbol_release" name="str_symbol_release">
+<%  end %>
+
+<%= form_tag url_for(controller: 'mandocs', action: 'outgoing_change_read'),method:'POST',id:'outgoing_change_read',remote:true,authenticity_token: true do %>
+  <input type="hidden" id="id_mandoc_change_read" name="id_mandoc">
+<%  end %>
+
+<!-- add docs -->
+<script>
+  $(document).ready(function() {
+    $('.update-mandocuhandle-out').on('click', function() {
+      var mandocuhandleId = $(this).data('uhandle-id');
+      $.ajax({
+        url: '<%=root_path%>mandocs/' + mandocuhandleId + '/update_read',
+        method: 'PUT',
+        data: { mandocuhandle: { sread: 'CO' } }
+      });
+    });
+  });
+</script>
+<script>
+  let root_path_mandoc="<%= root_path%>";
+  let action_del_mandocs ="<%= mandocs_del_after_handle_path %>";
+  let mandocs_get_department_path = "<%=mandocs_get_department_path%>";
+  let mandocs_outgoing_update_path ="<%= mandocs_outgoing_update_path %>";
+  let mandocs_outgoing_edit_path ="<%= mandocs_outgoing_edit_path %>";
+  let mandocs_edit_handle_path ="<%= mandocs_outgoing_edit_handle_path %>";
+  let mess_del_man= "<%=lib_translate("Are_you_sure_to_delete_this_bank")%>";
+  let action_send_email_test ="<%= mandocs_send_email_test_path %>";
+  let action_upload_file_tinymce ="<%= released_mandocs_upload_file_tinymce_path %>";
+  let mandocfile_upload_mediafile= "<%= url_for(action: :mandocfile_upload_mediafile)%>";
+  let action_delete_outgoingfile = '<%= url_for(action: :delete_mandocfile_outgoing)%>';
+  let href_mandocfile_delete = '<%= url_for(action: :delete_mandocfile_outgoing)%>';
+  let check_duplicate_symboll = '<%= url_for(controller: "mandocs", action: :check_duplicate_symboll)%>';
+  let mandocs_outgoing_index_path = '<%= url_for(action: "outgoing_index", controller: 'mandocs')%>';
+  let mess_del= "<%= lib_translate('Are_you_sure_to_delete_this_mandocfile_of')%>";
+  let blank_created_by= "<%= lib_translate('blank_created_by')%>";
+  let blank_signed_by= "<%= lib_translate('blank_signed_by')%>";
+  let blank_ssymbol= "<%= lib_translate('blank_ssymbol')%>";
+  let blank_sno= "<%= lib_translate('blank_sno')%>";
+  let blank_contents= "Vui lòng nhập nội dung";
+  let time_now= "<%=Time.now.strftime('%d/%m/%Y')%>";
+  let count_mandoc =  "<%=@count_man_out%>";
+  var media_trans = {
+    upload_guide_1:'<%= lib_translate("upload_guide_1") %>',
+    upload_guide_2:'<%= lib_translate("upload_guide_2") %>',
+    upload_guide_3:'<%= lib_translate("upload_guide_3") %>',
+    confirm_delete:'<%= lib_translate("confirm_delete") %>',
+    confirm_delete_all:'<%= lib_translate("confirm_delete_all") %>',
+    select_files:'<%= lib_translate("select_files") %>',
+    cancel:'<%= lib_translate("Cancel") %>',
+    confirm:'<%= lib_translate("Confirm") %>',
+    message:'<%= lib_translate("Message") %>',
+    remove:'<%= lib_translate("Remove") %>',
+    upload:'<%= lib_translate("Upload") %>',
+    error:'<%= lib_translate("error") %>',
+    try_again:'<%= lib_translate("try_again") %>',
+    file_name:'<%= lib_translate("File_name") %>',
+    create_date:'<%= lib_translate("Create_date") %>',
+    created_by:'<%= lib_translate("Created_by") %>'
+  }
+  let Choose_date = "<%= lib_translate("Choose_date") %>";
+  let closeText = "<%= lib_translate("closeText") %>";
+  let prevText = "<%= lib_translate("prevText") %>";
+  let nextText = "<%= lib_translate("nextText") %>";
+  let currentText = "<%= lib_translate("currentText") %>";
+  let Jan = "<%= lib_translate("Jan") %>";
+  let Feb = "<%= lib_translate("Feb") %>";
+  let Mar = "<%= lib_translate("Mar") %>";
+  let Apr = "<%= lib_translate("Apr") %>";
+  let May = "<%= lib_translate("May") %>";
+  let Jun = "<%= lib_translate("Jun") %>";
+  let Jul = "<%= lib_translate("Jul") %>";
+  let Aug = "<%= lib_translate("Aug") %>";
+  let Sep = "<%= lib_translate("Sep") %>";
+  let Oct = "<%= lib_translate("Oct") %>";
+  let Nov = "<%= lib_translate("Nov") %>";
+  let Dec = "<%= lib_translate("Dec") %>";
+  let Mon = "<%= lib_translate("Mon") %>";
+  let Tue = "<%= lib_translate("Tue") %>";
+  let Wed = "<%= lib_translate("Wed") %>";
+  let Thu = "<%= lib_translate("Thu") %>";
+  let Fri = "<%= lib_translate("Fri") %>";
+  let Sat = "<%= lib_translate("Sat") %>";
+  let Sun = "<%= lib_translate("Sun") %>";
+  let PHOIHOPXL = "<%= lib_translate("PHOIHOPXL") %>";
+  let XULY = "<%= lib_translate("Receive") %>";
+  let DEBIET = "<%= lib_translate("To_know") %>";
+  let Time_Now = "<%=Time.now.strftime("%d/%m/%Y")%>";
+  var dataUsers = <%= 
+  data = []
+  @users.each do |user|
+    positionjobUser = ""
+    work_user = Work.where(user_id: user.id).last
+    if !work_user.nil?
+      positionjobU = Positionjob.where(id: work_user.positionjob_id).first
+      if !positionjobU.nil?
+        positionjobUser = positionjobU.name
+      end
+    end
+    data.append({
+      'users' => user,
+      'positionjob' => positionjobUser
+    })
+  end
+  data.to_json.html_safe
+  %>;
+  let datepicker_buttonImage = "<%= image_path('icon-calender-datepicker.png') %>";
+
+  function clickDeleteMandocPending(id){
+    let href = "<%= url_for(action: :destroy)%>";
+    href += `?manid=${id}`;
+
+    let html = `<%= lib_translate("Are_you_sure_to_delete_this_mandoc_pending")%>`
+    openConfirmDialog(html,(result )=>{
+    if(result){
+        doClick(href,'delete')
+    }
+    });
+
+  }
+
+  function openFormAddMandocPending() {
+    document.getElementById("btn_add_doc_pending").style.display = "block";
+    document.getElementById("id_mandoc").value = "";
+    document.getElementById("sno").value = "";
+    document.getElementById("ssymbol").value = "";
+    document.getElementById("notes").value = "";
+    document.getElementById("slink").value = "";
+    document.getElementById("number_pages").value = "";
+    document.getElementById("created_by").value = "<%=@user.last_name + " " + @user.first_name%>";
+    $('#signed_by').prop("selectedIndex", 0);
+    var type_book = "VAN-BAN-DI";
+    document.getElementById("type_book").value = type_book;
+    $("#type_book").trigger("change");
+    tinymce.get("contents").setContent(''); 
+  }
+</script>
+<script>
+
+// datepick local
+  <%= if session[:lang] == "vi"
+    'flatpickr.localize(flatpickr.l10ns.vn);'.html_safe
+  end
+  %>
+  <%list_handle_file = [] 
+  if !@list_file.nil?
+      @list_file.each do |y|
+        list_handle_file.push({
+          id: y.id,
+          relative_id: y.mandoc_id,
+          file_name: y.mediafile.file_name,
+          created_at: y.created_at.strftime("%d/%m/%Y"),
+          file_owner: y.mediafile.owner
+        })
+    end
+  end
+  %>
+</script>
+
+<%= javascript_include_tag '/assets/myjs/options_mandoc_table.js' %>

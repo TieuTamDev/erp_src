@@ -1,0 +1,38 @@
+<style>
+	table th {
+		white-space: normal !important;
+	}
+	table td {
+		white-space: normal !important;
+	}
+	#loading_screen {
+		position: fixed;
+		z-index: 9999;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background: rgb(0 0 0 / 51%);
+		display: none;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+	}
+</style>
+
+<div style="display: none" id="loading_screen">
+	<div class="spinner_handle"></div>
+	<p style="color: var(--falcon-avatar-status-border-color);"><%= lib_translate("Inprogress_handle")  %>...</p>
+</div>
+
+<div class="bmtu_header_dashboard">
+	<h3 class="mt-2 overview_text"><%= lib_translate("List notifies")  %></h3>
+</div>
+
+<div class="card mb-3">
+	<div class="card-body pt-0">
+		<div class="tab-content">
+			<%= render partial: 'notifies/partial/table_notification.html.erb', locals: { is_handle: false } %>
+		</div>
+	</div>
+</div>

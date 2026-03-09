@@ -1,0 +1,135 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "select2.min" %>
+<% end %>
+<% content_for :bottombody do %>
+  <%= javascript_include_tag 'select2.full.min' %>
+  <%= javascript_include_tag 'select2.min.js' %>
+  <%= javascript_include_tag '/assets/myjs/room_configuration.js' %>
+<% end %>
+<style>
+    #selectedUsers ul { padding-left:0; }
+    #selectedUsers .list-group-item { border:none; border-bottom:1px solid #eee; }
+    #selectedUsers .btn-remove-user { padding:0 .5em; }
+    .select2-container--default .select2-selection--single {
+        background-color: #fff;
+        border: 1px solid #ced4da;
+        border-radius: 0.375rem;
+        height: calc(2.25rem + 2px);
+        padding: 0.375rem 0.75rem;
+        font-size: 1rem;
+        line-height: 1.5;
+        box-shadow: inset 0 1px 2px rgba(0,0,0,0.075);
+        box-sizing: border-box;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 1.5;
+        padding-left: 0;
+        color: #212529;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 100%;
+        right: 10px;
+        top: 0;
+    }
+</style>
+<script>
+    let workshifts_get_all_users_path = "<%= workshifts_get_all_users_path %>";
+    let base_url = "<%= @ERP_PATH %>";
+</script>
+<div class="bmtu_header_dashboard">
+  <div class="card mb-3">
+    <div class="card-body pt-0">
+      <div class="tab-content">
+        <div class="row">
+          <div class="col">
+            <h3 class="mt-2 overview_text"><%= lib_translate("Cấu hình nhân viên vào phòng làm việc") %></h3>
+          </div>
+        </div>
+        <div class="tab-pane preview-tab-pane active" role="tabpanel">
+          <div class="table-responsive scrollbar">
+            <div class="d-flex justify-content-end mt-3 mb-3">
+              <input id="roomSearch" class="form-control form-control-sm w-auto" placeholder="Tìm phòng …">
+            </div>
+            <table id="roomTable" class="table table-bordered fs--1 mb-0 table-hover dataTable no-footer">
+              <thead class="bg-200 text-900">
+              <tr>
+                <th class="sort" data-sort="name" style="text-align: center; cursor: pointer;"><%= lib_translate("STT") %> </th>
+                <th class="sort" data-sort="start_time" style="text-align: center; cursor: pointer;"><%= lib_translate("Tên phòng") %></th>
+                <th class="sort" data-sort="end_time" style="text-align: center; cursor: pointer;"><%= lib_translate("Toà nhà") %></th>
+                <th class="sort" data-sort="checkin_start" style="text-align: center; cursor: pointer;"><%= lib_translate("Tầng") %></th>
+                <% if (is_access(session["user_id"], "WORKSHIFT-CONFIGURATION", "ADM")) %>
+                  <th class="no-sort" style="text-align: center"></th>
+                <% end %>
+              </tr>
+              </thead>
+              <tbody class="list">
+              <% @rooms.each_with_index  do |item, index| %>
+                <tr>
+                  <td class="text-center"><%= (index + 1) + (@page - 1) * @per_page %></td>
+                  <td style="white-space: nowrap;"><%= item[:name] %></td>
+                  <td style="text-align: center;min-width: 100px;"><%= item[:building] %></td>
+                  <td style="text-align: center;min-width: 100px;"><%= item[:location] %></td>
+                  <% if (is_access(session["user_id"], "WORKSHIFT-CONFIGURATION", "ADM")) %>
+                    <td style="text-align: center; min-width: 110px">
+                      <a style="cursor:pointer;" onclick="openModal('<%= item[:id] %>', '<%= item[:name] %>')" data-bs-toggle="modal" data-bs-target="#modal-rooms">
+                        <span class="text-primary fas fa-user-cog me-3"></span>
+                      </a>
+                    </td>
+                  <% end %>
+                </tr>
+              <% end %>
+              </tbody>
+            </table>
+            <nav aria-label="pagination" class="d-flex justify-content-center align-items-center flex-wrap gap-2">
+              <ul class="pagination justify-content-center pagination-sm mb-0">
+                <% 1.upto(@total_pages) do |p| %>
+                  <li class="page-item <%= 'active' if p == @page %>">
+                    <%= link_to p,
+                                workshifts_room_configuration_path(
+                                  page: p, per_page: @per_page, search: params[:search],
+                                  lang: session[:lang]
+                                ),
+                                class: 'page-link' %>
+                  </li>
+                <% end %>
+              </ul>
+              <select id="perPageSelect" class="form-select form-select-sm ms-2"
+                      style="width:auto">
+                <% [10,25,50].each do |opt| %>
+                  <option value="<%= opt %>" <%= 'selected' if opt == @per_page %>><%= opt %></option>
+                <% end %>
+              </select>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal configuration -->
+<div class="modal fade" id="modal-rooms" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><span id="modalRoomName"></span></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body d-flex gap-3 align-items-stretch" id="roomsContent">
+        <div class="col-md-6">
+          <label class="form-label fw-bold">Danh sách nhân viên thuộc phòng làm việc</label>
+          <div id="selectedUsers"></div>
+        </div>
+        <div class="col-md-6 pe-3">
+          <label class="form-label fw-bold">Thêm nhân viên</label>
+          <select id="usersSelect" class="form-select" style="width:100%"></select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-custom" data-bs-dismiss="modal">Đóng</button>
+        <button class="btn btn-primary px-4" type="button" id="btnSave"><%= lib_translate("Lưu") %></button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- End modal configuration -->

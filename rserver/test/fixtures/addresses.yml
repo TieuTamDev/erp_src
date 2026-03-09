@@ -1,0 +1,31 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  name: MyString
+  mediafile: one
+  country: MyString
+  province: MyString
+  city: MyString
+  district: MyString
+  ward: MyString
+  street: MyText
+  'no': MyString
+  stype: MyString
+  status: MyString
+  note: MyText
+
+two:
+  user: two
+  name: MyString
+  mediafile: two
+  country: MyString
+  province: MyString
+  city: MyString
+  district: MyString
+  ward: MyString
+  street: MyText
+  'no': MyString
+  stype: MyString
+  status: MyString
+  note: MyText

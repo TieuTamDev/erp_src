@@ -1,0 +1,17 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  file_name: MyString
+  file_type: MyString
+  file_size: MyString
+  owner: MyString
+  status: MyString
+  note: MyText
+
+two:
+  file_name: MyString
+  file_type: MyString
+  file_size: MyString
+  owner: MyString
+  status: MyString
+  note: MyText

@@ -1,0 +1,61 @@
+<div class="title mt-3">
+    <h4 class="mb-1" style="color: var(--falcon-btn-falcon-success-active-color);"><%= lib_translate("authority_&_responsibility") %></h4>
+    <h6 class="m-0" style="color: var(--falcon-badge-soft-secondary-color);"> <%= lib_translate("Work_career_recruitment") %></h6>
+</div>
+<hr class="mt-4 mb-3" style="width: 100%; height: 4px; background:  var(--falcon-badge-soft-secondary-background-color);">
+<div class="mb-3">
+  <div class="pt-0">
+    <div class="tab-content">
+      <table id="table_task" class="table table-bordered fs--1 mb-0 table-hover" style="margin-top: 0px !important; margin-bottom: 0px !important">
+          <thead class ="bg-200 text-900">
+              <tr>
+                  <th class="sort " data-sort="Name_stask" style="text-align: center;"><%= lib_translate("Work_name")  %></th>
+                  <th class="sort" data-sort="Scode_stask" style="text-align: center;"><%= lib_translate("Work_code")  %></th>
+                  <th class="sort" data-sort="Created_by_stask" style="text-align: center;"><%= lib_translate("Created_by")  %></th>
+                  <th class="sort" style="display:none;" data-sort="Desc_stask" style="text-align: center;"><%= lib_translate("Desc")  %></th>
+                  <th class="sort" data-sort="Status_stask" style="text-align: center;"><%= lib_translate("Status")  %></th>
+              </tr>
+          </thead>
+          <tbody class="list">
+
+            <% @works_stask.each do |works|
+                works.positionjob.responsibles.each do |re|
+                  %>
+
+                <tr>
+                  <td style="text-align: start;white-space: nowrap;" class="Name_stask ">
+                  <%= re.stask.name %>
+                  </td>
+                  <td style="text-align: center;white-space: nowrap;" class="Scode_stask">
+                    <%= re.stask.scode %>
+                  </td>
+                  <td style="text-align: center; white-space: nowrap;" class="Created_by_stask">
+                    <%= if User.where(id: re.stask.created_by).first.nil? 
+                        ""
+                      else   
+                        User.where(id: re.stask.created_by).first.last_name.capitalize.titleize + " " + User.where(id: re.stask.created_by).first.first_name.capitalize.titleize
+                      end 
+                    %>
+                  </td>
+
+                  <td style="display:none;" style="text-align: start; white-space: nowrap;" class="Desc_stask">
+                    <%= re.stask.desc %>
+                  </td>
+                  <td style="text-align: center;white-space: nowrap;" class="Status_stask">
+                    <%=if re.stask.status == "ACTIVE"
+                        lib_translate("ac_icon")
+                      else
+                        lib_translate("inac_icon")
+                      end%>
+                  </td>
+                </tr>
+              <%end%>
+
+            <%end %>
+              
+          </tbody>
+      </table>
+      
+    </div>
+  </div>
+</div>

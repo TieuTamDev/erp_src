@@ -1,0 +1,19 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  notify: one
+  user: one
+  username: MyString
+  isread: false
+  dtreceived: 
+  dtread: 2023-07-29 11:42:53
+  status: MyString
+
+two:
+  notify: two
+  user: two
+  username: MyString
+  isread: false
+  dtreceived: 
+  dtread: 2023-07-29 11:42:53
+  status: MyString

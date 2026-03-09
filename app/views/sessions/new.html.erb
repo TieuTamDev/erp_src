@@ -1,0 +1,137 @@
+<style>
+  .bg_login_bmtu {
+    background-image: url('<%= image_path('image_login_bg_capp.jpg') %>');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: left;
+  }
+  .img_login_staff {
+    width: 35%;
+  }
+
+   @media screen and (max-width: 470px) {
+    .img_login_staff {
+      width: 40%;
+    }
+   }
+   .red {
+    color: red;
+   }
+
+</style>
+  <!-- ===============================================-->
+  <!--    Main Content-->
+  <!-- ===============================================-->
+  <main class="main bg-style-bmtu" id="top">
+    <div class="container-fluid">
+      <div class="row min-vh-100 flex-center g-0">
+        <div class="col-lg-8 col-xxl-5 py-3  position-relative">
+          <img class="bg-auth-circle-shape top-0" style="right: -8.75rem; left: auto;" src="<%= image_path("bg-shape.png") %>" alt="" width="250">
+          <img class="bg-auth-circle-shape-2" src="<%= image_path("shape-1.png") %>" alt="" width="150"> 
+            <a class="d-flex flex-center">
+              <img class="img_login_staff" src="<%= image_path("/assets/image/logo.svg")  %>"/>
+              <img class="img_login_staff" src="<%= image_path("buhlogo.png") %>" />
+            </a>
+          <div class="card overflow-hidden z-index-1">
+            <div class="card-body p-0">
+              <div class="row g-0 h-100">
+                <div class="col-md-5 text-center bg_login_bmtu">
+                </div>
+                <div class="col-md-7 d-flex flex-center">
+                  <div class="p-3 p-md-3" style="width: 90%;">
+                    <div class="mb-3 d-flex justify-content-end">
+                      <select class="select_lang_home" id="select_lang" onchange="checkLanguage()" data-bs-toggle="tooltip" data-bs-placement="left" title="<%= lib_translate("Select_language")  %>" data-width="fit" style="border: none;border-radius: 50px;padding-left: 3px;width: auto; font-size: 13px;background: #d8e2ef;color: #2c7be5;cursor: pointer;">
+                        <option value='vi'><%= lib_translate("VI") %></option>
+                      <option value='en'><%= lib_translate("EN") %></option>
+                    </select>
+                    </div>
+                    <div class="flex-grow-1">
+                      <%= render partial: "shared/flash"%>
+                      <div class="row" style="text-align: center;">
+                          <h3 style="color: #dc973f;"><%= lib_translate("Login_To_Your_Account")%></h3>
+                      </div> 
+                      <%= form_tag login_path,method:'POST',remote:true,authenticity_token: true do %>
+                        <div class="mb-3">
+                          <label class="form-label" for="card-email"><%= lib_translate("Email_phone_id_username") %>:</label> 
+                          <input class="form-control" name="email_txt" type="text" id="user_email">
+                        </div>
+                        <div class="mb-3">
+                          <div class="d-flex justify-content-between">
+                            <label class="form-label" for="card-password"><%= lib_translate("Password") %>:</label> 
+                          </div>
+                          <div class="input-group" id="show_hide_password">
+                            <input class="form-control" name="password_txt" id="password_txt" style="border-radius: 0.25rem;" type="password"><div class="input-group-addon" style="position: absolute;z-index: 30;right: 4px; bottom: 6px;"> <a href=""><i id="icon_eye_capp" class="fa fa-eye-slash z-index" aria-hidden="true"></i></a>  </div>
+                          </div>
+                          <div class="red mb-0 pt-2" id="valid-login" role="alert" style="font-size: 0.8em;"></div>
+                        </div>
+                        <div class="row flex-between-center">
+                          <div class="col-auto">
+                            <div class="form-check mb-0">
+                              <input class="form-check-input" type="checkbox" id="card-checkbox" checked="checked" />
+                              <label class="form-check-label mb-0" for="card-checkbox"><%= lib_translate("Remember_Me")%></label>
+                            </div>
+                          </div> 
+                          <div class="col-auto"><%= link_to lib_translate("Forgot_password"), forgotpw_path(lang: session[:lang]), class: "fs--1 text-danger" %></div>
+                        </div>
+                        <div class="mb-3"> 
+                          <input type="submit" name="commit" value="Đăng nhập" class="btn btn-danger d-block w-100 mt-3" role="button" data-disable-with="Đăng nhập">
+                        </div>
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+ 
+<div class="modal fade" id="two-auth-modal" data-bs-keyboard="false" data-bs-backdrop="true" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document" style="display: flex; align-items: center; justify-content: center; min-height: calc(100% - 1rem);">
+    <div class="modal-content position-relative" style="width:80%">
+      <div class="position-absolute top-0 end-0 mt-2 me-2 z-1"></div>
+      <div class="modal-body p-0">
+        
+        <div class="rounded-top-3 py-3 pb-0 ps-4 pe-6 bg-body-tertiary">
+          <h4 style="font-weight:bold;" class="mb-1" id="modalExampleDemoLabel">Nhập mã xác thực</h4>
+        </div>
+        <%= form_tag "/", method: 'POST', id: "form-two-factor-auth", remote: true, authenticity_token: true do %>
+        <input class="d-none" name="token" id="token">
+        <div class="p-2 pb-1 ps-4 pe-4 d-flex">
+            <div class="input-container" style="width: 100%;height: 71px;padding: 10px;background: white;border-radius: 5px;overflow: hidden;justify-content: center;align-items: center;gap: 10px;display: inline-flex">
+            <% number = 6 %>
+            <% (1..number).each do |i| %>
+              <% next_input_id = (i == number) ? 'null' : "'digit#{i + 1}'" %>
+              <% prev_input_id = (i == 1) ? 'null' : "'digit#{i - 1}'" %>
+                    <input style="width: 100%;height: 3rem;padding: 10px;background: #F9F9F9;border-radius: 12px;border: 1px #95C3FF solid;flex-direction: column;justify-content: center;align-items: center;gap: 10px;display: inline-flex"
+                     class="text-center digit-input"
+                     type="text"
+                     maxlength="1"
+                     size="1"
+                     id="digit<%= i %>"
+                     oninput="validateNumberInput(event); handleInput(this, <%= next_input_id %>, <%= prev_input_id %>)"
+                     onkeydown="handleBackspace(event, <%= prev_input_id %>)"
+                     onpaste="handlePaste(event)">
+            <% end %>
+          </div>
+        </div>
+
+        <div class="red mb-0 p-1 pb-1 ps-4 pe-4" id="valid-two-auth" role="alert" style="font-size: 0.8em;"></div>
+        <div class="modal-footer p-2 pb-3 ps-4 pe-4 pt-1" style="border-top: 0px;">
+          <input type="submit" name="commit" value="Xác nhận" id="btn-login-twofa" class="btn btn-primary m-0 mb-1" style="width: 100%">
+        </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+  <!-- Lê Ngọc Huy -->
+  <%= javascript_include_tag '/assets/lib_hrm/jquery-3.2.1.slim.min.js', integrity: 'sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN', crossorigin: 'anonymous' %> 
+  <%= javascript_include_tag '/assets/lib_hrm/bootstrap.min.js', integrity: 'sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl', crossorigin: 'anonymous'%>
+  <%= javascript_include_tag '/assets/myjs/login.js' %>

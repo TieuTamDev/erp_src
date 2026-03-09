@@ -1,0 +1,13 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  holtype: one
+  imax: MyString
+  salary_rate: MyString
+  salias: MyString
+
+two:
+  holtype: two
+  imax: MyString
+  salary_rate: MyString
+  salias: MyString

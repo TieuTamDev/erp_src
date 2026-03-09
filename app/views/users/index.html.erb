@@ -1,0 +1,906 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "select2-bootstrap-5-theme.min" %>
+  <%= stylesheet_link_tag "select2.min" %>
+  <%= stylesheet_link_tag "prism-okaidia" %>
+  <%= stylesheet_link_tag 'jquery-ui.css' %>  
+  <%= stylesheet_link_tag '/assets/lib_hrm/font-open-sans.css' %> 
+  <%= stylesheet_link_tag '/assets/mystyle/user-index.css' %>
+  <%= javascript_include_tag 'jquery.js'%>
+  <%= javascript_include_tag 'jquery-ui.js'%>
+  <%= javascript_include_tag '/assets/myjs/time-display.js' %>
+  <%= javascript_include_tag 'prism' %>
+<% end %>
+
+<% content_for :bottombody do %>
+  <%= javascript_include_tag 'prism' %>
+  <%= render partial: "shared/selectVN"%>    
+  <%= render partial: "shared/mutilInput"%>   
+  <script>
+    //datepicker
+    $(function () {
+      $( ".datepicker" ).datetimepicker({
+        format: 'DD/MM/YYYY'
+      });
+    });
+  </script>
+    <%= javascript_include_tag 'select2.full.min'%>
+    <%= javascript_include_tag 'select2.min.js'%>
+    <%= javascript_include_tag '/assets/lib_hrm/popper.min.js'%>
+    <%# <%= javascript_include_tag '/assets/lib_hrm/bootstrap.min.js'%>
+    <%= javascript_include_tag '/assets/lib_hrm/moment-with-locales.js' %>
+    <%= javascript_include_tag '/assets/lib_hrm/bootstrap-datetimepicker.min.js' %>
+<% end %>
+
+<style>
+    .dataTables_wrapper {
+      margin-top: 0.5rem !important;
+    }
+</style>
+
+<%# LNQ.Thai Table like Base %>
+<div class="card mb-3">
+    <div class="card-body pt-0">
+        <div class="tab-content">
+            <div class="tab-pane preview-tab-pane active" role="tabpanel"aria-labelledby="tab-dom-5a3c857c-8deb-4307-af64-a62f27089443"id="dom-5a3c857c-8deb-4307-af64-a62f27089443">
+                <div id="User-List-Table" data-list='{"valueNames":["id","username","email","sid","insurance_no","gender","nationality","ethnic","religion","marriage","education","academicrank","status"],"page":<%= session[:number_paging_table] %>,"pagination":true}'>
+                    <div >
+                        <div class="row ">
+                            <div class="col-xl-5">
+                                <div class="mt-3">                                    
+                                        <h3 ><%= lib_translate("List_of_staff") %></h3>                                     
+                                </div>
+                            </div>
+                            <div class="col-xl-7">
+                                <div>
+                                    <div class="input-group justify-content-end mt-3">
+                                      <input style="width:15%;" class="form-control form-control-sm shadow-none search d-none" id="search_user" type="search" placeholder= "<%= lib_translate("Search_table")%>" aria-label="search" />  
+                                          <% if is_access(session["user_id"], "USERS","ADD") %> 
+                                            <button onclick="openFormAddUser()" class="btn btn-primary btn-add-user me-2" id="btn-add-user" data-bs-toggle="modal" data-bs-target="#modal-users">
+                                              <%= lib_translate("Add_staff")%>
+                                            </button>
+                                            <button data-bs-toggle="modal"  onclick="clickOpenImportStuInfo()" data-bs-target="#modal-import-file-stu-info" class="btn btn-warning me-2" type="button">Import hợp đồng</button>
+
+                                            <button onclick="clickOpenImport()" class="btn btn-warning me-2" data-bs-toggle="modal" data-bs-target="#modal-import-file" id="btn-import-file">
+                                              <%= lib_translate("Import_from_file")%> <span class="fas fa-file-excel ms-1"></span>
+                                            </button>
+                                            <a href="<%= user_export_users_path() %>" target="_blank" class="btn btn-secondary">
+                                              <%= lib_translate("Export_from_file")%> <span class="fas fa-file-excel ms-1"></span>
+                                            </a>
+                                          <% end %>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <ul class="nav nav-tabs" id="myTab" role="tablist">
+                        <li class="nav-item"><a class="nav-link active" id="home-tab" data-bs-toggle="tab" href="#tab-home" role="tab" aria-controls="tab-home" aria-selected="true"><%= lib_translate("List_of_staff")  %></a></li>
+                        <li class="nav-item"><a class="nav-link" id="profile-tab" data-bs-toggle="tab" href="#tab-profile" role="tab" aria-controls="tab-profile" aria-selected="false"><%= lib_translate("organization_structure")  %></a></li>
+                        <li class="nav-item"><a class="nav-link" id="contact-tab" data-bs-toggle="tab" href="#tab-contact" role="tab" aria-controls="tab-contact" aria-selected="false"><%= lib_translate("Extended_application")  %></a></li>
+                    </ul>
+                    <div class="tab-content pt-3" id="myTabContent">
+                        <div class="tab-pane fade" id="tab-profile" role="tabpanel" aria-labelledby="profile-tab"> 
+                        </div>
+                        <div class="tab-pane fade" id="tab-contact" role="tabpanel" aria-labelledby="contact-tab">
+                        </div>
+                        <div class="pb-3 table-responsive tab-pane fade show active" id="tab-home" role="tabpanel" aria-labelledby="home-tab">
+                            <span onclick="close_nav_menu_bar_resposive()" style="display:none; cursor:pointer" id="nav-tab-bar" class="fas fa-bars"></span>
+                            <ul  class="nav nav-pills main_tab_user hide_menu_bar" id="pill-myTab" role="tablist" style="display:flex; align-items:center;">
+                                <span onclick="firstpage()"  class="fas fa-chevron-circle-left me-3" style="display:none;cursor:pointer" id="previous-page-usertab"></span>
+                                <li onclick="close_nav_menu_bar_resposive()"  class="nav-item"><a class="nav-link active" id="tab1" data-bs-toggle="tab" href="#pill-tab-home" role="tab" aria-controls="pill-tab-home" aria-selected="true" style="font-size: 13px;font-weight: bold; " ><%= lib_translate("Overview")  %></a></li>
+                                <li onclick="close_nav_menu_bar_resposive()"  class="nav-item"><a class="nav-link" id="tab2" data-bs-toggle="tab" href="#pill-tab-payroll-benefits" role="tab" aria-controls="pill-tab-payroll-benefits" aria-selected="true" style="font-size: 13px;font-weight: bold;"><%= lib_translate("Payroll_benefits")  %></a></li>
+                                <li onclick="close_nav_menu_bar_resposive()"  class="nav-item"><a class="nav-link" id="tab3" data-bs-toggle="tab" href="#pill-tab-tax_insurance_and_administration" role="tab" aria-controls="pill-tab-tax_insurance_and_administration" aria-selected="false" style="font-size: 13px;font-weight: bold;"><%= lib_translate("Tax_Insurance_and_Administration")  %></a></li>
+                                <li onclick="close_nav_menu_bar_resposive()"  class="nav-item"><a class="nav-link" id="tab4" data-bs-toggle="tab" href="#pill-tab-work_schedule_and_leave" role="tab" aria-controls="pill-tab-work_schedule_and_leave" aria-selected="false" style="font-size: 13px;font-weight: bold;"><%= lib_translate("Work_schedule_and_leave")  %></a></li>
+                                <li onclick="close_nav_menu_bar_resposive()"  class="nav-item"><a class="nav-link" id="tab5" data-bs-toggle="tab" href="#pill-tab-contact" role="tab" aria-controls="pill-tab-contact" aria-selected="false" style="font-size: 13px;font-weight: bold; display:none"><%= lib_translate("Teams_and_manager")  %></a></li>
+                                <li onclick="close_nav_menu_bar_resposive()"  class="nav-item"><a class="nav-link" id="tab6" data-bs-toggle="tab" href="#pill-tab-contact" role="tab" aria-controls="pill-tab-contact" aria-selected="false" style="font-size: 13px;font-weight: bold; display:none"><%= lib_translate("Personal_information_and_contact")  %></a></li>
+                                <span onclick="nextpage()" class="fas fa-chevron-circle-right ms-3" id="next-page-usertab" style="cursor:pointer"></span>
+                            </ul>
+                            <hr class="mt-3 mb-0" style="width: 100%">
+                            <div id="pill-myTabContent" class="tab-content pt-1">
+                                <div class="tab-pane fade show active " id="pill-tab-home" role="tabpanel" aria-labelledby="home-tab">
+                                <div class="scrollbar">
+                                    <%= render_search_pagination(users_index_path()).html_safe %>
+                                    <table id="positonjob_table" class="table table-sm table-responsive-sm table-bordered fs--2 mb-0">
+                                        <thead class ="bg-200 text-900" style="vertical-align: middle !important; ">
+                                            <tr>
+                                                <th  class="no-sort" data-sort="ID" style="text-align: center; width: 20px !important" class="align-middle white-space-nowrap">
+                                                    <div class="form-check mb-0">
+                                                        <input class="form-check-input" style="margin-left: -1.8em !important; margin-top:0.5em !important" type="checkbox" data-bulk-select='{"body":"bulk-select-body","actions":"bulk-select-actions","replacedElement":"bulk-select-replace-element"}' />
+                                                    </div>
+                                                </th>
+                                                <th class="sort" style="text-align:left;font-weight: bolder; width: 20%;" data-sort="username"><%= lib_translate("Name") %></th>
+                                                <th class="sort" style="text-align:left; font-weight: bolder;width: 80px;" data-sort="sid"><%= lib_translate("employee_code") %></th>
+                                                <th class="sort" data-sort="status" style="font-weight: bolder;width: 70px"><%= lib_translate("Status") %></th>
+                                                <th class="sort" data-sort="Department_POS" style="text-align: left; font-weight: bolder; width: 9%"><%= lib_translate("Seniority") %></th>
+                                                <th class="sort" data-sort="Create_by_POS" style="text-align: left; font-weight: bolder"><%= lib_translate("Title") %></th>
+                                                <th class="sort capp-table-col-md" data-sort="Action_POS" style="text-align: left; font-weight: bolder"><%= lib_translate("Office") %></th>
+                                                <th class="sort capp-table-col-xl" style="text-align:left;font-weight: bolder; width: 70px" data-sort="gender"><%= lib_translate("Gender") %></th>
+                                                <% if (is_access(session["user_id"], "USERS","EDIT") || is_access(session["user_id"], "USERS","DEL")) %> 
+                                                  <th class="no-sort" style="text-align: center; white-space: nowrap; padding-right:0px !important; width: 80px" ></th>
+                                              <% end %>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="list" id="bulk-select-body" style="vertical-align: middle !important;">
+                                            <% 
+                                            @users.each do |user| 
+                                            oUorg = Uorg.where(user_id: user.id)
+                                            list_uorg_user = []
+                                            oUorg.each do |uorg|
+                                            list_uorg_user.push(uorg.organization_id ? uorg.organization_id : "") 
+                                            end
+                                            %>                          
+                                                <tr>
+                                                  <td class="align-middle white-space-nowrap">
+                                                    <div class="form-check mb-0">
+                                                        <input class="form-check-input" style="margin-left: -1.8em !important; margin-top:0.5em !important"  type="checkbox" id="checkbox-1" data-bulk-select-row="data-bulk-select-row" />
+                                                    </div>
+                                                  </td>
+                                                  <td class="username fw-bold ms-1" onclick='window.location="<%= user_details_path(id: user.id, lang: session[:lang]) %>"; clearCurrentTab()' style="text-align: left;cursor: pointer;white-space: nowrap;text-transform: capitalize; display: flex;align-items: center;width:auto">
+                                                    <%# Vu: user avatar 22/12/2022 %>
+                                                    <%
+                                                      if !user.avatar.nil?
+                                                        avatar_url = request.base_url + "/mdata/hrm/" +  Mediafile.where("id = #{user.avatar}").first.file_name
+                                                      else
+                                                        avatar_url = image_path('no_avatar.jpg')
+                                                      end
+                                                    %>
+                                                    <% contract = Contract.where(user_id: user.id).first
+
+                                                      if !contract
+                                                          icon = ""
+                                                          icon_value = "fas fa-info-circle"
+                                                          erro_title = lib_translate("This_user_doesn't_have_a_contract_yet")
+                                                          page = 'contract'
+                                                      else
+                                                          benefits = Benefit.where(user_id: user.id, stype: user.benefit_type).first
+                                                          if benefits.nil?
+                                                            icon = ""                                                          
+                                                            icon_value = "fas fa-coins"
+                                                            erro_title = lib_translate("This_user_doesn't_have_a_benefits_yet")
+                                                            page = 'benefit'
+                                                            else
+                                                            icon = "d-none"
+                                                          end
+                                                      end
+
+                                                    %>
+
+                                                    <% 
+                                                    %>      
+                                                    
+                                                                                          
+                                                    <div class="avatar">
+                                                      <div style="border: 1px solid var(--falcon-badge-soft-secondary-background-color);border-radius: 50%;background-image: url(<%= avatar_url%>);overflow: hidden;background-repeat: no-repeat;background-size: cover;height: 1.5rem; width: 1.5rem;">
+                                                      </div>                                                       
+                                                    </div>  
+                                                    <div style="z-index: 9;padding-top: 16px ;margin-left: -8px ;" class="<%= icon%>" data-toggle="tooltip" data-placement="top" title="<%= erro_title %>">
+                                                      <%= link_to  user_details_path(id: user.id, lang: session[:lang],page: page) do %>
+                                                        <i class="<%=icon_value%>" aria-hidden="true" style="color: var(--falcon-orange); font-weight: bold; font-size: 13px;"></i>
+                                                      <% end %>
+                                                    </div>
+                                                      <div style="cursor: pointer; text-transform: capitalize;  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" class="ms-2"><%= user.last_name %>  <%= user.first_name %> </div>
+                                                    
+                                                    <%# Vu: user avatar end %>
+                                                  </td>
+                                                  <td class="sid text-success fw-bold" onclick='window.location="<%= user_details_path(id: user.id, lang: session[:lang]) %>"; clearCurrentTab()'  style="cursor: pointer; text-align: left;width: auto;">
+                                                      <%= user.sid %>
+                                                  </td>
+                                                  <td class="status" onclick='window.location="<%= user_details_path(id: user.id, lang: session[:lang]) %>";clearCurrentTab()' style="cursor: pointer;white-space: nowrap;text-align: center;width: auto;">
+                                                      <%= (if user.status=="ACTIVE" 
+                                                        image_tag('circle.png')
+                                                      else 
+                                                        image_tag('circle_red.png')
+                                                      end ) %>                              
+                                                  </td>
+                                                  <td style="white-space: nowrap; width:auto;" id="time_work_user_<%= user.id %>">
+                                                    <!-- Date -->
+                                                    
+                                                    <script>
+                                                          var day1 = '<%= oContract = user.contracts.where(status: "ACTIVE").order(created_at: :asc).first
+                                                          (oContract && oContract.dtfrom.to_date > Date.today) ? Time.now.strftime("%Y/%m/%d") : oContract ? oContract.dtfrom.strftime("%Y/%m/%d") : Time.now.strftime("%Y/%m/%d") %>';
+                                                          var day2 = '<%= Time.now.strftime("%Y/%m/%d") %>';
+                                                          var [yearfrom, monthfrom, dayfrom] = day1.split('/').map(Number);
+                                                          var [yearto, monthto, dayto] = day2.split('/').map(Number);
+                                                          var start_date = [yearfrom, monthfrom - 1, dayfrom];
+                                                          var end_date = moment({years: yearto,months: monthto - 1,days: dayto});
+                                                          $('#time_work_user_<%= user.id %>').text(getTimeWork(moment(start_date), moment(end_date)));
+                                                    </script>
+                                                  </td>
+                                                  <td  style="white-space: nowrap;">
+                                                    <%
+                                                        # Lấy Work mới nhất của user
+                                                        latest_work = Work.where(user_id: user.id).where.not(positionjob_id: nil).order(created_at: :desc).first
+
+                                                        # Lấy positionjob và phòng ban hiện tại
+                                                        positionjob = latest_work&.positionjob
+                                                        positionjob_name = positionjob&.name
+
+                                                        # Phòng ban hiện tại (ví dụ: sub a.1)
+                                                        department = positionjob&.department
+                                                        department_name = department&.name
+
+                                                        # Truy ngược để tìm phòng ban gốc
+                                                        main_department = department
+                                                        while main_department&.parents.present?
+                                                          main_department = Department.find_by(id: main_department.parents)
+                                                        end
+
+                                                        main_department_name = main_department&.name
+                                                    %>
+                                                    
+                                                    <% if positionjob_name.present? %>
+                                                      <%= positionjob_name %> ( <%= department_name %> )
+                                                    <% else %>
+                                                      
+                                                    <% end %>
+
+                                                  </td>
+                                                  <td class="capp-table-col-md"  style="white-space: nowrap;">
+                                                      <%= main_department_name %>
+                                                  </td>
+                                                  <td class="gender capp-table-col-xl" onclick='window.location="<%= user_details_path(id: user.id, lang: session[:lang]) %>";clearCurrentTab()' style="cursor: pointer;width:auto">                               
+                                                      <%= (if user.gender=="0" 
+                                                      lib_translate("Male")
+                                                      elsif user.gender=="1" 
+                                                      lib_translate("Female") 
+                                                      else 
+                                                      lib_translate("Other") 
+                                                      end ) %>                              
+                                                  </td>
+                                                  <% if (is_access(session["user_id"], "USERS","EDIT") || is_access(session["user_id"], "USERS","DEL")) %> 
+                                                    <td style="text-align: center; ">
+                                                        <% if is_access(session["user_id"], "USERS","EDIT") %> 
+                                                          <a class="edit_user" style="text-decoration: none;" data-bs-toggle="modal" data-bs-target="#modal-users" data-toggle="tooltip" data-placement="top" title="Chỉnh sửa thông tin nhân sự"
+                                                            onclick="openFormUpdateUser(
+                                                            `<%= user.id %>`, 
+                                                            `<%= user.sid %>`, 
+                                                            `<%= user.username %>`,
+                                                            `<%= user.email %>`, 
+                                                            `<%= user.gender %>`, 
+                                                            `<%= user.nationality %>`, 
+                                                            `<%= user.ethnic %>`, 
+                                                            `<%= user.religion %>`, 
+                                                            `<%= user.marriage %>`, 
+                                                            `<%= user.insurance_no %>`, 
+                                                            `<%= user.education %>`,
+                                                            `<%= user.academic_rank %>`, 
+                                                            `<%= user.status %>`, 
+                                                            `<%= user.stype %>`,
+                                                            `<%= user.note %>`,
+                                                            `<%= user.first_name %>`,
+                                                            `<%= user.last_name %>`,
+                                                            `<%= user.birthday&.strftime('%d/%m/%Y') %>`,
+                                                            `<%= user.taxid %>`,
+                                                            `<%= user.insurance_reg_place %>`,
+                                                            `<%= user.place_of_birth %>`,
+                                                            `<%= user.m_place_of_birth %>`,
+                                                            `<%= user.email1 %>`,
+                                                            `<%= user.phone %>`,
+                                                            `<%= user.mobile %>`,
+                                                            `<%= user.staff_type %>`,
+                                                            `<%= user.staff_status %>`, 
+                                                            <%= user.benefit_type %>,
+                                                            <%= list_uorg_user %>,
+                                                            `<%= user.twofa %>`,
+                                                            `<%= user.twofa_exam %>`,
+                                                            `<%= user.ignore_attend %>`,
+                                                            `<%= user&.termination_date&.strftime('%Y-%m-%d') %>`,
+                                                            )">
+                                                            <span class="text-primary fas fa-user-edit me-1" ></span>
+                                                          </a>
+                                                        <% end %>
+                                                        <!-- Button trigger modal --> 
+                                                        <% if is_access(session["user_id"], "USERS","DEL") %> 
+                                                          <a data-toggle="tooltip" data-placement="top" title="Xóa nhân sự" data-bs-toggle="modal" data-bs-target="#modal-list-user-<%= user.id %>" style="cursor: pointer;">
+                                                            <span class="text-danger fas fa-trash" ></span>
+                                                          </a> 
+                                                          <!-- Modal -->
+                                                          <div class="modal fade" id="modal-list-user-<%= user.id %>" tabindex="-1" role="dialog"
+                                                            aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                                            <div class="modal-dialog" role="document">
+                                                              <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                  <h5 class="modal-title" id="exampleModalLabel"><%= lib_translate("Message") %></h5>
+                                                                  <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close" style=" border: none;background: none;">
+                                                                    <span aria-hidden="true" style="font-size: 20px;">&times;</span>
+                                                                  </button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                  <%= lib_translate("Are_you_sure_to_delete_this_staff")  %> <span style="font-weight:bold; color:red; text-transform: capitalize;"> <%= user.last_name %> <%= user.first_name %> </span>?
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                  <button id="btn_close_delete_user" type="button" class="btn btn-secondary"
+                                                                    data-bs-dismiss="modal"><%= lib_translate("Close")  %></button>
+                                                                  <%= link_to lib_translate("Delete") , url_for(action: :del, id: user.id), method: :delete, class: "btn btn-danger", id: "btn_delete_user_list", onclick: "delete_loading_user_list(this)" %>
+
+                                                                  <div id="loading_button_delete_user_list" class= "btn btn-danger" style="opacity: 0.8; width: 100%; display:none;" >
+                                                                    <i class ="fa fa-spinner fa-spin"> </i>  <%=lib_translate("Deleting")%> 
+                                                                  </div>                                          
+                                                                </div>
+                                                              </div>
+                                                            </div>
+                                                          </div>
+                                                        <% end %>
+                                                    </td>
+                                                <% end %> 
+                                                </tr>
+                                              <% end %>         
+                                        </tbody>
+                                    </table> 
+                                    <%= render_pagination_limit_offset(users_index_path(lang: session[:lang], per_page: session[:per_page], search: session[:search]), 10, @users.count).html_safe %>
+                                </div> 
+                                </div>
+                                <div class="tab-pane fade " id="pill-tab-payroll-benefits" role="tabpanel" aria-labelledby="profile-tab">
+                                </div>
+                                <div class="tab-pane fade" id="pill-tab-tax_insurance_and_administration" role="tabpanel" aria-labelledby="contact-tab">
+                                </div>
+                                <div class="tab-pane fade" id="pill-tab-work_schedule_and_leave" role="tabpanel" aria-labelledby="contact-tab">
+                                </div>
+                            </div>                 
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%# LNQ.Thai Table Base %>
+
+<div id="form-add-user-container" class="modal">
+  <div class="modal-dialog" style="max-width: 80%;margin: 0 auto;margin-top: 10px;">
+    <div class="modal-content" style="background: var(--falcon-badge-soft-primary-background-color);">
+      <div style="text-align:right;" class="cls_bmtu_close_btn">
+        <button onclick="closeFormAdd()" type="button" class="close_form_add btn"> X </button>
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+
+
+
+
+<!-- modal -->
+<div class="modal fade" id="modal-users"  tabindex="-1" role="dialog"  aria-hidden="true" data-bs-keyboard="false" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 80%">
+    <div class="modal-content position-relative">
+      <div class="position-absolute top-0 end-0 mt-2 me-2 z-index-1">
+        <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div class="rounded-top-lg py-3 ps-4 pe-6 bg-light">
+          <h4 class="mb-1" id="cls_bmtu_form_add_title"><%= lib_translate("Add_staff")  %></h4>
+        </div>
+        <div class="p-2 pb-0">
+          <div id="error_explanation" class="text-danger" style="text-align: center;font-size: 13px;"></div>
+            
+            <div class="form-add-user">
+        <%= form_for @user, :url=> user_update_path, html: {method: :post, id:"form_add_user", autocomplete: "off",class:'col-12' } do |f| %>
+          <div class="erro_labble mb-2" style="height: 40px;">
+            <p style="display:none; color: rgb(197 82 82);border: 1px solid rgb(199 136 136 / 23%);background: rgb(255 54 54 / 16%);border-radius: 5px;padding: 10px;margin-right: 15px;margin-left: 15px;"
+              id="erro_labble_content">
+            </p>
+          </div>
+          <div class="form-group" style="display:none;" class="txt_update_id">
+            <%= f.label :id %> <span style="color:red;" class="red">* </span>
+              <%= f.text_field :id, class: 'form-control' , name: 'user_id' %>
+          </div>
+          <div class="form-group" style="display:none;">
+            <input value="1" type="text" id="type_upadte" name="type_upadte"><br>
+          </div>
+          <div class="row" style="margin: 0 auto;">
+            <div class="col-xl-4">
+              <div class="form-group" id="id_add_sid">
+                  <%= f.label lib_translate("first_name") %> <span style="color:red;" class="red">* </span>
+                  <%= f.text_field :first_name, class: 'form-control', id:'user_first_name_add' ,  name:'user_first_name_add', autocomplete: 'off', style:"text-transform:capitalize" %>
+              </div>
+              <div class="form-group" id="id_add_sid">
+                  <%= f.label lib_translate("Last_name") %> <span style="color:red;" class="red">* </span>
+                  <%= f.text_field :last_name, class: 'form-control',  id:'user_last_name_add' ,  name:'user_last_name_add', autocomplete: 'off', style:"text-transform:capitalize" %>
+              </div>
+              <div class="form-group" id="id_add_sid">
+                <%= f.label lib_translate("employee_code") %> <span style="color:red;" class="red">* </span>
+
+                  <%= f.text_field :sid, class: 'form-control' ,  name:'user_sid_add', autocomplete: 'off', style:'text-transform:uppercase' %>
+              </div>
+              <div class="form-group">
+                <%= f.label lib_translate("Email") %> <span style="color:red;" class="red">* </span>
+                  <%= f.text_field :email , class: 'form-control' , name: 'user_email_add',autocomplete: 'off' %>
+              </div>
+              <div class="form-group">
+                <%= f.label lib_translate("Username") %> <span style="color:red;" class="red">* </span>
+
+                  <%= f.text_field :username, class: 'form-control' , name: 'user_username_add',autocomplete: 'off', autocomplete: 'new-username' %>
+              </div>
+              <div class="form-group d-none" id="id_bmtu_pwd" style="position: relative;">
+                <%= f.label lib_translate("Password") %> <span style="color:red;" class="red">* </span>
+                  <%= f.text_field :password_digest , class: 'form-control' , name: 'user_password_add' , id: 'user_password_add',autocomplete: 'new-password' %>
+                    <a style="cursor: pointer;" id="show_pwd">
+                      <i class="fa fa-eye" id="eye1"
+                        style="position:absolute;right: 5px;bottom: 9px;"></i>
+                    </a>
+              </div>
+              <div class="form-group d-none" id="id_bmtu_re_pwd" style="position: relative;">
+                <%= f.label lib_translate("Re_password") %> <span style="color:red;" class="red">* </span>
+                  <%= f.text_field :password_digest , class: 'form-control' ,name: 'user_re_password_digest_add' , id: 'user_re_password_digest_add', autocomplete: 'new-password' %>
+                    <a style="cursor: pointer;" id="show_re_pwd">
+                      <i class="fa fa-eye" id="eye2"
+                        style="position:absolute;right: 5px;bottom: 9px;"></i>
+                    </a>
+              </div>
+              <div class="mt-4" style="display:flex;white-space: nowrap;">
+                  <%= f.label lib_translate("Benefits_type") %>:
+                  <div class="" style="border: none;box-shadow: none; font-size: 14px;">
+                    <input checked type="radio" id="user_benefit_type_0" class="form-check-input ms-3 me-1" value="1" name="user_benefit_type_add" ></option><label class="form-check-label" for="user_benefit_type_0" style="cursor: pointer">1</label>
+                    <input type="radio" id="user_benefit_type_1" class="form-check-input ms-3 me-1" value="2" name="user_benefit_type_add" ></option><label class="form-check-label" for="user_benefit_type_1" style="cursor: pointer">2</label>
+                    <input type="radio" id="user_benefit_type_2" class="form-check-input ms-3 me-1" value="3" name="user_benefit_type_add" ></option><label class="form-check-label" for="user_benefit_type_2" style="cursor: pointer">3</label>
+                  </div>
+              </div>
+              <div class="" style="display:flex;white-space: nowrap;">
+                  <%= f.label lib_translate("Gender_1") %>
+                  <div class="" style="border: none;box-shadow: none; font-size: 14px;">
+                    <input checked type="radio" id="user_gender_0" class="form-check-input ms-3 me-1" value="0" name="user_gender_add" ></option><label class="form-check-label" for="user_gender_0" style="cursor: pointer"><%= lib_translate("Male")%></label>
+                    <input type="radio" id="user_gender_1" class="form-check-input ms-3 me-1" value="1" name="user_gender_add" ></option><label class="form-check-label" for="user_gender_1" style="cursor: pointer"><%= lib_translate("Female")%></label>
+                    <input type="radio" id="user_gender_2" class="form-check-input ms-3 me-1" value="2" name="user_gender_add" ></option><label class="form-check-label" for="user_gender_2" style="cursor: pointer"><%= lib_translate("Other")%></label>
+                  </div>
+              </div>
+              <div class="" style="display:flex;font-size:14px;white-space: nowrap;">
+                    <%= f.label lib_translate("Stype_HR") %> 
+                    <div class="" style="border: none;box-shadow: none;font-size:14px;">
+                      <input checked type="radio" id="user_style_member" class="form-check-input ms-3 me-1" value="MEMBER" name="user_stype_add" ></option><label class="form-check-label" for="user_style_member" style="cursor: pointer"><%= lib_translate("MEMBER")%></label>
+                      <input  type="radio" id="user_style_applyer" class="form-check-input ms-3 me-1" value="APPLYER" name="user_stype_add" ></option><label class="form-check-label" for="user_style_applyer" style="cursor: pointer"><%= lib_translate("APPLYER")%></label>
+                    </div>
+              </div> 
+              <div class="" style="display:flex;font-size:14px;white-space: nowrap;">
+                <%= f.label lib_translate("Marriage") %>
+                <div class="" style="border: none;box-shadow: none;font-size:14px;">
+                  <input type="radio" id="user_Marriage_Single" class="form-check-input ms-3 me-1" value="Single" name="user_Marriage_add" ></option><label class="form-check-label" for="user_Marriage_Single" style="cursor: pointer"><%= lib_translate("Single")%></label>
+                  <input checked type="radio" id="user_Marriage_Married" class="form-check-input ms-3 me-1" value="Married" name="user_Marriage_add" ></option><label class="form-check-label" for="user_Marriage_Married" style="cursor: pointer"><%= lib_translate("Married")%></label>
+                </div>
+              </div>
+              <div class="" style="display:flex;font-size:14px;white-space: nowrap;">
+                <%= f.label lib_translate("Status_1") %>                         
+                  <div class="" style="border: none;box-shadow: none;font-size:14px;">
+                    <input checked type="radio" id="user_status_ACTIVE" class="form-check-input ms-3 me-1" value="ACTIVE" name="user_status_add" ></option><label class="form-check-label" for="user_status_ACTIVE" style="cursor: pointer">Active</label>
+                    <input  type="radio" id="user_status_INACTIVE" class="form-check-input ms-3 me-1" value="INACTIVE" name="user_status_add" ></option><label class="form-check-label" for="user_status_INACTIVE" style="cursor: pointer">Inactive</label>
+                  </div>
+              </div> 
+              <div class="" style="display:flex;font-size:14px;white-space: nowrap;">
+                <%= f.label lib_translate("Bảo mật 2 lớp:") %>                         
+                  <div class="form-check form-switch" style="margin-bottom:unset;margin-left: 10px;">
+                    <input class="form-check-input" name="twofa" id="checkbox-active" onchange="onChangeTwoFA(this)" value="" style="cursor: pointer;" type="checkbox" />
+                    <label style="margin: 0;cursor: pointer;" for="checkbox-active"></label>
+                  </div>
+              </div> 
+              <div class="" style="display:flex;font-size:14px;white-space: nowrap;">
+                <%= f.label lib_translate("Xác thực tổ hợp:") %>                         
+                  <div class="form-check form-switch" style="margin-bottom:unset;margin-left: 10px;">
+                    <input class="form-check-input" name="twofa_exam" id="checkbox-active-exam" onchange="onChangeTwoFA(this)" value="" style="cursor: pointer;" type="checkbox" />
+                    <label style="margin: 0;cursor: pointer;" for="checkbox-active-exam"></label>
+                  </div>
+              </div>
+              <div class="" style="display:flex;font-size:14px;white-space: nowrap;">
+                <%= f.label lib_translate("Không bắt buộc chấm công") %>
+                  <div class="form-check form-switch" style="margin-bottom:unset;margin-left: 10px;">
+                    <input class="form-check-input" name="ignore_attend" id="checkbox-active-checkin" onchange="onChangeTwoFA(this)" value="" style="cursor: pointer;" type="checkbox" />
+                    <label style="margin: 0;cursor: pointer;" for="checkbox-active-checkin"></label>
+                  </div>
+              </div>
+            </div>
+            <div class="col-xl-4">
+              <div class="form-group">
+                    <%= f.label lib_translate("Host_unit") %> <a class="ms-2" href="<%= organization_index_path() %>"><span style="width:10px; color:#98a7b9" class="fas fa-database"></span></a>
+                    <div id="select_add_organization_bd" class="stype mb-0"> 
+                        <% @organizations.each do |organization| %>  
+                            <div class="form-check form-check-inline mb-0" >
+                                <input class="form-check-input cursor-pointer" onchange='onCheckboxOrhid("<%= organization.scode %>")' id="<%= organization.id %>" type="checkbox" data-scode="<%= organization.scode %>" value="<%= organization.id %>" name="organization_user[]" />
+                                <label class="form-check-label cursor-pointer mb-0" for="<%= organization.id %>"><%= organization.name  %></label>
+                            </div>  
+                        <% end %>
+                    </div> 
+              </div>
+              <div class="form-group mt-2">
+                <%= f.label lib_translate("Mobile") %> <span style="color:red;" class="red">* </span>
+                  <%= f.number_field :mobile , class: 'form-control' , name: 'user_mobile_add', id: 'user_mobile_add', maxlength:'10' %>
+              </div>           
+              <div class="form-group">
+                <%= f.label lib_translate("Other_Emails") %> 
+                  <%= f.text_field :email1 , class: 'form-control' , name: 'user_email_2_add', id: 'user_email_2_add' %>
+              </div>
+              <div class="form-group">
+                <%= f.label lib_translate("Phone") %> 
+                  <%= f.text_field :phone , class: 'form-control' , name: 'user_phone_add', id: 'user_phone_add' %>
+              </div>              
+              <div class="form-group">
+                <%= f.label lib_translate("Tax_code") %>
+                      <%= f.number_field  :taxid  , class: 'form-control' , name: 'user_taxid_add' , id: 'user_taxid_add' %>   
+              </div>
+              <div class="form-group">
+                  <%= f.label lib_translate("Insurance_No") %>
+                  <%= f.text_field :insurance_no , class: 'form-control' , name: 'user_insurance_No_add' %>
+              </div>
+              <div class="form-group" >
+                    <%= f.label lib_translate("Place_of_registration_of_social_insurance")  %> <a class="ms-2" href="<%= tbhospitals_index_path() %>"><span style="width:10px; color:#98a7b9" class="fas fa-database"></span></a>
+                      <select class="form-select selectpicker" name="user_insurance_placed_add" id="user_insurance_placed_add"></select>
+              </div>
+              <div class="form-group">                      
+                <label for="tbuserstatus"><%= lib_translate("Tbuserstatus") %></label><a class="ms-2" href="<%= tbuserstatus_index_path() %>"><span style="width:10px ;color:#98a7b9" class="fas fa-database"></span></a>
+                    <select onchange="showTerminationDate()" class="form-select selectpicker" name="user_tbuserstatus_add" id="user_tbuserstatus_add_details"></select>
+              </div>
+              <div style="display:none" id="termination_date_group" class="form-group">                      
+                <label for=""><%= lib_translate("Ngày nghỉ việc") %></label>
+                <input class="form-control" placeholder="ngày/tháng/năm" type="date" id="termination_date" name="termination_date">
+              </div>
+            </div>
+            <div class="col-xl-4">            
+              <div class="form-group">
+                <%= f.label lib_translate("Religion") %><a class="ms-2" href="<%= religions_index_path() %>"><span style="width:10px ;color:#98a7b9" class="fas fa-database"></span></a>
+                  <select class="form-select selectpicker" name="user_religion_add" id="user_religion_add_details"></select>  
+              </div>             
+              
+              <div class="form-group">                      
+                <label for="organizerSingle"><%= lib_translate("Nationality") %></label><a class="ms-2" href="<%= nationality_index_path() %>"><span style="width:10px ;color:#98a7b9" class="fas fa-database"></span></a>
+                    <select class="form-select selectpicker" name="user_nationality_add" id="user_nationality_add_details"></select>
+              </div>
+
+              <div class="form-group">
+                <%= f.label lib_translate("Ethnic") %> <a class="ms-2" href="<%= ethnic_index_path() %>"><span style="width:10px ;color:#98a7b9" class="fas fa-database"></span></a>
+                  <select class="form-select selectpicker" type="text" name="user_ethnic_add" id="user_ethnic_add"></select>
+              </div>
+
+              <div class="form-group" >
+                  <%= f.label lib_translate("Birthday")  %>              
+                  <div id="datepicker-container" class="datepicker-container">
+                    <span style="position: relative;" class="outline-element-container"> <input value="01/01/2004" id="user_birthday_add" type="text" name="user_birthday_add" class="form-control datepicker openemr-datepicker input-textbox outline-element incorrect" placeholder="dd/mm/yyyy" objtype="7" name="action_element" objindex=""  aria-label="Select Date"> <span class="correct-incorrect-icon"> </span></span>
+                    <div id="datepicker"></div>
+                  </div>
+              </div>
+
+              <div class="form-group">
+                <%= f.label lib_translate("Hometown") %>
+                  <%= f.text_field :place_of_birth , class: 'form-control' , name: 'user_place_of_birth_add', id: 'user_place_of_birth_add' %>
+              </div> 
+              <div class="form-group">
+                <%= f.label lib_translate("Place_of_birth") %>
+                  <%= f.text_field :m_place_of_birth , class: 'form-control' , name: 'user_m_place_of_birth_add', id: 'user_m_place_of_birth_add' %>
+              </div> 
+              <div class="form-group">
+                <%= f.label lib_translate("Education") %> <a class="ms-2" href="<%= education_edit_path() %>"><span style="width:10px ;color:#98a7b9" class="fas fa-database"></span></a>
+                    <select class="form-select selectpicker" name="user_education_add" id="user_education_add"></select>   
+              </div> 
+              <div class="form-group">
+                <%# load dữ liệu academicrank %>
+                <%= f.label lib_translate("Academic_rank") %> <a class="ms-2" href="<%= academicrank_index_path() %>"><span style="width:10px ;color:#98a7b9" class="fas fa-database"></span></a>                            
+                <select class="form-select selectpicker" name="user_academic_add" id="user_academic_add"  ></select> 
+              </div>
+              <div class="form-group">                      
+                <label for="tbusertype"><%= lib_translate("Tbusertype") %></label><a class="ms-2" href="<%= tbusertype_index_path() %>"><span style="width:10px ;color:#98a7b9" class="fas fa-database"></span></a>
+                    <select class="form-select selectpicker" name="user_tbusertype_add" id="user_tbusertype_add_details"></select>
+              </div>
+              
+            </div>
+            <div class="row mt-2"></div>
+            <div class="form-group">
+            <%= f.label lib_translate("Note") %>
+            <%= f.text_area :note , class: 'form-control' , name: 'user_note_add' , id: 'user_note_add' %>
+            </div>
+          </div>
+          <div class="modal-footer border-0 p-0 m-2">
+            <%= f.submit "" , type:"button" , id:"btn_add_new_user",
+              class: "btn btn-warning border-red border-pink-600 cls-bmtu-text-red md:group-hover:bg-pink-50 btn-block btn-block text-uppercase " %>
+              <div id="loading_button" class= "btn btn-warning border-red border-pink-600 cls-bmtu-text-red md:group-hover:bg-pink-50 btn-block btn-block text-uppercase" style="opacity: 0.8;display:none;" >
+                    <i class ="fa fa-spinner fa-spin"> </i>  <%=lib_translate("Save")%> 
+              </div>
+          </div>
+        <% end %>          
+      </div>
+        </div>
+      </div>
+    </div>
+  </div>  
+</div>  
+
+<%# Model inport file %>
+<div class="modal fade" data-bs-keyboard="false" data-bs-backdrop="static" id="modal-import-file" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 500px">
+    <div class="modal-content position-relative">
+      <div class="position-absolute top-0 end-0 mt-1 me-2 z-index-1">
+        <button  class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base button-cancel-import" style="width: 2rem;height: 2rem;" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div class="rounded-top-lg py-3 ps-4 pe-6 bg-light">
+          <h5 class="mb-1"><%= lib_translate("Import_from_file")%></h5>
+        </div>
+        <%# File preview/process %>
+          <div class="border rounded-1 mt-2 me-2 ms-2" id="import-file-containter" style="display:none;">
+            <div class="ps-2" style="display: flex;align-items: center;">
+                <%= image_tag("/assets/image/excel.png") %>
+                <div class="ms-2">
+                    <p class="m-0" id="import-file-name" style="font-size: 0.9em;font-weight: 600;">...</p>
+                    <p class="m-0" id="import-file-size" style="font-size: 0.8em;">...</p>
+                </div>
+            </div>
+            <div class="progress me-2 ms-2 mb-1" style="height:7px">
+                <div class="progress-bar bg-success" id="file-process" role="progressbar" style="transition: width 0.2s ease; width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                </div>
+            </div>
+          </div>
+        <div class="pe-3 ps-3 pt-3 pb-2">
+          <%# Form import file user %>
+          <div>
+            <input id="file-import-user" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" type="file" name="file" hidden>
+            <label for="file-import-user" id="label-select-file" class="btn btn-warning m-0"><%= lib_translate("select_files")%></label>
+            <button class="btn btn-primary btn-secondary disabled" onclick="clickImportFile()" id="button-upload-file" type="submit">
+              <%# icon %>
+              <span class="spinner-border spinner-border-sm upload-process" role="status" aria-hidden="true"></span>
+              <%# text %>
+              <span class="upload-text"><%= lib_translate("Upload")%><span class="fas fa-upload ms-1"></span></span>
+            </button>
+            <div class="btn btn-primary" id="reupload-button" style="display: none;" onclick="clickReupload()"><%= lib_translate("Continue_import")%></div>
+            <a href="<%=user_download_template_import_user_path%>" class="btn btn-success">Tải mẫu import<span class="ms-1 fas fa-download"></span></a>
+
+          </div>
+          <div id="import-server-error" style="display:none;">
+            <span class="text-danger">Lỗi khi xử lý dữ liệu. Vui lòng kiểm tra và thử lại.</span>
+          </div>
+          <%# Import result %>
+          <div id="import-result" class="border rounded-1 mt-2 collapse">
+            <h5 class="p-2 fs-0 bg-200"><%= lib_translate("Processing_result")%>:<span id="result-total"></span></h5>
+            <div class="p-2">
+              <p class="m-0">
+                <span style="font-weight: 500;font-size: 17px;"><%= lib_translate("Total")%>:</span>
+                <span id="result_total" style="font-size: 18px;color: black;font-weight: 800;">0</span>
+              </p>
+              <p class="m-0">
+                <span style="font-weight: 500;font-size: 17px;"><%= lib_translate("Success")%>:</span>
+                <span id="success_count" class="text-success" style="font-size: 18px;color: black;font-weight: 800;">0</span>
+              </p>
+              <p class="m-0">
+                <span style="font-weight: 500;font-size: 17px;"><%= lib_translate("Duplicate")%>:</span>
+                <span id="update_count" class="text-info" style="font-size: 18px;color: black;font-weight: 800;">0</span>
+                <span id="update-all-button" onclick="uploadAllImport()" class="btn btn-primary btn-sm ms-4" style="padding: 0px 7px;font-size: 0.7em;display:none;"><%= lib_translate("Update_all")%></span>
+              </p>
+              <div id="update_list" class="ps-2 mt-2 scrollbar" style="max-height: 300px;"></div>
+              <p class="m-0">
+                <span style="font-weight: 500;font-size: 17px;"><%= lib_translate("Not_Success")%>:</span>
+                <span id="error_count" class="text-danger" style="font-size: 18px;color: black;font-weight: 800;">0</span>
+              </p>
+              <div id="error_list" class="ps-3 scrollbar" style="max-height: 300px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary button-cancel-import" type="button" data-bs-dismiss="modal"><%= lib_translate("Close")%></button>
+      </div>
+    </div>
+  </div>
+</div>
+<div style="display:none;">
+  <p id="import-action" hidden><%= url_for(action:'import_users',controller:'users')%></p>
+  <p id="update-import-action" hidden><%= url_for(action:'update_imports',controller:'users')%></p>
+</div>
+
+
+
+<div>
+
+<div class="modal fade" data-bs-keyboard="false" data-bs-backdrop="static" id="modal-import-file-stu-info" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 700px">
+    <div class="modal-content position-relative">
+      <div class="position-absolute top-0 end-0 mt-1 me-2 z-index-1">
+        <button  class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base button-cancel-import" style="width: 2rem;height: 2rem;" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div class="rounded-top-lg py-3 ps-4 pe-6 bg-light">
+          <h5 class="mb-1">Cập nhập thông tin hợp đồng <b class="render_name_tbfeet"></b> từ file</h5>
+        </div>
+        <%# File preview/process %>
+          <div class="border rounded-1 mt-2 me-2 ms-2" id="import-file-containter-stu-info" style="display:none;">
+            <div class="ps-2" style="display: flex;align-items: center;">
+                <%= image_tag("/assets/image/excel.png") %>
+                <div class="ms-2">
+                    <p class="m-0" id="import-file-name-stu-info" style="font-size: 0.9em;font-weight: 600;">...</p>
+                    <p class="m-0" id="import-file-size-stu-info" style="font-size: 0.8em;">...</p>
+                </div>
+            </div>
+            <div class="progress me-2 ms-2 mb-1" style="height:7px">
+                <div class="progress-bar bg-success" id="file-process-stu-info" role="progressbar" style="transition: width 0.2s ease; width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                </div>
+            </div>
+          </div>
+        <div class="pe-3 ps-3 pt-3 pb-2">
+          <%# Form import file student %>
+          <div>
+            <input id="file-import-student-stu-info" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" type="file" name="file" hidden>
+            <label for="file-import-student-stu-info" id="label-select-file-stu-info" class="btn btn-warning m-0"><%= lib_translate("select_files")%></label>
+            <button class="btn btn-primary btn-secondary disabled" onclick="clickImportFileStuInfo()" id="button-upload-file-stu-info" type="submit">
+              <%# icon %>
+              <span id="spin_icon_update_info" class="spinner-border spinner-border-sm upload-process" role="status" aria-hidden="true"></span>
+              <%# text %>
+              <span class="upload-text"><%= lib_translate("Upload")%><span class="fas fa-upload ms-1"></span></span>
+            </button>
+            <div class="btn btn-primary" id="reupload-button-stu-info" style="display: none;" onclick="clickReuploadStuInfo()"><%= lib_translate("Continue_import")%></div>
+            <a href="<%=user_download_template_import_contract_path%>" id="btn_download_tmp_stu_info" class="btn btn-success">Tải mẫu import<span class="ms-1 fas fa-download"></span></a>
+          </div>
+          <div id="import-server-error-stu-info" style="display:none;">
+            <span class="badge badge-soft-danger">Lỗi khi xử lý dữ liệu. Vui lòng kiểm tra và thử lại.</span>
+          </div>
+          <%# Import result %>
+          <div id="import-result-stu-info" class="border rounded-1 mt-2 collapse">
+            <h5 class="p-2 fs-0 bg-200"><%= lib_translate("Processing_result")%>:<span id="result-total-stu-info"></span></h5>
+            <div class="p-2">
+              <p class="m-0">
+                <span style="font-weight: 500;font-size: 17px;"><%= lib_translate("Total")%>:</span>
+                <span id="result_total_stu_info" style="font-size: 18px;color: black;font-weight: 800;">0</span>
+              </p>
+              <p class="m-0">
+                <span style="font-weight: 500;font-size: 17px;"><%= lib_translate("Success")%>:</span>
+                <span id="success_count_stu_info" class="text-success" style="font-size: 18px;color: black;font-weight: 800;">0</span>
+              </p>
+              <p class="m-0 d-none" >
+                <span style="font-weight: 500;font-size: 17px;"><%= lib_translate("Duplicate")%>:</span>
+                <span id="update_count_stu_info" class="text-info" style="font-size: 18px;color: black;font-weight: 800;">0</span>
+                <span id="update-all-button-stu-info" onclick="uploadAllImportStuInfo()" class="btn btn-primary btn-sm ms-4" style="padding: 0px 7px;font-size: 0.7em;display:none;"><%= lib_translate("Update_all")%></span>
+              </p>
+              <div id="update_list_stu_info" class="ps-2 mt-2 scrollbar" style="max-height: 300px;"></div>
+              <p class="m-0">
+                <span style="font-weight: 500;font-size: 17px;"><%= lib_translate("Not_Success")%>:</span>
+                <span id="error_count_stu_info" class="text-danger" style="font-size: 18px;color: black;font-weight: 800;">0</span>
+              </p>
+              <div id="error_list_stu_info" class="ps-3 scrollbar" style="max-height: 300px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary button-cancel-import" type="button" data-bs-dismiss="modal"><%= lib_translate("Close")%></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="display:none;">
+    <p id="import-action-stu-info" hidden><%= url_for(action:'import_user_contract',controller:'users')%></p>
+</div>
+
+</div>
+<script>
+  // Từ khóa dịch
+  let strAddUser = "<%= lib_translate("Add_staff") %>";
+  let strUpdateUser = "<%= lib_translate("Update_staff") %>";
+  let strSidValid1 = "<%= lib_translate("Employee_code_already_exists") %>";
+  let strSidValid2 = "<%= lib_translate("Please_Don't_Enter_Space_in_Employee_code") %>";
+  let strSidValid3 = "<%= lib_translate("Employee_code_must_have_at_least_6_characters") %>";
+  let strUsernameVaild1 = "<%= lib_translate("Username_already_exists")  %>";
+  let strUsernameVaild2 = "<%= lib_translate("Please_Don't_Enter_Space_in_User_Name")%>";
+  let strUsernameVaild3 = "<%= lib_translate("Username_must_have_at_least_6_characters")%>";
+  let strEmailVaild1 = "<%= lib_translate("Email_already_exists")%>";
+  let strEmailVaild2 = "<%= lib_translate("Please_enter_the_correct_email_address")%>";
+  let strPwdVaild1 = "<%= lib_translate("Password_must_have_at_least_8_characters")%>";
+  let strPwdVaild2 = "<%= lib_translate("Please_Don't_Enter_Space_Password")%>";
+  let strPwdVaild3 = "<%= lib_translate("Re-Password_incorrect")%>";
+  let strMobileVaild1 = "<%= lib_translate("Mobile_validation")%>";
+  let strMobileVaild2 = "<%= lib_translate("Vietnam_mobile_validation")%>";
+  let strFname = "<%= lib_translate("Please_Enter_Firts_name")%>";
+  let strLname = "<%= lib_translate("Please_Enter_Last_name")%>";
+  let strSid = "<%= lib_translate("Please_Enter_Employee_code")%>";
+  let strEmail = "<%= lib_translate("Please_Enter_User_Email")%>";
+  let strUsername = "<%= lib_translate("Please_Enter_User_Name")%>";
+  let strPwd = "<%= lib_translate("Please_Enter_Password")%>";
+  let strRePwd = "<%= lib_translate("Please_Enter_Re-Password")%>";
+  let strMobile = "<%= lib_translate("Please_enter_your_mobile")%>";
+  let buttonText = "<%= lib_translate("Choose_date")%>";
+  let closeText = "<%= lib_translate("closeText")%>";
+  let prevText = "<%= lib_translate("prevText")%>";
+  let nextText = "<%= lib_translate("nextText")%>";
+  let currentText = "<%= lib_translate("currentText")%>";
+  let Jan = "<%= lib_translate("Jan")%>";
+  let Feb = "<%= lib_translate("Feb")%>";
+  let Mar = "<%= lib_translate("Mar")%>";
+  let Apr = "<%= lib_translate("Apr")%>";
+  let May = "<%= lib_translate("May")%>";
+  let Jun = "<%= lib_translate("Jun")%>";
+  let Jul = "<%= lib_translate("Jul")%>";
+  let Aug = "<%= lib_translate("Aug")%>";
+  let Sep = "<%= lib_translate("Sep")%>";
+  let Oct = "<%= lib_translate("Oct")%>";
+  let Nov = "<%= lib_translate("Nov")%>";
+  let Dec = "<%= lib_translate("Dec")%>";
+  let Sun = "<%= lib_translate("Sun")%>";
+  let Mon = "<%= lib_translate("Mon")%>";
+  let Tue = "<%= lib_translate("Tue")%>";
+  let Wed = "<%= lib_translate("Wed")%>";
+  let Thu = "<%= lib_translate("Thu")%>";
+  let Fri = "<%= lib_translate("Fri")%>";
+  let Sat = "<%= lib_translate("Sat")%>";
+  let urlSid = "<%= user_check_unique_sid_path %>";
+  let show = "<%= user_show_select_path %>";
+  let urlUsername = "<%= user_check_unique_username_path %>";
+  let urlEmail = "<%= user_check_unique_email_path %>";
+  let urlCheckOrg =  "<%= user_checkOrg_path %>";
+  let lastUserSid = "<%=@userLastid.to_i%>";
+  let strUserOrgid = "<%=@Orgid%>";
+  var randomPwdFinal = "<%=SecureRandom.base64(10).gsub("==", "@*").gsub(/[&\/\\#,+()$~%.'":?<>{}]/, SecureRandom.base58(1)).slice(6, 16)%>";
+  let no_avatar_url = "<%=image_path('no_avatar.jpg')%>";
+  let pwd_vaild_rule = "<%= lib_translate("Pwd_vaild_rule")%>";
+
+  let trans_skip = "<%= lib_translate("Skip")%>"
+  let trans_update = "<%= lib_translate("Update")%>"
+  let trans_upload = "<%= lib_translate("Upload")%>";
+  let trans_uploading = "<%= lib_translate("Uploading")%>"
+  let trans_processing = "<%= lib_translate("Processing")%>"
+
+    $('#myModal').on('shown.bs.modal', function () {
+      $('#myInput').trigger('focus')
+    })
+    
+
+    $('#search_user').bind('keypress keydown keyup', function(e){
+      if(e.keyCode == 13) { e.preventDefault(); }
+    });
+
+
+
+    $( "#user_birthday_add" ).datepicker({
+      showButtonPanel: true,
+          dateFormat: "dd/mm/yy",
+          changeMonth: true,
+          changeYear: true,
+          yearRange: "c-100:c+10",
+          // defaultDate: +1,
+          buttonImageOnly: true,
+          buttonImage: "<%= image_path('icon-calender-datepicker.png') %>",
+          showOn: "button",
+          buttonText: buttonText,
+          closeText: closeText,
+          prevText: prevText,
+          nextText: nextText,
+          currentText: currentText,
+          monthNamesShort: [Jan, Feb, Mar, Apr,May, Jun, Jul, Aug, Sep, Oct, Nov, Dec],
+          dayNamesMin: [Sun, Mon, Tue, Wed,Thu, Fri, Sat],
+          firstDay: 1,
+          isRTL: false,
+          showMonthAfterYear: false,
+          yearSuffix: "",
+    });
+    function onChangeTwoFA(e){
+        if(e.id === "checkbox-active-checkin") {
+            // ignore_attend: TRUE / FALSE
+            if(e.value === 'TRUE'){
+                $(e).val('FALSE');
+                $(e).next().html("Tắt").css("color", "red");
+            } else {
+                $(e).val('TRUE');
+                $(e).next().html("Bật").css("color", "green");
+            }
+        } else {
+            // twofa & twofa_exam: on / off
+            if(e.value === 'on'){
+                $(e).val('off');
+                $(e).next().html("Tắt").css("color", "red");
+            } else {
+                $(e).val('on');
+                $(e).next().html("Bật").css("color", "green");
+            }
+        }
+    }
+
+
+
+
+    
+
+    // $('#user_tbuserstatus_add_details').on('change', function() {
+    //     if ($(this).val() === 'NGHI-VIEC') {
+    //         $('#user_status_INACTIVE').prop('checked', true);
+    //     } else {
+    //         $('#user_status_ACTIVE').prop('checked', true);
+    //     }
+    // });
+
+</script>
+<%= javascript_include_tag '/assets/myjs/user-index.js' %>
+<%= javascript_include_tag '/assets/lib_hrm/bootstrap.min.js', integrity: 'sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl', crossorigin: 'anonymous'%>
+<%= javascript_include_tag '/assets/myjs/import_user_contract.js' %>

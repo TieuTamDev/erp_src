@@ -1,0 +1,35 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  signdoc: one
+  swidth: MyString
+  sheight: MyString
+  px: MyString
+  py: MyString
+  signed_by: MyText
+  nopage: MyString
+  signed_at: 2025-03-29 13:56:59
+  signer_email: MyText
+  signer_fn: MyText
+  signer_ln: MyText
+  signer_title: MyText
+  note: MyText
+  signatureid: MyString
+  signature_path: MyText
+
+two:
+  signdoc: two
+  swidth: MyString
+  sheight: MyString
+  px: MyString
+  py: MyString
+  signed_by: MyText
+  nopage: MyString
+  signed_at: 2025-03-29 13:56:59
+  signer_email: MyText
+  signer_fn: MyText
+  signer_ln: MyText
+  signer_title: MyText
+  note: MyText
+  signatureid: MyString
+  signature_path: MyText

@@ -1,0 +1,100 @@
+<div class="">
+  <div class="bmtu_header_dashboard">
+    <h3 class="mt-2 overview_text"><%= lib_translate("Maintenance")  %></h3>
+  </div>
+
+    <div class="card mb-3">
+        <div class="card-body pt-0 mt-3">
+            <div class="tab-content">
+                <%= form_for @maintains, :url=> maintain_update_path, html: {method: :post, id:"maintains_form" } do |f| %>
+
+                    <div class="mb-3">
+                        <label for="" class="form-label"><%= lib_translate("app")  %> </label>
+                        <select class="form-select" id="maintenanceAppInput" name="maintenanceApp">
+                            <option value="ERP"> ERP </option>
+                            <option value="STF"> STF </option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="" class="form-label"><%= lib_translate("period")  %> </label>
+                        <input type="" value="<%=@period%>" class="form-control" id="" aria-describedby="" name="maintenance_period">
+                    </div>            
+                    <div class="mb-3">
+                        <label for="" class="form-label"><%= lib_translate("opentiming")  %></label>
+                        <input type="" value="<%=@opentiming%>" class="form-control" id="" name="maintenance_openning">
+                    </div>
+                    <div class="mb-3">
+                        <label for="" class="form-label"><%= lib_translate("oips")  %></label>
+                        <input class="form-control" value="<%=@oips%>" id="" cols="" name="maintenance_ips">
+                    </div>  
+                    <fieldset>
+                        <div class="row mb-3" style="align-items: center;">
+                            <label class="form-label"><%= lib_translate("MAINTAIN") %>:</label>
+                            <div class="col-sm-9">
+                                <div class="row">
+                                    <div class="col-auto">
+                                        <input checked type="radio" id="maintenance_status_active" class="form-check-input" value="NO" name="maintenance_status_add"/> <label class="form-check-label" for="maintenance_status_active" style="cursor: pointer"> HOẠT ĐỘNG </label>
+                                    </div>
+                                    <div class="col-auto">
+                                        <input  type="radio" id="maintenance_status_inactive" class="form-check-input" value="YES" name="maintenance_status_add"/> <label class="form-check-label" for="maintenance_status_inactive" style="cursor: pointer"> BẢO TRÌ </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                    <button onclick="submitData()" id="submit_button" type="button" class="btn btn-primary"><%= lib_translate("Save")  %></button>
+                <% end %>
+            </div>
+            <div class="tab-content mt-4">
+                <h1> <%= lib_translate("Maintain_history")%> </h1> 
+                <%= render_search_pagination(maintain_index_path()).html_safe %>
+                <table id="table_tbhospitals" class="table table-bordered fs--1 mb-0 table-hover" style="margin-top: 0px !important; margin-bottom: 0px !important">
+                    <thead class="bg-200 text-900">
+                    <tr>                    
+                        <th class="sort" data-sort="name" style="text-align: center; cursor: pointer;"><%= lib_translate("app")  %></th>
+                        <th class="sort" data-sort="scode" style="text-align: center; cursor: pointer;"><%= lib_translate("period")  %></th>
+                        <th style="text-align: center; cursor: pointer;" class="sort" data-sort="status"><%= lib_translate("oips")  %></th>
+                        <th style="text-align: center; cursor: pointer;" class="sort" data-sort="status"><%= lib_translate("opentiming")  %></th>                  
+                    </tr>
+                    </thead>
+                    <tbody class="list">
+                    <% @Hismaintenances.each do |hismaintenances| %>
+                        <tr>
+                            <td class="name"> <%= hismaintenances.app %> </td>
+                            <td class="scode"> <%= hismaintenances.period %> </td>
+                            <td class="opentiming"> <%= hismaintenances.oips %> </td>
+                            <td class="opentiming"> <%= hismaintenances.opentiming %> </td>                     
+
+                        </tr>
+                    <% end %>
+                    </tbody>
+                </table>
+                <%= render_pagination_limit_offset(maintain_index_path(lang: session[:lang], per_page: session[:per_page], search: session[:search]), 10, @Hismaintenances.count).html_safe %>
+            </div>
+        </div>
+    </div>
+</div>
+<script>        
+    function submitData(){
+        if (confirm("Bạn có chắc chắn muốn thao tác hay không ?")) {   
+            $("#maintains_form").submit();
+            $("#submit_button").prop('disabled', true);
+        }
+    }
+    var currentIpV4 = "<%= request.remote_ip%>";
+    
+    $( document ).ready(function() {
+        var strApp = "<%=@app%>" ;
+        if (strApp != ""){
+        $("#maintenanceAppInput").val(strApp);
+        }
+        let maintains_status = "<%= @status%>";
+        if (maintains_status == "NO") {
+            document.getElementById("maintenance_status_active").checked = true;
+        }else {
+            document.getElementById("maintenance_status_inactive").checked = true;
+        }  
+       
+    });
+</script>  
+

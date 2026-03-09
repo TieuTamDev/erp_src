@@ -1,0 +1,7 @@
+<% @form_data[:stream_datas]&.each do |button| %>
+  <%= button_tag lib_translate("appointment.button.#{button[:status]}.#{button[:result]}"),
+    class: "btn #{result_style(button[:result])} #{button[:status]} px-3 me-2",
+    data:{status:button[:status], result: button[:result]},
+    onclick: "clickSubmitAppointProcess('#{button[:status]}', '#{button[:result]}', '#{button[:next_department_id]}', '#{button[:next_department_scode]}','#{button[:next_status]}')"
+  %>
+<% end %>

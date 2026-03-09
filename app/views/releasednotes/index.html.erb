@@ -1,0 +1,126 @@
+<% content_for :head do %>
+    <%= stylesheet_link_tag '/assets/mystyle/religions.css'%>
+    <%= javascript_include_tag '/assets/myjs/tinymcev6.min.js', referrerpolicy: "origin" %>
+    <%= javascript_include_tag '/assets/myjs/flatpickr.js' %>
+    <%= javascript_include_tag '/assets/myjs/flatpickr_local/vn.js' %>
+    <%= stylesheet_link_tag '/assets/mystyle/flatpickr.min.css' %>
+    <%= stylesheet_link_tag "select2-bootstrap-5-theme.min" %>
+    <%= stylesheet_link_tag "select2.min" %>
+<% end %> 
+
+<% content_for :bottombody do %>
+    <%= javascript_include_tag 'select2.full.min'%>
+    <%= javascript_include_tag 'select2.min.js'%>
+    <%= javascript_include_tag '/assets/myjs/releasednotes.js'%>
+    <%= javascript_include_tag '/assets/lib_hrm/bootstrap-datetimepicker.min.js' %>
+<% end %>
+<style></style>
+<!-- title header -->
+<div class="list_RELIGIONS">
+    <div class="bmtu_header_dashboard">
+        <h3 class="mt-2 overview_text"><%= lib_translate("List_releasednotes")  %></h3>
+    </div>
+    <% if is_access(session["user_id"], "RELEASEDNOTES","ADD") %>
+        <button class="btn btn-primary btn-add-user mt-3 mb-3" id="btn-add-user" data-bs-toggle="modal" data-bs-target="#modal-releasednote">
+            <%= lib_translate("Add_releasednotes")  %>
+        </button>
+    <% end %>
+</div>
+<!-- show released notes list -->
+<% @releasednotes.each do |releasednote| %>
+    <div class="card mb-3">
+        <div class="card-header">
+            <h5 class="mb-2">
+                <%= releasednote.dtrelease.strftime("%d-%m-%Y %H:%M")%> - <code class="fw-bold fs-1"><%= releasednote.name %></code>
+                <span> 
+                    <% if is_access(session["user_id"], "RELEASEDNOTES","EDIT") %>
+                        <a style="background: none !important; border: none !important;cursor: pointer;" data-bs-toggle="modal" data-bs-target="#modal-releasednote" data-update='<%= Base64.encode64({"id" =>  releasednote.id , "name" => releasednote.name, "authors" => releasednote.authors , "dtrelease" => releasednote.dtrelease.strftime("%d-%m-%Y %H:%M"), "contents" => releasednote.contents}.to_json) %>'>
+                            <span class="text-primary fas fa-pen ms-3"></span>
+                        </a>
+                    <% end %>
+                </span>
+            </h5>
+            <p class="mb-0"><%= lib_translate("Authors")%>: <%= releasednote.authors %></p>
+        </div>
+        <div class="card-body bg-light">
+            <%= releasednote.contents.html_safe%>
+        </div>
+    </div>
+<% end %>
+<!-- Modal add Released Note -->
+<div class="modal fade" id="modal-releasednote" tabindex="-1" role="dialog" aria-hidden="true" data-bs-focus="false">
+    <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+        <div class="modal-content position-relative">
+            <div class="position-absolute top-0 end-0 mt-2 me-2 z-index-1">
+                <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="rounded-top-lg py-3 ps-4 pe-6 bg-light">
+                    <h4 class="mb-1" id="cls_bmtu_form_add_title"><%= lib_translate("CREATE_releasednotes")  %></h4>
+                </div>
+                <div class="p-4 pb-0">
+                    <div class="form-add-releasednotes">
+                        <%= form_for @releasednote, :url=> releasednotes_update_path, html: {method: :post, id:"form_add_releasednotes", class:'col-12' } do |f| %>
+                            <div class="erro_labble mb-2">
+                                <p style="display:none; color: rgb(197 82 82);border: 1px solid rgb(199 136 136 / 23%);background: rgb(255 54 54 / 16%);border-radius: 5px;padding: 10px"
+                                id="erro_labble_content">
+                                </p>
+                            </div>
+                            <div class="row mb-3" style="display:none;">
+                                <%= f.label :id, class: "col-sm-3 col-form-label" %>
+                                <div class="col-sm-9">
+                                    <%= f.text_field :id, class: 'form-control' , name: 'id', id:'id' %>
+                                    <%= f.text_field :id, class: 'form-control' , name: 'authors', id:'authors_input' %>
+                                </div>
+                            </div>
+                            <div class="row mb-3"> 
+                                <label class="col-sm-4 col-lg-3 col-form-label" ><%= lib_translate("Name") %>:</label>
+                                <div class="col-sm-8 col-lg-9">
+                                    <%= f.text_field :name, class: 'form-control',  name:'name' , id:"name"%>
+                                </div>
+                            </div>
+                            <div class="row mb-3"> 
+                                <label class="col-sm-4 col-lg-3 col-form-label" ><%= lib_translate("Authors") %>:</label>
+                                <div class="col-sm-8 col-lg-9">
+                                    <select class="form-select selectpicker" id="authors" multiple="multiple" size="3" data-options='{"removeItemButton":true,"placeholder":true}'>
+                                        <option value="Đinh Hoàng Vũ">Đinh Hoàng Vũ</option>
+                                        <option value="Đinh Quốc Hải">Đinh Quốc Hải</option>
+                                        <option value="Hồ Xuân Hoàng Anh">Hồ Xuân Hoàng Anh</option>
+                                        <option value="Lê ngọc Huy">Lê ngọc Huy</option>
+                                        <option value="Trương Phú Đồng">Trương Phú Đồng</option>
+                                        <option value="Hoàng Tuấn Đạt">Hoàng Tuấn Đạt</option>
+                                        <option value="Lê Nguyễn Quang Thái">Lê Nguyễn Quang Thái</option>
+                                    </select> 
+                                </div>
+                            </div>          
+                            <div class="row mb-3"> 
+                                <label class="col-sm-4 col-lg-3 col-form-label" ><%= lib_translate("Datetime_release") %>:</label>
+                                <div class="col-sm-8 col-lg-9">
+                                    <input class="form-control datetimepicker date_post" id="dtrelease" name="dtrelease" type="text" placeholder="d/m/y H:i" data-options='{"enableTime":true,"dateFormat":"d-m-y H:i","disableMobile":true}' />
+                                </div>
+                            </div>  
+                            <div class="col-12 mt-1">
+                                <label for="#contents" class="col-form-label"><%= lib_translate('Contents') %>:</label>
+                                <%= f.text_area(:contents, :id=> "contents",:name=> "contents", :class =>"tinymce d-none") %>
+                                <div class="error error-content mt-2"></div>
+                            </div>
+                            <div class="modal-footer border-0 p-0 mb-2">
+                            <%= f.submit lib_translate("Save") , type:"button" , id:"btn_save",
+                                class: "btn btn-warning  border-red border-pink-600 cls-bmtu-text-red md:group-hover:bg-pink-50 btn-block btn-block text-uppercase " %>
+                                <div id="loading_button_releasednotes" class= "btn btn-warning border-red border-pink-600 cls-bmtu-text-red md:group-hover:bg-pink-50 btn-block btn-block text-uppercase " style="opacity: 0.8;display:none;" >
+                                    <i class ="fa fa-spinner fa-spin"> </i>  <%=lib_translate("Save")%> 
+                                </div>
+                            </div>
+                        <% end %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    let title_create = "<%= lib_translate('Create_releasednote')%>";
+    let title_update = "<%= lib_translate('Update_releasednote')%>";
+    let time_now = "<%= Time.now.strftime('%d/%m/%Y %H:%M')%>";
+    
+</script>

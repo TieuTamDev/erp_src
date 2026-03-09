@@ -1,0 +1,105 @@
+.item-file{
+    display: flex !important;
+    flex-direction: column;
+    overflow: hidden;
+}
+.item-file-info{
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+    overflow: hidden;
+}
+.item-file-name{
+    cursor: pointer;
+    margin: 0;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.item-file-size{
+    margin: 0;
+    text-indent: 30px;
+    font-size: 14px;
+}
+.item-file-process{
+    margin-left: 30px;
+    text-align: left;
+}
+.item-file-process .progress{
+    height: 4px;
+}
+.file_owner{
+    text-transform: capitalize;
+}
+.item-file-buttons{
+    display: flex;
+    width: 146px;
+    justify-content: space-between;
+    margin-top: 7px;
+}
+.item-file-buttons button{
+    width: 80px;
+}
+.item-file-error{
+    font-size: 11px;
+    color: var(--falcon-btn-falcon-danger-color);
+}
+
+.media-controls{
+    display: flex;
+    flex-direction: column;
+    margin-top: 10px;
+}
+.media-controls button{
+    margin-top: 5px;
+    padding: 2px 5px;
+}
+
+
+/* .item-file{
+    flex-direction: row;
+    align-items: center;
+}
+.item-file-size{
+    padding: 0px 10px;
+    text-align: center;
+    text-indent: unset;
+}
+.item-file-process{
+    margin-left: 0px;
+    width: 250px;
+    text-align: center;
+}
+.item-file-info{
+    width: calc(100% - 526px);
+}
+
+.item-file-buttons{
+    margin-top: 0px;
+} */
+
+@media (min-width: 576px){
+    .media-controls{
+        display: block;
+    }
+    .media-controls button{
+        margin-top: unset;
+        margin-right: 5px;
+    }
+}
+/*
+@media (min-width: 768px){
+} */
+
+@media (min-width: 1200px){
+    
+}
+
+@media (min-width: 1540px){
+    
+}
+
+
+
+@media (min-width: 1540px){
+   
+}

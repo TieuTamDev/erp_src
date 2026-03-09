@@ -1,0 +1,279 @@
+<style>
+    .align-middle {
+      color: #b8b8bd;
+    }
+  
+    .form-add-holiday {
+      justify-content: center;
+      display: flex;
+      background-color: white;
+      border-radius: 10px;
+    }
+  
+    #form-add-archive-container {
+      background: rgba(0, 0, 0, 0.84);
+      overflow-y: scroll;
+    }
+  
+    #form-update-holiday-container {
+      background: rgba(0, 0, 0, 0.84);
+      overflow-y: scroll;
+    }
+  
+    #form_add_holiday {
+      width: 80%;
+    }
+  
+    #cls_bmtu_form_add_title {
+      font-size: 25px;
+      font-weight: bold;
+      text-align: center;
+    }
+  
+    .cls_bmtu_close_btn {
+      width: 100%;
+    }
+  
+    .btn-close {
+      text-align: right;
+      color: red;
+    }
+  
+    .close_form_add {
+      color: red;
+      font-size: 20px;
+      font-weight: bold;
+    }
+  
+    .edit_holiday {
+      cursor: pointer;
+      text-decoration: none;
+    }
+  </style>
+  
+  <div class="list_archive">
+    <div class="bmtu_header_dashboard">
+      <h3 class="mt-2 overview_text"><%=lib_translate('Archive')%></h3>
+    </div>
+    <div class="card mb-3">
+      <div class="card-body pt-0">
+        <div class="tab-content">
+          <div
+            class="tab-pane preview-tab-pane active"
+            role="tabpanel"
+            aria-labelledby="tab-dom-5a3c857c-8deb-4307-af64-a62f27089443"
+            id="dom-5a3c857c-8deb-4307-af64-a62f27089443"
+          >
+            <div
+              id="table_archive"
+              data-list='{"valueNames":["id","user_id","issued_place","stype","issued_day","status"],"page":5,"pagination":true}'
+            >
+              <div
+                class="row g-0 mb-2"
+                style="justify-content: space-between; align-items: center"
+              >
+                <div class="col-auto col-sm-5 mb-1">
+                  <button
+                    onclick="openFormAddArchive()"
+                    class="btn btn-primary btn-add-holiday mt-3"
+                    id="btn-add-holiday"
+                  >
+                    Add
+                  </button>
+                </div>
+                <!-- <div class="col-auto col-sm-5 mb-1">
+                  <form>
+                    <div class="input-group mt-3">
+                      <input
+                        class="form-control form-control-sm shadow-none search"
+                        type="search"
+                        placeholder="Search..."
+                        aria-label="search"
+                      />
+                      <div class="input-group-text bg-transparent">
+                        <svg
+                          class="svg-inline--fa fa-search fa-w-16 fs--1 text-600"
+                          aria-hidden="true"
+                          focusable="false"
+                          data-prefix="fa"
+                          data-icon="search"
+                          role="img"
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 512 512"
+                          data-fa-i2svg=""
+                        >
+                          <path
+                            fill="currentColor"
+                            d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z"
+                          ></path>
+                        </svg>
+                      </div>
+                    </div>
+                  </form>
+                </div> -->
+              </div>
+              <div class="table-responsive scrollbar">
+                <table
+                  class="table table-bordered table-striped fs--1 mb-0 table-hover"
+                >
+                  <thead class="bg-200 text-900">
+                    <tr>
+                      <th data-sort="id" >ID</th>
+                      <th class="sort" data-sort="user_id" style="display: none;">User ID</th>
+                      <th class="sort" data-sort="name">Name</th>
+                      <th class="sort" data-sort="issued_place">Issued_place</th>
+                      <th class="sort" data-sort="stype">Stype</th>
+                      <th class="sort">Mediafile</th>
+                      <th class="sort" data-sort="issued_day">Issued date</th>
+                      <th class="sort" data-sort="status">Status</th>
+                      <th style="text-align: center">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody class="list">
+                    <tr>
+                     
+                    </tr>
+                
+                  </tbody>
+                </table>
+              </div>
+              <div class="d-flex justify-content-center mt-3">
+                <button
+                  class="btn btn-sm btn-falcon-default me-1"
+                  type="button"
+                  title="Previous"
+                  data-list-pagination="prev"
+                >
+                  <span class="fas fa-chevron-left"></span>
+                </button>
+                <ul class="pagination mb-0"></ul>
+                <button
+                  class="btn btn-sm btn-falcon-default ms-1"
+                  type="button"
+                  title="Next"
+                  data-list-pagination="next"
+                >
+                  <span class="fas fa-chevron-right"> </span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <!-- FORM ADD HOLIDAY -->
+
+  </div>
+  <div id="form-add-archive-container" class="modal">
+    <div class="modal-dialog" style="max-width: 500px">
+      <div class="modal-content">
+        <div style="text-align: right" class="cls_bmtu_close_btn">
+          <button
+            onclick="closeFormAdd()"
+            type="button"
+            class="close_form_add btn"
+          >
+            X
+          </button>
+        </div>
+        <div class="form-add-holiday">
+          <%= form_for Archive.new, :url=> "/mywork/user/archive/edit", html:
+          {method: :post, id:"form_add_archive" } do |f| %>
+          <p id="cls_bmtu_form_add_title">CREATE ARCHIVE</p>
+          <div class="erro_labble mb-2" style="height: 40px">
+            <p
+              style="
+                display: none;
+                color: rgb(197 82 82);
+                border: 1px solid rgb(199 136 136 / 23%);
+                background: rgb(255 54 54 / 16%);
+                border-radius: 5px;
+                padding: 10px;
+                margin-right: 15px;
+                margin-left: 15px;
+              "
+              id="erro_labble_content"
+            ></p>
+          </div>
+          <div class="form-group" style="display: none" class="txt_update_id">
+            <%= f.label :id %> <span style="color: red" class="red">* </span>
+            <%= f.text_field :id, class: 'form-control' , name: 'archive_id_add'
+            %>
+          </div>
+          <div class="row" style="margin: 0 auto">
+            <div class="form-group" id="id_add_sid">
+              <%= f.label :user_id %>
+              <span style="color: red" class="red">* </span>
+              <%= f.text_field :user_id, class: 'form-control' ,
+              name:'archive_user_id_add' %>
+            </div>
+
+            <div class="form-group">
+              <%= f.label :name %> 
+              <%= f.text_field :name, class: 'form-control', name: 'archive_name_add' %>
+            </div>
+
+            <div class="form-group">
+              <%= f.label :issued_place %> <%= f.text_field :issued_place ,
+              class: 'form-control' , name: 'archive_issued_place_add' %>
+            </div>
+
+            <div class="form-group">
+              <%= f.label :stype %> <%= f.select :stype, [["Nghỉ phép","Nghỉ
+              phép"] , ["Nghỉ không lương","Nghỉ không lương"], ["Nghỉ thai
+              sản","Nghỉ thai sản"],["Nghỉ tang gia","Nghỉ tang gia"], ["Nghỉ
+              cưới hỏi","Nghỉ cưới hỏi"]], {}, :class=> "form-control", name:
+              'archive_stype_add'%>
+            </div>
+
+            <div class="form-group">
+              <%= f.label :mediafile_id %> <%= f.file_field :mediafile_id,
+              class: 'form-control' , name: 'archive_mediafile_id_add' , :id=>
+              "archive_mediafile_id_add",:accept=>"image/x-png,image/gif,image/jpeg" %>
+            </div>
+
+            <div class="form-group">
+              <%= f.label :issue_date %> <%= f.date_field :issue_date , class:
+              'form-control' , :value => Time.now.strftime('%Y-%m-%d'), name:
+              'archive_issue_date_add' %>
+            </div>
+
+            <div class="form-group">
+              <%= f.label :status %> <%= f.select :status, [["ACTIVE","ACTIVE"], ["INACTIVE","INACTIVE"]], {}, :class=> "form-control", name:
+              'archive_status_add'%>
+            </div>
+          </div>
+          <div class="form-group" style="margin-left: 15px; margin-right: 15px">
+            <%= f.submit "CREATE ARCHIVE" , type:"button" ,
+            id:"btn_add_new_archive", class: "btn btn-primary mt-3 mb-5
+            border-red border-pink-600 cls-bmtu-text-red
+            md:group-hover:bg-pink-50 btn-block btn-block text-uppercase ",
+            style: "width: 100%;" %>
+          </div>
+
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+    <%= javascript_include_tag 'prism' %>
+    <script>
+      function openFormAddArchive() {
+        document.getElementById("form-add-archive-container").style.display =
+          "block";
+        document.getElementById("cls_bmtu_form_add_title").innerHTML =
+          "CREATE ARCHIVE";
+        document.getElementById("btn_add_new_archive").value = "CREATE ARCHIVE";
+      }
+      function closeFormAddArchive() {
+        document.getElementById("form-add-archive-container").style.display =
+          "none";
+        document.getElementById("holiday_id").value = "";
+      }
+    </script>
+  <%= javascript_include_tag '/assets/lib_hrm/jquery-3.2.1.slim.min.js', integrity: 'sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN', crossorigin: 'anonymous' %> 
+  <%= javascript_include_tag '/assets/lib_hrm/popper.min.js', integrity: 'sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q', crossorigin: 'anonymous' %>
+  <%= javascript_include_tag '/assets/lib_hrm/bootstrap.min.js', integrity: 'sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl', crossorigin: 'anonymous'%>
+  
+  

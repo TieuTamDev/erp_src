@@ -1,0 +1,230 @@
+<div class="modal-body px-4 pb-3">
+	<div class="accordion border rounded overflow-hidden" id="accordionFaq">
+		<div class="card shadow-none rounded-bottom-0 border-bottom">
+			<div class="accordion-item border-0">
+				<div class="card-header p-0" id="info-appointment">
+					<button class="accordion-button btn btn-link text-decoration-none d-block w-100 py-2 px-3 border-0 text-start rounded-0 shadow-none" data-bs-toggle="collapse" data-bs-target="#info-appointments" aria-expanded="true" aria-controls="info-appointments">
+						<span class="fas fa-caret-right accordion-icon me-3" data-fa-transform="shrink-2"></span>
+						<span class="fw-medium font-sans-serif text-900">Thông tin <%= lib_translate("appointment.#{@form_data[:appointment].stype}").downcase %></span>
+					</button>
+				</div>
+				<div class="accordion-collapse collapse show" id="info-appointments" aria-labelledby="info-appointment" data-parent="#accordionFaq" style="">
+					<div class="accordion-body p-0">
+					    <div class="card-body py-1"> 
+							<%= render "appointments/layouts/appointment_info" %>
+                        </div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="card shadow-none rounded-bottom-0 border-bottom">
+			<div class="accordion-item border-0">
+				<div class="card-header p-0" id="list-file-appointment">
+					<button class="accordion-button btn btn-link text-decoration-none d-block w-100 py-2 px-3 border-0 text-start rounded-0 shadow-none" data-bs-toggle="collapse" data-bs-target="#list-file-appointments" aria-expanded="true" aria-controls="list-file-appointments">
+						<span class="fas fa-caret-right accordion-icon me-3" data-fa-transform="shrink-2"></span>
+						<span class="fw-medium font-sans-serif text-900">Danh sách file liên quan</span>
+					</button>
+				</div>
+				<div class="accordion-collapse collapse show" id="list-file-appointments" aria-labelledby="list-file-appointment" data-parent="#accordionFaq">
+					<div class="accordion-body p-0">
+						<div class="card-body py-1">
+							<%= render "appointments/layouts/mediafiles_info" %>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="card shadow-none rounded-0 ">
+			<div class="accordion-item border-0">
+				<div class="card-header p-0" id="user-info-appointment">
+					<button class="accordion-button btn btn-link text-decoration-none d-block w-100 py-2 px-3 border-0 text-start rounded-0 shadow-none" data-bs-toggle="collapse" data-bs-target="#user-info-appointments" aria-expanded="true" aria-controls="user-info-appointments">
+						<span class="fas fa-caret-right accordion-icon me-3" data-fa-transform="shrink-2"></span>
+						<span class="fw-medium font-sans-serif text-900">Thông tin nhân sự <%= @form_data[:user] ? @form_data[:user].last_name : "N/A" %> <%= @form_data[:user] ? @form_data[:user].first_name : "" %></span>
+					</button>
+				</div>
+				<div class="accordion-collapse collapse show" id="user-info-appointments" aria-labelledby="user-info" data-parent="#accordionFaq">
+					<div class="accordion-body p-0">
+						<div class="card-body py-1">
+							<%= render "appointments/layouts/user_info" %>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="modal-footer border-0 px-4 pb-4 pt-0" id="btn-handle">
+	<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+	<%= render "appointments/buttons/submit_buttons"%>
+</div>
+<%= form_tag appointment_path(id: @form_data[:appointment_id]),method: :patch,id:'form-update-process',remote:true,authenticity_token: true do %>
+    <input name="mandocuhandle_id" value="<%= @form_data[:mandocuhandle_id]%>" hidden/> 
+    <input name="appointment_id" value="<%= @form_data[:appointment_id]%>" hidden/>
+    <input name="status" value="<%= @form_data[:status]%>" hidden/>
+    <div id="extra-inputs"></div>
+<%end%>
+<script>
+    $("#popupLargeModal").find(".modal-dialog").css({"max-width": "90%"});
+    // status button
+    $("#btn-handle").find('[data-result="approved"]').attr("data-bs-dismiss","modal");
+    $("#btn-handle").find('[data-result="rejected"]').attr("data-bs-dismiss","modal");
+
+    function initPopups() {
+        $("#popupConfirmForm .modal-content").html(`
+            <div class="modal-header">
+                <h5 class="modal-title m-0">Trình lên Ban Giám Hiệu</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="p-2 pb-3">
+                <label class="form-label">Ban giám hiệu</label>
+                <select class="form-select input" id="assign_user_id" name="assign_user_id"></select>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary close-btn" type="button" data-bs-dismiss="modal">Đóng</button>
+                <button class="btn btn-primary confirm-btn" type="button">Xác nhận</button>
+            </div>
+        `);
+
+        $("#popupConfirm .modal-content").html(`
+            <div class="modal-header">
+                <h5 class="modal-title m-0">Từ chối đề xuất bổ nhiệm</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="p-3">
+                <span>Lý do từ chối:</span>
+                <textarea class="form-control input" name="mandocuhandle_contents" rows="3" placeholder="Lý do"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger confirm-btn" type="button">Từ chối</button>
+                <button class="btn btn-secondary close-btn" type="button" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        `);
+    }
+
+    function clickSubmitAppointProcess(status,result,next_department_id,next_department_scode,next_status) {
+        let popupID = "";
+        switch (result) {
+            case "rejected":
+                popupID = "#popupConfirm";
+                break;
+            case "approved":
+                popupID = "#popupConfirmForm";
+                break;
+        
+            default:
+                break;
+        }
+        openConfirmPopup(popupID,status,result,next_department_id,next_department_scode,next_status);
+    }
+
+    function openConfirmPopup(popupID,status,result,next_department_id,next_department_scode,next_status) {
+        let dialog = $(popupID);
+        dialog.find(".confirm-btn").off().on('click',()=>{
+            submitUpdate(popupID,status,result,next_department_id,next_department_scode,next_status);
+        });
+        dialog.modal('show');
+
+        if (result == "approved"){
+            $('#assign_user_id').select2({
+                theme: 'bootstrap-5',
+                language: {
+                searching: function () {
+                    return 'Đang tìm kiếm...';
+                },
+                loadingMore: function () {
+                    return 'Đang tải...';
+                }
+                },
+                placeholder: 'Chọn ban giám hiệu',
+                ajax: {
+                    delay: 1000,
+                    url: `<%= @ERP_PATH%>appointments/get_users`,
+                    data: function (params) {
+                        return {
+                            search: params.term,
+                            department_id: next_department_id
+                        };
+                    },
+                    processResults: function (data, params) {
+                        let results = data.items.map(function (item) {
+                            let option = { id: item.id, text: `${item.last_name} ${item.first_name} (${item.sid})` };
+                            return option;
+                        });
+
+                        return {
+                            results: results
+                        };
+                    }
+                }
+            });
+        }
+    }
+
+    function submitUpdate(popupID,status,result,next_department_id,next_department_scode,next_status) {
+        let updateForm = $("#form-update-process");
+        let wrapinputs = updateForm.find("#extra-inputs");
+        wrapinputs.html("");
+        let inputs = {};
+
+        // popup input
+        let popup = $(popupID);
+        popup.find(".input").each((_,element)=>{
+            let name = element.getAttribute("name");
+            let value = element.value;
+            inputs[name] = value;
+        });
+
+        if(inputs.hasOwnProperty("mandocuhandle_contents")){
+            if(inputs.mandocuhandle_contents == ""){
+                alert("Vui lòng nhập lý lo từ chối!");
+                return;
+            }
+        }
+
+        if(result == "approved"){
+            if(inputs.assign_user_id == ""){
+                alert("Vui lòng chọn người xử lý!");
+                return;
+            }
+        }
+
+        // step data
+        inputs["result"] = result;
+        inputs["next_department_id"] = next_department_id;
+        inputs["next_department_scode"] = next_department_scode;
+        inputs["next_status"] = next_status;
+
+        // result data
+        switch (result) {
+            case "approved":
+                inputs = {...inputs};
+                break;
+            default:
+                break;
+        }
+
+        // append inputs
+        Object.keys(inputs).forEach(key=>{
+            if(key == "mandocuhandle_contents"){
+                updateForm.append(`<textarea name="${key}" rows="4" cols="50">${inputs[key]}</textarea>`);
+            }else{
+                updateForm.append(`<input name="${key}" value="${inputs[key]}" hidden/>`);
+            }
+        });
+        
+        updateForm.submit();
+
+        popup.modal('hide');
+    }
+
+    function onSubmitError(message) {
+        console.log(message);
+    }
+    
+    function onSubmitSuccess() {
+        $("#refresh-btn").click();
+    }
+
+    // init confirm popup
+    initPopups();
+</script>

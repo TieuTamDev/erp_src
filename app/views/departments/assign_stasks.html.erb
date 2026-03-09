@@ -1,0 +1,508 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "select2-bootstrap-5-theme.min" %>
+  <%= stylesheet_link_tag "select2.min" %>
+  <%= stylesheet_link_tag 'jquery-ui.css' %>  
+<% end %>
+<% content_for :bottombody do %>
+    <%= javascript_include_tag 'select2.full.min'%>
+    <%= javascript_include_tag 'select2.min.js'%>
+    <%= javascript_include_tag '/assets/lib_hrm/bootstrap.min.js', integrity: 'sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl', crossorigin: 'anonymous'%>
+    <script>
+        const selects = $("select.select2");
+        for (let i = 0; i < selects.length; i++) {
+            const selectElement = $(selects[i]);
+            if (selectElement.length) {
+                if (selectElement.hasClass("select2-hidden-accessible")) {
+                    selectElement.select2('destroy');
+                }
+                selectElement.select2({
+                    width: '100%',
+                    theme: "bootstrap-5",
+                });
+            }
+        }
+    </script>
+<% end %>
+<style>
+    a[aria-expanded="true"] .rotate-icon {
+        transform: rotate(90deg);
+    }
+    a[aria-expanded="false"] .rotate-icon {
+        transform: rotate(0deg);
+    }
+    .count_dueties {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        border: 1px solid #cccccc;
+        font-size: 14px;
+        color: #333333;
+        margin-left: 8px;
+        font-weight: 500;
+    }
+</style>
+<div class="mb-2">
+    <a href="<%= departments_department_list_path()%>">Danh sách đơn vị</a>
+    <span class="fas fa-angle-right ms-2 me-2" style="color: #919191;"></span>
+    <a href="<%= departments_department_details_path(department_id: @department&.id, lang: session[:lang], tab: "Mô tả vị trí công việc") %>"><%= @department&.name %></a>
+    <span class="fas fa-angle-right ms-2 me-2" style="color: #919191;"></span>
+    <span class="text-info" style="">Phân công việc</span>
+</div>
+<%= form_tag departments_add_stasks_into_user_path, method: :post, id: "form-add-stask-into-user", authenticity_token: true do %>
+<input type="hidden" name="positionjob_id" value="<%= params[:positionjob_id] %>">
+<input type="hidden" name="department_id" value="<%= params[:department_id] %>">
+<input type="hidden" name="stask_ids" value="">
+<input type="hidden" name="gtask_ids" value="">
+<div class="card" style="flex-grow: 1;">
+    <div class="card-body p-3">
+        <h4 class="mb-1">Phân công công việc cho nhân sự</h4>
+        <p class="mb-3">Vị trí công việc: <span class="fw-bold pj-name"><%= @position&.name %></span></p>
+        <!-- Chọn nhân sự -->
+        <div class="mb-4 position-relative">
+            <label class="col-form-label" for="message-text">Tên nhân sự</label>
+            <select class="form-select select2" placeholder="Vui lòng chọn nhân sự" onchange="onSelectedUsers(this)" name="user_id" id="">
+                <option value="">Chọn nhân sự</option>
+                <% @users.each do |user| %>
+                    <option value="<%= user.id %>"> <%= user.last_name %> <%= user.first_name %> </option>
+                <% end %>
+            </select>
+            <div id="user-error" class="invalid-feedback" style="display: none; position: absolute; top: 95%; left: 0;">
+                Vui lòng chọn nhân sự.
+            </div>
+        </div>
+        <div class="card-body border rounded-3" style="background-color: #F9FAFB;">
+            <div class="page-add-stasks border-0 rounded-3">
+                <div class="row gx-0">
+                    <div class="col-12 col-xl-6 mb-3 mb-xl-0">
+                        <div class="p-3 me-xl-2 border rounded-3 bg-white" style="height: 550px;">
+                            <h4>Danh sách công việc đã được phân công</h4>
+                            <div class="">
+                                <label class="col-form-label" for="message-text">Tìm kiếm</label>
+                                <div class="form-control d-flex align-items-center" style="padding: .2125rem 1rem !important;">
+                                    <input class="col-10 me-auto" type="text"  id="task-search-input" placeholder="Tìm công việc..." style="outline: none;border: none;">
+                                    <span class="fas fa-search" style="color:#999999"></span>
+                                </div>
+                            </div>
+                            <div class="d-flex mb-1">
+                                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                                    <li class="nav-item" role="presentation"><a class="nav-link active" id="home-tab-user" data-bs-toggle="tab" href="#tab-home-user" role="tab" aria-controls="tab-home-user" aria-selected="false" tabindex="-1">Công việc</a></li>
+                                    <li class="nav-item" role="presentation"><a class="nav-link" id="profile-tab-user" data-bs-toggle="tab" href="#tab-profile-user" role="tab" aria-controls="tab-profile-user" aria-selected="true">Nhóm công việc</a></li>
+                                </ul>
+                            </div>
+                            <div class="tab-content border border-0 rounded-3 bg-white py-3 px-2 mt-2"id="myTabContenst" style="overflow: auto;max-height: 323px;">
+                                <div class="tab-pane fade active show" id="tab-home-user" role="tabpanel"aria-labelledby="home-tab-user">
+                                    <div class="" id="stasks-of-user">
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="tab-profile-user" role="tabpanel" aria-labelledby="profile-tab-user">
+                                    <div class="gtasks_of_user" id="">
+        
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-xl-6">
+                        <div class="p-3 ms-xl-2 border rounded-3 bg-white" style="height: 550px;">
+                            <h4>Thêm công việc mới cho nhân sự</h4>
+                            
+                            
+                            <div class="d-flex">
+                                    <div class="col-4 pe-2">
+                                        <label class="col-form-label" for="message-text">Chức năng</label>
+                                        <select class="form-select select2" placeholder="Vui lòng chọn chức năng" name="function_id" id="">
+                                        </select>
+                                    </div>
+                                    <div class="col-4 px-2">
+                                        <label class="col-form-label" for="message-text">Nhiệm vụ</label>
+                                        <select class="form-select select2" placeholder="Vui lòng chọn nhiệm vụ" name="duty_id" id="">
+                                        </select>
+                                    </div>
+                                    <div class="col-4 ps-2">
+                                        <label class="col-form-label" for="message-text">Tìm kiếm</label>
+                                        <div class="form-control d-flex align-items-center" style="padding: .2125rem 1rem !important;">
+                                            <input class="col-10 me-auto" type="text" name="search" id="taskSearch" onkeyup="searchTasks(this)" placeholder="Tìm công việc..." style="outline: none;border: none;">
+                                            <span class="fas fa-search" style="color:#999999"></span>
+                                        </div>
+                                    </div>
+                            </div>
+                            <div class="d-flex mb-1">
+                                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                                    <li class="nav-item" role="presentation"><a class="nav-link active" id="home-tab" data-bs-toggle="tab" href="#tab-home" role="tab" aria-controls="tab-home" aria-selected="false" tabindex="-1">Công việc</a></li>
+                                    <li class="nav-item" role="presentation"><a class="nav-link" id="profile-tab" data-bs-toggle="tab" href="#tab-profile" role="tab" aria-controls="tab-profile" aria-selected="true">Nhóm công việc</a></li>
+                                </ul>
+                            </div>
+                            <div class="tab-content border border-0 rounded-3 bg-white py-3 px-2 mt-2 position-relative"id="myTabContent" style="overflow: auto;max-height: 350px;">
+                                <div class="tab-pane fade active show" id="tab-home" role="tabpanel"aria-labelledby="home-tab">
+                                    <div class="render_stasks" id="task-tree-container" style="min-height: 239px;">
+                                            
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="tab-profile" role="tabpanel" aria-labelledby="profile-tab">
+                                    <div class="render_gtasks" style="min-height: 239px;">
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary mt-3 position-sticky bottom-0" type="button" onclick="submitAddStasks()" style="left: 90%">Lưu</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<%end%>
+<%= form_tag departments_get_stasks_path,method:'GET',class:"d-flex", id:'form-get-stasks',remote:true,authenticity_token: true do %>
+    <input type="hidden" name="function_id">
+    <input type="hidden" name="duty_id">
+    <input type="hidden" name="search">
+<%end%>
+
+<%= form_tag departments_get_gtasks_path,method:'GET',id:'form-get-gtasks',remote:true,authenticity_token: true do %>
+<%end%>
+<script>
+    let stask_added = [];
+    $(document).ready(function () {
+        showLoadding(true)
+        let user_id = sessionStorage.getItem("user_id");
+        console.log(user_id);
+        user_select = $("select[name='user_id']")
+        if (user_select.find(`option[value='${user_id}']`).length < 1) {
+            user_select.val("").trigger("change");
+        }else{
+            user_select.val(user_id).trigger("change");
+        }
+        $("#form-get-stasks").submit();
+    });
+    function submitAddStasks() {
+        let user_id = $("select[name='user_id']").val();
+        sessionStorage.getItem("user_id");
+        if (user_id == "") {
+            $('#user-error').show();
+            $('select[name="user_id"]').addClass('is-invalid');
+        }else{
+            $('#user-error').hide();
+            $('select[name="user_id"]').removeClass('is-invalid');
+            $("#form-add-stask-into-user").submit();
+        }
+    }
+    function getDatas(functions, dueties, stasks, selectedFunctionId, selectedDutyId, gtasks, stasks_without_duty) {
+        renderFunctionOptions(functions, selectedFunctionId);
+        renderDutyOptions(dueties, selectedDutyId);
+        renderTaskTree(stasks, "task-tree-container");
+        renderStasks(stasks_without_duty, "task-tree-container");
+
+        checkedStasks();
+        renderGtasks(gtasks)
+        checkedGtasks();
+        showLoadding(false);
+    }
+
+    function renderFunctionOptions(functions, selectedId) {
+        let $select = $('select[name="function_id"]');
+        $select.empty();
+        $select.append(`<option value="">Chọn chức năng</option>`);
+        functions.forEach(function(func) {
+            $select.append(
+                `<option value="${func.id}" ${func.id == selectedId ? 'selected' : ''}>${func.name}</option>`
+            );
+        });
+    }
+
+    function renderDutyOptions(dueties, selectedId) {
+        let $select = $('select[name="duty_id"]');
+        $select.empty();
+        $select.append(`<option value="">Chọn nhiệm vụ</option>`);
+        dueties.forEach(function(duty) {
+            $select.append(
+                `<option value="${duty.id}" ${duty.id == selectedId ? 'selected' : ''}>${duty.name}</option>`
+            );
+        });
+    }
+
+    function renderTaskTree(datas, element) {
+        const $container = $(`#${element}`);
+        let side_show = element == "task-tree-container" ? 'right' : 'left'
+        $container.empty(); // clear nội dung cũ
+        let show_functions = "";
+        let show_duties = "";
+        if (element == "task-tree-container") {
+            show_duties = $("select[name='duty_id']").val() != "" ? "d-none" : "";
+            show_functions = $("select[name='function_id']").val() != "" ? "d-none" : "";
+        }
+        datas.forEach(func => {
+            const $funcBlock = $(`
+                <div class="function-block mb-2 p-2 border rounded bg-light">
+                    <a class="${show_functions}" data-bs-toggle="collapse" href="#collapse-function-${side_show}-${func.function_id}" role="button" aria-expanded="true" aria-controls="collapse-function-${side_show}-${func.function_id}">
+                        <h5 class="fw-medium" style="font-size: 15px;"><span class="fas fa-angle-right rotate-icon me-3"></span>Chức năng: ${func.function_name} <span class="count_dueties">2</span></h5>
+                    </a>
+                </div>
+            `);
+            
+            const $funcBody = $(`<div class="ms-3 collapse show" id="collapse-function-${side_show}-${func.function_id}"></div>`); // phần nhiệm vụ
+            if (func.duties.length > 0) {
+                func.duties.forEach(duty => {
+                    const $dutyBlock = $(`
+                        <div class="duty-block p-2">
+                            <a class="${show_duties}" data-bs-toggle="collapse" href="#collapse-duty-${side_show}-${duty.duty_id}" role="button" aria-expanded="true" aria-controls="collapse-duty-${side_show}-${duty.duty_id}">
+                            <h6 class="text-secondary"><span class="fas fa-angle-right rotate-icon me-3"></span>Nhiệm vụ: ${duty.duty_name}</h6>
+                            </a>
+                        </div>
+                    `);
+    
+                    const $taskList = $(`<div class="ms-3 collapse show" id="collapse-duty-${side_show}-${duty.duty_id}"></div>`);
+    
+                    duty.stasks.forEach(task => {
+                        const $taskItem = $(`
+                            <div class="form-check" style="margin-bottom: 0px !important;">
+                                <input class="form-check-input ${element == "task-tree-container" ? '' : 'd-none'}" type="checkbox" value="${task.id}" name="stask_id" id="task_${side_show}_${task.id}">
+                                <label class="form-check-label" for="task_${side_show}_${task.id}">
+                                    ${task.name}
+                                </label>
+                            </div>
+                        `);
+                        $taskList.append($taskItem);
+                    });
+    
+                    $dutyBlock.append($taskList);
+                    $funcBody.append($dutyBlock);
+                });
+            }
+
+            $funcBlock.append($funcBody);
+            $container.append($funcBlock);
+        });
+    }
+
+    function renderStasks(stasks, element) {
+        const $container = $(`#${element}`);
+        let side_show = element == "task-tree-container" ? 'right' : 'left'
+        let staskItem = "";
+        
+        stasks.forEach(stask => {
+            staskItem += `
+                <div class="form-check">
+                    <input class="form-check-input ${element == "task-tree-container" ? '' : 'd-none'}" type="checkbox" value="${stask.id}" name="stask_id" id="task_${side_show}_${stask.id}">
+                    <label class="form-check-label" for="task_${side_show}_${stask.id}">
+                        ${stask.name}
+                    </label>
+                </div>
+            `;
+        });
+        $container.append(staskItem);
+    }
+
+    function renderGtasks(gtasks, element = "render_gtasks") {
+        let side_show = element == "render_gtasks" ? 'right' : 'left';
+        gtask_datas = "";
+        gtasks.forEach(gtask => {
+            stask_datas = "";
+            gtask.stasks.forEach(stask => {
+                stask_datas += `
+                    <div class="collapse show" id="${side_show}_stasks_of_gtask_${gtask.id}">
+                        <div class="stask_${stask.id} ps-6">
+                            <label class="form-check-label me-auto" for="">${stask.name}</label>
+                        </div>
+                    </div>
+                `
+            });
+            
+            gtask_datas += `
+                 <div class="gtask-${gtask.id} gtask-item mb-2 p-2 border rounded bg-light">
+                    <div class="d-flex align-items-center">
+                        <a data-bs-toggle="collapse" href="#${side_show}_stasks_of_gtask_${gtask.id}" role="button" aria-expanded="true">
+                            <span class="fas fa-angle-right rotate-icon me-3"></span>
+                        </a>
+                        <div>
+                            <input class="form-check-input ${element == "render_gtasks" ? '' : 'd-none'}" type="checkbox" name="gtask_id" id="gtask_${side_show}_${gtask.id}" value="${gtask.id}">
+                            <label class="form-check-label fs-0 mb-0 fw-medium" style="font-size: 15px;" for="gtask_${gtask.id}">Nhóm công việc: ${gtask.name}</label>
+                        </div>
+                    </div>
+                    ${stask_datas}
+                </div>
+            `;      
+        });
+        $(`.${element}`).html(gtask_datas);
+    }
+    
+    let stask_id_checked = [];
+    let gtask_id_checked = [];
+
+    function onSelectedUsers(element) {
+        showLoadding(true);
+        let user_id = $(element).val();
+        sessionStorage.setItem("user_id", user_id);
+        $.ajax({
+            type: "get",
+            url: ERP_PATH + "/departments/get_stasks_of_user",
+            data: {user_id: user_id, positionjob_id: "<%= params[:positionjob_id] %>"},
+            dataType: "JSON",
+            success: function (response) {
+                renderTaskTree(response.stask_datas, "stasks-of-user")
+                renderGtasks(response.gtask_datas, "gtasks_of_user")
+                renderStasks(response.stasks_without_duty, "stasks-of-user")
+                checkedStasks(response.stask_ids);
+                checkedGtasks(response.gtask_ids)
+                stask_id_checked = response.stask_ids;
+                gtask_id_checked = response.gtask_ids;
+                $("input[name='gtask_ids']").val(gtask_id_checked);
+                $("input[name='stask_ids']").val(stask_id_checked);
+                showLoadding(false);
+            }
+        });
+    }
+
+    function checkedStasks(stask_ids = stask_id_checked) {
+        $('input[name="stask_id"]').prop("checked", false);
+        stask_ids.forEach(id => {
+            $(`#task_right_${id}`).prop("checked", true);
+        });
+    }
+
+    function checkedGtasks(gtask_ids = gtask_id_checked) {
+        $('input[name="gtask_id"]').prop("checked", false);
+        gtask_ids.forEach(id => {
+            $(`#gtask_right_${id}`).prop("checked", true);
+        });
+    }
+
+    $("select[name='duty_id']").change(function(){
+        showLoadding(true);
+        let value = $(this).val();
+        $("input[name='duty_id']").val(value);
+        $("#form-get-stasks").submit();
+    });
+    $("select[name='function_id']").change(function(){
+        showLoadding(true);
+        let value = $(this).val();
+        $("input[name='function_id']").val(value);
+        $("select[name='duty_id']").val("").trigger('change');
+    });
+    $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+        let activatedTabId = $(e.target).attr('id');
+
+        if (activatedTabId === 'home-tab') {
+            $("select[name='function_id'], select[name='duty_id']").parent().show();
+        } else if (activatedTabId === 'profile-tab') {
+            $("select[name='function_id'], select[name='duty_id']").parent().hide();
+        }
+    });
+
+    let searchTimer = null;
+    function searchTasks(element) {
+        clearTimeout(searchTimer);
+
+        searchTimer = setTimeout(function() {
+            let value = $(element).val();
+            $("input[name='search']").val(value);
+            $('#form-get-stasks').submit();
+        }, 1000);
+    }
+
+    let taskSearchTimer;
+    $('#task-search-input').on('input', function () {
+        clearTimeout(taskSearchTimer);
+        const input = $(this).val();
+        taskSearchTimer = setTimeout(() => {
+            filterTasksByKeyword(input);
+            filterGtasksByKeyword(input);
+        }, 1000);
+    });
+    function filterTasksByKeyword(keyword) { 
+        keyword = keyword.toLowerCase().trim();
+        
+        $('#stasks-of-user .function-block').each(function () {
+            let hasVisibleDuty = false;
+
+            $(this).find('.duty-block').each(function () {
+                let hasVisibleTask = false;
+
+                $(this).find('.form-check').each(function () {
+                    const taskText = $(this).text().toLowerCase();
+                    const isMatch = taskText.includes(keyword);
+                    
+                    if (isMatch) {
+                        $(this).show();
+                        hasVisibleTask = true;
+                    } else {
+                        $(this).hide();
+                    }
+                });
+
+                if (hasVisibleTask) {
+                    $(this).show();
+                    hasVisibleDuty = true;
+                } else {
+                    $(this).hide();
+                }
+            });
+
+            if (hasVisibleDuty) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+    }
+    function filterGtasksByKeyword(keyword) {
+        keyword = keyword.toLowerCase().trim();
+
+        $('.gtasks_of_user .gtask-item').each(function () {
+            let hasVisibleStask = false;
+
+            $(this).find('[for^="gtask_"]').each(function () {
+                const taskText = $(this).text().toLowerCase();
+                const isMatch = taskText.includes(keyword);
+
+                if (isMatch) {
+                    $(this).show();
+                    hasVisibleStask = true;
+                } else {
+                    $(this).hide();
+                }
+            });
+
+            // Nếu trong nhóm có ít nhất một công việc khớp thì hiển thị nhóm
+            if (hasVisibleStask) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+    }
+    $('input').on('keydown', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            return false;
+        }
+    });
+    $(document).on("change", "input[name='stask_id']", function () {
+        const taskId = parseInt($(this).val());
+
+        if ($(this).is(":checked")) {
+            if (!stask_id_checked.includes(taskId)) {
+            stask_id_checked.push(taskId);
+            }
+        } else {
+            stask_id_checked = stask_id_checked.filter(id => id !== taskId);
+        }
+        
+        $("input[name='stask_ids']").val(stask_id_checked);
+    });
+    $(document).on("change", "input[name='gtask_id']", function () {
+        const taskId = parseInt($(this).val());
+
+        if ($(this).is(":checked")) {
+            if (!gtask_id_checked.includes(taskId)) {
+                gtask_id_checked.push(taskId);
+            }
+        } else {
+            gtask_id_checked = gtask_id_checked.filter(id => id !== taskId);
+        }
+        $("input[name='gtask_ids']").val(gtask_id_checked);
+    });
+
+</script>

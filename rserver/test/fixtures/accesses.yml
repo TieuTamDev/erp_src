@@ -1,0 +1,17 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  stask: one
+  resource: one
+  permision: MyString
+  dtfrom: 2022-11-11 11:39:53
+  dtto: 2022-11-11 11:39:53
+  status: MyString
+
+two:
+  stask: two
+  resource: two
+  permision: MyString
+  dtfrom: 2022-11-11 11:39:53
+  dtto: 2022-11-11 11:39:53
+  status: MyString

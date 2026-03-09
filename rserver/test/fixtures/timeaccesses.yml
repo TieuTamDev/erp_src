@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  tfrom: 2021-11-22 17:33:02
+  tto: 2021-11-22 17:33:02
+  user_name: MyString
+
+two:
+  tfrom: 2021-11-22 17:33:02
+  tto: 2021-11-22 17:33:02
+  user_name: MyString

@@ -1,0 +1,58 @@
+<%= form_for holtype,
+      url: holtype.new_record? ? holtypes_path : holtype_path(holtype),
+      method: holtype.new_record? ? :post : :patch,
+      html: { id: "holtype_form" } do |f| %>
+
+  <div class="modal-header">
+    <h5 class="modal-title" id="holtypeModalLabel">
+      <%= holtype.new_record? ? "Thêm loại phép" : "Cập nhật loại phép" %>
+    </h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+  </div>
+
+  <div class="modal-body">
+    <div class="mb-3">
+      <%= f.label :name, "Tên loại phép", class: "form-label" %>
+      <%= f.text_field :name, id: "holtype_name", class: "form-control", maxlength: 50 %>
+    </div>
+
+
+    <div class="mb-3 d-none">
+      <%= f.label :code, "Mã loại", class: "form-label" %>
+      <%= f.text_field :code, class: "form-control" %>
+    </div>
+
+    <div class="mb-3">
+      <%= f.label :note, "Ghi chú", class: "form-label" %>
+      <%= f.text_area :note, id: "holtype_note", class: "form-control", rows: 4, maxlength: 255 %>
+    </div>
+
+
+    <div class="mb-3">
+      <%= f.label :status, "Trạng thái", class: "form-label d-block" %>
+      <div class="form-check form-check-inline">
+        <%= f.radio_button :status, "ACTIVE", checked: holtype.status.blank? || holtype.status == "ACTIVE", class: "form-check-input", id: "holtype_status_ACTIVE" %>
+        <%= f.label :status_active, "Hoạt động", class: "form-check-label" %>
+      </div>
+      <div class="form-check form-check-inline">
+        <%= f.radio_button :status, "INACTIVE", checked: holtype.status == "INACTIVE", class: "form-check-input", id: "holtype_status_INACTIVE" %>
+        <%= f.label :status_inactive, "Không hoạt động", class: "form-check-label" %>
+      </div>
+    </div>
+    <div class="mb-3 d-none">
+      <%= f.label :sholtemp, "Biểu mẫu phép", class: "form-label" %>
+      <%= f.collection_select :sholtemp, @holtemps, :id, :title,
+            { prompt: "Chọn biểu mẫu phép" },
+            { class: "form-select select2" } %>
+    </div>
+  </div>
+ 
+
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+    <%= f.submit holtype.new_record? ? "Thêm mới" : "Cập nhật", class: 'btn btn-primary',
+             data: { disable_with: false } %>
+
+  </div>
+<% end %>

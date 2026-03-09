@@ -1,0 +1,24 @@
+.form-add-archive{
+  border-radius: 5px;
+  background: var(--falcon-badge-soft-primary-background-color);
+  padding: 20px 20px 20px 20px;
+  box-shadow: rgb(100 100 111 / 20%) 0px 7px 29px 0px;
+}
+
+#id_cancel_archive{
+  color: var(--falcon-orange) !important;
+}
+#btn-add-archive{
+  color: var(--falcon-orange) !important;
+}
+#btn-add-archive:hover{
+  color: var(--falcon-btn-falcon-success-color) !important;
+}
+@media screen and (max-width: 724px){
+  .reponsil{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    align-content: center;
+  }
+}

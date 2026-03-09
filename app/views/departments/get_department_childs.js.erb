@@ -1,0 +1,122 @@
+<%
+    rows = []
+    @departments.each_with_index do |department, index|
+        stt = (index + 1) + ((session[:page].to_i - 1) * session[:per_page].to_i)
+        group_btn = ""
+        
+        if department.has_child == 1
+            group_btn = "<button class='expand-btn-modern' onclick='clickGroups(#{department.id})' data-collapse-btn='target-#{department.id}' style='width: 28px; height: 28px; font-size: 0.8rem;'>
+                            <i id='collap-icon-#{department.id}' class='fas fa-chevron-right icon-transition'></i>
+                        </button>"
+        else
+            group_btn = "<div class='expand-btn-modern' style='visibility: hidden; width: 28px; height: 28px;'></div>"
+        end
+        
+        rows << "<tr class='department-row' style='cursor: pointer; transition: all 0.3s ease;'>
+                    <td onclick='clickDepartmentRow(#{department.id})' style='text-align: center; font-weight: 500;'>#{stt}</td>
+                    <td style='text-align: center;'>#{group_btn}</td>
+                    <td class='pt-2 pb-2' onclick='clickDepartmentRow(#{department.id})'>
+                        <div style='padding-left: 1rem;'>
+                            <p class='department-name-modern' style='font-size: 0.875rem;'>
+                                <i class='fas fa-layer-group me-2 text-primary'></i>#{department.name}
+                            </p>
+                            <p class='department-name-en-modern' style='font-size: 0.75rem; padding-left: 1.5rem;'>#{department.name_en}</p>
+                        </div>
+                    </td>
+                    <td onclick='clickDepartmentRow(#{department.id})' style='font-weight: 500;'>
+                        <i class='fas fa-user-tie me-1 text-success'></i>#{department.leader_name}
+                    </td>
+                    <td onclick='clickDepartmentRow(#{department.id})' style='color: var(--falcon-text-muted);'>
+                        <i class='fas fa-user me-1 text-info'></i>#{department.deputy_name}
+                    </td>
+                    <td style='text-align: center;' onclick='clickDepartmentRow(#{department.id})'>
+                        <span style='font-size: 0.75rem; padding: 0.3rem 0.6rem;'>
+                            <i class='fas fa-users me-1'></i>#{department.user_count}
+                        </span>
+                    </td>
+                </tr>"
+                
+        if department.has_child == 1
+            rows << "<tr>
+                        <td colspan='6' style='padding: 0; background: transparent;'>
+                            <div class='collapsed p-0' data-groups='#{department.id}' id='target-#{department.id}' style='transition: all 0.3s ease;'></div>
+                        </td>
+                    </tr>"
+        end
+    end
+%>
+
+// Enhanced nested table rendering
+$(`[data-groups="<%= @parent_id%>"]`).fadeOut(200, function() {
+    $(this).html(`
+        <div class="nested-container-modern-child-level-2">
+            <table class="table nested-table-modern">
+                <thead>
+                    <tr>
+                        <th style="width: 60px; text-align: center; font-size: 0.8rem;">#</th>
+                        <th style="width: 50px; text-align: center;"></th>
+                        <th style="font-size: 0.8rem;">
+                            <i class="fas fa-layer-group me-2"></i>Tên Nhóm
+                        </th>
+                        <th style="font-size: 0.8rem;">
+                            <i class="fas fa-user-tie me-2"></i>Trưởng nhóm
+                        </th>
+                        <th style="font-size: 0.8rem;">
+                            <i class="fas fa-user me-2"></i>Phó nhóm
+                        </th>
+                        <th style="text-align: center; font-size: 0.8rem;">
+                            <i class="fas fa-users me-2"></i>Số lượng nhân sự
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <%= rows.join("").html_safe%>
+                </tbody>
+            </table>
+        </div>
+    `).fadeIn(300);
+    
+    // Add hover effects to nested rows
+    $(this).find('.department-row').hover(
+        function() {
+            $(this).css('background', 'linear-gradient(135deg, rgba(102, 126, 234, 0.06) 0%, rgba(118, 75, 162, 0.06) 100%)');
+            $(this).css('transform', 'translateX(3px)');
+        },
+        function() {
+            $(this).css('background', '');
+            $(this).css('transform', '');
+        }
+    );
+});
+
+// Enhanced expand/collapse for nested items
+function clickGroups(parent_id) {
+    let container = $(`[data-groups="${parent_id}"]`);
+    let iconCollapse = $(`#collap-icon-${parent_id}`);
+    let expandBtn = iconCollapse.closest('.expand-btn-modern');
+
+    let is_collapsed = container.hasClass("collapsed");
+
+    container.toggleClass("collapsed", !is_collapsed);
+    container.toggleClass("show", is_collapsed);
+
+    if(is_collapsed) {
+        iconCollapse.css("transform", "rotate(90deg)");
+        expandBtn.css("background", "#1e5bb8");
+        
+        let form = $("#form-get-department-childs");
+        form.find('[name="parent_id"]').val(parent_id);
+        form.submit();
+        showLoadding(true);
+    } else {
+        iconCollapse.css("transform", "");
+        expandBtn.css("background", "var(--falcon-info)");
+        
+        container.fadeOut(200, function() {
+            container.html("");
+            container.show();
+        });
+    }
+}
+
+showLoadding(false);

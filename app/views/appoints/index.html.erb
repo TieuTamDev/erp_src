@@ -1,0 +1,551 @@
+<%# Hai - appoint  %>
+<% content_for :head do %>
+  <%= stylesheet_link_tag "select2-bootstrap-5-theme.min" %>
+  <%= stylesheet_link_tag "select2.min" %>
+<% end %>
+
+<% content_for :bottombody do %>
+  <%= javascript_include_tag 'select2.full.min'%>
+  <%= javascript_include_tag 'select2.min.js'%>
+
+<% end %>
+<style>
+    .dataTables_wrapper {
+      margin-top: 0 !important;
+    }
+</style>
+<div class="mb-2 mt-1 d-flex justify-content-between align-items-center flex-wrap gap-2" >
+  <!-- Bên trái: Các nút -->
+  <div class="d-flex gap-2 ms-1">
+    <button type="button" class="btn btn-outline-success d-none" data-bs-toggle="modal" data-bs-target="#importModal">
+      📥 Import Excel
+    </button>
+  </div>
+</div>
+<div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="importModalLabel">📁 Import Nhân sự</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <%= form_tag import_excel_appoints_path, method: :post, id: 'import-form', multipart: true, authenticity_token: true,class: "d-flex flex-column gap-3" do %>
+          <%= file_field_tag :file, class: "form-control", accept: ".xlsx", required: true %>
+          <%= submit_tag '📥 Xác nhận Import', class: 'btn btn-success' %>
+        <% end %>
+        <div id="import-result" class="mt-3"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="alert-appoint" style="display: none;">
+  <div class="alert alert-success border-2 d-flex align-items-center" role="alert" style="position: absolute; z-index: 20; top: 10; right: 0; top: 100px;">
+    <div class="bg-success me-3 icon-item"><span class="fas fa-check-circle text-white fs-3"></span></div>
+    <p class="mb-0 flex-1"><%= lib_translate("Delete_successfully")  %></p>
+    <button class="btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+</div>
+<div class="row ms-1" >
+      <div class="card theme-wizard mb-5">
+        <div class="card-header bg-light pt-3 pb-2 pt-3 mt-3">
+          <ul class="nav justify-content-between nav-wizard" id="step-wrap">
+            <li  class="nav-item"><a id="tabs_1" class="nav-link active fw-semi-bold" ><span class="nav-item-circle-parent"><span class="nav-item-circle"><span class="fas fa-user"></span></span></span><span class="d-none d-md-block mt-1 fs--1"><%= lib_translate("List_of_personnel")  %></span></a></li>
+            <li  class="nav-item"><a id="tabs_2" class="nav-link fw-semi-bold" ><span class="nav-item-circle-parent"><span class="nav-item-circle"><span class="fas fa-user-cog"></span></span></span><span class="d-none d-md-block mt-1 fs--1"><%= lib_translate("appoint")  %></span></a></li>
+            <li  class="nav-item"><a id="tabs_3" class="nav-link fw-semi-bold" ><span class="nav-item-circle-parent"><span class="nav-item-circle"><span class="fas fa-user-check"></span></span></span><span class="d-none d-md-block mt-1 fs--1"><%= lib_translate("resultAppoint")  %></span></a></li>
+          </ul>
+        </div>
+        <div class="card-body py-4">
+          <div class="tab-content" id="tab-wrap"> 
+            
+
+            <%# Danh sách nhân sự %>
+            <div class="tab-pane active px-sm-3 px-md-5" role="tabpanel" aria-labelledby="bootstrap-wizard-tab1" id="bootstrap-wizard-tab1">
+              <div id="table_work" data-list='{"valueNames":["id","order","user_id","department","positionjob_id"],"page":<%= session[:number_paging_table] %>,"pagination":true}' >
+                <div class="row g-0 mb-2" style=" justify-content: space-between; align-items: center; " >
+                  <div class="col-auto col-sm-5 mb-1">
+                  <h4><%= lib_translate("List_of_personnel") %></h4> 
+                  </div>
+                  <button onclick="" class="btn btn-primary btn-add-work mt-3" id="btn-add-work" data-bs-toggle="modal" data-bs-target="#modal-modal-work">
+              <%= lib_translate("Add_work_primary")  %>
+            </button>
+            <!-- modal -->
+            <div class="modal fade" id="modal-modal-work" tabindex="-1" role="dialog" aria-hidden="true" data-bs-focus="false">
+              <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content position-relative">
+                  <div class="position-absolute top-0 end-0 mt-2 me-2 z-index-1">
+                    <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body p-0">
+                    <div class="rounded-top-lg py-3 ps-4 pe-6 bg-light">
+                      <h4 class="mb-1" id="cls_bmtu_form_add_title"><%= lib_translate("Create_work_primary")  %></h4>
+                    </div>
+                    <div class="p-4 pb-0">
+                      <div id="error_explanation" class="text-danger" style="text-align: center;font-size: 13px;"></div>
+                        <div class="form-add-appoint">
+                          <%= form_for Work.new, :url=> appoints_update_path, html: {method: :post, id:"form_add_appoint",class:'col-12' } do |f| %>
+                            <div class="erro_labble mb-2">
+                                <p style="display:none; color: rgb(197 82 82);border: 1px solid rgb(199 136 136 / 23%);background: rgb(255 54 54 / 16%);border-radius: 5px;padding: 10px"
+                                id="erro_labble_content">
+                                </p>
+                            </div>
+                            <div class="row mb-3" style="display:none;">
+                              <%= f.label :id, class: "col-sm-4 col-lg-3 col-form-label" %>
+                              <div class="col-sm-8 col-lg-9">
+                                    <%= f.text_field :id, class: 'form-control' , name: 'work_id_add', id:  'work_id_add' %>
+                              </div>
+                            </div>
+                            <div class="row mb-3"> 
+                              <label class="col-sm-4 col-lg-3 col-form-label"><%= lib_translate("Fullname_work") %>:</label>
+                              <div class="col-sm-8 col-lg-9">
+                                <select class="form-select selectpicker" name="user_id_work" id="user_id_work">
+                                    <% User.all.each do |user| %>
+                                      <option value="<%= user.id%>"> <b><%= user.last_name + " " + user.first_name %></b> (<i><%= user.email %></i>)</option>
+                                    <%end%>
+                                  </select>
+                              </div>
+                            </div>
+                            <div class="row mb-3"> 
+                              <label class="col-sm-4 col-lg-3 col-form-label"><%= lib_translate("Name_work") %>:</label>
+                              <div class="col-sm-8 col-lg-9">
+                                <select class="form-select selectpicker" name="positionjob_id_work" id="positionjob_id_work">
+                                    <% 
+                                      Positionjob.all.each do |positionjob| 
+                                      nameDepart = Department.where(id: positionjob.department_id).first
+                                      if !nameDepart.nil?
+                                        nameDepartment = " (" + nameDepart.name + ")"
+                                      else
+                                        nameDepartment = ""
+                                      end
+
+                                    %>
+                                      <option value="<%= positionjob.id%>"> <%= positionjob.name %> <%= nameDepartment%></option>
+                                    <% end%>
+                                  </select>
+                              </div>
+                            </div>
+                            <div class="modal-footer border-0 p-0 mb-2">
+                                <%= f.submit "Thêm mới" , type:"submit" , id:"btn_add_new_work_buttton",
+                                class: "btn btn-warning border-red border-pink-600 cls-bmtu-text-red md:group-hover:bg-pink-50 btn-block btn-block text-uppercase "%>
+                                <div id="loading_button_appoint" class= "btn btn-warning border-red border-pink-600 cls-bmtu-text-red md:group-hover:bg-pink-50 btn-block btn-block text-uppercase " style="opacity: 0.8;display:none;" >
+                                      <i class ="fa fa-spinner fa-spin"> </i>  <%=lib_translate("Save")%> 
+                                </div>
+                            </div>
+                          <% end %>
+                        </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+                  <%= render_search_pagination(appoints_index_path()).html_safe %>
+                  <form id="form-tab-0">
+                    <table id="table_appoint" class="table table-bordered fs--1 mb-0 table-hover">
+                      <thead class="bg-200 text-900">
+                        <tr>
+                          <th class="no-sort" style="text-align: center; width: 30px;"></th>
+                          <th  data-sort="work_id" style="text-align: center; cursor: pointer; display:none;"> </th>
+                          <th  class="sort" data-sort="user_id" style="text-align: center; cursor: pointer;"> <%= lib_translate("Full_name")  %> </th>
+                          <th  class="sort" data-sort="department" style="text-align: center; cursor: pointer;"><%= lib_translate("unit")  %></th>
+                          <th  class="sort" data-sort="positionjob_id" style="text-align: center; cursor: pointer;"><%= lib_translate("Position_Job")  %></th>
+                          <% if (is_access(session["user_id"], "APPOINTS","EDIT") || is_access(session["user_id"], "APPOINTS","DEL")) %>
+                              <th class="no-sort" style="text-align: center; cursor: pointer;width: 50px;"></th>
+                            <% end %>
+                        </tr>
+                      </thead>
+                      <tbody class="list" id="bulk-select-body">
+                  
+                        <% @works.each_with_index do |work,i|%>
+                          <%
+                          
+                          if work.stask_id.nil?
+
+
+                          %>
+                        <%
+                          name = User.select("last_name,first_name, sid, email").where("id = ?",work.user_id).first
+                          department_name = ""
+                          if !work.positionjob_id.nil? 
+                            @positionjob_user = Positionjob.where("id = ?", work.positionjob_id).first
+                            department_name = @positionjob_user.department.name if !@positionjob_user.nil? && !@positionjob_user.department.nil?
+                          end
+
+                          position_name = ""
+                          if !work.positionjob_id.nil?
+                            @positionjob_user = Positionjob.where("id = ?", work.positionjob_id).first
+                            position_name = @positionjob_user.name if !@positionjob_user.nil?
+                          end
+                        %>
+
+                        <tr>
+                          <td>
+                            <input type="checkbox" name="work_checkbox" id="work_checkbox_<%= work.id%>" value="<%= work.id%>" onchange="checkSelected()">
+                          </td>
+                          <td class="work_id" style="text-align: center; display:none;" > <%= work.id %> </td>
+                          <td class="user_id"> 
+                            <div style="text-align: start; cursor:pointer; display: flex;flex-direction: column;">
+                              <label style="cursor: pointer; text-transform: capitalize;  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" for="work_checkbox_<%= work.id%>"><b><%= name.last_name + " " + name.first_name %></b></label>
+                              <label style="cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;font-style: italic;" for="work_checkbox_<%= work.id%>"> (<%= name.sid %> - <%= name.email %>)</label>
+                            </div>
+                           </td>
+                          <td class="department"  style="text-align: center;" >  
+                            <div style="text-align: start; cursor:pointer; display: flex;flex-direction: column;">
+                              <label style="cursor:pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"  for="work_checkbox_<%= work.id%>">
+                                  <%= department_name%> 
+                              </label>
+                            </div>
+                          </td>
+                          <td class="positionjob_id" style="text-align: center;" >
+                            <div style="text-align: start; cursor:pointer; display: flex;flex-direction: column;">
+                              <label style="cursor: pointer;" for="work_checkbox_<%= work.id%>">
+                                <%= position_name%>
+                              </label>
+                            </div>
+                          </td>
+                          <% if (is_access(session["user_id"], "APPOINTS","EDIT") || is_access(session["user_id"], "APPOINTS","DEL")) %>
+                            <td class="p-2" style="min-width: 100px; text-align: center ; white-space: nowrap;">
+                              <i onclick="clickOneUser('<%= work.id%>','step-wrap')" class="text-primary fas fa-arrow-right" style="width: 20px; cursor: pointer;" ></i>
+                              
+                              
+                              <!-- Button trigger modal -->
+                                 
+                                <a data-toggle="modal" data-target="#modal-work-delete-<%= work.id %>" style="cursor: pointer;">
+                                  <span class="text-danger fas fa-trash d-none" style="width: 12px;"></span>
+                                </a>
+                              
+
+                                <!-- Modal -->
+                                <div class="modal fade" id="modal-work-delete-<%= work.id %>" tabindex="-1" role="dialog"
+                                aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                  <div class="modal-dialog" role="document">
+                                      <div class="modal-content">
+                                      <div class="modal-header">
+                                          <h5 class="modal-title" id="exampleModalLabel"><%= lib_translate("Are_you_sure")  %></h5>
+                                          <button type="button" class="close" data-dismiss="modal" aria-label="Close" style=" border: none;background: none;">
+                                          <span aria-hidden="true" style="font-size: 20px;">&times;</span>
+                                          </button>
+                                      </div>
+                                      <div class="modal-body">
+                                          <%= lib_translate("Are_you_sure_to_delete_this_work")  %><span style="font-weight:bold; color:red;"> <%= work&.id %> </span>?
+                                      </div>
+                                      <div class="modal-footer">
+                                          <button type="button" class="btn btn-secondary" data-dismiss="modal"><%= lib_translate("Close")  %></button>
+                                          <%= link_to lib_translate("Delete"), url_for(action: :del, id: work.id), method: :delete, class: "btn btn-danger", id: "btn_delete_work", onclick: "delete_loading_work(this)" %>
+                                          <div id="loading_button_delete_work" class= "btn btn-danger" style="opacity: 0.8; display:none;" >
+                                            <i class ="fa fa-spinner fa-spin"> </i>  <%=lib_translate("Deleting")%> 
+                                          </div>
+                                      </div>
+                                      </div>
+                                  </div>
+                                </div>
+                            </td>
+                          <% end %>
+                        </tr>
+                        <%end end%>
+                      </tbody>
+                    </table>
+                  </form>
+                  <%= render_pagination_limit_offset(appoints_index_path(lang: session[:lang], per_page: session[:per_page], search: session[:search]), 10, @works.count).html_safe %>
+                </div>
+              </div>
+            </div>
+            <%# Bổ nhiệm %>
+            <div class="tab-pane px-sm-3 px-md-5" role="tabpanel" aria-labelledby="bootstrap-wizard-tab2" id="bootstrap-wizard-tab2">
+              <h3><%= lib_translate("updateDepartmentAndPositionjob")  %></h3>
+                <form id="form-tab-1" action="<%=appoints_update_path%>" accept-charset="UTF-8" method="post">
+                  <input type="hidden" id="authenticity_token" name="authenticity_token" value="">
+                </form>
+            </div>
+
+            <%# Kết quả %>
+            <div class="tab-pane text-center px-sm-3 px-md-5" role="tabpanel" aria-labelledby="bootstrap-wizard-tab3" id="bootstrap-wizard-tab3">
+              <h4 class="mb-1 pb-3" style="color: var(--falcon-btn-falcon-success-active-color);"><%= lib_translate("successAppoint")  %></h4>
+              <div id="show-final" style="display: flex; justify-content: space-between; flex-wrap: wrap; ">
+
+              </div>
+              <a class="btn btn-primary px-5 my-3" href="<%=appoints_index_path(lang: session[:lang])%>"><%= lib_translate("returnToListUsers")  %></a>
+            </div>
+          </div>
+        </div>
+        <%# next - prev %>
+      <% if is_access(session["user_id"], "APPOINTS","EDIT") %>
+          <div class="card-footer bg-light px-sm-3 px-md-5">
+            <div style="display: flex;justify-content: space-between;">
+                <div style="width: 200px">
+                  <button id="prev-step-button" class="btn btn-link px-5 px-sm-6" type="button" onclick="clickNextStep(-1,'step-wrap')"><span class="fas fa-chevron-left me-2" data-fa-transform="shrink-3"></span><%= lib_translate("prevAppoint")  %></button>
+                </div>
+                <div style="width: 200px">
+                  <button id="apply-appoint-button" class="btn btn-primary" type="button" onclick="clickSubmitAppoint()"><%= lib_translate("applyAppoint")  %></button>
+                  <button id="next-step-button" class="btn btn-primary disabled"  data-bs-toggle="tab" onclick="clickNextStep(1,'step-wrap')">
+                    <%= lib_translate("nextAppoint")  %><span class="fas fa-chevron-right ms-2" data-fa-transform="shrink-3"> </span>
+                  </button>
+                  
+                </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+  </div>
+  <%# End - appoint  %>
+  <script>
+    
+
+    <% 
+      user_works = []
+      @works.each do |work|
+        work_id =  work.id
+        user_id = work.user_id
+        positionjob_id = work.positionjob_id
+        positionjob = Positionjob.where(id: positionjob_id).first
+        department_id = nil
+        if !positionjob.nil?
+          department_id = Positionjob.where(id: positionjob_id).first.department_id
+          positionjob_name = positionjob.name
+          if !department_id.nil?
+            department_name = Department.where(id: department_id).first.name
+          end
+        end
+        name = User.select("last_name,first_name").where("id = ?",work.user_id).first
+        name = name.last_name + " " + name.first_name
+
+        user_works.push({
+          work_id: work_id,
+          user_id: user_id,
+          positionjob_id: positionjob_id,
+          department_id: department_id,
+          name: name,
+          positionjob_name: positionjob_name,
+          department_name: department_name
+        })
+      end
+    %>
+    let updateList = <%= @workUpdate.to_json.html_safe%>;
+    let user_works = <%= user_works.to_json.html_safe %>;
+    let current_tab = 0;
+    $('#apply-appoint-button').hide();
+    $('#prev-step-button').hide();
+
+    if(updateList.length > 0){
+
+      let listtab = $('#step-wrap')[0].children
+      $('#next-step-button').hide();
+      current_tab = listtab.length - 1;
+      // show step highlight
+      for (let i = 0; i < listtab.length; i++) {
+        var tab = listtab[i].querySelector('a')
+        tab.classList.toggle('done',true);
+        tab.classList.toggle('active',false);
+      }
+      // render data
+      renderDataDone();
+
+      // show tab
+      showTab(listtab.length - 1);
+    }
+
+    function clickNextStep(step, tabId){
+      let lastTab = current_tab;
+      current_tab += step;
+      // show step highlight
+      set_step(tabId);
+
+      let uploadData = lastTab < current_tab;
+
+      if (uploadData){
+        // reset form date
+        $('#form-tab-'+current_tab).trigger("reset");
+  
+        // get select user
+        if (current_tab == 1){
+          let listIds = getListWorkSelected();
+          renderUserList(listIds);
+        }
+
+      }
+      // show tab
+      showTab(current_tab);
+    }
+
+    function clickOneUser(work_id,tabId){
+      current_tab = 1;
+
+      set_step(tabId);
+
+      // render data to form
+      renderUserList([work_id]);
+      // show tab
+      showTab(current_tab);
+    }
+
+    function set_step(id){
+
+      if(current_tab < 0 ){
+        current_tab = 0;
+      }
+
+      let listtab = $(`#${id}`)[0].children
+      if(!listtab){
+        return;
+      }
+
+      if(current_tab > listtab.length - 1){
+        return;
+      }
+
+      // show step highlight
+      for (let i = 0; i < listtab.length; i++) {
+        var tab = listtab[i].querySelector('a')
+        if(i < current_tab){
+          tab.classList.toggle('done',true);
+          tab.classList.toggle('active',false);
+        }else if(i == current_tab){
+          tab.classList.toggle('active',true);
+          tab.classList.toggle('done',false);
+        }else{
+          tab.classList.toggle('active',false);
+          tab.classList.toggle('done',false);
+        }
+      }
+      // step controls button
+      if(current_tab >= listtab.length - 2){
+          $('#next-step-button').hide();
+          $('#apply-appoint-button').show();
+      }else{
+        if (current_tab == listtab.length -1){
+          $('#next-step-button').hide();
+          $('#apply-appoint-button').hide();
+        }else{
+            $('#next-step-button').show();
+            $('#apply-appoint-button').hide();
+        }
+      }
+
+      if(current_tab == 0 || current_tab == listtab.length - 1){
+        $('#prev-step-button').hide();
+      }else{
+        $('#prev-step-button').show();
+      }
+    }
+
+    function showTab(index){
+      $('#tab-wrap').find('.tab-pane').each((i,tab)=> {
+          if(i == index){
+              tab.style.display = 'block';
+          }else{
+              tab.style.display = 'none';
+          }
+      });
+    }
+
+    function checkSelected(){
+      let listids = getListWorkSelected();
+      $('#next-step-button').toggleClass( "disabled", listids.length == 0);
+    }
+
+    function getListWorkSelected(){
+      let listId = [];
+      let listSelect = $('#form-tab-0').find('input[type=checkbox]');
+      listSelect.each((index,checkbox) => {
+        if (checkbox.checked){
+          listId.push(checkbox.value);
+        }
+      })
+      return listId;
+    }
+
+
+    function renderUserList(userIdlist){
+      let form = $('#form-tab-1');
+      form.find('.capp-form-bg').remove();
+      user_works.forEach(work => {
+        if(userIdlist.includes(work.work_id.toString())){
+          form.append(`<div class="row mb-2 p-3 capp-form-bg" style="box-shadow: var(--falcon-box-shadow); border-radius: var(--falcon-card-border-radius);" id="div-data">
+                        <input name="works_id[]" value="${work.work_id}" hidden>
+                        <input name="users_id[]" value="${work.user_id}" hidden>
+                        <input name="departments_id_old[]" value="${work.department_id}" hidden>
+                        <input name="positionjobs_id_old[]" value="${work.positionjob_id}" hidden>
+                        <h5 class="pb-1" style="margin: 0;margin-top: 11px; "> 
+                          <span style="color: rgb(33, 136, 220); text-transform: capitalize;">${work.name}</span>
+                          <span style="font-size: 1rem;">
+                            <span >(</span> 
+                            <span style="color: rgb(33, 136, 220);">${work.positionjob_name ? work.positionjob_name : '<%= lib_translate("UnassignedPositionjob")  %>'}</span>
+                            <span>- </span> 
+                            <span style="color: rgb(33, 136, 220);">${work.department_name ? work.department_name : '<%= lib_translate("UnassignedDepartment")  %>' }</span> 
+                            <span>)</span>
+                          </span>
+                          <span class="close text-danger fs-3" style="float: right; cursor: pointer;" id="remove-item-appoint" onclick="clickRemoveItemAppoint()">x</span>
+                        </h5>
+                        <div class="col-xl-6 col-sm-12  pb-3">
+                            <div class="form-group">
+                              <label class="mb-0 pb-1" style="color: rgb(33, 136, 220);"><%= lib_translate("newDepartment")  %></label>
+                              <select name="departments_id[]" class="form-select selectpicker js-choice pb-1 selectpicker " id="appoint_department_${work.work_id}" size="1" onchange="getDepartmentId('appoint_department_${work.work_id}','${work.work_id}')">
+                                <% @departments.each do |department|%> 
+                                  <option value="<%=department.id%>" ${work.department_id =='<%=department.id%>' ? "selected"  :""}><%=department.name%></option>
+                                <%end%>
+                              </select>
+                            </div>
+                        </div>
+                        <div class="col-xl-6 col-sm-12 pb-3">
+                            <div class="form-group">
+                            <label class="mb-0 pb-1" style="color: rgb(33, 136, 220);"><%= lib_translate("newPositionjob")  %></label> 
+                            <select name= "positionjobs_id[]" class="form-select selectpicker js-choice pb-1 " id="appoint_positionjob_${work.work_id}">
+
+                            </select>
+                            </div>
+                        </div>
+                      </div>`);
+          getDepartmentId('appoint_department_'+ work.work_id,work.work_id,work.positionjob_id);
+      }});
+    }
+
+    function renderDataDone(){
+      let div = $('#show-final');
+
+      updateList.forEach(work => {
+        div.append(`<div class="row mb-2 col-5 p-3 capp-form-bg" style="box-shadow: var(--falcon-box-shadow); border-radius: var(--falcon-card-border-radius); margin: 0 auto;">
+                      <p><%= lib_translate("fullNameAppoint")  %> <strong style="color: var(--falcon-btn-falcon-success-active-color); text-transform: capitalize;">${work.user_name}</strong></p>
+                      <p><%= lib_translate("appointAsStaff")  %> <strong style="color: var(--falcon-btn-falcon-success-active-color);">${work.positionjob_name}</strong></p>
+                      <p><%= lib_translate("belongDepartment")  %> <strong style="color: var(--falcon-btn-falcon-success-active-color);">${work.department_name}</strong></p>
+                    </div>`);
+      });
+    }
+
+    function getDepartmentId(select_depratment,work_id,select_id){
+      let department_id = $('#'+select_depratment).val()
+      let select_appoint = $(`#appoint_positionjob_${work_id}`)
+      select_appoint.empty();
+
+        $.ajax({
+            type: "GET",
+            url: "<%= appoints_edit_path%>",
+            data: { idDepartment: department_id },
+            dataType: "JSON",
+            success: function (response) {
+                for (let i = 0; i < response.list.length; i++) {
+                    select_appoint.append(`<option value="${response.list[i].id}"${select_id == response.list[i].id ? "selected"  :""}>${response.list[i].name}</option>`)
+                }
+            }
+        });
+    }
+
+    function openFormUpdateAppoint(id, user_id, positionjob_id, department_id){
+      document.getElementById("work_id_add").value = id;
+      document.getElementById("work_user_id_add").value = user_id;
+      document.getElementById("appoint_positionjob_id_add").value = positionjob_id; 
+      document.getElementById("appoint_department_id_add").value = department_id; 
+    }
+
+    function clickSubmitAppoint(){
+      let form = $('#form-tab-1');
+      form.find('#authenticity_token').val($('meta[name="csrf-token"]').attr("content"));
+      form.submit();
+    }
+
+    function clickRemoveItemAppoint(){
+      $('#alert-appoint').css({'display': 'block'});
+      $('#div-data').remove();
+    }
+
+
+  </script>
+<%= javascript_include_tag '/assets/lib_hrm/bootstrap.min.js', integrity: 'sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl', crossorigin: 'anonymous'%>

@@ -1,0 +1,44 @@
+/* Author: Đinh Hoàng Vũ */
+/* clone */
+.clone-item{
+    display: flex;
+    position: absolute;
+    padding: 5px 10px;
+    background-color: rgb(102, 162, 211);
+    z-index: 999;
+    user-select: none;
+    color: white;
+}
+.clone-item-size{
+    margin-left: 5px;
+}
+.clone-item-count{
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    border-radius: 10px;
+    min-width: 20px;
+    max-height: 20px;
+    padding: 0px 5px;
+    font-size: 15px;
+    line-height: 20px;
+    background-color: rgb(221, 48, 48);
+    text-align: center;
+    pointer-events: none;
+}
+.clone-item-multi{
+    box-shadow: 3px 3px 0px 0px rgb(35, 79, 116);
+}
+.clone-item p{
+    margin: 0;
+    padding: 0;
+}
+
+/* event */
+.grap-select{
+    background-color: rgb(163, 163, 163) !important;
+    opacity: 0.6;
+}
+.item-drop{
+    background-color: rgb(214, 231, 255);
+}

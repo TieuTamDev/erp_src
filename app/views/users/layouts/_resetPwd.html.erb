@@ -1,0 +1,224 @@
+<% if is_access(session["user_id"], request.env["PATH_INFO"] == "/user/details" ? "USER-DETAILS" : request.env["PATH_INFO"] == "/user/profile" ? "USER-PROFILE" : "","EDIT") && request.env["PATH_INFO"] != "/user/profile" %> 
+        <div class="card mb-3">
+          <div class="card-body pt-0">
+            <div class="tab-content">
+              <div class="tab-pane preview-tab-pane active" role="tabpanel" aria-labelledby="tab-dom-5a3c857c-8deb-4307-af64-a62f27089443" id="dom-5a3c857c-8deb-4307-af64-a62f27089443" >
+                <div class="form-add-user">
+                  <%= form_for @user, :url=> user_update_path, html: {method: :post } do |f| %>
+                    <div class="">                     
+                      <div class="row">
+                        <div class="erro_labble mb-2" style="height: 40px">
+                          <p style=" display: none; color: rgb(197 82 82); border: 1px solid rgb(199 136 136 / 23%); background: rgb(255 54 54 / 16%); border-radius: 5px; padding: 10px;" id="erro_labble_content_resset" ></p>
+                        </div>
+              
+                        <div class="form-group" style="display: none" class="txt_update_id">
+                          <%= f.label :id %> <%= f.text_field :id, class: 'form-control' , name: 'user_id' %>
+                        </div>
+                            <div class="form-group" style="display:none;">
+                            <input value="update_pwd" type="text" id="type_upadte" name="type_upadte"><br>
+                            </div>
+                  
+                        <div class="form-group " id="id_bmtu_pwd" style="position: relative;">
+                        <%= f.label lib_translate("Password") %> <span style="color:red;" class="red">* </span>
+                          <%= f.password_field  :password_digest , class: 'form-control' , name: 'user_password_add' ,id: 'user_password_reset_pwd',autocomplete: 'new-password' %>
+                            <a style="cursor: pointer;" id="show_pwd">
+                              <i class="fa fa-eye-slash" id="eye1"
+                                style="position:absolute;right: 25px;bottom: 9px;"></i>
+                            </a>
+                        </div>
+
+                        <div class="form-group" id="id_bmtu_re_pwd" style="position: relative;">
+                            <%= f.label lib_translate("Re_password") %> <span style="color:red;" class="red">* </span>
+                            <%= f.password_field  :password_digest , class: 'form-control' , name: 'user_re_password_digest_add_reset_pwd' , id: 'user_re_password_digest_add_reset_pwd', autocomplete: 'new-password' %>
+                            <a style="cursor: pointer;" id="show_re_pwd">
+                              <i class="fa fa-eye-slash" id="eye2"
+                                style="position:absolute;right: 25px;bottom: 9px;"></i>
+                            </a>
+                        </div>
+                        
+                        <div class="form-group" id="twofa" style="position: relative;">
+                            <%= f.label lib_translate("Bảo mật 2 lớp") %> <span style="color:red;" class="red">* </span>
+                              <div class="form-check form-switch" style="margin-bottom:unset;">
+                                <input class="form-check-input" name="twofa" id="checkbox-active" onchange="onChangeTwoFA(this)" value="<%= @user.twofa == 'YES' ? 'on' : 'off' %>" style="cursor: pointer;" type="checkbox" <%= @user.twofa =='YES' ? 'checked="checked"' : '' %> />
+                                <label style="color: <%= @user.twofa =='YES' ? 'var(--falcon-success)' : 'var(--falcon-danger)' %>; margin: 0;cursor: pointer;" for="checkbox-active"><%= @user.twofa =='YES' ? 'Bật' : 'Tắt' %></label>
+                              </div>
+                        </div>
+                        <div  id="notice">
+                            
+                        </div>
+                      
+                        <div class="form-group" style="">
+                          <%= f.submit lib_translate("Save"), disabled: true , type:"submit" , id:"btn_add_reset_pwd", class: "btn btn-primary mt-3 mb-5 border-red border-pink-600 cls-bmtu-text-red md:group-hover:bg-pink-50 btn-block btn-block text-uppercase ", style: "width: 100%;" %>
+                          <div id="loading_button_reset_pwd" class= "btn btn-primary mt-3 mb-5 border-red border-pink-600 cls-bmtu-text-red md:group-hover:bg-pink-50 btn-block btn-block text-uppercase" style="opacity: 0.8;width: 100%;display:none;" >
+                            <i class ="fa fa-spinner fa-spin"> </i>  <%=lib_translate("Save")%> 
+                          </div>
+                        </div>
+                       
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+<%end%>
+<%= form_tag user_update_2fa_status_path ,method:'POST', class:'d-flex justify-content-end align-items-end',id: "form_update_twofa",remote:true,authenticity_token: true do %>
+  <input type="hidden" name="user_id" value="<%=@user&.id%>"/>
+  <input type="hidden" name="twofa" id="twofa_ckb">
+<%end %>
+<script>
+//script cua dat // 
+        document.getElementById('btn_add_reset_pwd').onclick = function () {         
+            document.getElementById("btn_add_reset_pwd").style.display = "none";
+            document.getElementById("loading_button_reset_pwd").style.display = "block";
+        }
+        function checkNospacePwd(value){
+        if ( value != " "  &&  value.indexOf(" ") < 0 ){
+          return true;
+        }else{
+          return false;
+        }
+        }
+
+        document.getElementById("user_password_reset_pwd").value = "";
+        document.getElementById("user_re_password_digest_add_reset_pwd").value = "";
+
+        var error_label = document.getElementById("erro_labble_content_resset"); 
+
+        document.getElementById("user_password_reset_pwd").addEventListener("change", function () {
+
+        var pwd_erro = document.getElementById('user_password_reset_pwd');
+        var pwd = document.getElementById('user_password_reset_pwd').value;
+
+          if (pwd.length < 8) {
+          error_label.innerHTML = "<%= lib_translate("Password_must_have_at_least_8_characters")  %>";
+          error_label.style.display = "block";
+          pwd_erro.style.border = "1px solid red";
+          pwd_erro.focus();
+          document.getElementById("btn_add_reset_pwd").disabled = true;
+          return;
+        }
+        if (checkNospacePwd(pwd) == false) {
+          error_label.innerHTML = "<%= lib_translate("Please_Don't_Enter_Space_Password")  %>";
+          error_label.style.display = "block";
+          pwd_erro.style.border = "1px solid red";
+          pwd_erro.focus();
+          document.getElementById("btn_add_reset_pwd").disabled = true;
+          return;
+        }
+        if (CheckPassword(pwd) == false) {
+          error_label.innerHTML = "<%= lib_translate("Pwd_vaild_rule")  %>";
+          error_label.style.display = "block";
+          pwd_erro.style.border = "1px solid red";
+          pwd_erro.focus();
+          document.getElementById("btn_add_reset_pwd").disabled = true;
+          return;
+        }
+
+
+        error_label.style.display = "none";
+        pwd_erro.style.border = "1px solid #ced4da";
+      });
+
+      document.getElementById("user_re_password_digest_add_reset_pwd").addEventListener("change", function () {
+
+        var rePwd_erro = document.getElementById('user_re_password_digest_add_reset_pwd');
+        var rePwd = document.getElementById('user_re_password_digest_add_reset_pwd').value;
+        var pwd = document.getElementById('user_password_reset_pwd').value;
+
+
+        
+        if (rePwd != pwd) {
+          error_label.innerHTML = "<%= lib_translate("Re-Password_incorrect")  %>";
+          error_label.style.display = "block";
+          rePwd_erro.style.border = "1px solid red";
+          rePwd_erro.focus();
+          document.getElementById("btn_add_reset_pwd").disabled = true;
+          return;
+        }
+
+
+        error_label.style.display = "none";
+        rePwd_erro.style.border = "1px solid #ced4da";
+        document.getElementById("btn_add_reset_pwd").disabled = false;
+      });
+
+  function CheckPassword(inputtxt){ 
+    var decimal=  /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{8,99}$/;
+    if(inputtxt.match(decimal)){     
+      return true;
+    }
+    else{   
+    return false;
+    }
+  }  
+
+const passwordField = document.querySelector("#user_password_reset_pwd");
+const eyeIcon = document.querySelector("#show_pwd");
+eyeIcon.addEventListener("click", function () {
+const type = passwordField.getAttribute("type") === "password" ? "text" : "password";
+passwordField.setAttribute("type", type);
+
+var pwdtype = document.getElementById("user_password_reset_pwd").getAttribute("type");
+
+
+var eye1 = document.getElementById('eye1');
+
+
+
+if (pwdtype == "text") {
+  eye1.classList.remove("fa-eye-slash");
+  eye1.classList.add("fa-eye");
+} else {
+  eye1.classList.add("fa-eye-slash");
+  eye1.classList.remove("fa-eye");
+}
+})
+
+const rePasswordField = document.querySelector("#user_re_password_digest_add_reset_pwd");
+const eyeIcon2 = document.querySelector("#show_re_pwd");
+eyeIcon2.addEventListener("click", function () {
+const type = rePasswordField.getAttribute("type") === "password" ? "text" : "password";
+rePasswordField.setAttribute("type", type);
+
+var pwdtype = document.getElementById("user_re_password_digest_add_reset_pwd").getAttribute("type");
+
+
+var eye2 = document.getElementById('eye2');
+
+
+
+if (pwdtype == "text") {
+  eye2.classList.remove("fa-eye-slash");
+  eye2.classList.add("fa-eye");
+} else {
+  eye2.classList.add("fa-eye-slash");
+  eye2.classList.remove("fa-eye");
+}
+})              
+  function onChangeTwoFA(e){
+    if(e.value == 'on'){
+      $(e).val('off');
+      $(e).next().html("Tắt")
+      $(e).next().css("color", "red");
+      $('#twofa_ckb').val('NO');
+    }else{
+      $(e).val('on');
+      $(e).next().html("Bật")
+      $(e).next().css("color", "green");
+      $('#twofa_ckb').val('YES');
+    }
+    $('#form_update_twofa').submit()
+    
+  }
+  function succesTwoFA(msg){
+    $('#notice').html(`<div class="alert_show alert alert-success alert-dismissible fade show" role="alert">
+        <span class="me-5">${msg}</span>
+        <button class="btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>`);
+    setTimeout(function() {
+      $('#notice').html(``);
+    }, 2000);
+  }
+</script>

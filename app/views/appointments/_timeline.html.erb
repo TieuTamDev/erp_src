@@ -1,0 +1,83 @@
+<div class="card mb-3">
+  <div class="card-header bg-body-tertiary pb-0">
+      <div class="d-flex align-items-center mb-2">
+          <h3 class="mb-0" data-anchor="data-anchor"><%= lib_translate("appointment.#{@appointment.stype}").capitalize %></h3>
+          <span class="ms-2 badges <%= @appointment.result_color %>" ><%= @appointment.result_name %></span>
+      </div> 
+      <p class="mb-1 fw-semi-bold">
+          <strong class="fw-semi-bold">Tên tác vụ:</strong> 
+          <strong class="fw-semi-bold"><%= @appointment&.title %></strong> 
+          
+      </p>
+      <p class="mb-1 fw-semi-bold">
+          <strong class="fw-semi-bold">Độ khẩn:</strong> 
+          <strong class="fw-semi-bold" style="color: <%= @appointment&.mandocpriority&.note %>;"><%= @appointment&.mandocpriority&.name %></strong>  
+      </p>
+      <p class="mb-1 fw-semi-bold <%= @appointment.stype == "BO_NHIEM" ? "" : "d-none"%>">
+          <strong class="fw-semi-bold">Thời gian dự kiến <%= lib_translate("appointment.#{@appointment.stype}").downcase %>:</strong> 
+          <strong class="fw-semi-bold"><%= @appointment&.expected_appointment_date&.strftime("%d/%m/%Y") %></strong>  
+      </p>
+      <%= link_to appointment_path(@appointment), 
+          class: "btn btn-primary mt-2", 
+          id: "refresh-btn", 
+          remote: true, 
+          data: { type: 'script' } do %>
+          <span class="fas fa-sync-alt"></span> Làm mới
+      <% end %> 
+  </div>
+  <div class="card-body p-3">
+    <div class="time-line-body"> 
+      <div id="loading_appoinment">
+          <div class="spinner_handle"></div>
+          <p class="mt-1" style="color: var(--falcon-avatar-status-border-color);">Đang làm mới...</p>
+      </div>
+      <div id="time-line-content" class="timeline-vertical px-2 px-sm-2 px-md-2 pe-lg-4 pe-xxl-7 py-5" style="background-color: #F9FAFD; border: 2px solid #E8EEF5; border-radius: 10px;">
+        <% @steps.each do |step_number, step_info| %>
+        
+          <% latest_handle = @latest_handles[step_info[:status]] %>
+          <% status_flags = status_flags_for_step(step_number, step_info, latest_handle, @appointsurvey) %>
+          <% timeline_class = status_flags[:skip] ? 'line-skip' : status_flags[:not_processed] ? 'line-not-processed' : status_flags[:completed] ? 'line-success' : '' %>
+          <% entity = step_info[:status] == 'evaluation' ? @appointsurvey : latest_handle %>
+          <div class="timeline-item timeline-item-end <%= timeline_class %>" id="step-<%= step_number %>">
+            <%= render_timeline_icon(status_flags) %>
+            <div class="row">
+              <div class="col-lg-2 timeline-item-time"> 
+                <div>
+                  <p class="fs-10 mb-0 fw-semi-bold">
+                    <%= status_flags[:completed] ? entity&.updated_at&.strftime('%d/%m/%Y') : '' %>
+                  </p>
+                  <p class="fs-11 text-600">
+                    <%= status_flags[:completed] ? entity&.updated_at&.strftime('%H:%M') : '' %>
+                  </p>
+                </div>
+              </div>
+              <div class="col-lg-10">
+                <% classes = timeline_classes(status_flags) %>
+                <div class="timeline-item-content <%= classes[:content] %>">
+                  <div class="timeline-item-card p-3">
+                    <div class="<%= classes[:border] %>">
+                      <h5 class="mb-0"><%= I18n.t("appointment.steps.#{step_info[:status]}", action: lib_translate("appointment.#{@appointment.stype}").downcase) %></h5>
+                      <%= step_info[:status] == 'evaluation' ? render_department_surveys : render_user_info(latest_handle, status_flags) %>
+                    </div>
+                    <%= render_timeline_button(entity, status_flags, step_info, type: step_info[:status] == 'evaluation' ? :survey : :status) %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+    scrollToStep(<%= @current_step %>);
+    function scrollToStep(stepNumber) {
+      var $element = $('#step-' + stepNumber);
+      if ($element.length) {
+        $element.get(0).scrollIntoView({behavior: 'smooth'});
+      }
+    }
+</script>

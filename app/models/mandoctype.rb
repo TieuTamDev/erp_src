@@ -1,0 +1,2 @@
+class Mandoctype < ApplicationRecord
+end

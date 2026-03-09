@@ -1,0 +1,55 @@
+<%= form_for holtemp,
+      url: holtemp.new_record? ? holtemps_path : holtemp_path(holtemp),
+      method: holtemp.new_record? ? :post : :patch,
+      html: { id: "holtemp_form" } do |f| %>
+
+  <div class="modal-header">
+    <h5 class="modal-title" id="holtempModalLabel">
+      <%= holtemp.new_record? ? "Thêm biểu mẫu phép" : "Cập nhật biểu mẫu phép" %>
+    </h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+  </div>
+
+  <div class="modal-body">
+    <div class="mb-3">
+      <%= f.label :title, "Tên biểu mẫu", class: "form-label" %>
+      <%= f.text_field :title, class: "form-control", id: "holtemp_title" %>
+    </div>
+    <div class="mb-3">
+      <%= f.label :content, "Nội dung", class: "form-label" %>
+      <%= f.text_area :content, id: "holtemp_content", class: "form-control tinymce", rows: 8 %>
+    </div>
+    <div class="mb-3">
+      <%= f.label :valid_from, "Áp dụng từ", class: "form-label" %>
+      <%= f.text_field :valid_from, class: "form-control flatpickr", placeholder: "dd/mm/yyyy" %>
+    </div>
+    <div class="mb-3">
+      <%= f.label :valid_to, "Áp dụng kết thúc", class: "form-label" %>
+      <%= f.text_field :valid_to, class: "form-control flatpickr", placeholder: "dd/mm/yyyy" %>
+    </div>
+    <div class="mb-3">
+      <%= f.label :dept, "Đơn vị sử dụng" %>
+      <%= f.select :dept, departments.map { |id, dept| [dept.name, id] },
+                  { prompt: "-- Chọn đơn vị --" },
+                  class: "form-select" %>
+    </div>
+
+
+    <div class="mb-3">
+      <%= f.label :status, "Trạng thái", class: "form-label d-block" %>
+      <div class="form-check form-check-inline">
+        <%= f.radio_button :status, "ACTIVE", checked: holtemp.status.blank? || holtemp.status == "ACTIVE", class: "form-check-input", id: "holtemp_status_ACTIVE" %>
+        <%= f.label :status_active, "Hoạt động", class: "form-check-label" %>
+      </div>
+      <div class="form-check form-check-inline">
+        <%= f.radio_button :status, "INACTIVE", checked: holtemp.status == "INACTIVE", class: "form-check-input", id: "holtemp_status_INACTIVE" %>
+        <%= f.label :status_inactive, "Không hoạt động", class: "form-check-label" %>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+    <%= f.submit holtemp.new_record? ? "Thêm mới" : "Cập nhật", class: "btn btn-primary" %>
+  </div>
+<% end %>

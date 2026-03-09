@@ -1,0 +1,21 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  userid: MyString
+  user_name: MyString
+  user_email: MyString
+  spath: MyText
+  saction_name: MyText
+  dtstart: 2024-12-12 15:54:37
+  dtend: 2024-12-12 15:54:37
+  note: 
+
+two:
+  userid: MyString
+  user_name: MyString
+  user_email: MyString
+  spath: MyText
+  saction_name: MyText
+  dtstart: 2024-12-12 15:54:37
+  dtend: 2024-12-12 15:54:37
+  note: 

@@ -1,0 +1,27 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  title: MyText
+  user: one
+  survey: one
+  stype: MyString
+  priority: MyString
+  new_dept: MyString
+  new_position: MyString
+  dtstart: 2025-03-29 13:43:12
+  result: MyString
+  status: MyString
+  note: 
+
+two:
+  title: MyText
+  user: two
+  survey: two
+  stype: MyString
+  priority: MyString
+  new_dept: MyString
+  new_position: MyString
+  dtstart: 2025-03-29 13:43:12
+  result: MyString
+  status: MyString
+  note: 

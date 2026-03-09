@@ -1,0 +1,25 @@
+<div style="font-family: Arial, sans-serif; font-size: 14px;">
+    <% if @message.include?("Nhân sự:") %>
+        <p style="color:#ff0000">Hệ thống ERP cảnh báo Đơn xin nghỉ của nhân sự dưới đây chưa được duyệt:</p>
+        <p>Bạn đang có các đơn nghỉ cần xử lý:</p>
+        <p>
+        <%= @message.html_safe %>
+        </p>
+    <% else %>
+        <p><%= @message %></p>
+        <p>Đơn xin nghỉ của bạn chưa được duyệt. Liên hệ với cấp duyệt tiếp theo để xử lý Đơn xin nghỉ</p>
+    <% end %>
+    <% if @message.include?("Nhân sự:") %>
+    <p style="color:#ff0000">
+        Vui lòng truy cập <a href="https://erp.bmtu.edu.vn/"><strong>Hệ thống ERP</strong></a> để duyệt đơn xin nghỉ của nhân sự được nêu trên.
+    </p>
+    <% else %>
+    <p>
+        Vui lòng theo dõi trạng thái đơn xin nghỉ của bạn trên
+        <a href="https://erp.bmtu.edu.vn/"><strong>Hệ thống ERP</strong></a>.
+    </p>
+    <% end %>
+    <br>
+    <p>Trân trọng,</p>
+    <p>Hệ thống ERP</p>
+</div>

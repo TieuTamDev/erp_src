@@ -1,0 +1,148 @@
+<% content_for :head do %>
+    <%= stylesheet_link_tag "select2-bootstrap-5-theme.min" %>
+    <%= stylesheet_link_tag "select2.min" %>
+    <%= javascript_include_tag '/assets/myjs/pdf/pdf.min.js' %>
+    <%= javascript_include_tag '/assets/myjs/pdf/pdf.worker.min.js' %>
+    <%= javascript_include_tag '/assets/myjs/pdf/pdf-sign.min.js' %>
+<% end %>
+
+<% content_for :bottombody do %>
+    <%= javascript_include_tag 'select2.min.js'%>
+<% end %>
+
+<style>
+    .appointment-timeline {
+        position: relative;
+        padding-left: 15px;
+    }
+    
+    .timeline-item {
+        padding-bottom: 20px;
+    }
+    
+    .timeline-indicator {
+        z-index: 1;
+    }
+    
+    .timeline-content {
+        padding-bottom: 10px;
+    }
+
+    .rounded-circle {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    div.timeline-icon > svg {
+        font-size: 1.2rem !important;
+    }
+    .line-success::before {
+        background-color: #00d27a;
+    }
+    .line-not-processed::before {
+        background-color: #b91c1c;
+    }
+    .line-skip::before {
+        background-color: #FC953B;
+    }
+    @media(min-width: 992px) {
+        .timeline-vertical .timeline-item:not(:last-child)::before {
+            left: 16%;
+        }
+    }
+    @media(min-width: 992px) {
+        .timeline-vertical .timeline-icon {
+            left: 16%;
+        }
+    }
+    .br-completed, .br-completed::before {
+        border: 1px solid #00d27a !important;
+    }
+    .br-current, .br-current::before {
+        border: 1px solid rgb(44 123 229) !important;
+    } 
+    .br-not-processed, .br-not-processed::before {
+        border: 1px solid #b91c1c !important;
+    } 
+    .br-skip, .br-skip::before {
+        border: 1px solid #FC953B !important;
+    } 
+    .badges {
+        display: inline-block;
+        padding: 5px 20px;
+        font-size: 12px;
+        font-weight: 600;
+        border-radius: 9999px; 
+    }
+    .badges-pending {
+        background-color: #DEE0E2;
+        color: #61666F;
+    } 
+    .badges-primary {
+        background-color: #d9e7fa; 
+        color: #215cac; 
+    } 
+    .badges-info {
+        background-color: #d8f3ff; 
+        color: #197aa4;  
+    }  
+    .badges-success {
+        color: #14AE5C;
+        background-color: #C8F9DF;
+    } 
+    .badges-warning {
+        background-color: #FEE9D7;
+        color: #FC953B;
+    } 
+    .badges-rejected {
+        background-color: #fee2e2;
+        color: #b91c1c;
+    }    
+    .badges-danger {
+        background-color: #fee2e2;
+        color: #b91c1c;
+    }  
+    #loading_appoinment {
+        position: absolute;
+        z-index: 2;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgb(0 0 0 / 90%);
+        display: none;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        border-radius: 10px;
+        box-sizing: border-box;
+    }
+    .scrollable-content {
+        max-height: 70vh;
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: #a0a0a0 #ffffff;
+    }
+    .time-line-body {
+        position: relative;     
+        overflow: hidden; 
+    }
+</style>
+<%= breadcrumbs([
+  { title: 'Trang chủ', path: root_path },
+  { title: lib_translate("appointment.#{@appointment.stype}").capitalize, path: appointments_path },
+  { title: @appointment.title, current: true },
+]) %>
+<div id="timeline-content">
+    <%= render partial: 'appointments/timeline' %>
+</div>
+
+<script>
+    $(document).on('click', '#refresh-btn', function() {
+        const $icon = $(this).find('svg'); 
+        $icon.addClass('fa-spin'); 
+        $("#loading_appoinment").css("display", "flex");
+    }); 
+</script>

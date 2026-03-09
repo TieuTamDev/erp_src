@@ -1,0 +1,38 @@
+<style>
+    .badges {
+        display: inline-block;
+        padding: 5px 10px;
+        font-weight: 600;
+        border-radius: 5px;
+    }
+    .badges-info {
+        background-color: #ebebeb;
+        color: #616161;
+    }
+</style>
+
+<% @chartData.each_with_index do |gsurvey, index| %>
+    <div class="card border mb-3" style="box-shadow: none;">
+        <div class="card-body">
+            <div class="card-title">
+                <%= index + 1 %>. <%= gsurvey[:gsurvey_name] %>
+            </div>
+            <div class="card-title fs-0">a. Biểu đồ:</div>
+            <div style="width: 100%; height: 300px;">
+                <canvas id="chart-<%= index %>"></canvas>
+            </div>
+        </div>
+        <div class="card-body pt-0">
+            <div class="card-title fs-0">b. Ý kiến khác:</div>
+            <div class="content-main"> 
+                <% gsurvey[:answer_orthers]&.each do |answer_orther| %>
+                <div class="card border mb-2" style="box-shadow: none;">
+                    <div class="px-3 py-2">
+                        <%= answer_orther[:note].to_s.gsub(/\r\n|\r|\n/, '<br>').html_safe %>
+                    </div>
+                </div>
+                <% end %> 
+            </div>
+        </div>
+    </div>
+<% end %> 

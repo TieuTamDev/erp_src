@@ -1,0 +1,234 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "select2-bootstrap-5-theme.min" %>
+  <%= stylesheet_link_tag "select2.min" %>
+<% end %>
+<% content_for :bottombody do %>
+    <%= javascript_include_tag 'select2.full.min'%>
+    <%= javascript_include_tag 'select2.min.js'%>
+<% end %> 
+
+<style>
+    #table_attend_teacher_wrapper .top {
+        display: none !important;
+    }
+
+    table td {
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+    }
+</style>
+<div class="mt-2">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="col-md-6">
+                <%= form_tag works_index_path(tab: @tab_names[:gtasks], lang: session[:lang]), method: :post do %>
+                    <div class="input-group">
+                        <%= text_field_tag :search, params[:search], class: "form-control", id: "gtask_search", placeholder: "Tìm kiếm" %>
+                        <span class="input-group-text bg-white">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                        </svg>
+                        </span>
+                    </div>
+                <% end %>
+            </div>
+        </div>
+        <div class="col-md-6 d-flex justify-content-end">
+            <%= link_to new_gtask_path, class: "btn btn-primary", id: "btn-add-function", onclick: "showLoadding(true);", remote: true do %>
+                <i class="fas fa-plus"></i> Thêm nhóm công việc
+            <% end %>
+        </div>
+    </div>
+</div>
+<table id="table_gtasks" class="table table-customs table-bordered fs--1 mb-0" style="margin-top: 15px !important; margin-bottom: 0px !important">
+    <thead>
+        <tr style="background-color: #EFF2F1;">
+            <th class="no-sort" style="width: 5%;">#</th>
+            <th class="no-sort" style="width: 40%;">Nhóm công việc</th>
+            <th class="no-sort" style="width: 40%;">Ghi chú</th>
+            <th class="no-sort text-center" style="width: 15%;">Hành động</th>
+        </tr>
+    </thead>
+    <tbody class="list">
+        <% if @gtasks.any? %>
+            <% @gtasks.each_with_index do |gtask, index| %>
+                <tr id="gtask-<%= gtask.id %>" class="gtask-row" data-gtask-id="<%= gtask.id %>">
+                    <td><%= (session[:page].to_i - 1) * session[:per_page].to_i + index + 1 %></td>
+                    <td class="text-start"> <img style="width: 15px; height: 15px; cursor: pointer;" src="data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%235e6e82'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e" alt="">
+                        &nbsp;&nbsp;&nbsp;&nbsp;<%= gtask.name %>
+                    </td>
+                    <td class="text-start"><%= gtask.sdesc %></td>
+                    <td class="text-center">
+                        <div class="d-flex justify-content-center align-items-center">
+                            <%= link_to assign_stasks_gtask_path(gtask), class: 'btn btn-link', onclick: "showLoadding(true);",
+                                        data: { bs_toggle: 'tooltip', bs_placement: 'top', bs_title: 'Gán công việc' },
+                                        remote: true do %>
+                                <img style="margin-right: 5px;" src="<%= image_path("/assets/image/icon-park.svg") %>" alt="file">
+                            <% end %>
+                            
+                            <%= link_to edit_gtask_path(gtask), class: 'btn btn-link', onclick: "showLoadding(true);",
+                                        data: { bs_toggle: 'tooltip', bs_placement: 'top', bs_title: 'Chỉnh sửa' },
+                                        remote: true do %>
+                                <i class="text-primary fas fa-pen"></i>
+                            <% end %>
+                            
+                            <%= link_to gtask_path(gtask), class: 'btn btn-link delete-gtask-btn', 
+                                        method: :delete,
+                                        data: { 
+                                            bs_toggle: 'tooltip', 
+                                            bs_placement: 'top', 
+                                            bs_title: 'Xóa',
+                                            can_delete: gtask.can_be_deleted,
+                                            gtask_name: gtask.name,
+                                            gtask_id: gtask.id,
+                                            remote: true
+                                        } do %>
+                                <i class="text-danger fas fa-trash"></i>
+                            <% end %>
+                        </div>
+                    </td>
+                </tr>
+                <tr id="stasks-<%= gtask.id %>" class="stasks-row" style="display: none;">
+                    <td colspan="4" class="p-0" style="border: none !important">
+                        <div class="stasks-container p-3" style="background-color: #ECECEC; border-radius: 10px;">
+                            <% if gtask.stasks.any? %>
+                                <table class="table table-sm table-striped table-bordered" style="background-color: white;">
+                                    <thead>
+                                        <tr class="bg-light">
+                                            <th style="width: 5%;">#</th>
+                                            <th style="width: 20%;">Tên công việc</th>
+                                            <th style="width: 15%;">Mức độ TX</th>
+                                            <th style="width: 15%;">Cấp xử lý</th>
+                                            <th style="width: 15%;">Mức độ khó</th>
+                                            <th style="width: 15%;">Mức độ ưu tiên</th>
+                                            <th style="width: 15%;">Quy trình</th>
+                                            <th style="width: 15%;">Ghi chú</th>
+                                            <th style="width: 15%;">Hành động</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% gtask.stasks.each_with_index do |stask, idx| %>
+                                            <tr id="stask-<%= stask.id %>">
+                                                <td><%= idx + 1 %></td>
+                                                <td><%= stask.name %></td>
+                                                <td>
+                                                    <% if stask.frequency.present? %>
+                                                        <%= WorksHelper::FREQUENCY_TYPES[stask.frequency.to_sym] %>
+                                                    <% else %>
+                                                        Không xác định
+                                                    <% end %>
+                                                </td>
+                                                <td><%= stask.level_handling %></td>
+                                                <td><%= stask.level_difficulty %></td>
+                                                <td><%= stask.priority %></td>
+                                                <td class="text-start">
+                                                    <% if stask.files.present? %>
+                                                        <ul class="list-unstyled mb-0">
+                                                            <% stask.files.each do |file| %>
+                                                                <div style="display: flex; align-items: center;">
+                                                                    <img class="task-icon" src="<%= image_path("/assets/image/#{file[:file_icon]}.png") %>">
+                                                                    <li style="list-style: none;"><%= file[:file_name] %></li>
+                                                                </div>
+                                                            <% end %>
+                                                        </ul>
+                                                    <% else %>
+                                                        <span class="text-muted">Không có file</span>
+                                                    <% end %>
+                                                </td>
+                                                <td><%= stask.note %></td>
+                                                <td class="text-center">
+                                                    <%= link_to unassign_stask_gtask_path(gtask, stask_id: stask.id),
+                                                        method: :patch,
+                                                        class: 'btn btn-sm btn-outline-danger',
+                                                        data: {
+                                                        confirm: "Xác nhận gỡ bỏ công việc #{stask.name} khỏi nhóm?",
+                                                        remote: true
+                                                        } do %>
+                                                        <i class="fas fa-times"></i>
+                                                    <% end %>
+                                                </td>
+                                            </tr>
+                                        <% end %>
+                                    </tbody>
+                                </table>
+                            <% else %>
+                                Chưa có công việc nào được gán cho nhóm này.
+                            <% end %>
+                        </div>
+                    </td>
+                </tr>
+            <% end %>
+        <% else %>
+            <tr>
+                <td colspan="4" class="text-center">Không có dữ liệu</td>
+            </tr>
+        <% end %>
+    </tbody>
+</table>
+
+<div class='d-flex justify-content-between align-items-center mt-3'>
+    <div style="font-size: 14px; font-weight: 400; color: #4E606E;">
+        <%
+            current_page = session[:page]&.to_i || 1
+            per_page = session[:per_page]&.to_i || 10
+            start_record = (current_page - 1) * per_page + 1
+            end_record = [current_page * per_page, @total_records].min
+        %>
+
+        <%=lib_translate('Show')%> <%= start_record %>-<%= end_record %> <%=lib_translate('Up_to')%> <%= @total_records %> <%=lib_translate('Record')%>
+    </div>
+    <div>
+        <%= render_pagination_limit_offset(works_index_path(tab: @tab_names[:gtasks], lang: session[:lang], per_page: session[:per_page], search: session[:search]), 10, @gtasks.count).html_safe %>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        $('.gtask-row').on('click', function(e) {
+          if ($(e.target).closest('.btn-link').length === 0) {
+            var gtaskId = $(this).data('gtask-id');
+            $('#stasks-' + gtaskId).toggle();
+          }
+        });
+
+        $('[data-bs-toggle="tooltip"]').tooltip();
+    });
+
+    document.querySelectorAll('.delete-gtask-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const canDelete = this.getAttribute('data-can-delete') === 'true';
+            const gtaskName = this.getAttribute('data-gtask-name');
+            
+            if (canDelete) {
+                if (confirm(`Xác nhận xóa nhóm công việc ${gtaskName}?`)) {
+                    showLoadding(true);
+
+                    const token = $('meta[name="csrf-token"]').attr('content');
+                    
+                    $.ajax({
+                        url: this.getAttribute('href'),
+                        type: 'DELETE',
+                        dataType: 'script',
+                        headers: {
+                            'X-CSRF-Token': token
+                        },
+                        success: function(response) {
+                        },
+                        error: function(xhr) {
+                            showLoadding(false);
+                            alert('Có lỗi xảy ra khi xóa nhóm công việc');
+                        }
+                    });
+                }
+            } else {
+                alert("Đối với các nhóm công việc đã được gán công việc, hệ thống sẽ không cho phép xóa. Để xóa nhóm công việc, vui lòng xóa toàn bộ các công việc liên quan trước!");
+            }
+            
+            return false;
+        });
+    });
+</script>

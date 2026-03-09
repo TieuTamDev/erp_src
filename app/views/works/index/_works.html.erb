@@ -1,0 +1,300 @@
+<style>
+    #table_attend_teacher_wrapper .top {
+        display: none !important;
+    }
+
+    .accordion-left-icon .accordion-button::after {
+        margin-left: 0;
+        order: -1;
+        margin-right: 0.8rem;
+        width: 0.9rem;
+        height: 0.9rem;
+        background-size: 0.9rem;
+        opacity: 0.9;
+        font-weight: bold;
+    }
+    
+    .accordion-left-icon .accordion-button {
+        flex-direction: row;
+        justify-content: flex-start;
+    }
+
+    #dutyAccordion .accordion-button {
+        padding: 0.5rem 1rem;
+        font-size: 0.95rem;
+        background-color: #ffffff;
+        border-left: 3px solid #6c757d;
+        border-radius: 0;
+    }
+    
+    #dutyAccordion .accordion-button:not(.collapsed) {
+        color: #495057;
+        background-color: #f1f3f5;
+    }
+
+    .bg-pending { background-color: #ffc107; }
+    .bg-processing { background-color: #17a2b8; }
+    .bg-completed { background-color: #28a745; }
+    .bg-default { background-color: #6c757d; }
+
+    .count_dueties {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        border: 1px solid #cccccc;
+        font-size: 14px;
+        color: #333333;
+        margin-left: 8px;
+        font-weight: 500;
+    }
+
+    .accordion-button:focus {
+        box-shadow: none !important;
+        outline: none !important;
+        border-color: inherit;
+    }
+    
+    .accordion-button:focus-visible {
+        box-shadow: none !important;
+        outline: none !important;
+        border-color: inherit;
+    }
+
+    .accordion-button:not(.collapsed):focus {
+        box-shadow: none !important;
+    }
+
+    .accordion-button {
+        outline: 0 !important;
+    }
+
+    table td {
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+    }
+
+    .accordion-item {
+        margin-bottom: 8px;
+        border-radius: 6px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .accordion-item:hover {
+        box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+    }
+    
+    #functionAccordion .accordion-button {
+        padding: 12px 16px;
+        font-weight: 500;
+        transition: all 0.2s ease-in-out;
+    }
+    
+    #functionAccordion .accordion-button:not(.collapsed) {
+        background-color: #edf2ff;
+    }
+    
+    #dutyAccordion .accordion-button {
+        border-left-width: 3px;
+        transition: all 0.2s ease;
+    }
+    
+    .accordion-body {
+        padding: 16px;
+        border-radius: 0 0 6px 6px;
+    }
+
+    .accordion-collapse {
+        transition: all 0.3s ease-in-out;
+    }
+
+    .count_dueties {
+        color: #495057;
+        font-weight: 600;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        transition: all 0.2s ease;
+    }
+</style>
+<div class="mt-2">
+    <%= form_tag works_index_path(tab: @tab_names[:works], lang: session[:lang]), method: :post do %>
+      <div class="row align-items-end justify-content-start">
+        <div class="col-md-3">
+          <div class="input-group">
+            <%= text_field_tag :search, params[:search], class: "form-control", id: "work_search", placeholder: "Tìm kiếm" %>
+            <span class="input-group-text bg-white">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+              </svg>
+            </span>
+          </div>
+        </div>
+        
+        <div class="col-md-9">
+            <!-- <div class="row align-items-end justify-content-end">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label class="d-block mb-1">Đơn vị</label>
+                        <%= select_tag :department_id, options_for_select([], ''), { include_blank: 'Chọn đơn vị', class: "form-select" } %>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label class="d-block mb-1">Chức năng</label>
+                        <%= select_tag :function_id, options_for_select([], ''), { include_blank: 'Chọn chức năng', class: "form-select" } %>
+                    </div>
+                </div>
+                
+                <div class="col-md-2">
+                    <button class="btn btn-primary w-100" type="submit">
+                        Lọc
+                    </button>
+                </div>
+            </div> -->
+        </div>
+      </div>
+    <% end %>
+</div>
+
+<table id="table_functions" class="table table-customs table-bordered fs--1 mb-0" style="margin-top: 15px !important; margin-bottom: 0px !important">
+    <thead>
+        <tr style="background-color: #EFF2F1;">
+            <th class="no-sort" style="font-size: 16px; width: 100%;">Chức năng</th>
+        </tr>
+    </thead>
+    <tbody class="list">
+        <% if @functions.any? %>
+            <tr>
+                <td class="p-0" style="border: none !important;">
+                    <!-- Accordion cho danh sách chức năng -->
+                    <div class="accordion accordion-left-icon" id="functionAccordion">
+                    <% @functions.each_with_index do |function, index| %>
+                        <div class="accordion-item border-0 mt-2">
+                        <span class="accordion-header" id="heading-<%= function.id %>">
+                            <button class="accordion-button collapsed" type="button" 
+                                    data-bs-toggle="collapse" data-bs-target="#function-collapse-<%= function.id %>" 
+                                    aria-expanded="false" aria-controls="function-collapse-<%= function.id %>">
+                            <span style="font-size: 16px; color: #333333;">
+                                <%= function.name %>
+                            </span>
+                            <span class="count_dueties"><%= function.get_duties.count %></span>
+                            </button>
+                        </span>
+                        <div id="function-collapse-<%= function.id %>" class="accordion-collapse collapse" 
+                            aria-labelledby="heading-<%= function.id %>">
+                            <div class="accordion-body">
+                            <% if function.get_duties.any? %>
+                                <!-- Accordion cho nhiệm vụ của chức năng này -->
+                                <div class="accordion accordion-left-icon ms-3" id="dutyAccordion-<%= function.id %>">
+                                <% function.get_duties.each_with_index do |duty, duty_index| %>
+                                    <div class="accordion-item border-0 mb-2">
+                                        <span class="accordion-header" id="duty-heading-<%= duty.id %>">
+                                            <button class="accordion-button collapsed p-2" type="button" 
+                                                    data-bs-toggle="collapse" data-bs-target="#duty-collapse-<%= duty.id %>" 
+                                                    aria-expanded="false" aria-controls="duty-collapse-<%= duty.id %>">
+                                            <%= duty.name %>
+                                            </button>
+                                        </span>
+                                        <div id="duty-collapse-<%= duty.id %>" class="accordion-collapse collapse" 
+                                            aria-labelledby="duty-heading-<%= duty.id %>">
+                                            <div class="accordion-body" style="background-color: #ECECEC; border-radius: 10px;">
+                                                <!-- Bảng công việc thuộc nhiệm vụ này -->
+                                                <div class="table-responsive">
+                                                    <table class="table table-bordered">
+                                                        <thead style="background-color: #F9FBFC;">
+                                                            <tr>
+                                                                <th style="width: 5%;">#</th>
+                                                                <th style="width: 20%;">Tên công việc</th>
+                                                                <th style="width: 10%;">Mức độ TX</th>
+                                                                <th style="width: 10%;">Cấp xử lý</th>
+                                                                <th style="width: 10%;">Mức độ khó</th>
+                                                                <th style="width: 10%;">Mức độ ưu tiên</th>
+                                                                <th style="width: 20%;">Quy trình</th>
+                                                                <th style="width: 15%;">Ghi chú</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody style="background-color: white;">
+                                                            <% tasks = Stask.tasks_of(duty.id) %>
+                                                            <% if tasks.any? %>
+                                                                <% tasks.each_with_index do |task, index| %>
+                                                                    <tr>
+                                                                        <td><%= index + 1 %></td>
+                                                                        <td><%= task.name %></td>
+                                                                        <td>
+                                                                            <% if task.frequency.present? %>
+                                                                                <%= WorksHelper::FREQUENCY_TYPES[task.frequency.to_sym] || task.frequency %>
+                                                                            <% else %>
+                                                                                <%= "-" %>
+                                                                            <% end %>
+                                                                        </td>
+                                                                        <td><%= task.level_handling %></td>
+                                                                        <td><%= task.level_difficulty %></td>
+                                                                        <td><%= task.priority %></td>
+                                                                        <td class="text-start">
+                                                                            <% if task.files.present? %>
+                                                                                <ul class="list-unstyled mb-0">
+                                                                                    <% task.files.each do |file| %>
+                                                                                        <div style="display: flex; align-items: center;">
+                                                                                            <img class="task-icon" src="<%= image_path("/assets/image/#{file[:file_icon]}.png") %>">
+                                                                                            <li style="list-style: none;"><%= file[:file_name] %></li>
+                                                                                        </div>
+                                                                                    <% end %>
+                                                                                </ul>
+                                                                            <% else %>
+                                                                                <span class="text-muted">Không có file</span>
+                                                                            <% end %>
+                                                                        </td>
+                                                                        <td><%= task.note %></td>
+                                                                    </tr>
+                                                                <% end %>
+                                                            <% else %>
+                                                                <tr>
+                                                                    <td colspan="8" class="text-center">Không có công việc nào</td>
+                                                                </tr>
+                                                            <% end %>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <% end %>
+                                </div>
+                            <% else %>
+                                <div class="text-center py-2" style="background-color: #ECECEC; border-radius: 10px;">Không có nhiệm vụ nào</div>
+                            <% end %>
+                            </div>
+                        </div>
+                        </div>
+                    <% end %>
+                    </div>
+                </td>
+            </tr>
+        <% else %>
+            <tr>
+                <td class="text-center">Không có chức năng nào</td>
+            </tr>
+        <% end %>
+    </tbody>
+</table>
+
+<div class='d-flex justify-content-between align-items-center mt-3'>
+    <div style="font-size: 14px; font-weight: 400; color: #4E606E;">
+        <%
+            current_page = session[:page]&.to_i || 1
+            per_page = session[:per_page]&.to_i || 10
+            start_record = (current_page - 1) * per_page + 1
+            end_record = [current_page * per_page, @total_records].min
+        %>
+
+        <%=lib_translate('Show')%> <%= start_record %>-<%= end_record %> <%=lib_translate('Up_to')%> <%= @total_records %> <%=lib_translate('Record')%>
+    </div>
+    <div>
+        <%= render_pagination_limit_offset(works_index_path(tab: @tab_names[:works], lang: session[:lang], per_page: session[:per_page], search: session[:search]), 10, @functions.count).html_safe %>
+    </div>
+</div>

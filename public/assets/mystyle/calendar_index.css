@@ -1,0 +1,89 @@
+
+.fc-day-past {
+    background: #f1f1f18a;
+}
+.fc .maintance {
+    background-color: #ffd0ce  !important;
+}
+.fc .maintance .fc-event-title,.fc .maintance .fc-event-time {
+    color: #db2828  !important;
+}
+.fc .maintance .fc-daygrid-event-dot {
+    border-color: #db2828  !important;
+}
+.fc .fc-event-end .fc-daygrid-event-dot {
+    border-color: rgb(116, 116, 116) !important;
+}
+.fc-event-end .fc-event-main:after {
+    background-color: rgb(116, 116, 116) !important;
+}
+.fc .fc-event-end {
+    background-color: var(--falcon-soft-dark) !important;
+}
+.fc .fc-event-future .fc-daygrid-event-dot {
+    border-color: rgb(237, 156, 97) !important;
+}
+.fc-event-future .fc-event-main:after {
+    background-color: rgb(237, 156, 97) !important;
+}
+.fc .fc-event-future {
+    background-color: var(--falcon-highlight-bg) !important;
+}
+.fc .fc-bg-event.fc-event.fc-event-start.fc-event-end.fc-event-future {
+    background-color: #c7c7c78a !important;
+}
+.fc .fc-event-today .fc-daygrid-event-dot {
+    border-color: green !important;
+}
+.fc-event-today .fc-event-main:after {
+    background-color: green !important;
+}
+.fc .fc-event-today {
+    background-color: var(--falcon-badge-soft-success-background-color) !important;
+}
+.fc .fc-event-title {
+    font-weight: 600 !important;
+}
+.fc-day-today .fc-daygrid-event-dot,
+.fc-day-today .fc-event-time,
+.fc-day-today .fc-event-title
+{
+    color: green !important;
+}
+.fc-day-past .fc-daygrid-event-dot,
+.fc-day-past .fc-event-time,
+.fc-day-past .fc-event-title
+{
+    color: var(--falcon-badge-soft-dark-color) !important;
+}
+.fc-day-future .fc-daygrid-event-dot,
+.fc-day-future .fc-event-time,
+.fc-day-future .fc-event-title
+{
+    color: rgb(231, 124, 47) !important;
+}
+.fc .fc-daygrid-event-harness {
+    padding-left: 5px !important;
+    padding-right: 5px !important;
+}
+.fc .maintance {
+    background-color: #ffd0ce  !important;
+}
+.fc .maintance .fc-event-title,.fc .maintance .fc-event-time {
+    color: #db2828  !important;
+}
+.fc .maintance .fc-daygrid-event-dot {
+    border-color: #db2828  !important;
+}
+table td {
+    overflow: unset !important;
+}
+/* .fc .fc-non-business {
+    background: var(--fc-non-business-color,rgba(255,201,203,0.2));
+} */
+tr:nth-child(even) {
+    background-color: unset !important;
+}
+table.fc-scrollgrid.fc-scrollgrid-liquid, table.fc-col-header {
+    border: none;
+}

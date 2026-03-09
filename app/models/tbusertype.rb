@@ -1,0 +1,2 @@
+class Tbusertype < ApplicationRecord
+end

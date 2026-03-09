@@ -1,0 +1,15 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  msg: 
+  msgdetails: 
+  owner: MyString
+  dtaccess: 2024-12-03 08:49:07
+  surl: MyText
+
+two:
+  msg: 
+  msgdetails: 
+  owner: MyString
+  dtaccess: 2024-12-03 08:49:07
+  surl: MyText

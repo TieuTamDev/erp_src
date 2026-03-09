@@ -1,0 +1,271 @@
+/* Author: Đinh Hoàng Vũ */
+.diagram-top-controls, .diagram-containter, .diagram-bottom-controls{
+    user-select: none;
+}
+.diagram-top-controls{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 25px;
+}
+.diagram-top-controls .select-label{
+    width: fit-content;
+    padding: 0px 10px;
+}
+.diagram-top-controls .form-select{
+    margin-bottom: 10px;
+}
+.diagram-top-controls .diagram-button-add{
+    width: 100%;
+    margin-bottom: 10px;
+}
+.diagram-bottom-controls{
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    padding: 10px 0px;
+}
+.diagram-bottom-controls button:first-child{
+    margin-bottom: 10px;
+}
+.diagram-bottom-button{
+    width: 100%;
+}
+
+.diagram-containter{
+    height: fit-content;
+    width: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 8px;
+    padding: 10px;
+}
+.left-panel{
+    min-width: 250px;
+    height: 70vh;
+    overflow-y: auto;
+}
+.left-panel .list-group-item {
+    margin-bottom: 2px;
+    cursor: grab;
+}
+.left-panel .list-group-item:hover{
+    background-color: rgb(214, 214, 214);
+}
+
+.gutter{
+    width: 100%;
+    height: 2px;
+    margin-right: 3px;
+    margin-left: 3px;
+    transition: 100ms ease-in-out;
+}
+.gutter:active{
+    background-color: #9fc6fbab;
+}
+
+.right-panel{
+    flex-grow: 1;
+    position: relative;
+    border-radius: 5px;
+    border: 1px solid #d7d7d7;
+}
+
+.diagram-textediter{
+    outline-color: var(--falcon-gray-300);
+    outline-width: 2px;
+    border-radius: 4px;
+    outline-style: solid;
+    padding: 5px;
+}
+.department-item{
+    padding: 10px;
+    border-radius: 4px;
+    background-color: var(--falcon-gray-200);
+    margin-bottom: 3px;
+}
+.department-item:hover{
+    background-color: var(--falcon-gray-300);
+}
+
+.diagram-group-button{
+    display: flex;
+    align-items: center;
+    height: 25px;
+    border: 1px solid #747474;
+    border-radius: 10px;
+    overflow: hidden;
+    background-color: white;
+    margin-right: 10px;
+}
+.diagram-group-button div:first-child{
+    border-right: 1px solid #747474;
+}
+
+.diagram-inner-button{
+    width: 30px;
+    height: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #222;
+}
+.diagram-single-button{
+    width: 30px;
+    height: 25px;
+    cursor: pointer;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 10px;
+}
+.diagram-single-button:hover{
+    background-color: var(--falcon-gray-300);
+}
+.diagram-inner-button:hover{
+    background-color: rgb(199, 199, 199);
+}
+.diagram-no-arrow{
+    width: 14px;
+    height: 3px;
+    background-color: #333;
+    border-radius: 2px;
+}
+
+.diagram-inner-controls{
+    display: flex;
+    align-items: center;
+    justify-content: end;
+    width: 100%;
+    height: 40px;
+    padding: 10px 16px;
+    background-color: white;
+    box-shadow: -2px 3px 5px 0px rgb(0 0 0 / 19%);
+    z-index: 5;
+}
+.diagram-zoom{
+    margin: 0;
+    margin-left: 10px;
+    padding: 0px 4px;
+    cursor: pointer;
+    width: 47px;
+    font-weight: bold;
+    font-size: 13px;
+    border-radius: 5px;
+    text-align: right;
+    border: 1px solid rgb(209, 209, 209);
+    color: #222;
+}
+.diagram-zoom:hover{
+    background-color: rgb(199, 199, 199);
+}
+
+.diagram-button-active{
+    background-color: rgb(199, 199, 199);
+}
+
+.loading-screen{
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    z-index: 999;
+    background-color: #00000094;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+.block-screen{
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    z-index: 7;
+    display: none;
+}
+
+/* collapse */
+.collapse-control{
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 7px 14px;
+}
+.collapse-title{
+    margin: 0px;
+}
+
+.diagram-scrollbar::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+@media (min-width: 576px){
+    .diagram-bottom-controls{
+        flex-direction: row;
+        align-items: center;
+        justify-content: end;
+        padding: 10px 0px;
+    }
+    .diagram-bottom-controls button:first-child{
+        margin-bottom: unset;
+        margin-right: 10px;
+    }
+    .diagram-bottom-button{
+        width: 130px;
+    }
+}
+
+@media (min-width: 768px){
+
+    .diagram-containter{
+        flex-direction: row !important;
+    }
+    .gutter{
+        width: 5px;
+        height: auto;
+        cursor: col-resize;
+    }
+    .left-panel{
+        margin-bottom: 5px;
+    }
+    .right-panel{
+        height: calc(100%-300px);
+        width: 500px;
+    }
+}
+
+@media (min-width: 992px){
+    
+    .diagram-top-controls{
+        flex-direction: row;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .diagram-top-controls .select-label{
+        width: 390px;
+        margin: unset;
+    }
+    .diagram-top-controls .form-select{
+        margin: unset;
+        margin-right: 10px;
+    }
+    .diagram-top-controls .diagram-button-add{
+        margin: unset;
+        width: 487px;
+    }
+}
+
+@media (min-width: 1200px){
+
+}
+
+@media (min-width: 1540px){
+   
+}

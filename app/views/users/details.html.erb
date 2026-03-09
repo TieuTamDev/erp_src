@@ -1,0 +1,612 @@
+<% content_for :head do %>
+  <!-- User Details -->
+  <%= stylesheet_link_tag "select2-bootstrap-5-theme.min" %>
+  <%= stylesheet_link_tag "select2.min" %>
+  <%= stylesheet_link_tag '/assets/lib_hrm/style_user_details.css' %> 
+
+  <%# Datepicker %>
+  <%= stylesheet_link_tag 'jquery-ui.css' %> 
+  <%= javascript_include_tag 'jquery-ui.js'%>
+
+  <%# Datepicker end %>
+  <%# Select 2 %>
+  <%= javascript_include_tag 'select2.min.js'%>
+  <%# Select 2 end %>
+
+  <%# _infomation  %>
+    <%= javascript_include_tag '/assets/lib_hrm/axios.min.js' %>
+  <%# _infomation end %>
+  
+  <%# Vũ: include upload media lib%>
+    <%= stylesheet_link_tag '/assets/lib_hrm/formmedia.css' %>
+    <%= javascript_include_tag '/assets/lib_hrm/formmedia_old.js' %>
+  <%# end %>
+
+  <!-- User Details End -->
+<% end %>
+
+<% content_for :bottombody do %>
+    <!-- User Details -->
+    <%= javascript_include_tag 'prism' %> 
+    <%= render partial: "shared/mutilInput"%>  
+    <!-- User Details End -->
+<% end %> 
+
+
+<!-- Vũ: translate dùng chung cho các media upload : 21/12/2022 -->
+<script>
+  var media_trans = {
+    upload_guide_1:'<%= lib_translate("upload_guide_1") %>',
+    upload_guide_2:'<%= lib_translate("upload_guide_2") %>',
+    upload_guide_3:'<%= lib_translate("upload_guide_3") %>',
+    confirm_delete:'<%= lib_translate("confirm_delete") %>',
+    confirm_delete_all:'<%= lib_translate("confirm_delete_all") %>',
+    select_files:'<%= lib_translate("select_files") %>',
+    cancel:'<%= lib_translate("Cancel") %>',
+    confirm:'<%= lib_translate("Confirm") %>',
+    message:'<%= lib_translate("Message") %>',
+    remove:'<%= lib_translate("Remove") %>',
+    upload:'<%= lib_translate("Upload") %>',
+    error: '<%= lib_translate("error") %>',
+    try_again:'<%= lib_translate("try_again") %>',
+    file_name: '<%= lib_translate("File_name") %>',
+    create_date:'<%= lib_translate("Create_date") %>',
+    created_by:'<%= lib_translate("Created_by") %>',
+  }
+</script>
+<!-- end  -->
+
+<!-- html -->
+<nav class="mb-3"   style="
+--falcon-breadcrumb-divider: url(
+  &#34;data:image/svg + xml,
+  %3Csvgxmlns='http://www.w3.org/2000/svg'width='8'height='8'%3E%3Cpathd='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z'fill='%23748194'/%3E%3C/svg%3E&#34;
+);
+"  aria-p="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item">
+      <a onclick="clearCurrentTab()"
+        href="<%= users_index_path(lang: session[:lang])  %>"
+        style="color: rgb(0, 153, 255) !important"
+        ><%= lib_translate("List_of_staff") %></a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page">
+      <%= lib_translate("details_of") %><span style="text-transform: capitalize;border: none; background: transparent; font-weight: bold">
+        <%= @user.last_name %>  <%= @user.first_name %> 
+      </span>
+    </li>
+  </ol>
+</nav>
+<style>
+  .activetab {
+    border-left: 2px solid var(--falcon-navbar-vertical-link-active-color) !important;
+        color: var(--falcon-navbar-vertical-link-active-color) !important;
+  }
+</style>
+
+<div class="card">
+  <div class="row">
+    <div class="col-12	col-sm-12	col-md-4 col-lg-4 col-xl-3 col-xxl-3 pe-0 border_right_menu_left" style="border-right: var(--falcon-border-width) var(--falcon-border-style) var(--falcon-border-color);" >
+        <div class="menu-left d-flex flex-column align-items-center p-2 pt-4">
+          <div class="avatar mb-2">
+              <div class="avatar-background" onclick="clearPreview()" data-bs-toggle="modal" data-bs-target="#edit-avatar-modal">
+                <i class="fas fa-edit" style="color:white;"></i>
+              </div>
+              <%# Vu: Update avatar 27/12/2022 %>
+              <%
+              if !@user.avatar.nil?
+                  avatar_url =  request.base_url + "/mdata/hrm/" +  Mediafile.where("id = #{@user.avatar}").first.file_name
+                else
+                  avatar_url = image_path('no_avatar.jpg')
+                end
+              %>
+              <div style="border: 2px solid var(--falcon-badge-soft-secondary-background-color);border-radius: 50%;background-image: url(<%= avatar_url%>);overflow: hidden;background-repeat: no-repeat;background-size: cover;width: 100px; height: 100px">
+              </div>
+              <%# Vu: Update avatar end %>
+          </div>
+          <%
+          @name_department = ""
+          @job_name = ""
+          works = @user.works.where("positionjob_id IS NOT NULL")
+          works.each do |work|
+            if !work&.positionjob.nil? && !work&.positionjob&.department.nil?
+              if work&.positionjob&.department&.is_virtual.nil? && work&.positionjob&.department&.parents.nil?
+                @name_department = work&.positionjob&.department&.name
+                @job_name = work&.positionjob&.name
+              end
+            end
+          end
+          %>
+          <h5 class="name" style="text-transform: capitalize; text-align: center"><%= @user ? @user.last_name : "N/A" %> <%= @user ? @user.first_name : "" %></h6> 
+          <h6 class="positionjob m-0 fw-normal mb-3 <%= if @job_name == "" 
+          "d-none"
+          end
+          %>">
+              <%= @job_name %>
+          </h6> 
+          <hr class="m-2" style="width: 100%">
+          <div class="infomation ps-3 pe-3 pb-2">
+              <div class="d-flex align-items-center mt-2">
+                <span style="width: 15px; height: 12px" class="fas fa-heart text-danger fs-5"></span>
+                <h6 class="fw-normal m-0 ms-2 " style="font-size: 13px" id="time_start_work"> 
+                </h6>
+              </div>
+              <div class="d-flex align-items-center mt-3"  onclick='setActionArchive("Archive", "tab_archive")' for="tab8" style="cursor: pointer">
+                <span style="width: 15px; height: 12px" class="fas fa-medal  fs-5"></span>
+                <h6 class="fw-normal m-0 ms-2 " style="font-size: 13px">
+                <%= 
+                  if  @countarchive > 0
+                    if !@archiveU.nil?
+                      if @countarchive > 1
+                        @archiveU.first.name + ", ..."
+                      else 
+                        @archiveU.first.name 
+                      end
+                    else
+
+                    end
+                  end %>
+                </h6>
+              </div>
+              <div class="d-flex align-items-center mt-3">
+                <span style="width: 15px; height: 12px" class="fas fa-id-card  fs-5"></span>
+                <h6 class="fw-normal m-0 ms-2 " style="font-size: 13px"><%= @user.sid ? @user.sid : "N/A" %></h6>
+              </div>
+              <div class="d-flex align-items-center mt-3 <%= if @name_department == "" 
+              "d-none"
+              end
+              %>">
+                <span style="width: 15px; height: 12px" class="fas fa-city  fs-5"></span>
+                <h6 class="fw-normal m-0 ms-2 " style="font-size: 13px">
+                  <%= @name_department %>
+                  </h6>
+              </div>
+              <div class="d-flex align-items-center mt-3">
+                <span style="width: 15px; height: 12px" class="fas fa-envelope  fs-5"></span>
+                <h6 class="fw-normal m-0 ms-2 " style="font-size: 13px;display:inline-block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;"><%= @user.email ? @user.email : "N/A" %></h6>
+              </div>
+              <div class="d-flex align-items-center mt-3 <%= if @user.phone.nil? || @user.phone == ""
+              "d-none"
+              end
+              %>">
+                <span style="width: 15px; height: 12px" class="fas fa-phone-alt  fs-5"></span>
+                <h6 class="fw-normal m-0 ms-2 " style="font-size: 13px"><%= if !@user.phone.nil? || @user.phone != ""
+                  @user.phone 
+                  else
+                  "N/A" 
+                end
+                  %></h6>
+              </div>
+          </div>
+          <hr class="m-2" style="width: 100%">
+          <div id="set_background" class="acction-menu-left p-2" style="border-radius: 5px">
+          <span onclick="hide_menu_left_profile_user()" style="display:none; cursor:pointer; margin: 6px;font-size: 23px;" id="nav-tab-bar-user-profile" class="fas fa-bars"></span>
+            <nav class="navbar p-0 show_menu_bar" id="user-profile-menu-left" >
+              <ul class="navbar-nav flex-column"> 
+                <li class="nav-item">  
+                  <!-- Thông tin cá nhân v-->
+                  <li onclick="hide_menu_left_profile_user()" class="nav-item ">
+                    <label onclick='setCurrentTab("staff_information", "tab_user")' for="tab1">
+                      <a class="nav-link ps-2" id="tab_user" role="button">
+                        <div class="d-flex align-items-center">
+                        <span class="nav-link-icon me-2"><span  style="font-size: 18px;" class="fas fa-user-alt"></span></span>
+                        <div class="d-flex flex-column">
+                          <span class="nav-link-text ps-1 " style="font-size: 14px; font-weight: 600">
+                          <%= lib_translate("Personal_information") %>
+                          </span>
+                          <span class="nav-link-text ps-1" style="font-size: 12px">
+                            <%= lib_translate("Personal_legal_background_information") %>
+                          </span>
+                        </div>
+                        </div>
+                      </a>
+                    </label>
+                  </li>
+                  <!-- Thông tin cá nhân -->
+                  <!-- Công việc -->
+                  <li onclick="hide_menu_left_profile_user()" class="nav-item">
+                    <label onclick='setCurrentTab("Work", "tab_work")' for="tab5">
+                      <a class="nav-link ps-2" id="tab_work" role="button">
+                        <div class="d-flex align-items-center">
+                        <span class="nav-link-icon me-2"><span  style="font-size: 18px;" class="fas fa-book-open"></span></span>
+                        <div class="d-flex flex-column">
+                          <span class="nav-link-text ps-1 " style="font-size: 14px; font-weight: 600">
+                            <%= lib_translate("Work") %>
+                          </span>
+                          <span class="nav-link-text ps-1" style="font-size: 12px">
+                            <%= lib_translate("Information_work_status") %>
+                          </span>
+                        </div>
+                        </div>
+                      </a>
+                    </label>
+                  </li>
+                  <!-- Công việc -->
+                  <!-- Thông tin công việc -->
+                  <li onclick="hide_menu_left_profile_user()" class="nav-item">
+                    <label onclick='setCurrentTab("Work_infomations", "tab_work_info")'  for="tab6">
+                      <a class="nav-link ps-2" id="tab_work_info" role="button">
+                        <div class="d-flex align-items-center">
+                        <span class="nav-link-icon me-2"><span  style="font-size: 18px;" class="far fa-flag"></span></span>
+                        <div class="d-flex flex-column">
+                          <span class="nav-link-text ps-1 " style="font-size: 14px; font-weight: 600">
+                            <%= lib_translate("authority_&_responsibility") %>
+                          </span>
+                          <span class="nav-link-text ps-1" style="font-size: 12px">
+                          <%= lib_translate("Work_career_recruitment") %>
+                          </span>
+                        </div>
+                        </div>
+                      </a> 
+                    </label>
+                  </li>
+                  <!-- Thông tin công việc -->
+                  <!-- Định danh -->
+                  <li onclick="hide_menu_left_profile_user()" class="nav-item">
+                    <label onclick='setCurrentTab("Identity", "tab_inden")'  for="tab9">
+                      <a class="nav-link ps-2" id="tab_inden" role="button">
+                        <div class="d-flex align-items-center">
+                        <span class="nav-link-icon me-2"><span  style="font-size: 18px;" class="far fa-address-card"></span></span>
+                        <div class="d-flex flex-column">
+                          <span class="nav-link-text ps-1 " style="font-size: 14px; font-weight: 600">
+                            <%= lib_translate("Identity") %>
+                          </span>
+                          <span class="nav-link-text ps-1" style="font-size: 12px">
+                            <%= lib_translate("CMND_CCCD_passport") %>
+                          </span>
+                        </div>
+                        </div>
+                      </a> 
+                    </label>
+                  </li>
+                  <!-- Định danh -->
+                  <!-- Lương v-->
+                  <li onclick="hide_menu_left_profile_user()" class="nav-item ">
+                    <label onclick='setCurrentTab("Benefit", "tab_benefit")'  for="tab10">
+                      <a class="nav-link ps-2" id="tab_benefit" role="button">
+                        <div class="d-flex align-items-center">
+                        <span class="nav-link-icon me-2"><span  style="font-size: 18px;" class="fas fa-wallet"></span></span>
+                        <div class="d-flex flex-column">
+                          <span class="nav-link-text ps-1 " style="font-size: 14px; font-weight: 600">
+                            <%= lib_translate("Benefit_tax_insurance") %>
+                          </span>
+                          <span class="nav-link-text ps-1" style="font-size: 12px">
+                            <%= lib_translate("Payroll_benefits") %>
+                          </span>
+                        </div>
+                        </div>
+                      </a>
+                    </label>
+                  </li>
+                  <!-- Lương -->
+                  <!-- Thành tựu v-->
+                  <li onclick="hide_menu_left_profile_user()" class="nav-item ">
+                    <label onclick='setCurrentTab("Archive", "tab_archive")'   for="tab8">
+                      <a class="nav-link ps-2" id="tab_archive" role="button">
+                        <div class="d-flex align-items-center">
+                        <span class="nav-link-icon me-2"><span  style="font-size: 18px;" class="fas fa-star"></span></span>
+                        <div class="d-flex flex-column">
+                          <span class="nav-link-text ps-1 " style="font-size: 14px; font-weight: 600">
+                            <%= lib_translate("Archive") %>
+                          </span>
+                          <span class="nav-link-text ps-1" style="font-size: 12px">
+                            <%= lib_translate("Certifications_and_rewards") %>
+                          </span>
+                        </div>
+                        </div>
+                      </a>
+                    </label>
+                  </li>
+                  <!-- Thành tựu -->
+                  <!-- Đánh giá phản hồi v-->
+                  <li onclick="hide_menu_left_profile_user()" class="nav-item">
+                    <label onclick='setCurrentTab("Review", "tab_review")'  for="tab4">
+                      <a class="nav-link ps-2" id="tab_review" role="button">
+                        <div class="d-flex align-items-center">
+                        <span class="nav-link-icon me-2"><span  style="font-size: 18px;" class="fas fa-user-check"></span></span>
+                        <div class="d-flex flex-column">
+                          <span class="nav-link-text ps-1 " style="font-size: 14px; font-weight: 600">
+                            <%= lib_translate("Review") %>
+                          </span>
+                          <span class="nav-link-text ps-1" style="font-size: 12px">
+                            <%= lib_translate("Performance_management_and_feedback") %>
+                          </span>
+                        </div>
+                        </div>
+                      </a>
+                    </label>
+                  </li>
+                  <!-- Đánh giá phản hồi -->
+                  <!-- Hợp đồng văn bản v-->
+                  <li onclick="hide_menu_left_profile_user()" class="nav-item">
+                    <label onclick='setCurrentTab("Contract", "tab_contract")'  for="tab3">
+                      <a class="nav-link ps-2" id="tab_contract" role="button">
+                        <div class="d-flex align-items-center">
+                        <span class="nav-link-icon me-2"><span  style="font-size: 18px;" class="fas fa-folder"></span></span>
+                        <div class="d-flex flex-column">
+                          <span class="nav-link-text ps-1 " style="font-size: 14px; font-weight: 600">
+                            <%= lib_translate("Contract") %>
+                          </span>
+                          <span class="nav-link-text ps-1" style="font-size: 12px">
+                            <%= lib_translate("Contracts_&_HR_Documents") %>
+                          </span>
+                        </div>
+                        </div>
+                      </a>
+                    </label>
+                  </li>
+                  <!-- Hợp đồng văn bản -->
+                  <!-- Lịch làm việc nghỉ phép v-->
+                  <li onclick="hide_menu_left_profile_user()" class="nav-item"> 
+                    <label onclick='setCurrentTab("Holidays", "tab_holidays")' for="tab2">
+                      <a class="nav-link ps-2" id="tab_holidays" role="button">
+                        <div class="d-flex align-items-center">
+                        <span class="nav-link-icon me-2"><span  style="font-size: 18px;" class="fas fa-calendar-day"></span></span>
+                        <div class="d-flex flex-column">
+                          <span class="nav-link-text ps-1 " style="font-size: 14px; font-weight: 600">
+                            <%= lib_translate("Holidays") %>
+                          </span>
+                          <span class="nav-link-text ps-1" style="font-size: 12px">
+                            <%= lib_translate("Timesheets_Checkin_Timeoffs") %>
+                          </span>
+                        </div>
+                        </div>
+                      </a>
+                    </label>
+                  </li>
+                  <!-- Lịch làm việc nghỉ phép -->
+                  <!-- Địa chỉ v-->
+                  <li onclick="hide_menu_left_profile_user()" class="nav-item">
+                    <label onclick='setCurrentTab("Address", "tab_address")' for="tab7">
+                      <a class="nav-link ps-2" id="tab_address" role="button">
+                        <div class="d-flex align-items-center">
+                        <span class="nav-link-icon me-2"><span  style="font-size: 20px;" class="fas fa-map-marker-alt"></span></span>
+                        <div class="d-flex flex-column">
+                          <span class="nav-link-text ps-1 " style="font-size: 14px; font-weight: 600">
+                            <%= lib_translate("Address") %>
+                          </span>
+                          <span class="nav-link-text ps-1" style="font-size: 12px">
+                            <%= lib_translate("Current_placed") %>
+                          </span>
+                        </div>
+                        </div>
+                      </a>
+                      </label>
+                  </li>
+                  <!-- Địa chỉ -->
+                  <!-- Dữ liệu hoạt động -->
+                  <% if is_access(session["user_id"], "USER-DETAILS-PWD","READ") %>
+                    <li onclick="hide_menu_left_profile_user()" class="nav-item">
+                      <label onclick='setCurrentTab("Password", "tab_reset_pwd")' for="tab11">
+                        <a class="nav-link ps-2" id="tab_reset_pwd" role="button">
+                          <div class="d-flex align-items-center">
+                          <span class="nav-link-icon me-2"><span  style="font-size: 18px;" class="fas fa-key"></span></span>
+                          <div class="d-flex flex-column">
+                            <span class="nav-link-text ps-1 " style="font-size: 14px; font-weight: 600">
+                              <%= lib_translate("Password") %>
+                            </span>
+                            <span class="nav-link-text ps-1" style="font-size: 12px">
+                              <%= lib_translate("Change_password") %>
+                            </span>
+                          </div>
+                          </div>
+                        </a>
+                      </label>
+                    </li>
+                  <%end%>
+                  <!-- Dữ liệu hoạt động -->
+                  <!-- Chữ ký  -->
+                  <li onclick="hide_menu_left_profile_user()" class="nav-item">
+                    <label onclick='setCurrentTab("Signature", "tab_signature")' for="tab12">
+                      <a class="nav-link ps-2" id="tab_signature" role="button">
+                        <div class="d-flex align-items-center">
+                        <span class="nav-link-icon me-2"><span  style="font-size: 18px;" class="fas fa-marker"></span></span>
+                        <div class="d-flex flex-column">
+                          <span class="nav-link-text ps-1 " style="font-size: 14px; font-weight: 600">
+                            <%= lib_translate("Chữ ký") %>
+                          </span>
+                          <span class="nav-link-text ps-1" style="font-size: 12px">
+                            <%= lib_translate("Quản lý mẫu chữ ký") %>
+                          </span>
+                        </div>
+                        </div>
+                      </a>
+                    </label>
+                  </li>
+                  <!-- Chữ ký -->
+                </li> 
+              </ul> 
+            </nav>
+          </div>
+        </div> 
+    </div>
+    <!-- Content -->
+    <div class="col-12	col-sm-12	col-md-8	col-lg-8	col-xl-9	col-xxl-9 pe-5 ps-4 pb-3" >
+        <div class="pc-tab" >
+          <input id="tab1" type="radio" name="pct"/>
+          <input id="tab2" type="radio" name="pct"  />
+          <input id="tab3" type="radio" name="pct" />
+          <input id="tab4" type="radio" name="pct" />
+          <input id="tab5" type="radio" name="pct" />
+          <input id="tab6" type="radio" name="pct"   />
+          <input id="tab7" type="radio" name="pct"  />
+          <input id="tab8" type="radio" name="pct"  />
+          <input id="tab9" type="radio" name="pct"  />
+          <input id="tab10" type="radio" name="pct" />
+          <input id="tab11" type="radio" name="pct" />
+          <input id="tab12" type="radio" name="pct" />
+          <section style="padding-top: 10px !important; padding-bottom: 0px !important;">
+
+            <div class="tab1">
+              <%= render partial: "users/layouts/user"%>   
+            </div>
+            <!-- HOLIDAY BY HAI -->
+            <div class="tab2">
+              <%= render partial: "users/layouts/holiday"%>   
+            </div>
+            <!-- H.a Contract -->
+            <div class="tab3">
+              <%= render partial: "users/layouts/contract"%>  
+            </div>
+            <!-- Dat Review -->
+            <div class="tab4"  >
+            <%= render partial: "users/layouts/review"%>  
+            </div>
+      
+            <!-- Hai work -->
+            <div class="tab5">
+            <%= render partial: "users/layouts/work"%>  
+            </div>
+      
+            <!-- Dat Task -->
+            <div class="tab6"> 
+            <%= render partial: "users/layouts/task"%>  
+            </div>
+      
+            <!-- H.a Address -->
+            <div class="tab7">
+                  <%= render partial: "users/layouts/address"%>  
+            </div>
+            <!-- Q.Thai Archive -->
+            <div class="tab8">
+            <%= render partial: "users/layouts/archive"%>  
+            </div>
+            <!-- H.a Identity -->
+            <div class="tab9">
+                  <%= render partial: "users/layouts/identity"%>  
+            </div>
+            <!-- Vu benefit -->
+            <div class="tab10">
+                <%= render partial: "users/layouts/benefit"%>  
+            </div>
+            <div class="tab11">
+                <%= render partial: "users/layouts/resetPwd"%>
+            </div>
+            <div class="tab12">
+                <%= render partial: "users/layouts/signature"%>
+            </div>
+
+          </section>
+        </div>
+    </div>
+      <!-- Content -->
+  </div>
+</div>
+
+<%# Vu: Update avatar 27/12/2022 %>
+<div class="modal fade" id="edit-avatar-modal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 500px">
+    <div class="modal-content position-relative">
+      <div class="position-absolute top-0 end-0 mt-2 me-2 z-index-1">
+        <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div class="rounded-top-lg py-3 ps-4 pe-6 bg-light">.
+          <h4 class="mb-1"><%= lib_translate("Update_avatar")%></h4>
+        </div>
+        <div class="p-4 pb-0">
+          <%= form_for @user, :url=> user_avatar_update_path, html: {method: :post, id:"form-update-avatar", autocomplete: "off",multipart: true } do %>
+            <div for="user-avatar-edit" id="label-drop-avatar" onclick="clickSelectAvatar()" class="avatar-dropfile mt-3 pt-2">
+              <div class="avatar-preview" id="avatar-preview" style="background-image: url(<%= avatar_url%>)"></div>
+              <div><i class="fas fa-plus" style="margin-right:5px"></i><%= lib_translate("Update_avatar_select_hint")%></div>
+            </div>
+            <label id="valid-avatar-message" class="mt-2" style="color: var(--falcon-badge-soft-danger-color);"></label>
+            <input name="file" id="user-avatar-edit" type="file" accept="image/*" onchange="onSelectAvatar(this)" hidden>
+            <input name="user_id" value="<%= @user.id%>" hidden>
+            <input name="current_direct" value="details" hidden>
+            <div class="modal-footer">
+              <button class="btn btn-secondary" type="button" data-bs-dismiss="modal"><%= lib_translate("Cancel")%></button>
+              <button class="btn btn-primary disabled" type="submit" id="submit-update-avatar"><%= lib_translate("Update")%></button>
+          </div>
+          <% end %> 
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</div>
+<%# Vu: Update avatar End %>
+
+<script>
+    var day1 = '<%= oContract = @user.contracts.where(status: "ACTIVE").order(created_at: :asc).first
+    (oContract && oContract.dtfrom.to_date > Date.today) ? Time.now.strftime("%Y/%m/%d") : oContract ? oContract.dtfrom.strftime("%Y/%m/%d") : Time.now.strftime("%Y/%m/%d") %>';
+    var day2 = '<%= Time.now.strftime("%Y/%m/%d") %>';
+    var [yearfrom, monthfrom, dayfrom] = day1.split('/').map(Number);
+    var [yearto, monthto, dayto] = day2.split('/').map(Number);
+    var start_date = [yearfrom, monthfrom - 1, dayfrom];
+    var end_date = moment({years: yearto,months: monthto - 1,days: dayto});
+    $('#time_start_work').text(getTimeWork(moment(start_date), moment(end_date)) + " <%= lib_translate("Ngay_lam_viec") %>");
+
+  // Thai save_tab 
+  let save_tab_details ="<%= session[:save_tab_details] %>";
+  function setActionArchive(tab, hightlight) {
+      localStorage.setItem("currentTab", tab);
+      let id_tag_a = document.getElementById(hightlight);
+          document.getElementById("tab_user").classList.remove('activetab');
+          document.getElementById("tab_work").classList.remove('activetab');
+          document.getElementById("tab_work_info").classList.remove('activetab');
+          document.getElementById("tab_inden").classList.remove('activetab');
+          document.getElementById("tab_benefit").classList.remove('activetab');
+          document.getElementById("tab_archive").classList.remove('activetab');
+          document.getElementById("tab_review").classList.remove('activetab');
+          document.getElementById("tab_contract").classList.remove('activetab');
+          document.getElementById("tab_holidays").classList.remove('activetab');
+          document.getElementById("tab_address").classList.remove('activetab');
+          document.getElementById("tab_reset_pwd").classList.remove('activetab');
+          document.getElementById("tab_signature").classList.remove('activetab');
+      if (id_tag_a) {
+        document.getElementById(hightlight).classList.add('activetab');
+        document.getElementById("tab8").click();
+      }  
+  }
+
+  // Vu: Update avatar 27/12/2022
+  $('#label-drop-avatar').on('drop',(e)=>{
+    e.preventDefault();
+    var files_drop = e.originalEvent.dataTransfer.files[0];
+    document.querySelector('#user-avatar-edit').files = e.originalEvent.dataTransfer.files;
+    showPreviewAvatar(files_drop);
+  })
+
+  $('#label-drop-avatar').on('dragover',function(e){
+    e.preventDefault();
+  })
+  
+  function clearPreview() {
+    $('#form-update-avatar').find('#valid-avatar-message').hide();
+    $('#avatar-preview').css("background-image", `url(<%= avatar_url%>)`);
+  }
+
+  function onSelectAvatar(input) {
+    let file = input.files[0];
+    showPreviewAvatar(file);
+  }
+
+  function clickSelectAvatar() {
+    $('#user-avatar-edit').click();
+  }
+
+  function showPreviewAvatar(file) {
+    let file_Mb = (file.size / 1024 / 1024).toFixed(1);
+
+    // valid file size
+    if(file_Mb > 3){
+      $('#form-update-avatar').find('#valid-avatar-message').html(`Ảnh bạn vừa chọn kích thước quá lớn (${file_Mb} MB). <br />Dung lượng ảnh cho phép: dưới 3 MB. <br />Vui lòng chọn ảnh khác!`);
+      $('#form-update-avatar').find('#valid-avatar-message').show();
+      return;
+    }else{
+      $('#form-update-avatar').find('#valid-avatar-message').html("");
+      $('#form-update-avatar').find('#valid-avatar-message').hide();
+    }
+
+    $('#form-update-avatar').find('#submit-update-avatar').toggleClass('disabled',false);
+    var reader = new FileReader();
+    reader.onloadend = function() {
+      $('#avatar-preview').css("background-image", `url(${reader.result})`);
+    }
+    reader.readAsDataURL(file);
+  }
+  // Vu: Update avatar end
+
+</script>
+<%= javascript_include_tag '/assets/myjs/save_tab_session_user_details.js' %>

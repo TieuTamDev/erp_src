@@ -1,0 +1,246 @@
+<% content_for :style_profile do %>
+      <!-- Bỏ style vào đây nhé! thanks -->
+<% end %>
+<%= stylesheet_link_tag '/assets/mystyle/flatpickr.min.css' %>
+
+<style>
+#id_add_school:hover{
+  color: var(--falcon-btn-falcon-success-color) !important;
+}
+</style> 
+<% content_for :javascript_profile do %> 
+      <!-- Bỏ Javascript vào đây nhé! thanks -->
+<%= javascript_include_tag '/assets/myjs/_education.js' %>
+
+<% end %>
+
+<hr class="mt-4 mb-3" style="width: 100%; height: 4px; background:  var(--falcon-badge-soft-secondary-background-color);">
+<div class="row">
+  <div id ="txt_education_title"class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 col-xxl-12 tag d-flex align-items-center">
+    <h5 class="m-0 mb-2" style="font-size: 17px;"><%= lib_translate("Educational_Information") %> </h5> 
+  </div>
+  <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 col-xxl-12 action-right-top d-flex align-items-center justify-content-end">
+   <% if is_access(session["user_id"], request.env["PATH_INFO"] == "/user/details" ? "USER-DETAILS" : request.env["PATH_INFO"] == "/user/profile" ? "USER-PROFILE" : "","ADD") %>
+        <a id="id_add_school" class="nav-link ps-2 pe-2 border-end border-2" onclick="openFormAddSchool()" style="font-size: 13px; color: var(--falcon-orange); font-weight:600" data-bs-toggle="collapse" href="#form_add_education" role="button" aria-expanded="false" aria-controls="form_add_education">
+          <%= lib_translate("Add_school") %> 
+        </a>
+      <% end%>       
+    <a id="id_cancel_add_school" class=" nav-link ps-2 pe-2 border-end border-2"  style="display:none; font-size: 13px;font-weight:600 " data-bs-toggle="collapse" href="#form_add_education" role="button" aria-expanded="false" aria-controls="form_add_education">
+      <%= lib_translate("Cancle") %> 
+    </a>  
+    <a  onclick="clickCollapseEducationInfo(this)" class="nav-link ms-3 me-2" data-bs-toggle="collapse" href="#open_form_education" role="button" aria-expanded="false" aria-controls="open_form_education">
+          <span id="collapse-education-icon-info" class="fas fa-caret-down"></span>
+    </a>
+  </div>
+</div>
+
+
+<div class="mb-2">
+    <div class="collapse" id="form_add_education">
+      <div class="card p-3 capp-form-bg" >     
+          <div class="form-add">
+            <%= form_for @school, :url=> user_education_update_path, html: {method: :post } do |f| %>
+
+              <div class="erro_labble mb-2" style="height: 40px;">
+                <p style="display:none; color: rgb(197 82 82);border: 1px solid rgb(199 136 136 / 23%);background: rgb(255 54 54 / 16%);border-radius: 5px;padding: 10px;" id="erro_labble_content_school"></p>
+              </div>  
+              <div class="form-group" style="display:none" >
+                <%= f.label :id %> 
+                <%= f.text_field :id, class: 'form-control', name:"school_add_id"  %>
+              </div>
+              <div class="form-group" style="display:none" >
+                <%= f.label :apply_id %> 
+                <%= f.text_field :apply_id, class: 'form-control', value: @apply.first.id, name:"school_add_apply_id"  %>
+              </div>              
+              <div class="form-group" style="" >
+                <%= f.label lib_translate("Schools") %> <span style="color:red;" class="red">* </span>
+                <%= f.text_field :name, class: 'form-control' ,  name:"school_add_name", id:"school_add_name" %>
+              </div>
+              <div class = "row">
+                <div class="col-xl-6">
+                  <div class="form-group">
+                    <%= f.label lib_translate("Period") %>
+                    <%= f.text_field :period, class: 'form-control' ,  name:"school_add_period", id:"school_add_period", placeholder: "Từ năm đến năm" %>
+                  </div>               
+                </div>
+
+                <div class="col-xl-6">
+                  <div class="form-group">
+                    <%= f.label lib_translate("Thời gian cấp") %><span style="color:red;" class="red">* </span>
+                    <%= f.text_field :address, class: 'form-control' ,  name:"school_add_address", id:"school_add_address" %>
+                  </div>
+                </div>
+              </div>
+              <div class = "row">
+                <div class="col-xl-6">
+                  <div class="form-group">
+                    <%= f.label lib_translate("Certificate") %> <span style="color:red;" class="red">* </span> 
+                    <%= f.text_field :certificate, class: 'form-control' ,  name:"school_add_certificate", id:"school_add_certificate" %>
+                  </div>               
+                </div>
+                <div class="col-xl-6">
+                  <div class="form-group">
+                    <%= f.label lib_translate("Thời hạn chứng nhận/chứng chỉ/bằng cấp") %> 
+
+                  </div>
+                  <div class="input-group mb-3">
+                    <%= f.text_field :dt, class: 'form-control flatpickr-date' ,value: Time.now.strftime("%d/%m/%Y"), name: 'term_cetificate', id: 'term_cetificate' %> 
+                    <div class="input-group-text" id="basic-addon2"><input class="form-check-input" type="checkbox" id="no_term_cetificate" name="no_term_cetificate" aria-label="Checkbox for following text input" /> <label for="no_term_cetificate" class="mb-0 ms-2 cursor-pointer">Vô thời hạn</label> </div>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-2 row" >
+                <div class="col-xl-6">
+                 <div class="form-group">
+                    <%= f.label lib_translate("Ranking") %>  
+                    <%= f.text_field :certificate, class: 'form-control' ,  name:"school_add_ranking", id:"school_add_ranking" %>
+                  </div>                  
+                </div>
+                <div class="col-xl-6 mt-5" style="display:flex;font-size:14px;">
+                  <%= f.label lib_translate("Status_1") %>                         
+                    <div style= "border: none;box-shadow: none;font-size:14px;">
+                      <input checked type="radio" id="school_add_ACTIVE" class="form-check-input ms-3 me-1" value="ACTIVE" name="school_add_status" ></option><label class="form-check-label" for="school_add_ACTIVE" style="cursor: pointer">ACTIVE</label>
+                      <input  type="radio" id="school_add_INACTIVE" class="form-check-input ms-3 me-1" value="INACTIVE" name="school_add_status" ></option><label class="form-check-label" for="school_add_INACTIVE" style="cursor: pointer">INACTIVE</label>
+                    </div>
+                </div>
+
+              </div> 
+              <div class="align-items-center mt-2 d-flex">
+                <button type="button" name="commit" value="Lưu thông tin" id="btn_add_new_school" class="btn btn-primary ps-2 pe-2 d-flex align-items-center justify-content-center" style="width: 100%;">
+                    <div class="spinner-border text-success me-2 d-none" id="loading_education" role="status" style="width:20px;height:20px">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <span class="m-0"><%= lib_translate("Save") %></span>
+                </button>
+              </div>
+            <% end %>   
+          </div>
+      </div>
+    </div>
+</div>
+
+<div class="collapse show table_hoc_van" id="open_form_education">
+  <div class="mt-2 mb-3">
+  </div>
+  <div class="table-responsive scrollbar"> 
+    <table class="table" style="border: none; border-color: var(--falcon-bg-navbar-glass);">
+      <thead style="color: var(--falcon-btn-falcon-success-active-color); font-size: 13px;">
+        <tr>
+          <th scope="col" style="width: 30%;"><%= lib_translate("Schools") %> </th>
+          <th scope="col" style="width: 10%;"><%= lib_translate("Time") %> </th>
+          <th scope="col" style="width: 30%;"><%= lib_translate("Certificate") %> </th>
+          <th scope="col" style="width: 20%;"><%= lib_translate("Thời hạn") %> </th>
+          <% if (is_access(session["user_id"], request.env["PATH_INFO"] == "/user/details" ? "USER-DETAILS" : request.env["PATH_INFO"] == "/user/profile" ? "USER-PROFILE" : "","EDIT") || is_access(session["user_id"], request.env["PATH_INFO"] == "/user/details" ? "USER-DETAILS" : request.env["PATH_INFO"] == "/user/profile" ? "USER-PROFILE" : "","DEL")) && (request.env["PATH_INFO"] != "/user/profile") %>
+          <th class="text-end" scope="col"></th>
+            <% end %>   
+
+        </tr>
+      </thead>
+      <tbody>
+        <% School.where(apply_id: @apply.first.id).order("created_at DESC").each do |school| %>
+          <tr>
+            <td style="vertical-align: middle; text-wrap: balance;" >
+              <h6 style="font-weight: 600;">
+                  <%= school.name %>            
+              </h6> 
+              <h6 class="m-0 p-0" style="color: var(--falcon-badge-soft-secondary-color); font-size: 13px;">                  
+                  <%= school.address %>
+              </h6>
+            </td>
+            <td style="vertical-align: middle; text-wrap: balance;" ><h6 style="font-weight: 600;">
+                  <%= (if school.nil? 
+                  else                    
+                  school.period
+                  end ) %></h6></td>
+            <td style="vertical-align: middle; text-wrap: balance;" ><h6 style="font-weight: 600;">
+                  <%= (if school.nil? 
+                  else                    
+                   school.certificate
+                  end ) %></h6></td>
+            <td style="vertical-align: middle; text-wrap: balance;" ><h6 style="font-weight: 600;">
+                  <%= if !@user.nil? && (@user.sid == "BU10396" || @user.sid == "BUH000031" ) || school.dtexpired == nil
+                    "Không có thời hạn"
+                  else    
+                    school.dtexpired.strftime("%d/%m/%Y")
+                  end  %></h6></td>
+            <% if (is_access(session["user_id"], request.env["PATH_INFO"] == "/user/details" ? "USER-DETAILS" : request.env["PATH_INFO"] == "/user/profile" ? "USER-PROFILE" : "","EDIT") || is_access(session["user_id"], request.env["PATH_INFO"] == "/user/details" ? "USER-DETAILS" : request.env["PATH_INFO"] == "/user/profile" ? "USER-PROFILE" : "","DEL")) %>
+            <td style="vertical-align: middle; min-width: 70px" class="text-end">
+              <div class="m-0 p-0">
+                  <% if is_access(session["user_id"], request.env["PATH_INFO"] == "/user/details" ? "USER-DETAILS" : request.env["PATH_INFO"] == "/user/profile" ? "USER-PROFILE" : "","EDIT") %>
+                          <a   style="text-decoration: none; cursor: pointer;"
+                            data-bs-toggle="collapse" href="#form_add_education" role="button" aria-expanded="false" aria-controls="form_add_education"
+                            onclick ="openFormUpdateSchool(`<%= school.id %>`, `<%= school.apply_id %>`, `<%= school.name %>`, `<%= school.period %>`,
+                            `<%= school.certificate %>`, `<%= school.address %>`, `<%= school.status %>`, `<%= school.level %>`, `<%= school.dtexpired&.strftime('%d/%m/%Y') %>`)"
+                            
+                            type="button" data-bs-toggle="tooltip" data-bs-placement="top" title="Edit"><i class = "fas fa-edit icon"></i> 
+                          </a>
+                        <% end %>
+              
+                     <% if is_access(session["user_id"], request.env["PATH_INFO"] == "/user/details" ? "USER-DETAILS" : request.env["PATH_INFO"] == "/user/profile" ? "USER-PROFILE" : "","DEL") %>
+                        <a onclick="clickDeleteEducation(`<%= school.id %>`,`<%= school.name %>`,`<%= @user.id %>` )" data-toggle="modal" style="cursor: pointer" >
+                          <span class="text-danger fas fa-trash"  style="width: 12px" ></span>
+                        </a> 
+                      <% end %>
+               
+
+                <div class="modal fade" id="modal-delete-school{<%= school.id %>}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" >
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel"><%= lib_translate("Message")  %></h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="border: none; background: none" >
+                          <span aria-hidden="true" style="font-size: 20px"  >&times;</span>
+                        </button>
+                      </div>
+                      <div style="text-align: start" class="modal-body"> 
+                        <%= lib_translate("confirm_delete_message")  %> 
+                        <span style="font-weight: bold; color: red; text-transform: capitalize;"> <%= school.name %> </span>?
+                      </div>
+                      <div class="modal-footer">
+                        <button id="btn_close_delete_review" type="button" class="btn btn-secondary" data-dismiss="modal" > <%= lib_translate("Close")  %>  </button>
+                        <%= link_to lib_translate("Delete"), url_for(action: :education_del, id: school.id), method: :delete,
+                                  class: "btn btn-danger", id: "btn_delete_user_list", onclick: "delete_loading_review(this)" %>                                
+                        <div id="loading_button_delete_review_user" class= "btn btn-danger" style="opacity: 0.8;width: 100%;display:none;" >
+                          <i class ="fa fa-spinner fa-spin"> </i>  <%=lib_translate("Deleting")%> 
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </td>
+          <% end %>
+
+          </tr>
+          <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+
+  let strVaildSchoolName = "<%= lib_translate("Please_Enter_School_Name")%>";
+  let strVaildSchoolPeroid = "<%= lib_translate("Please_Enter_school_peroid")%>";
+  let strVaildSchoolCertificate = "<%= lib_translate("Please_Enter_school_certificate")%>";
+  let strVaildSchooladdress = "<%= lib_translate("Vui lòng nhập đơn vị cấp chứng chỉ")%>";
+  let apply_id = "<%=@apply.first.id%>";
+  let linkDeleteEducationName = "<%= url_for(action: :education_del)%>";
+  let deleteMessageEducation = "<%= lib_translate("Confirm_delete")%>"
+    $('#no_term_cetificate').change(function() {
+      if ($(this).is(':checked')) {
+        $('#term_cetificate').val('Vô thời hạn');
+      } else {
+        $('#term_cetificate').val('<%= Time.now.strftime("%d/%m/%Y") %>');
+      }
+    });
+      $('#term_cetificate').change(function() {
+      $('#no_term_cetificate').prop('checked', false);
+    });
+  document.addEventListener('DOMContentLoaded', function() {
+    flatpickr(".flatpickr-date", {
+    dateFormat: "d/m/Y"
+    });
+  });
+</script>
+<%= javascript_include_tag '/assets/myjs/flatpickr.js'%>

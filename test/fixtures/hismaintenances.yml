@@ -1,0 +1,13 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  app: MyString
+  period: MyString
+  oips: MyString
+  opentiming: MyString
+
+two:
+  app: MyString
+  period: MyString
+  oips: MyString
+  opentiming: MyString

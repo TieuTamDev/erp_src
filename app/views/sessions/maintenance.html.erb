@@ -1,0 +1,39 @@
+<style>
+
+  .bg-style-bmtu{
+    background-image: url('https://erp.bmtu.edu.vn/assets/bgr-page-login-6163c8b018d3ee10e886c249a8a34a2a3920fd94af60cf93b36c838c0637e847.jpg');
+  }
+
+    @media only screen and (max-width: 600px) {
+            .container {
+                display: block !important;
+            }
+    }
+</style>
+<div class="bg-style-bmtu"  style= "display: flex;align-items: center;width:100%;height: 100vh;background-color: white;">
+    <div class="container" style="display: flex;align-items: center;width:100%;">
+        <div>
+            <h2 class="p-2 ps-3 pe-3 rounded-pill" style="font-size: 1.6em;color: white;width: fit-content;background-color: var(--falcon-btn-falcon-warning-color);text-align: center;">
+                <%= lib_translate("THÔNG BÁO BẢO TRÌ ĐỊNH KỲ")%>
+            </h2>
+            <h3 class="fw-normal "><%= lib_translate("Quý khách hàng thân mến!")%></h3>
+
+            <p>
+                <%= lib_translate("Maintenance_text_2")%> <span style="font-size: 1.2em;font-weight: 800;color: var(--falcon-heading-color);"><%= @period %></span> <%= lib_translate("Maintenance_text_4")%> <br>
+                <%= lib_translate("Maintenance_text_3")%> <span style="font-size: 1.2em;font-weight: 800;color: var(--falcon-heading-color);"><%= @opentime %></span>
+            </p>
+            <p>
+                <%= lib_translate("Maintenance_text_5")%> <br>
+                <%= lib_translate("Maintenance_text_6")%> 
+            </p>
+
+            <h3 style="font-size: 1.2em;font-weight: 700;"><%= lib_translate("Maintenance_text_7")%></h3>
+            <h4 class="fw-normal "><%= lib_translate("Maintenance_text_8")%></h4>
+        </div>
+        <div style="margin: 0 auto;height: 340px;width: 340px;position: relative;">
+            <div class="rounded-circle" style="position:absolute;width: 76%;height: 76%;top: 50%;left: 50%;transform: translate(-50%, -50%);background-color: var(--falcon-badge-soft-dark-background-color);"></div>
+            <div class="rounded-circle" style="position:absolute;width: 52%;height: 4%;left: 50%;top: 100%;box-shadow: 0px 0px 2px 1px #000;opacity: 0.3;transform: translate(-50%, -50%);background-color: #000;"></div>
+            <%= image_tag("/assets/icons/maintenance.png",class: "img-fluid", style:"padding: 0;width: 100%;position:absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);") %>
+        </div>
+    </div>
+</div>

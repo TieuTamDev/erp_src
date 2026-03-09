@@ -1,0 +1,585 @@
+<% content_for :head do %>
+  <%= javascript_include_tag '/assets/myjs/choices.js' %>
+  <%= stylesheet_link_tag '/assets/mystyle/choices.min.css'%>
+  <%= stylesheet_link_tag "select2-bootstrap-5-theme.min" %>
+  <%= stylesheet_link_tag "select2.min" %>
+  <%= stylesheet_link_tag 'jquery-ui.css' %>  
+  <%= stylesheet_link_tag '/assets/mystyle/stask.css' %>
+<% end %>
+<% content_for :bottombody do %>
+    <%= javascript_include_tag 'select2.full.min'%>
+    <%= javascript_include_tag 'select2.min.js'%>
+    <%= javascript_include_tag '/assets/myjs/stask.js' %>
+    <%= javascript_include_tag '/assets/lib_hrm/bootstrap.min.js', integrity: 'sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl', crossorigin: 'anonymous'%>
+<% end %> 
+<style>
+    .dataTables_wrapper {
+      margin-top: 0 !important;
+    }
+    .select2-container .select2-selection--multiple .select2-selection__rendered {
+        display: flex;
+    }
+    .select2-container--bootstrap-5 .select2-dropdown .select2-results__options .select2-results__option.select2-results__option--disabled, .select2-container--bootstrap-5 .select2-dropdown .select2-results__options .select2-results__option[aria-disabled=true] {
+        color: #e3e3e3;
+    }
+</style>
+<div class="card mb-3">
+      <div class="card-body pt-0">
+        <div class="tab-content mt-3">
+          <div class="row">
+            <div class="col-12 col-sm-12 col-md-12 col-lg-8 col-xl-8 col-xxl-8 tag d-flex align-items-center title">
+                <h4 class="mb-1" style="color: var(--falcon-btn-falcon-success-active-color);"><%= lib_translate('Stask_List')%></h4>
+            </div>
+            <div class="col-12 col-sm-12 col-md-12 col-lg-4 col-xl-4 col-xxl-4 action-right-top d-flex align-items-center justify-content-end">
+                <% if is_access(session["user_id"], "STASKS","ADD") %> 
+                  <a id="btn_add_stask" class="nav-link ps-2 pe-3 border-end border-2" role="button" style="font-size: 13px; font-weight: 700" onclick="openFormAddStask()" class="btn btn-primary mt-3"  data-bs-toggle="modal" data-bs-target="#modal-stasks" >
+                    <%= lib_translate("New_task") %> 
+                  </a> 
+                  <a id="id_cancel_stask" class=" nav-link ps-2 pe-3 border-end border-2"  style="display:none; font-size: 13px; font-weight: 700;cursor:pointer" data-bs-toggle="collapse" data-bs-target="#form_stask" aria-expanded="false" aria-controls="form_stask">
+                    <%= lib_translate("Cancle") %> 
+                  </a> 
+                <% end %>
+            </div>
+          </div> 
+            <%= render_search_pagination(stasks_index_path()).html_safe %>
+            <table id="table_stask"  class="table table-responsive border-1 table-bordered fs--1 mb-0" style="border-collapse: collapse;">
+              <thead class ="bg-200 text-900">
+                  <tr>
+                      <th class="sort" data-sort="Name_stask" style="text-align: left; white-space: nowrap;"><%= lib_translate("Name_stask")  %></th>
+                      <th class="sort" data-sort="Created_by_stask" style="text-align: left; white-space: nowrap;"><%= lib_translate("Created_by")  %></th>
+                      <% if (is_access(session["user_id"], "STASKS","EDIT") || is_access(session["user_id"], "STASKS","DEL")) %> 
+                          <th class="no-sort" style="text-align: center; "></th> 
+                      <% end %>
+                  </tr>
+              </thead>
+              <tbody class="list">
+                  <% 
+                    @stasks.each do |stask| 
+                    # get list resource each task
+                    oAccess = Access.where("stask_id = #{stask.id}")
+                    list_resource_name = []
+                    list_access = []
+                    oAccess.each do |access|
+                      duplicate = false
+                      list_resource_name.push(access.resource.scode ? access.resource.scode : "")
+                      list_access.each do |access_item|
+                        if access_item[:stask_id] == access.stask_id && access_item[:resource_id] == access.resource_id
+                          duplicate = true
+                          access_item[:permisions].push(access.permision)
+                        end
+                      end
+                      if !duplicate
+                          list_access.push({
+                            id:access.id,
+                            stask_id:access.stask_id,
+                            resource_id: access.resource_id,
+                            resource_scode:access.resource.scode,
+                            permisions: [access.permision]
+                          })
+                        end
+                      
+                    end
+                  %>
+                    <tr id="table-<%= stask.id %>">
+                      <td style="text-align: left; white-space: nowrap;" class="Name_stask">
+                        <%= stask.name %>
+                      </td>
+                      <td style="text-align: left;  width: auto; white-space: nowrap; " class="Created_by_stask">
+                        <%= stask.created_by 
+                          created_by = User.where(id: stask.created_by ).first
+                        if !created_by.nil?
+                         "#{created_by.last_name.capitalize.titleize} #{created_by.first_name.capitalize} (#{created_by.email})"                                         
+                        else 
+                          ""
+                        end                        
+                        %>
+                      </td>
+                      <% if (is_access(session["user_id"], "STASKS","EDIT") || is_access(session["user_id"], "STASKS","DEL")) %> 
+                        <td style="text-align: center; white-space: nowrap; min-width: 160px">
+                          <% if is_access(session["user_id"], "STASKS","EDIT") %> 
+                              <a class="me-4" data-bs-toggle="collapse" href="#collapseExample-<%= stask.id  %>" role="button" aria-expanded="false" aria-controls="collapseExample-<%= stask.id  %>" data-toggle="tooltip" data-placement="top" title="Cấu hình tài nguyên và quyền hạn">
+                                <span class="fas fa-sitemap icon text-warning"></span>
+                              </a>
+                              <a class="me-4 add_staff_stask"  data-bs-toggle="modal" data-bs-target="#add_staff_stask" data-stask-id="<%= stask.id %>" data-stask-name="<%= stask.name %>" data-stask-created-by="<%= 
+                              if !stask.created_by.nil?
+                                        created_by = User.where(id: stask.created_by ).first
+                                        if !created_by.nil?
+                                            "#{created_by.last_name.capitalize.titleize} #{created_by.first_name.capitalize} (#{created_by.email})"                                         
+                                        else 
+                                            ""
+                                        end     
+                                    end 
+                              %>" style="cursor: pointer;color: #2e9b4f;" data-toggle="tooltip" data-placement="top" title="Phân công công việc kiêm nhiệm">
+                                <i class="fas fa-user-cog"></i>
+                              </a>
+                              <a class="me-4 show_user_asign" data-bs-toggle="modal" data-bs-target="#list_staff_stask" data-stask-id="<%= stask.id %>" style="cursor: pointer;color: #313131;" data-toggle="tooltip" data-placement="top" title="Xem danh sách nhân sự">
+                                <i class="fas fa-users"></i>
+                                <%= !stask.works.where(positionjob_id: nil).nil? ? stask.works.where(positionjob_id: nil).count > 0 ? "<span class='notification-number'>#{stask.works.where(positionjob_id: nil).count}</span>".html_safe : '' : '' %>
+                              </a>
+                              <a data-toggle="tooltip" data-placement="top" title="Chỉnh sửa công việc" class="me-4" style="cursor:pointer;color: #2C7BE5;" onclick="openFormUpdateStask( '<%= stask.id %>','<%= stask.name %>','<%= stask.scode %>',
+                              '<%= stask.desc %>', '<%= stask.status %>' , '<%= stask.created_by %>')" data-bs-toggle="modal" data-bs-target="#modal-stasks">
+                              <span class="fas fa-edit icon"></span>
+                              </a>
+                          <% end %>
+                          <% if is_access(session["user_id"], "STASKS","DEL") %> 
+                            <a  data-bs-toggle="modal" data-bs-target="#exampleModal-<%= stask.id %>" style="cursor: pointer;color: #E63757;" data-toggle="tooltip" data-placement="top" title="Xóa công việc" >
+                              <i class="fas fa-trash icon"></i>
+                            </a>
+                          <% end %>
+                            <div class="modal fade" id="exampleModal-<%= stask.id %>" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                              <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                  <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalLabel"><%= lib_translate("Are_you_sure")  %></h5>
+                                    <button style="border: none;background: white;" type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                                      <span style="border: none;background: white;color: red;font-weight: bold;font-size: 20px;" aria-hidden="true">&times;</span>
+                                    </button>
+                                  </div>
+                                  <div class="modal-body">
+                                    <%= lib_translate("Are_you_sure_to_delete_this_task")  %> <span class="fw-bold" style="font-weight: bold; color: red"> <br>  <%= stask.scode %>  </span> ?
+                                  </div>
+                                  <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close_stask_delete"><%= lib_translate("Close")   %></button>
+                                    <%= link_to lib_translate("Delete") , url_for(action: :del, id: stask.id), method: :delete, class: "btn btn-danger", id:"delete_stask_delete_form"%>
+                                      <div id="loading_button_delete_stask" class= "btn btn-danger" style="opacity: 0.8; width: 100%; display:none;" >
+                                          <i class ="fa fa-spinner fa-spin icon"> </i>  <%=lib_translate("Deleting")%> 
+                                      </div> 
+                                   
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                        </td>
+                      <% end %>
+                    </tr>
+                      <% if is_access(session["user_id"], "STASKS","EDIT") %> 
+                          <tr style="background: var(--falcon-border-color);" class="collapse" id="collapseExample-<%= stask.id %>">
+                            <td style="display: none;" class="Name_stask">
+                              <%= stask.name %>
+                            </td>
+                            <td style="display:none " class="Created_by_stask">
+                              <%= stask.created_by 
+                                created_by = User.where(id: stask.created_by ).first
+                              if !created_by.nil?
+                               "#{created_by.last_name.capitalize.titleize} #{created_by.first_name.capitalize} (#{created_by.email})"                                         
+                              else 
+                                ""
+                              end                        
+                              %>
+                            </td>
+                            <td colspan="3" style="padding: 0;">
+                              <div class="p-3">
+                                <div id="table_permision_stask">
+                                <div class="row justify-content-end g-0">
+                                  <div class="col-auto col-sm-5">
+                                  </div>
+                                </div>
+                                <div class="  scrollbar">
+                                  <table class="table table-bordered fs--1 mb-0">
+                                    <thead class="bg-200 text-900">
+                                      <tr style="border-width: 2px 2px !important;">
+                                        <th class="align-middle white-space-nowrap" style="width: 23px;">
+                                          <div class="form-check mb-0"><input class="form-check-input" id="bulk-select-<%= stask.id  %>" type="checkbox" data-bulk-select='{"body":"bulk-select-body-<%= stask.id %>","actions":"bulk-select-actions","replacedElement":"bulk-select-replace-element"}' /></div>
+                                        </th>
+                                        <th style="text-align: left; vertical-align: middle" data-sort="name">
+                                          <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <%= lib_translate("Resource")  %>
+                                            <button class="btn btn-danger btn-sm me-1" onclick="deleteAllSelected('<%= stask.id %>')">Xóa danh sách đã chọn</button> 
+                                          </div>
+                                        </th>
+                                        <th style="text-align: left; vertical-align: middle" data-sort="per">
+                                          <div style="display: flex; justify-content: space-between; align-items: center;">
+                                            <%= lib_translate("Permissions")  %>
+                                            <button class="btn btn-primary btn-sm me-1">Áp dụng nhiều quyền</button>  
+                                          </div>
+                                        </th>
+                                        <th style="text-align: right; vertical-align: middle">  
+                                          <a style="cursor: pointer;" class="btn btn-warning btn-sm"  data-bs-toggle="modal" data-bs-target="#add-resource-modal" onclick="addResource('<%= stask.id  %>',<%= list_resource_name %>)">
+                                            <%= lib_translate("Add_resource")  %>
+                                          </a>
+                                        </th>
+                                      </tr>
+                                    </thead>
+                                    <tbody class="list" id="bulk-select-body-<%= stask.id %>">
+                                      <% list_access.each do |access|%>
+                                        <tr style="background: var(--falcon-border-color);">
+                                          <td class="align-middle white-space-nowrap">
+                                            <div class="form-check mb-0"><input class="form-check-input" type="checkbox" id="select-access-<%= stask.id  %>" data-select-row="<%= access[:id] %>" /></div>
+                                          </td>
+                                          <td class="name" style="text-align: left;">
+                                            <%=lib_translate(access[:resource_scode])  %>
+                                          </td>
+                                          <td 
+                                          <% if !is_access(session["user_id"], "STASKS","DEL") %>
+                                          colspan="2" 
+                                          <% end  %>
+                                          style="text-align: center;" >
+                                            <div class="d-flex  justify-content-between">
+                                            <div class="d-flex" style="white-space: nowrap;"> 
+                                            <%# render permission%>
+                                            <% permissions = Access.where({resource_id: access[:resource_id],stask_id: access[:stask_id]})
+                                              list_permissions_id = []
+                                              permissions.each do |per|
+                                              list_permissions_id.push(per.permision ? per.permision : "")
+                                            %>
+                                              <div class="<%= per.permision ? "dot_delete_stask me-2" : "no_dot_delete_stask" %>">
+                                                  <%= lib_translate(per.permision) %> 
+                                                  <i class="<%= per.permision ? "far fa-times-circle icon cursor-pointer ms-1 text-danger
+                                                  #{if !is_access(session["user_id"], "STASKS","DEL") 
+                                                      "hidden"
+                                                    end
+                                                  }
+                                                  " : "hidden" %>" data-bs-toggle="modal" data-bs-target="#delete_modal_access-<%= per.id %>"></i></div>
+                                                  <div class="modal fade" id="delete_modal_access-<%= per.id %>" tabindex="-1" role="dialog" aria-hidden="true">
+                                                    <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 500px">
+                                                      <div class="modal-content position-relative">
+                                                        <div class="position-absolute top-0 end-0 mt-2 me-2 z-index-1">
+                                                          <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                          <div class="modal-body p-0">
+                                                            <div class="rounded-top-lg py-3 ps-4 pe-6 bg-light d-flex">
+                                                              <h4 class="mb-1" id="modalExampleDemoLabel"><%= lib_translate("Are_you_sure")  %></h4>
+                                                            </div>
+                                                            <div class="p-4 pb-0">
+                                                                <div class="mb-3"><%= lib_translate("Are_you_sure_to_delete_this_per") %> <span class="fw-bold" style="font-weight: bold; color: red"><%= lib_translate(per.permision) %></span>?
+                                                                </div>  
+                                                            </div>
+                                                          </div>
+                                                          <div class="modal-footer"> 
+                                                            <%= link_to lib_translate("Delete") , url_for(action: :access_del, id: per.id, stask_id: stask.id, resource_id: per.resource_id), method: :delete, class: "btn btn-danger"%>
+                                                          </div>
+                                                      </div>
+                                                    </div>
+                                                  </div>
+                                            <% end %>
+                                            </div> 
+                                            <% if is_access(session["user_id"], "STASKS","EDIT") %> 
+                                                <a style="cursor: pointer;color: #E63757;"  data-bs-toggle="modal" data-bs-target="#add_permission_modal" onclick="addPermision('<%= stask.id  %>','<%= access[:resource_scode]  %>',<%= list_permissions_id %>)" >
+                                                  <i class="fas fa-plus-circle text-primary" style="width: 40px; margin-top:5px;"></i>
+                                                </a>
+                                            <% end %> 
+                                            </div>
+                                          </td>
+                                          <% if is_access(session["user_id"], "STASKS","DEL") %> 
+                                          <td style="text-align: center;">
+                                            <i class="fas fa-trash icon text-danger" style="cursor: pointer;width: 15px" data-bs-toggle="modal" data-bs-target="#delete_modal_access-all-<%= access[:id] %>"></i>
+                                              <div class="modal fade" id="delete_modal_access-all-<%= access[:id] %>" tabindex="-1" role="dialog" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 500px">
+                                                  <div class="modal-content position-relative">
+                                                    <div class="position-absolute top-0 end-0 mt-2 me-2 z-index-1">
+                                                      <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                      <div class="modal-body p-0">
+                                                        <div class="rounded-top-lg py-3 ps-4 pe-6 bg-light d-flex">
+                                                          <h4 class="mb-1" id="modalExampleDemoLabel"><%= lib_translate("Are_you_sure")  %></h4>
+                                                        </div>
+                                                        <div class="p-4 pb-0">
+                                                            <div class="mb-3">
+                                                              <%= lib_translate("confirm_delete_message")  %> <span class="fw-bold" style="font-weight: bold; color: red"><%= access[:resource_scode] %></span> ?
+                                                            </div> 
+                                                        
+                                                        </div>
+                                                      </div>
+                                                      <div class="modal-footer"> 
+                                                        <%= link_to lib_translate("Delete") , url_for(action: :access_del, id: access[:id], resource_id: access[:resource_id], stask_id: stask.id, ck_action: access[:resource_id]), method: :delete, class: "btn btn-danger"%>
+                                                      </div>
+                                                  </div>
+                                                </div>
+                                              </div> 
+                                          </td>
+                                          <% end  %>
+                                        </tr> 
+                                      <% end %>
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+                              </div>
+                            </td>
+                          </tr>
+                      <% end %> 
+                  <% end %>
+              </tbody>
+            </table> 
+            <%= render_pagination_limit_offset(stasks_index_path(lang: session[:lang], per_page: session[:per_page], search: session[:search]), 10, @stasks.count).html_safe %>
+            <div class="modal fade" id="add-resource-modal" data-bs-focus="false" tabindex="-1" role="dialog" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 40%">
+                <div class="modal-content position-relative">
+                  <div class="position-absolute top-0 end-0 mt-2 me-2 z-index-1">
+                    <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <%= form_for @acces, :url=> stask_access_update_path, html: {method: :post} do |f| %>
+                    <div class="modal-body p-0">
+                      <div class="rounded-top-lg py-3 ps-4 pe-6 bg-light d-flex">
+                        <h4 class="mb-1" id="modalExampleDemoLabel"><%= lib_translate("Add_resource")  %></h4>
+                      </div>
+                      <p style="color:red" class="m-0 ms-4 mt-2" id="erro_labble_content_btn_add_resource">
+                      </p>
+                      <div class="ps-4 pe-4 pb-0">
+                          <div class="mb-3" style="display: none;">
+                            <input type="text" name="stask_id" id="stask_id_add"> 
+                          </div>   
+                          <div class="mb-4 mt-2" id="select_resource_id"> 
+                            <div class="d-flex" style="align-items: flex-start">
+                            <select id="select_resource" class="form-select" name="resource_scode[]" multiple="multiple" required="required"> 
+                              <% @resource.each do |resource| %>
+                              <option value="<%= resource.scode %>"><%= lib_translate(resource.scode) %></option>
+                              <% end %>
+                            </select>
+                            <%= f.submit lib_translate("Add_resource") , type:"button", class: "btn btn-primary ms-3", id: "btn_add_resource" %>
+                            </div>
+                          </div>  
+                      </div>
+                    </div> 
+                  <% end %>
+                </div>
+              </div>
+            </div>
+            <div class="modal fade" id="add_permission_modal" tabindex="-1" role="dialog" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 500px">
+                <div class="modal-content position-relative">
+                  <div class="position-absolute top-0 end-0 mt-2 me-2 z-index-1">
+                    <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <%= form_for @acces, :url=> stask_access_update_path, html: {method: :post, id: "form-new-permission"} do |f| %>
+                    <div class="modal-body p-0">
+                      <div class="rounded-top-lg py-3 ps-4 pe-6 d-flex">
+                        <h4 class="mb-1" id="modalExampleDemoLabel"><%= lib_translate("Edit_Permission")  %></h4>
+                      </div>
+                      <p style="color:red" class="m-0 ms-4" id="erro_labble_content_btn_add_permission">
+                      </p>
+                      <div class="ps-4 pe-4 pb-0">
+                          <div class="mb-3" style="display: none;">
+                            <input type="text" name="resource_scode" id="resource_id"> 
+                          </div> 
+                          <div class="mb-3" style="display: none;">
+                            <input type="text" name="stask_id" id="stask_id"> 
+                          </div>  
+                          <div id="select_add_permission_bd" class="mt-3"> 
+                            <% @permisions.each do |permision| %>
+                                <div class="form-check form-check-inline" >
+                                  <input class="form-check-input cursor-pointer" id="<%= permision.scode %>" type="checkbox" value="<%= permision.scode %>" name="permission[]" />
+                                  <label class="form-check-label cursor-pointer" for="<%= permision.scode %>"><%= lib_translate(permision.scode)  %></label>
+                                </div>  
+                            <% end %> 
+                          </div> 
+                      </div>
+                    </div>
+                    <div class="modal-footer" style="border: none;"> 
+                      <%= f.submit lib_translate("Save_Permission") , type:"button", class: "btn btn-primary", id: "btn_add_permission" %>
+                    </div>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+        </div>
+      </div>
+</div>
+<pre id="selectedRows"></pre>
+<% if is_access(session["user_id"], "STASKS","EDIT") %> 
+  <!-- modal -->
+  <div class="modal fade" id="modal-stasks" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+      <div class="modal-content position-relative">
+        <div class="position-absolute top-0 end-0 mt-2 me-2 z-index-1">
+          <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-0">
+          <div class="rounded-top-lg py-3 ps-4 pe-6 bg-light">
+            <h4 class="mb-1" id="cls_bmtu_form_add_title"><%= lib_translate("New_task")  %></h4>
+          </div>
+          <div class="p-4 pb-0">
+              <div id="error_explanation" class="text-danger" style="text-align: center;font-size: 13px;"></div>
+              <%= form_for @stask, :url=> stask_update_path, html: {method: :post, id:"form_add_stask" } do |f| %>
+                  <div class="erro_labble" >
+                      <p style="color:red" id="erro_labble_content">
+                      </p>
+                  </div>
+                    <div class="form-group" style="display:none;">
+                  <%= f.label :id %>   <span  class="red"> </span>
+                  <%= f.text_field :id, class: 'form-control', name: 'stask_id', id: 'stask_id_form'%>
+                  </div>
+                    <div class="form-group">
+                  <label  > <%= lib_translate("Name_stask")  %>  </label> <span  class="red">* </span>
+                  <%= f.text_field :name, class: 'form-control' , name: 'txt_name' %>
+                  </div>
+                  <div class="form-group">
+                  <label  > <%= lib_translate("Scode_stask")  %>  </label>
+                  <%= f.text_field :scode, class: 'form-control', name: 'txt_scode' %>
+                  </div>
+                  <div class="form-group">
+                  <label  > <%= lib_translate("Created_by")  %> </label>
+                  
+
+                  <select class="form-select selectpicker" name="created_by" id="created_by">
+                          <option value="" ><%= lib_translate('Select_Position_Job')%> </option>
+                          <% @users.each do |user| %>
+                              <option value="<%= user.id%>" >
+                                  <%=user.last_name.capitalize.titleize %> <%=user.first_name.capitalize%> (<%=user.email %>)
+                              </option>
+                          <%end%>
+                      </select>
+                  </div>
+                    <div class="form-group">
+                  <label> <%= lib_translate("Desc")  %>  <span style="color:red;" class="red"> </span></label>
+                  <%= f.text_area :desc, class: 'form-control', name: 'txt_desc'  %>
+                  </div>
+                  <div class="form-group mt-2">
+                  <label> <%= lib_translate("Status")  %>  <span style="color:red;" class="red"></span></label>
+                    <input checked type="radio" id="sel_status_active" class="form-check-input ms-3 me-1" value="ACTIVE" name="sel_status"/>
+                    <label class="form-check-label" for="sel_status_active" style="cursor: pointer"> ACTIVE</label>
+                    <input  type="radio" id="sel_status_inactive" class="form-check-input ms-3 me-1" value="INACTIVE" name="sel_status"/> 
+                    <label class="form-check-label" for="sel_status_inactive" style="cursor: pointer"> INACTIVE</label>
+                  <div class="modal-footer border-0 p-0 mb-2">
+                    <%= f.submit "" , type:"submit" , id:"btn_add_new_stask", class: "btn btn-warning border-red border-pink-600 cls-bmtu-text-red md:group-hover:bg-pink-50 btn-block btn-block text-uppercase " %>
+                      <div id="loading_button_stasks" class= "btn btn-warning border-red border-pink-600 cls-bmtu-text-red md:group-hover:bg-pink-50 btn-block text-uppercase" style="opacity: 0.8;display:none;" >
+                          <i class ="fa fa-spinner fa-spin"> </i>  <%=lib_translate("Save")%>
+                      </div>
+                  </div>
+              <% end %>
+          </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>   
+  
+  <div class="modal fade" id="add_staff_stask"  tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 90%;" role="document">
+      <div class="modal-content position-relative">
+        <div class="position-absolute top-0 end-0 mt-2 me-2 z-index-1">
+          <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-0">
+          <%= form_tag stask_asign_stask_user_path, method: "POST", id: 'asign_stask_user' do %>
+            <div class="rounded-top-lg py-3 ps-4 pe-6 bg-light">
+              <h4 class="mb-1"><%= lib_translate("Assign_work_to_employees")  %></h4>
+              <input type="hidden" name="id_stask" class="id_stask_asign">
+              <input type="hidden" name="user_checked" id="ids_user_checked">
+            </div>
+            <div class="p-4 pb-0" style="height: 550px; overflow: overlay;">
+              <span><b><%= lib_translate("Name_stask")  %>:</b> <i class="render_name_stask"> </i></span><br>
+              <span><b><%= lib_translate("Created_by")  %>:</b> <i class="render_created_by"> </i></span>
+              <table id="table_add_staff_stask" class="table table-responsive border-1 table-bordered fs--1 mb-0">
+                <thead class="text-black bg-200">
+                  <tr>
+                    <th class="no-sort align-middle white-space-nowrap" style="width: 28px;">
+                      <div class="form-check mb-0">
+                        <input class="form-check-input" type="checkbox" data-bulk-select='{"body":"bulk-select-body","actions":"bulk-select-actions","replacedElement":"bulk-select-replace-element"}' />
+                      </div>
+                    </th>
+                    <th class="align-middle"><%= lib_translate("Full_name")  %></th>
+                    <th class="align-middle"><%= lib_translate("Email")  %></th>
+                    <th class="align-middle"><%= lib_translate("Department")  %></th>
+                    <th class="align-middle"><%= lib_translate("Positionjob")  %></th>
+                  </tr>
+                </thead>
+                <tbody id="bulk-select-body">
+                  <% @users.each do |user| 
+                      department_name = ""
+                      job_name = ""
+                        works = user.works
+                        works.each do |work|
+                            if !work.positionjob.nil? && !work.positionjob.department.nil?
+                              department_name = work.positionjob.department.name
+                              job_name = work.positionjob.name
+                            end
+                        end
+                  %>
+                    <tr>
+                      <td class="align-middle white-space-nowrap">
+                        <div class="form-check mb-0">
+                          <input class="form-check-input checkbox_user_asign" name="check_box_user" type="checkbox" value="<%= user.id %>" id="checkbox-1" data-bulk-select-row="data-bulk-select-row" />
+                        </div>
+                      </td>
+                      <th class="align-middle"><%= user.last_name %> <%= user.first_name %></th>
+                      <td class="align-middle"><%= user.email %></td>
+                      <td class="align-middle"><%= department_name %></td>
+                      <td class="align-middle"><%= job_name %></td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer mt-2">
+              <button class="btn btn-secondary" type="button" data-bs-dismiss="modal"><%= lib_translate("Close")  %></button>
+              <button class="btn btn-primary" id="submit_asign_stask_user" type="button" disabled><%= lib_translate("Asign_user")  %></button>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>  
+  
+  <div class="modal fade" id="list_staff_stask" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" style="max-width: 90%;" role="document">
+      <div class="modal-content position-relative">
+        <div class="position-absolute top-0 end-0 mt-2 me-2 z-index-1">
+          <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-0">
+          <div class="rounded-top-lg py-3 ps-4 pe-6 bg-light">
+            <h4 class="mb-1" id="cls_bmtu_form_add_title"><%= lib_translate("List_of_personnel_belonging_to_the_job")  %></h4>
+          </div>
+          <div class="p-4">
+            <div id="error_explanation" class="text-danger" style="text-align: center;font-size: 13px;">
+              <table id="table_list_staff_stask" class="table table-responsive border-1 table-bordered fs--1 mb-0">
+                <thead class="text-black bg-200">
+                  <tr>
+                    <th class="align-middle"><%= lib_translate("Full_name")  %></th>
+                    <th class="align-middle"><%= lib_translate("Email")  %></th>
+                    <th class="align-middle"><%= lib_translate("Department")  %></th>
+                    <th class="align-middle"><%= lib_translate("Positionjob")  %></th>
+                  </tr>
+                </thead>
+                <tbody id="render_list_staff_stask">
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>  
+  </div>  
+
+  <%= form_tag stask_list_user_asign_stask_path, method:'POST', id: "form_get_list_user_asign_stask", remote:true, authenticity_token: true do %>
+    <input type="hidden" name="id_stask" id="id_stask_asgin">
+  <%  end %>
+<% end  %>
+<script>
+  let New_stask = "<%= lib_translate("New_task")  %> ";
+  let Update_task = "<%= lib_translate("Update_task")  %>";
+  let PLease_choose_resource = "<%= lib_translate("PLease_choose_resource")  %>";
+  let user_email ="<%= @current_user.id%>"
+  let stask_id ="<%= session[:table_stask_id]%>"
+  var delete_stask_delete_form = document.getElementById("delete_stask_delete_form")
+  if (delete_stask_delete_form) {
+    delete_stask_delete_form.onclick = function () {    
+      document.getElementById("delete_stask_delete_form").style.display = "none"; 
+      document.getElementById("close_stask_delete").style.display = "none"; 
+      document.getElementById("loading_button_delete_stask").style.display = "block";
+    };
+  }
+
+  document.addEventListener('readystatechange', event => { 
+    if (event.target.readyState === "interactive") {  
+        list = document.querySelectorAll("#collapseExample-<%= session[:table_stask_id] %>");
+        for (var i = 0; i < list.length; ++i) {
+          list[i].classList.add('show'); 
+        }
+    }
+
+    if (event.target.readyState === "complete") { 
+      '<%= session[:table_stask_id] = "" %>'
+    }
+  });
+</script>
+<script>
+  var arrUsersId = <%= !@users.nil? ? @users.ids : [] %>;
+  var checkedValues = [];
+  $(document).ready(function() {
+    $('[data-toggle="tooltip"]').tooltip({
+    delay: { "show": 100, "hide": 100 }
+    });
+  });
+</script>

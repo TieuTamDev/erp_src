@@ -1,0 +1,126 @@
+<%# author: Đinh Hoàng Vũ %>
+<% content_for :head do %>
+  <%= stylesheet_link_tag '/assets/mystyle/grap-drop.css' %>
+  <%= stylesheet_link_tag '/assets/mystyle/diagram.css' %>
+  <%= stylesheet_link_tag '/assets/department_streams/style/department_streams.css' %>
+<% end %>
+<% content_for :bottombody do %>
+  <%= javascript_include_tag '/assets/myjs/resize-panel.js' %>
+  <%= javascript_include_tag '/assets/myjs/grap-drop.js' %>
+  <%= javascript_include_tag '/assets/myjs/diagram.js' %>
+
+  <%= javascript_include_tag '/assets/myjs/testing/jszip.min.js' %>
+  <%= javascript_include_tag '/assets/myjs/testing/minified.js' %>
+  <%= javascript_include_tag '/assets/myjs/testing/docx-preview.js' %>
+
+  <%= javascript_include_tag '/assets/department_streams/javascripts/department_streams.js' %>
+<% end %>
+<script>
+  let remove_trans = '<%= lib_translate('Confirm_delete')%>'
+</script>
+<div id="block-screen" class="block-screen"></div>
+<div class="diagram-top-controls">
+  <p class="select-label"><%= lib_translate("Select_operation_diagram")  %></p>
+  <select id="diagram-select" onchange="onSelectDiagram(this);" class="form-control form-select" disabled>
+    <option value="0" selected><%= lib_translate("Select_a_diagram")  %></option>
+    <% @streams.each do |stream| %>
+      <option value=<%=stream.id%> ><%=stream.name%></option>
+    <%end%>
+  </select>
+  <% if is_access(session["user_id"], "STREAMS","ADD") %> 
+    <button type="button" onclick="clickAddnew()" class="btn btn-primary diagram-button-add" disabled><i class="fas fa-plus"></i> <%= lib_translate("Add_operation_diagram")%></button>
+  <% end %>
+</div> 
+<div id="visible-layout" style="display:none;">
+  <div class="card" style="margin-bottom: 10px;overflow: hidden;">
+    <div id="collapse-control" class="collapse-control bg-300" onclick="clickCollapse(this)" data-bs-toggle="collapse" data-bs-target="#form-diagram-info">
+      <i id="collapse-icon" style="font-size: 20px;pointer-events: none;transition: 200ms ease-in;" class="fas fa-chevron-circle-right"></i>
+      <p class="collapse-title" style="pointer-events: none;text-indent: 10px;"><%= lib_translate("Diagram_info")%></p>
+    </div>
+    <form id="form-diagram-info" class="needs-validation collapse" style="padding: 0px 10px;" novalidate>
+      <div style="display:flex;align-items: center;margin-bottom: 5px;margin-top: 5px;">
+        <p style="margin: 0;margin-right:20px"><%= lib_translate("Status")%> :</p>
+        <div class="form-check form-switch" style="margin-bottom:unset; padding-left: 40px;">
+          <input class="form-check-input" id="checkbox-active" onchange="onChangeStatus(this)" style="cursor: pointer;" type="checkbox" checked/>
+          <label style="color: var(--falcon-success); margin: 0;cursor: pointer;" for="checkbox-active">ACTIVE</label>
+        </div>
+      </div>
+      <div class="has-validation ">
+        <label style="margin: 0px;margin-bottom: 3px;"><%= lib_translate("Diagram_name")%>:</label>
+        <input oninput="onNameChange(this)" class="form-control" id="diagram-name" type="text" pattern=".{6,}" placeholder="" required/>
+        <div class="invalid-feedback"><%= lib_translate("Diagram_valid_name")%></div>
+      </div>
+      <input class="form-control" id="diagram-scode" type="text" placeholder="" style="display:none;" hidden disabled/>
+      <div>
+        <label style="margin: 0px;margin-bottom: 3px;"><%= lib_translate("Note")%> :</label>
+        <textarea class="form-control scrollbar" id="diagram-note" rows="3" placeholder=""></textarea>
+      </div>
+      <div class="diagram-bottom-controls">
+    <% if is_access(session["user_id"], "STREAMS","EDIT") %> 
+          <button type="button" id="button-save" class="btn btn-primary diagram-bottom-button" onclick="clickSave()"><%= lib_translate("Save")  %></button>
+    <% end %>
+      </div>
+    </form>
+</div>
+<div class="diagram-containter card" id="diagram-containter">
+  <div id="left-panel" class="left-panel" style="overflow-y: unset; display: flex;">
+    <div style="display: flex;flex-direction: column;flex-grow: 1;">
+      <h5><%= lib_translate("List_Department")%></h5>
+      <ul class="flex-lg-column fs--1 scrollbar" style="padding: 0px;list-style: none;height: calc(100% - 25px);" id="list-department">
+        <% @departments.each do |department| %>
+          <li class="department-item" can-grap="true" id=<%= department.id %> data-hl="true" data-name="<%= department.name %>"><%= department.name %></li>
+        <% end %>
+      </ul>
+    </div>
+    <div id="gutter" class="gutter" style="background-color: #9fc6fbab;"></div>
+  </div>
+  <div class="right-panel" style="overflow: hidden;">
+    <div id="loading-screen" class="loading-screen" style="color: white;">
+      <div class="spinner-border" role="status"></div>
+    </div>
+    <div ignore-click="true" id="diagram-inner-controls" class="diagram-inner-controls" style="justify-content: space-between;">
+      <div>
+        <i onclick="clickHideNodeList(this)" class="fas fa-chevron-circle-left" style="font-size: 20px;cursor: pointer;"></i>
+      </div>
+      <div style="display: flex">
+        <div ignore-click="true" onclick="toggleGrid(this);" data-grid="true" class="diagram-single-button diagram-button-active"><i class="fas fa-border-all"></i></div>
+        <div class="diagram-group-button">
+            <div ignore-click="true" onclick="toggleDrawEnd(this,true)" class="diagram-inner-button diagram-button-active arrow-controls"><i class="fas fa-long-arrow-alt-right d"></i></div>
+            <div ignore-click="true" onclick="toggleDrawEnd(this,false)" class="diagram-inner-button arrow-controls"><i class="fas fa-minus" style="font-size: 20px;"></i></div>
+        </div>
+        <div class="diagram-group-button">
+            <div ignore-click="true" onclick="toggleArrowType(this,true)" class="diagram-inner-button diagram-button-active arrow-controls"><i class="fas fa-minus" style="font-size: 20px;"></i></div>
+            <div ignore-click="true" onclick="toggleArrowType(this,false)" class="diagram-inner-button arrow-controls"><div id="arrow-controls" style="width: 22px;border-top: 2px dashed #444444;"></div></div>
+        </div>
+        <input ignore-click="true" type="color" id="control-pick-color" oninput="onSelectColor(this);" style="cursor: pointer; width:30px" value="#000000">
+        <p ignore-click="true" class="diagram-zoom" id="zoom-button">100%</p>
+      </div>
+    </div>
+    <div class="scrollbar diagram-scrollbar" style="overflow: scroll;height: 70vh;" can-drop="true" id="diagram"></div>
+  </div>
+</div>
+<div class="diagram-bottom-controls">
+  <% if is_access(session["user_id"], "STREAMS","EDIT") %> 
+    <button type="button" id='button-delete' class="btn btn-secondary diagram-bottom-button" onclick="clickCancel()"><%= lib_translate("Cancel")  %></button>
+    <button type="button" id="button-save" class="btn btn-primary diagram-bottom-button" onclick="clickSave()"><%= lib_translate("Save")  %></button>
+  <% end %>
+</div>
+
+<%# remote Forms %>
+<%= form_tag 'streams/update',controller:'departments',method:'POST',id:'streams_update_form', remote:true,authenticity_token: true do %>
+  <input id="input-data" type="hidden" name="data" type="text">
+<%  end %>
+<%= form_tag 'streams/edit',method:'GET',id:'streams_edit_form',controller:'departments',remote:true,authenticity_token: true do %>
+  <input id="input-data" type="hidden" name="stream_id" type="text">
+<%  end %>
+<%= form_tag 'streams/delete',method:'DELETE',id:'streams_delete_form',controller:'departments',remote:true,authenticity_token: true do %>
+  <input id="input-data" type="hidden" name="stream_id" type="text">
+<%  end %>
+<script>
+  let formsList = <%= @formsList.to_json.html_safe%>;
+  // trans
+  let trans_cancel = '<%= lib_translate("Cancel")%>';
+  let trans_confirm = '<%= lib_translate("Confirm")%>';
+  let trans_popup_connect_title = 'Thông tin đường dẫn';
+  let trans_delete = '<%= lib_translate("Delete")%>';
+</script>

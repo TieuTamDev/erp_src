@@ -1,0 +1,21 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  name: MyString
+  amount: MyString
+  stype: MyString
+  mediafile: one
+  dtfrom: 2022-11-11 10:58:20
+  dtto: 2022-11-11 10:58:20
+  status: MyString
+
+two:
+  user: two
+  name: MyString
+  amount: MyString
+  stype: MyString
+  mediafile: two
+  dtfrom: 2022-11-11 10:58:20
+  dtto: 2022-11-11 10:58:20
+  status: MyString

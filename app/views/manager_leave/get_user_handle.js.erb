@@ -1,0 +1,18 @@
+$("#nextHandler").empty();
+var dataResult = <%= @result_user.to_json.html_safe %>;
+if (!dataResult || Object.keys(dataResult).length === 0) {
+  alert("Đơn đã bị hủy");
+  window.location.reload();
+}
+else{
+$("#nextHandler").append(`
+    <option value="">Chọn người phê duyệt</option>
+  `);
+dataResult.forEach((step) => {
+  const item = `
+    <option value="${step.id}">${step.last_name} ${step.first_name}</option>
+  `;
+  $("#nextHandler").append(item);
+});
+showLoadding(false);
+}

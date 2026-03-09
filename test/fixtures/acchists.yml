@@ -1,0 +1,17 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  dlogin: 2023-04-06 09:01:21
+  dlogout: 2023-04-06 09:01:21
+  location: MyString
+  browser: MyString
+  device: MyString
+  user: one
+
+two:
+  dlogin: 2023-04-06 09:01:21
+  dlogout: 2023-04-06 09:01:21
+  location: MyString
+  browser: MyString
+  device: MyString
+  user: two

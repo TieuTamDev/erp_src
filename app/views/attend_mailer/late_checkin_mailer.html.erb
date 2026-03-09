@@ -1,0 +1,38 @@
+<div style="max-width: 80%; margin: 0 auto; font-family: Arial, sans-serif; color: #333333; line-height: 1.6; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <div style="background:linear-gradient(324deg,#ffad45 0%,#c53239 100%);padding:20px;border-radius:8px 8px 0 0;">
+        <h2 style="margin:0;color:#ffffff;font-size:clamp(18px,4vw,24px);text-transform:uppercase;letter-spacing:1px;text-align: center;">Thông báo về việc giảng viên điểm danh muộn</h2>
+        <div style="width: 100%;color:#ffffff;font-size:clamp(14px,3vw,16px);">
+            <div style="background:rgba(255,255,255,0.1);padding:10px;border-radius:4px;margin-top:10px">Họ và tên:
+                <strong><%= @full_name %></strong>
+            </div>
+            <div style="background:rgba(255,255,255,0.1);padding:10px;border-radius:4px;margin-top:10px">Mã nhân sự:
+                <strong><%= @user_sid %></strong>
+            </div>
+            <div style="background:rgba(255,255,255,0.1);padding:10px;border-radius:4px;margin-top:10px">Email:
+                <strong><%= @user_email %></strong>
+            </div>
+        </div>
+        <div style="width: 100%;color:#ffffff;font-size:clamp(14px,3vw,16px)">
+            <div style="background:rgba(255,255,255,0.1);padding:10px;border-radius:4px;margin-top:10px">Học phần:
+                <strong><%= @mmodule_name %></strong>
+            </div>
+            <div style="background:rgba(255,255,255,0.1);padding:10px;border-radius:4px;margin-top:10px">
+                Thời gian: <strong><%= @time_schedule %></strong>
+            </div>
+            <div style="background:rgba(255,255,255,0.1);padding:10px;border-radius:4px;margin-top:10px">
+                Phòng học: <strong><%= @room_names %></strong>
+            </div>
+        </div>
+        <div style="background:rgba(255,255,255,0.1);padding:10px;border-radius:4px;margin-top: 10px;color: #ffffff;text-align: center;font-size: clamp(14px, 3vw, 16px);"> 
+            Thời gian điểm danh: <strong><%= @current_time %></strong>
+        </div>
+    </div>
+    <div style="padding: 20px; background-color: #f8f9fa; border-radius: 0 0 8px 8px; border-top: 1px solid #e0e0e0;">
+        <p style="margin: 0 0 20px 0; color: #1a73e8; font-weight: bold;">Trân trọng,</p>
+        <div style="background-color: #fff4f4; border-radius: 4px; padding: 15px; border-left: 4px solid #dc3545;">
+            <strong style="color: #dc3545; display: block; margin-bottom: 5px;">Lưu ý:</strong>
+            <span style="color: #666666;">Đây là hộp thư thông báo nội bộ, đề nghị Quý Thầy/Cô không phản hồi vào mail
+                này.</span>
+        </div>
+    </div>
+</div>

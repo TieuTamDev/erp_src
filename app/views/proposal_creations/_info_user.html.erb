@@ -1,0 +1,221 @@
+<style>
+    table td {
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
+    }
+</style>
+
+<div class="col-12 col-sm-12 col-md-7 col-lg-7 col-xl-7 col-xxl-7" style="border-radius: 5px;">
+    <%= form_for @user, :url=> user_update_path, html: {method: :post, id:"form_add_user" } do |f| %>
+        <%
+            list_uorg_user = []
+            @uorgs.each do |uorg|
+                list_uorg_user.push(uorg.organization_id ? uorg.organization_id : "") 
+            end
+        %>
+        <div class="collapse show row mt-3 justify-content-center" id="open_form_infor" style="padding-bottom: 20px;border-radius: 5px; border: 1px solid #E5E7EB; border-top-left-radius: 20px; border-top-right-radius: 20px;">
+            <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 col-xxl-12 mb-3" style="background-color: #F9FAFB; display: flex; justify-content: center; align-items: center; flex-direction: column; padding: 20px; border-top-left-radius: 20px; border-top-right-radius: 20px;">
+                <div class="avatar mb-2" style="position: relative; width: 150px; height: 150px; border: 2px solid var(--falcon-badge-soft-secondary-background-color); border-radius: 50%; background-color: #fff; display: flex; justify-content: center; align-items: center;">
+                    <%
+                      if !@user.avatar.nil?
+                        avatar_url = request.base_url + "/mdata/hrm/" + Mediafile.where("id = #{@user.avatar}").first.file_name
+                      else
+                        avatar_url = image_path('no_avatar.jpg')
+                      end
+                    %>
+                    <div style="border: 2px solid var(--falcon-badge-soft-secondary-background-color); border-radius: 50%; background-image: url(<%= avatar_url %>); overflow: hidden; background-repeat: no-repeat; background-size: cover; width: 130px; height: 130px; margin: 0 auto;">
+                    </div>
+                </div>
+                <%
+                    @name_department = ""
+                    @job_name = ""
+                    work = @user.works.where("positionjob_id IS NOT NULL").first
+                    if !work&.positionjob.nil? && !work&.positionjob&.department.nil?
+                        @name_department = work&.positionjob&.department&.name
+                        @job_name = work&.positionjob&.name
+                    end
+                %>
+                <h5 class="name" style="text-transform: capitalize; text-align: center;">
+                    <%= @user ? @user.last_name : "N/A" %> <%= @user ? @user.first_name : "" %>
+                </h5>
+                <div class="d-flex align-items-center justify-content-center">
+                    <span style="width: 15px; height: 12px;" class="fas fa-heart text-danger fs-5"></span>
+                    <h6 class="fw-normal m-0 ms-2" style="font-size: 13px;" id="time_start_work">
+                    </h6>
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="row">
+                    <div class="col-12 col-md-12 mb-4">
+                        <span class="fw-bold">Trình độ học vấn:</span>
+                        <table class="table table-bordered fs--1 mb-0 mt-2" style="border: none; border-color: var(--falcon-bg-navbar-glass);">
+                            <thead style="color: var(--falcon-btn-falcon-success-active-color); font-size: 13px;">
+                              <tr>
+                                <th scope="col" style="width: 30%;"><%= lib_translate("Schools") %> </th>
+                                <th scope="col" style="width: 10%;"><%= lib_translate("Time") %> </th>
+                                <th scope="col" style="width: 30%;"><%= lib_translate("Certificate") %> </th>
+                                <th scope="col" style="width: 20%;"><%= lib_translate("Thời hạn") %> </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <% @schools.each do |school| %>
+                                <tr>
+                                  <td style="vertical-align: middle; text-wrap: balance;" >
+                                    <h6 style="font-weight: 600;">
+                                        <%= school.name %>            
+                                    </h6> 
+                                    <h6 class="m-0 p-0" style="color: var(--falcon-badge-soft-secondary-color); font-size: 13px;">                  
+                                        <%= school.address %>
+                                    </h6>
+                                    </td>
+                                    <td style="vertical-align: middle; text-wrap: balance;" ><h6 style="font-weight: 600;">
+                                        <%= (if school.nil? 
+                                        else                    
+                                        school.period
+                                        end ) %></h6></td>
+                                    <td style="vertical-align: middle; text-wrap: balance;" ><h6 style="font-weight: 600;">
+                                        <%= (if school.nil? 
+                                        else                    
+                                         school.certificate
+                                        end ) %></h6></td>
+                                    <td style="vertical-align: middle; text-wrap: balance;" ><h6 style="font-weight: 600;">
+                                        <%= if !@user.nil? && (@user.sid == "BU10396" || @user.sid == "BUH000031" ) || school.dtexpired == nil
+                                          "Không có thời hạn"
+                                        else    
+                                          school.dtexpired.strftime("%d/%m/%Y")
+                                        end  %></h6>
+                                    </td>
+                                </tr>
+                                <% end %>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="col-12 col-md-12 mb-4">
+                        <span class="fw-bold">Kinh nghiệm làm việc:</span>
+                        <table class="table table-bordered fs--1 mb-0 mt-2" style="border: none; border-color: var(--falcon-bg-navbar-glass);">
+                            <thead style="color: var(--falcon-btn-falcon-success-active-color); font-size: 13px;">
+                              <tr>
+                                <th scope="col"><%= lib_translate("Company") %> </th>
+                                <th scope="col"><%= lib_translate("Position_of_company") %> </th>
+                                <th scope="col"><%= lib_translate("Time") %> </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <% @work_history.each do |work| %>
+                                <tr>
+                                  <td style="vertical-align: middle;" >
+                                    <h6 style="font-weight: 600;"> 
+                                      <%= work.name%> 
+                                    </h6> 
+                                    <h6 class="m-0 p-0" style="color: var(--falcon-badge-soft-secondary-color); font-size: 13px;">
+                                      <%= work.leader%>
+                                    </h6>
+                                  </td>
+                                     
+                                  <td style="vertical-align: middle;" >
+                                  <h6 style="font-weight: 600;">
+                                      <%= work.position%>
+                                  </h6>
+                                  </td>
+                                      
+                                  <td style="vertical-align: middle;" >
+                                    <h6 style="font-weight: 600;"> 
+                                      <%= work.period%>
+                                    </h6>
+                                  </td>
+                                </tr> 
+                              <% end %>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="col-12 col-md-12 mb-4">
+                        <span class="fw-bold">Công việc hiện tại:</span>
+                        <table class="table table-bordered fs--1 mb-0 mt-2" style="border: none; border-color: var(--falcon-bg-navbar-glass);">
+                            <thead style="color: var(--falcon-btn-falcon-success-active-color); font-size: 13px;">
+                                <tr>
+                                    <th class="sort " data-sort="Name_stask" style="text-align: center;"><%= lib_translate("Work_name")  %></th>
+                                    <th class="sort" data-sort="Scode_stask" style="text-align: center;"><%= lib_translate("Work_code")  %></th>
+                                    <th class="sort" data-sort="Created_by_stask" style="text-align: center;"><%= lib_translate("Created_by")  %></th>
+                                    <th class="sort" style="display:none;" data-sort="Desc_stask" style="text-align: center;"><%= lib_translate("Desc")  %></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% @works_stask.each do |works|
+                                    works.positionjob.responsibles.each do |re|
+                                        %>
+                                        <tr>
+                                            <td style="text-align: start;white-space: nowrap;" class="Name_stask ">
+                                                <%= re.stask.name %>
+                                            </td>
+                                            <td style="text-align: center;white-space: nowrap;" class="Scode_stask">
+                                                <%= re.stask.scode %>
+                                            </td>
+                                            <td style="text-align: center; white-space: nowrap;" class="Created_by_stask">
+                                                <%= if User.where(id: re.stask.created_by).first.nil? 
+                                                    ""
+                                                    else   
+                                                    User.where(id: re.stask.created_by).first.last_name.capitalize.titleize + " " + User.where(id: re.stask.created_by).first.first_name.capitalize.titleize
+                                                    end 
+                                                %>
+                                            </td>
+                                            <td style="display:none;" style="text-align: start; white-space: nowrap;" class="Desc_stask">
+                                                <%= re.stask.desc %>
+                                            </td>
+                                        </tr>
+                                    <%end%>
+                                <%end %>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="col-12 col-md-12 mb-4">
+                        <span class="fw-bold">Khen thưởng:</span>
+                        <table class="table table-bordered fs--1 mb-0 mt-2" style="border: none; border-color: var(--falcon-bg-navbar-glass);">
+                            <thead style="color: var(--falcon-btn-falcon-success-active-color); font-size: 13px;">
+                              <tr>
+                                <th class="sort" data-sort="name_archive" style="text-align: center; cursor: pointer;"><%= lib_translate("Archive_name")  %></th>
+                                <th class="sort" data-sort="issued_place_archive" style="text-align: center; cursor: pointer;"> <%= lib_translate("Archive_Issued_place")  %> </th>
+                                <th class="sort" data-sort="stype_archive" style="text-align: center; cursor: pointer;display:none"><%= lib_translate("Stype_archive")  %></th>
+                                <th class="sort" data-sort="issue_type_archive" style="text-align: center; cursor: pointer;"> <%= lib_translate("Archive_issue_type")  %> </th>
+                                <th class="sort" data-sort="issue_id_archive" style="text-align: center; cursor: pointer"><%= lib_translate("Issue_id_archive")  %></th> 
+                                <th class="sort" data-sort="issue_date_archive" style="text-align: center; cursor: pointer;"> <%= lib_translate("Archive_issue_date")  %> </th>
+                                <th class="sort" data-sort="issue_level_archive" style="text-align: center; cursor: pointer;"> <%= lib_translate("Archive_issue_level")  %> </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                                <% @archives.each do |archive| %>
+                                    <tr id= "id_edit_btn_archive" myidarchive = '<%= archive.id %>' >
+                                        <td style="cursor: pointer; text-align: center; white-space: none !important;" > 
+                                            <%= archive.name %>
+                                        </td>
+                                        <td style="cursor: pointer; text-align: center;  white-space: none !important;" >
+                                            <%= archive.issued_place %>
+                                        </td>
+                                        <td style="cursor: pointer; text-align: center;display:none" >
+                                            <%= archive.stype %>
+                                        </td>
+                                        <td>
+                                            <%= archive.issue_type %>
+                                        </td>
+                                        <td>
+                                            <%= archive.issue_id %>
+                                        </td>
+                                        <td style="cursor: pointer; text-align: center;" >
+                                            <%= archive.issued_date&.strftime('%d/%m/%Y') %>
+                                        </td>
+                                        <td>
+                                            <%= archive.issue_level %>
+                                        </td>
+                                    </tr>
+                                <% end %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <% end %>
+</div>

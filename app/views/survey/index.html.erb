@@ -1,0 +1,195 @@
+<div class="list_survey">
+  <div class="bmtu_header_dashboard">
+    <h3 class="mt-2 overview_text"><%= lib_translate("Dánh sách khảo sát")  %></h3>
+  </div>
+  <div class="card mb-3">
+    <div class="card-body pt-0">
+      <div class="tab-content">
+        <button onclick="openFormAddSurvey()"  class="btn btn-primary btn-add-user mt-3 mb-2" id="btn-add-user" data-bs-toggle="modal" data-bs-target="#modal-survey">
+        <%= lib_translate("Thêm khảo sát")  %>
+        </button>
+      <%= render_search_pagination(survey_index_path()).html_safe %>
+      <table id="table_survey" class="table table-bordered fs--1 table-hover mt-2 mb-2">
+        <thead class="bg-200 text-900">
+          <tr>
+            <th class="sort" data-sort="url" style=""><%= lib_translate("Tên")  %></th>
+            <th class="sort" data-sort="scode" style=""><%= lib_translate("Loại")  %></th> 
+            <th style="" class="sort" data-sort="status"><%= lib_translate("Status")  %></th>
+            <th class="no-sort" style="text-align: center"></th>
+          </tr>
+        </thead>
+        <tbody class="list">
+          <% @surveys.each do |survey| 
+          oAppointment = Appointment.where(survey_id: survey.id).first
+          is_use = false
+          if !oAppointment.nil?
+            is_use = true
+          end
+          %>
+                      <tr>
+                          <td class="name"> <%= survey.name %> </td>
+                          <td class="scode"> <%=if survey.stype=="BO-NHIEM" 
+                              "Bổ nhiệm"
+                            else 
+                              "Miễn nhiệm"
+                            end %> </td>
+                          <td style="text-align: center" class="status">
+                            <%= (if survey.status=="ACTIVE" 
+                              lib_translate("ac_icon")
+                            else 
+                              lib_translate("inac_icon")
+                            end ) %>
+                          </td>
+                          <td style="min-width: 100px; text-align: center;">
+                      <a style="cursor: pointer;" target="_blank" href="<%=(survey_detail_path(survey_id: survey.id, lang: session[:lang]))%>"  style="text-decoration: none;">
+                                  <span class="text-warning fas fa-eye me-3" style="width: 15px"></span>
+                              </a>
+                              <%if !is_use%>
+                              <a style="cursor: pointer;" class="edit_form" style="text-decoration: none;"
+                                  onclick='openFormUpdateform(
+                                    `<%=   survey.id %>`, 
+                                    `<%= escape_javascript(survey.name.to_s) %>`, 
+                                    `<%= escape_javascript(survey.code.to_s) %>`,
+                                    `<%= escape_javascript(survey.stype.to_s) %>`,
+                                    `<%= escape_javascript(survey.note.to_s) %>`, 
+                                    `<%= escape_javascript(survey.status.to_s) %>`)'
+                                    data-bs-toggle="modal" data-bs-target="#modal-survey">
+                                  <span class="text-primary fas fa-edit me-3" style="width: 15px"></span>
+                              </a>
+                              <a data-toggle="modal" data-target="#modal-survey-delete-<%= survey.id %>" style="cursor: pointer;">
+                                <span class="text-danger fas fa-trash" style="width: 12px;"></span>
+                              </a>
+                              <%else%>
+                                <a style="opacity:0" >
+                                    <span class="text-primary fas fa-edit me-3" style="width: 15px"></span>
+                                </a>
+                                <!-- Button trigger modal -->
+                                <a style="opacity:0">
+                                  <span class="text-danger fas fa-trash" style="width: 12px;"></span>
+                                </a>
+                              <%end%>
+                              <!-- Modal -->
+                              <div class="modal fade" id="modal-survey-delete-<%= survey.id %>" tabindex="-1" role="dialog"
+                              aria-labelledby="exampleModalLabel" aria-hidden="true">
+                              <div class="modal-dialog" role="document">
+                                  <div class="modal-content">
+                                  <div class="modal-header">
+                                      <h5 class="modal-title" id="exampleModalLabel"><%= lib_translate("Are_you_sure")  %></h5>
+                                      <button type="button" class="close" data-dismiss="modal" aria-label="Close" style=" border: none;background: none;">
+                                      <span aria-hidden="true" style="font-size: 20px;">&times;</span>
+                                      </button>
+                                  </div>
+                                  <div class="modal-body">
+                                      <%= lib_translate("Bạn có chắc muốn xóa")  %><span style="font-weight:bold; color:red;"> <%= survey.name %> </span>?
+                                  </div>
+                                  <div class="modal-footer">
+                                      <button type="button" class="btn btn-secondary" data-dismiss="modal"><%= lib_translate("Close")  %></button>
+                                      <%= link_to lib_translate("Delete"), url_for(action: :del, id: survey.id), method: :delete, class: "btn btn-danger", id: "btn_delete_survey", onclick: "delete_loading_survey(this)" %>
+                                      <div id="loading_button_delete_survey" class= "btn btn-danger" style="opacity: 0.8; width: 100%; display:none;" >
+                                        <i class ="fa fa-spinner fa-spin"> </i>  <%=lib_translate("Deleting")%> 
+                                      </div>
+                                  </div>
+                                  </div>
+                              </div>
+                              </div>
+                          </td>
+                      </tr>
+                  <% end %>
+        </tbody>
+      </table>
+      <%= render_pagination_limit_offset(survey_index_path(lang: session[:lang], per_page: session[:per_page], search: session[:search]), 10, @surveys.count).html_safe %>
+      </div>
+    </div>
+  </div>
+  
+</div>
+
+<!-- modal -->
+<div class="modal fade" id="modal-survey" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content position-relative">
+      <div class="position-absolute top-0 end-0 mt-2 me-2 z-index-1">
+        <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0">
+        
+        <div class="rounded-top-lg py-3 ps-4 pe-6 bg-light">
+          <h4 class="mb-1" id="cls_bmtu_form_add_title"><%= lib_translate("Thêm khảo sát")  %></h4>
+        </div>
+        <div class="p-4 pb-0">
+          <div id="error_explanation" class="text-danger" style="text-align: center;font-size: 13px;"></div>
+            <div class="survey-add-survey">
+              <%= form_for "", :url=> survey_update_survey_path(), html: {method: :post, id:"form_add_survey",class:'col-12' } do |f| %>
+                <div class="erro_labble mb-2">
+                    <p style="display:none; color: rgb(197 82 82);border: 1px solid rgb(199 136 136 / 23%);background: rgb(255 54 54 / 16%);border-radius: 5px;padding: 10px"
+                    id="erro_labble_content">
+                    </p>
+                </div>
+                <div class="row mb-3" style="display:none;">
+                    <div class="col-sm-8 col-lg-9">
+                        <input class="form-control" name="survey_id_add" id="survey_id_add">
+                    </div>
+                </div>
+                <div class="row mb-3"> 
+                    <label class="col-sm-4 col-lg-3  col-form-label"><%= lib_translate("Tên khảo sát") %><span style="color:red">* </span>:</label>
+                    <div class="col-sm-8 col-lg-9">
+                        <input class="form-control" name="survey_name_add" id="survey_name_add">
+                    </div>
+                </div>
+                <div class="row mb-3"> 
+                    <label class="col-sm-4 col-lg-3  col-form-label"><%= lib_translate("Mã khảo sát") %>:</label>
+                    <div class="col-sm-8 col-lg-9">
+                        <input class="form-control" name="survey_code_add" id="survey_code_add">
+                    </div>
+                </div>
+                <div class="row mb-3"> 
+                    <label class="col-sm-4 col-lg-3  col-form-label"><%= lib_translate("Loại khảo sát") %>:</label>
+                    <div class="col-sm-8 col-lg-9">
+                        <select class="form-select" name="survey_stype_add" id="survey_stype_add">
+                            <option value="BO-NHIEM">Bổ Nhiệm</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row mb-3"> 
+                    <label class="col-sm-4 col-lg-3  col-form-label"><%= lib_translate("Ghi chú") %>:</label>
+                    <div class="col-sm-8 col-lg-9">
+                        <textarea class="form-control" name="survey_note_add" id="survey_note_add" rows="3"></textarea>
+                    </div>
+                </div>
+                <fieldset>
+                  <div class="row mb-3" style="align-items: center;">
+                    <label class="col-sm-4 col-lg-3  col-form-label"><%= lib_translate("Status") %>:</label>
+                    <div class="col-sm-8 col-lg-9">
+                      <div class="row">
+                        <div class="col-auto">
+                          <input checked type="radio" id="survey_status_active" class="form-check-input" value="ACTIVE" name="survey_status_add" /> <label class="form-check-label" for="survey_status_active" style="cursor: pointer"> HOẠT ĐỘNG</label>
+                        </div>
+                        <div class="col-auto">
+                          <input  type="radio" id="survey_status_inactive" class="form-check-input" value="INACTIVE" name="survey_status_add" /> <label class="form-check-label" for="survey_status_inactive" style="cursor: pointer"> KHÔNG HOẠT ĐỘNG</label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </fieldset>
+
+                <div class="modal-footer border-0 p-0 mb-2">
+                    <%= f.submit "Lưu" , type:"button" , id:"btn_add_new_survey_buttton",
+                    class: "btn btn-warning border-red border-pink-600 cls-bmtu-text-red md:group-hover:bg-pink-50 btn-block btn-block text-uppercase " %>
+                    <div id="loading_button_survey" class= "btn btn-warning border-red border-pink-600 cls-bmtu-text-red md:group-hover:bg-pink-50 btn-block btn-block text-uppercase " style="opacity: 0.8;display:none;" >
+                          <i class ="fa fa-spinner fa-spin"> </i>  <%=lib_translate("Save")%> 
+                    </div>
+                </div>
+              <% end %>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+    let update_translate = "<%= lib_translate("Cập nhật khảo sát")%>";
+    let create_translate = "<%= lib_translate("Thêm khảo sát")%>";
+</script>
+<%= javascript_include_tag '/assets/myjs/survey_index.js'%>
+<%= javascript_include_tag '/assets/lib_hrm/jquery-3.2.1.slim.min.js', integrity: 'sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN', crossorigin: 'anonymous' %> 
+<%= javascript_include_tag '/assets/lib_hrm/bootstrap.min.js', integrity: 'sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl', crossorigin: 'anonymous'%>

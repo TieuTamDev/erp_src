@@ -1,0 +1,543 @@
+# Files in the config/locales directory are used for internationalization
+# and are automatically loaded by Rails. If you want to use locales other
+# than English, add the necessary files in this directory.
+#
+# To use the locales, use `I18n.t`:
+#
+#     I18n.t 'hello'
+#
+# In views, this is aliased to just `t`:
+#
+#     <%= t('hello') %>
+#
+# To use a different locale, set it with `I18n.locale`:
+#
+#     I18n.locale = :es
+#
+# This would use the information in config/locales/es.yml.
+#
+# To learn more, please read the Rails Internationalization guide
+# available at http://guides.rubyonrails.org/i18n.html.
+
+en:
+  hello: "Hello world"
+  simple_captcha:
+    placeholder: "Enter the image value"
+    label: "Enter the code in the box:"
+    refresh_button_text: "Refresh"
+    message:
+      default: "Secret Code did not match with the Image"
+      user: "The secret Image and code were different"
+  Platform: "Platform"
+
+
+  # Header
+  M: "M"
+  Home: "Home"
+  Current_Logged_In: "Current Logged In"
+  My_Account: "My Account"
+  Logout: "Logout"
+  MailTT: "MailTT"
+  PhoneTT: "PhoneTT"
+  Admin: "Admin"
+  Platform: "Platform"
+  Productions: "Productions"
+  My Clients: "My Clients"
+  Administration Tools: "Administration Tools"
+  Pricing: "Pricing"
+  Users: "Users"
+  Stages: "Stages"
+  Streams: "Streams"
+  Roles: "Roles"
+  Log History: "Log History"
+  My Products & Services: "My Products & Services"
+  Role System: "Roles System"
+  Forgot your password: "Forgot your password"
+  Sign in using our secure server: "Sign in using our secure server"
+  Use the form below to create login credentials that can be used for Mplatform: "Use the form below to create login credentials that can be used for Mplatform"
+  #############################
+  ## translate button
+  View: "View"
+  Edit: "Edit"
+  Delete: "Delete"
+  Update: "Update"
+  Register: "Register"
+  Create: "Create"
+  Saved: "Saved"
+  Back: "Back"
+  Cancel: "Cancel"
+  ##
+  Business: "Business"
+  Admin: "Admin"
+  Admin System: "Admin System"
+  Active: "Active"
+  Pending: "Pending"
+  Inactive: "Inactive"
+  
+  Register New Platform: "Register New Platform"
+  ## Feature
+  The list of features of feature_name: "The list of features of %{feature_name} are:"
+  Update successfully: "Update successfully"
+  Created successfully: "Created successfully"
+  Do you want to delete feature_name: "Do you want to delete %{feature_name} ?"
+  Platfrom Information: "Platfrom Informations"
+  Edit Platfrom: "Edit Platfrom"
+  Create New Feature: "Create New Feature"
+  Please, add the feature for feature_name: "Please, add the feature for %{feature_name} :"
+  Go to List of Features: "Go to List of Features*"
+  Features: "Features"
+  Feature Name: "Feature Name"
+  Feature Value: "Feature Value"
+
+  ## General
+  Search: "Search"
+  OK: "OK"
+  Email: "Email"
+  Groups: "Groups"
+  State: "State"
+  Status: "Status"
+  Actions: "Actions"
+  Action: "Action"
+  Export CSV: "Export CSV"
+  Name: "Name"
+  Description: "Description"
+  Previous: "Previous"
+  Continue: "Continue"
+  Finish: "Finish"
+  Do you want to delete: "Do you want to delete"
+  Client: "Client"
+  Save: "Save"
+  Don't Save: "Don't Save"
+  Image: "Image"
+  Sign up: "Sign up"
+  Sign Up Mplatform: "Sign Up Mplatform"
+  ## User
+  List Of Users: "List Of Users"
+  Add New User: "Add New User"
+  User Name: "User Name"
+  Password: "Password"
+  First Name: "First Name"
+  Last Name: "Last Name"
+  Created By: "Created By"
+  User Details: "User Details"
+  Edit User: "Edit User"
+  User Info: "User Info"
+  Permission Instance: "Permission Instance"
+  New User: "New User"
+  Create User: "Create User"
+  User Information: "User Information"
+  Configure Security Group: "Configure Security Group"
+  Confirmation: "Confirmation"
+  Assign a role: "Assign a role"
+  Create a new role: "Create a new role"
+  Select an existing role: "Select an existing role"
+  User Information: "User Information"
+  Application: "Application"
+  Access rights: "Access rights"
+  Access right: "Access right"
+  Running: "Running"
+  Stopped: "Stopped"
+  Close: "Close"
+  Security Group: "Security Group"
+  Dashboard: "Dashboard"
+  Reports: "Reports"
+  Payment Methods: "Payment Methods"
+  Payment History: "Payment History"
+  Username: "Username"
+  Type characters: "Type characters"
+  Create New Access Right: "Create New Access Right"
+  ## Role
+  List Of Roles: "List Of Roles"
+  Add New Role: "Add New Role"
+  Create New Role: "Create New Role"
+  Role Details: "Role Details"
+  Edit Role: "Edit Role"
+  Role Settings: "Role Settings"
+  Add New Permission: "Add New Permission"
+  List of members: "List of members"
+  Please choose user: "Please choose user"
+  Add User To Role: "Add User To Role"
+  User Assigned To Role: "User Assigned To Role"
+  ## Stages
+  List Of Stages: "List Of Stages"
+  Select a Stage: "Select a Stage"
+  Create new stage: "Create new stage"
+  Delete Stage: "Delete Stage"
+  Assign/Unassign the Roles to/from: "Assign/Unassign the Roles to/from"
+  You can click on Assign/Unassign button or drag & drop role to assign/unassign role to/from the stage: "You can click on Assign/Unassign button or drag & drop role to assign/unassign role to/from the stage"
+  Current roles in stage: "Current roles in stage"
+  Role Name: "Role Name"
+  Unassign: "Unassign"
+  Unassigned Roles: "Unassigned Roles"
+  Assign: "Assign"
+  ## Stream
+  Stream: "Stream"
+  STAGES: "STAGES"
+  Add New Stage: "Add New Stage"
+  Please choose a stream: "Please choose a stream"
+  Add New Stream: "Add New Stream"
+  Delete Stream: "Delete Stream"
+  Save Stream: "Save Stream"
+  Do you want to save changes you made: "Do you want to save changes you made"
+  Stream Details: "Stream Details"
+  Go to List of Streams: "Go to List of Streams"
+  Edit Stream: "Edit Stream"
+  Warning: "Warning"
+  ## History
+  Log Histories: "Log Histories"
+  Recent activity: "Recent activity"
+  Access Type: "Access Type"
+  User: "User"
+  Device: "Device"
+  Operating System: "Operating System"
+  Location: "Location"
+  Date/Time: "Date/Time"
+  Show Details: "Show Details"
+  Access History Detail: "Access History Detail"
+  ## Home
+  Welcome to Mplatform: "Welcome to Mplatform"
+  Activity on this account: "Activity on this account"
+  This feature provides information about the last activity on this mail account and any concurrent activity: "This feature provides information about the last activity on this mail account and any concurrent activity"
+  This account does not seem to be open in any other location: "This account does not seem to be open in any other location"
+  However, there may be sessions that have not been signed out: "However, there may be sessions that have not been signed out"
+  Sign out all other web sessions: "Sign out all other web sessions"
+  Recent activity: "Recent activity"
+  Alert preference: "Alert preference"
+  Show an alert for unusual activity: "Show an alert for unusual activity"
+  indicates activity from the current session: "indicates activity from the current session"
+  This computer is using IP address: "This computer is using IP address"
+  ## Platform 
+  List Of Applications: "List Of Applications"
+  Register New Platform: "Register New Platform"
+  Platform Name: "Platform Name"
+  Create Platform: "Create Platform"
+  Platform Settings: "Platform Settings"
+  You can add/edit the features for: "You can add/edit the features for"
+  Platform: "Platform"
+  by adding/editing the information below: "by adding/editing the information below"
+  The features of: "The features of"
+  The features of Platform are: "The features of Platform are"
+  Text: "Text"
+  Check Box: "Check Box"
+  Remove: "Remove"
+  Create New Feature: "Create New Feature"
+  Application Details: "Application Details"
+  Go to List of Applications: "Go to List of Applications"
+  Add New Customer: "Add New Customer"
+  You can add/edit the features for <strong>mapp_name</strong> by adding/editing the information below: "You can add/edit the features for <strong>%{mapp_name}</strong> by adding/editing the information below :"
+  The features of <strong>mapp_name</strong> are: "The features of <strong>%{mapp_name}</strong> are:" 
+  Platform Settings: "Platform Settings"
+  Edit Platform: "Edit Platform"
+  ## Product
+  List Of Products: "List Of Products"
+  Create New Product: "Create New Product"
+  Create Product: "Create Product"
+  Product Settings: "Product Settings"
+  includes: "includes"
+  Edit Product: "Edit Product"
+  Product Details: "Product Details"
+  ## Price
+  List Of Product Prices: "List Of Product Prices"
+  Add New Product Price: "Add New Product Price"
+  Price: "Price"
+  Product: "Product"
+  From: "From"
+  To: "To"
+  Create New Product Price: "Create New Product Price"
+  Price: "Price"
+  Product Price Details: "Product Price Details"
+  Edit Product Price: "Edit Product Price"
+  Go to List of Product Price: "Go to List of Product Price"
+  Do you want to delete price of product_name: "Do you want to delete price of %{product_name} ?"
+  ## Instance
+  List Of Instances: "List Of Instances"
+  Create New Instance: "Create New Instance"
+  Root Path: "Root Path"
+  State: "State"
+  Expiration: "Expiration"
+  Create by: "Create by"
+  Created at: "Created at"
+  List of Users: "List of Users"
+  Site Name: "Site Name"
+  Instance Details: "Instance Details"
+  App Root: "App Root"
+  Do you want to remove services and product of instance_name: "Do you want to remove services and product of %{instance_name} ?"
+  Go to List of Instances: "Go to List of Instances"
+  ## Client
+  Client Details: "Client Details"
+  Password: "Password"
+  Confirm Password: "Confirm Password" 
+  List Of Clients: "List Of Clients"
+  Add New Client: "Add New Client"
+  Client Name: "Client Name"
+  Access Right: "Access Right"
+  New Client: "New Client"
+  Create New Client: "Create New Client"
+  Contact Information: "Contact Information"
+  Payment Information: "Payment Information"
+  Sites Information: "Sites Information"
+  Confirmation: "Confirmation"
+  Add Another Field: "Add Another Field"
+  Website: "Website"
+  Contact Information: "Contact Information"
+  Phone: "Phone"
+  Link: "Link"
+  Address: "Address"
+  Organization: "Organization"
+  Group: "Group"
+  Department: "Department"
+  Company: "Company"
+  Site Information: "Site Information"
+  Your admin site: "Your admin site"
+  Register to use products of system/Register to become reseller: "Register to use products of system/Register to become reseller"
+  Payment Information: "Payment Information"
+  Credit/Debit Card Number: "Credit/Debit Card Number"
+  Cardholder's Name: "Cardholder's Name"
+  Address: "Address"
+  Phone number: "Phone number"
+  Website: "Website"
+  Organization: "Organization"
+  Credit/Debit Card Number: "Credit/Debit Card Number"
+  Expiration Date: "Expiration Date"
+  Month: "Month"
+  Year: "Year"
+  Use my contact address: "Use my contact address"
+  Use new address: "Use new address"
+  Phone number: "Phone number"
+  Account Name: "Account Name"
+  Website: "Website"
+  Address: "Address"
+  My username: "My username"
+  Enter a new password: "Enter a new password"
+  Confirm Password: "Confirm Password"
+  Current Default: "Current Default"
+  Make Default: "Make Default"
+  Credit Card: "Credit Card"
+  Name on Card: "Name on Card"
+  Expires On: "Expires On"
+  Add A Card: "Add A Card"
+  Your our site: "Your our site"
+  Use your site: "Use your site"
+  Your current site: "Your current site"
+  Use new site: "Use new site"
+  Use my contact address: "Use my contact address"
+  Current contact address: "Current contact address"
+  Use new address: "Use new address"
+  Expiration Date: "Expiration Date"
+  Phone number: "Phone number"
+  Street: "Street"
+  City: "City"
+  State/Province or Region: "State/Province or Region"
+  Postal code: "Postal code"
+  Country: "Country"
+  Job title: "Job title"
+  Department: "Department"
+  Account Information: "Account Information"
+  Sites Information: "Sites Information"
+  Contact Information: "Contact Information"
+  Payment Information: "Payment Information"
+  Company: "Company"
+  Add New A Card: "Add New A Card"
+  #Forgot password
+  MPlatform - Sign In: "MPlatform - Sign In"
+  M: "M"
+  Platform: "Platform"
+  Enter the E-mail associated with your Mplatform account: "Enter the E-mail associated with your Mplatform account"
+  We'll send you a link to a page where you can easily create a new password: "We'll send you a link to a page where you can easily create a new password"
+  then click Continue: "then click Continue"
+  Mplatform Password Assistance: "Mplatform Password Assistance"
+  E-mail: "E-mail"
+  Type the characters you see in this image: "Type the characters you see in this image"
+  Reset password: "Reset password"
+  To reset your password, follow the instructions in the email we've just sent you from: "To reset your password, follow the instructions in the email we've just sent you from"
+  Choose a new password for this user account.This password will repalce the old one, everything else about the user account will remain unchanged: "Choose a new password for this user account.This password will repalce the old one, everything else about the user account will remain unchanged"
+  Try again: "Try again"
+  # Session
+  Sign In Mplatform: "Sign In Mplatform"
+  User name or E-mail: "User name or E-mail"
+  Create account: "Create account"
+  Name: "Name"
+  # Profile
+  Mplatform Profile: "Mplatform Profile"
+  #User
+  Update Fail: "Update Fail"
+  Permission For New User: "Permission For New User"
+  Create New User: "Create New User"
+  Edit Profile: "Edit Profile"
+  user_name are using the services and products: "%{user_name} are using the services and products"
+  User name can't be blank: "User name can't be blank"
+  Last name can't be blank: "Last name can't be blank"
+  Password confirmation doesn't match Password: "Password confirmation doesn't match Password"
+  Password is too long (maximum is 20 characters): "Password is too long (maximum is 20 characters)"
+  Password is too short (minimum is 6 characters): "Password is too short (minimum is 6 characters)"
+  Invalid email address: "Invalid email address"
+  Email has already been taken: "Email has already been taken"
+  E-mail can't be blank: "E-mail can't be blank"
+  # roles
+  Do you want to delete role_name: "Do you want to delete %{role_name} ?"
+  Value: "Value"
+  Permissions for: "Permissions for"
+  are: "are"
+  Descriptions: "Descriptions"
+  Products & Services : " Products & Services"
+  Go to List of Roles: "Go to List of Roles"
+  Message: "Message"
+  The Path invalid: "The Path invalid"
+  Role Details: "Role Details"
+  Information: "Information"
+  List Of Members: "List Of Members"
+  Url: "Url"
+  Delete function_name: "Delete function %{function_name}"
+  Edit function_name: "Edit function %{function_name}"
+  # stage
+  Stage Details: "Stage Details"
+  Edit Content: "Edit Content"
+  Edit Stages: "Edit Stages"
+  Add New Stage: "Add New Stage"
+  List Roles Of Stage: "List Roles Of Stage"
+  Go to List of Stages: "Go to List of Stages"
+  Go: "Go"
+  # Currency
+  Edit Currency: "Edit Currency"
+  Create New Currency: "Create New Currency"
+  Go to List of Currencies: "Go to List of Currencies"
+  Currency Details: "Currency Details"
+  Add New Currency: "Add New Currency"
+  Add: "Add"
+  Create New Unit: "Create New Unit"
+  #Function
+  Do you want to delete function_name: "Do you want to delete %{function_name} ?"
+  Function Details: "Function Details"
+  Name: "Name"
+  Edit Function: "Edit Function"
+  Create New Function: "Create New Function"
+  Go to List of Functions: "Go to List of Functions"
+  Add New Function: "Add New Function"
+  # Unit
+  Unit Details: "Unit Details"
+  #Term
+  Term Details: "Term Details"
+  Go to List of Terms: "Go to List of Terms"
+  Add New Term: "Add New Term"
+  Edit Term: "Edit Term"
+  #Permission
+  Permission Details: "Permission Details"
+  #Navi Item
+  Add New Navi Item: "Add New Navi Item"
+  Go to List of Navigation Items: "Go to List of Navigation Items"
+  Navigation: "Navigation"
+  Parent: "Parent"
+  Order: "Order"
+  Path: "Path"
+  Title: "Title"
+  Navigation Item Details: "Navigation Item Details"
+  Create New Navi Item: "Create New Navi Item"
+  Add New Navigation: "Add New Navigation"
+  Navigation Details: "Navigation Details"
+  Go to List of Navigations: "Go to List of Navigations"
+  Edit Navigation: "Edit Navigation"
+  Create New Navigation: "Create New Navigation"
+  Create New Navigation Item: "Create New Navigation Item"
+  List Of Navigation Items: "List Of Navigation Items"
+  Parent Navigation: "Parent Navigation"
+  Parent Naviitem: "Parent Naviitem"
+  Edit Navi Item: "Edit Navi Item"
+  Search by Title: "Search by Title"
+  
+  Do you want to delete user_name: "Do you want to delete %{user_name} ?"
+  Instance: "Instance"
+  New Access Right: "New Access Right"
+  Edit Client: "Edit Client"
+  Account Settings: "Account Settings"
+  Edit Account Information: "Edit Account Information"
+  Edit Contact Information: "Edit Contact Information"
+  Please, waiting: "Please, waiting"
+  seconds: "seconds"
+  Your account will be activated within 24 hours: "Your account will be activated within 24 hours"
+  Thank you for your signing up: "Thank you for your signing up"
+  Sign out other session successfully: "Sign out other session successfully"
+  My e-mail address: "My e-mail address"
+  Yes: "Yes"
+  No: "No"
+
+  #Translate for model warning
+  activerecord:
+    errors:
+      models:
+        currency:
+          attributes:
+            value:
+              blank: "can't be blank"
+        unit:
+          attributes:
+            value:
+              blank: "can't be blank"
+        term:
+          attributes:
+            value:
+              blank: "can't be blank"
+        price:
+          attributes:
+            price: 
+              blank: "can't be blank"
+              not_a_number: "is not a number"
+            product_id:
+              blank: "can't be blank"
+            currency_id:
+              blank: "can't be blank"
+            unit_id:
+              blank: "can't be blank"
+            term_id:
+              blank: "can't be blank"
+        role:
+          attributes:
+            name: 
+              blank: "can't be blank"
+              taken: "has already been taken"
+        stage:
+          attributes:
+            name: 
+              blank: "can't be blank"
+        user:
+          attributes:
+            user_name: 
+              blank: "can't be blank"
+        stream:
+          attributes:
+            name: 
+              blank: "can't be blank"
+        mapplication:
+          attributes:
+            name: 
+              blank: "can't be blank"
+        product:
+          attributes:
+            name: 
+              blank: "can't be blank"
+              taken: "has already been taken"
+        instance:
+          attributes:
+            name: 
+              blank: "can't be blank"
+            product_id: 
+              blank: "can't be blank"
+        feature:
+          attributes:
+            name: 
+              blank: "can't be blank"
+        client:
+          attributes:
+            username: 
+              blank: "can't be blank"
+              taken: "has already been taken"
+            first_name:
+              blank: "can't be blank"
+            last_name:
+              blank: "can't be blank"
+            password:
+              too_short: "is too short (minimum is 6 characters)"
+              too_long:  "is too long (maximum is 20 characters)"
+            password_confirmation:
+              too_short: "is too short (minimum is 6 characters)"
+              too_long:  "is too long (maximum is 20 characters)"
+              blank: "can't be blank"

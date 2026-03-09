@@ -1,0 +1,15 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: MyString
+  department: one
+  mediafile: one
+  note: MyText
+  status: MyString
+
+two:
+  name: MyString
+  department: two
+  mediafile: two
+  note: MyText
+  status: MyString

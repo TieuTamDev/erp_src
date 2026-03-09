@@ -1,0 +1,225 @@
+<div class="row align-items-center justify-content-between mb-3">
+  <div class="col-auto">
+    <h4 class="mb-0">Danh sách nhân sự dự kiến nghỉ phép</h4>
+  </div>
+
+  <div class="col-12">
+    <%= form_tag dashboards_list_user_leave_path,
+        method: 'GET',
+        remote: true,
+        authenticity_token: true,
+        id: "filter-leave-form",
+        class: "row g-2 justify-content-end align-items-end" do %>
+
+      <%= hidden_field_tag :lang, session[:lang] %>
+      <%= hidden_field_tag :page, params[:page] || 1, id: "hidden_page" %>
+      <%= hidden_field_tag :per_page, params[:per_page] || 10, id: "hidden_per_page" %>
+
+      <!-- Tìm kiếm -->
+      <div class="col-12 col-md-6 col-lg-4">
+        <label class="form-label mb-1"><%= lib_translate("Tìm kiếm") %></label>
+        <input type="text" id="search_leave" name="search_leave" placeholder="Nhập tên nhân sự tìm kiếm"
+              value="<%= params[:search_leave] %>" class="form-control" />
+      </div>
+
+      <!-- Nhân sự -->
+      <div class="col-12 col-md-4 col-lg-3">
+        <label class="form-label mb-1"><%= lib_translate("Nhân sự") %></label>
+        <select class="select-form selectpicker w-100" name="user_leave" id="user_leave">
+          <option value="">Tất cả</option>
+          <option value="LANH-DAO" <%= 'selected' if params[:user_leave] == 'LANH-DAO' %>>Lãnh đạo</option>
+          <option value="NHAN-VIEN" <%= 'selected' if params[:user_leave] == 'NHAN-VIEN' %>>Nhân viên</option>
+        </select>
+      </div>
+
+      <!-- Thời gian -->
+      <div class="col-12 col-md-6 col-lg-4">
+        <label class="form-label mb-1">Thời gian</label>
+        <input type="text" id="date_leave_range_2" name="daterange"
+              value="<%= params[:daterange] %>" class="form-control" />
+      </div>
+
+      <!-- Nút lọc -->
+      <div class="col-12 col-md-auto">
+        <button type="submit" class="btn btn-primary mt-4 w-100 w-md-auto">Lọc</button>
+      </div>
+
+    <% end %>
+  </div>
+
+</div>
+
+<div class="scrollbar">
+<table id="table_dashboard_management_view_2" class="table table-bordered table-sm fs--1 mb-0" style="table-layout: unset !important;">
+  <thead class="bg-200 text-900">
+    <tr>
+      <th>Nhóm</th>
+      <th>Nhân sự</th>
+      <th>Đơn vị</th>
+      <th>Hình thức nghỉ</th>
+      <th>Thời gian nghỉ</th>
+      <th class="text-center">Số ngày</th>
+    </tr>
+  </thead>
+  <tbody id="table_dashboard_management_view_leave">
+    <tr id="loading-leave-spinner" style="display:none;">
+      <td colspan="6" class="text-center py-3">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Đang tải dữ liệu...</span>
+        </div>
+      </td>
+    </tr>
+
+    <% @data_tab.each do |user| %>
+      <% detail_count = user[:detail_rows].size %>
+      <% if detail_count > 0 %>
+        <% user[:detail_rows].each_with_index do |detail, index| %>
+          <tr data-test="<%= user[:user_id] %>" data-nhom="<%= user[:check_nhom] %>">
+            <% if index == 0 %>
+              <td class="align-middle" rowspan="<%= detail_count %>"><%= user[:nhom] %></td>
+              <td class="align-middle" rowspan="<%= detail_count %>"><%= user[:sender] %></td>
+              <td class="align-middle" rowspan="<%= detail_count %>"><%= user[:department] %></td>
+            <% end %>
+            <td style="padding-left: 21px;"><%= detail[:hinh_thuc_nghi] %></td>
+            <td><%= detail[:thoi_gian_nghi] %></td>
+            <td class="text-center"><%= detail[:tong_so_ngay] %></td>
+          </tr>
+        <% end %>
+      <% else %>
+        <tr>
+          <td class="text-center"><%= user[:nhom] %></td>
+          <td><%= user[:sender] %></td>
+          <td><%= user[:department] %></td>
+          <td colspan="3" class="text-center text-muted">Không có chi tiết nghỉ phép</td>
+        </tr>
+      <% end %>
+    <% end %>
+  </tbody>
+
+</table>
+</div>
+
+
+<div class="d-flex justify-content-center align-items-center mt-3 flex-wrap gap-3">
+    <div class="d-flex align-items-center gap-3" id="page_leave">
+    <% if @total_pages > 1 %>
+        <nav>
+            <ul class="pagination mb-0">
+                <% (1..@total_pages).each do |page| %>
+                <li class="page-item <%= 'active' if page == @page %>">
+                    <a href="javascript:void(0)" class="page-link pagination-link" data-page="<%= page %>"><%= page %></a>
+                </li>
+                <% end %>
+            </ul>
+        </nav>
+    <% end %>
+    <% if @per_page > 10 %>
+        <label class="me-2 mb-0">Hiển thị:</label>
+        <%= select_tag :per_page,
+            options_for_select([10, 20, 50, 100], @per_page.to_i),
+            id: "per_page",
+            class: "form-select form-select-sm w-auto" %>
+    <% end %>
+
+    </div>
+</div>
+<script>
+$(document).on("click", ".pagination-link", function (e) {
+    e.preventDefault();
+    const page = $(this).data("page");
+    $("#hidden_page").val(page);
+    $("#filter-leave-form").submit();
+});
+$(document).on("change", "#per_page", function () {
+    const perPage = $(this).val();
+    $("#hidden_per_page").val(perPage);
+    $("#hidden_page").val(1); // reset về page 1
+    $("#filter-leave-form").submit();
+});
+$(document).on("submit", "#filter-leave-form", function () {
+  $("#table_dashboard_management_view_leave").find("tr:not(#loading-leave-spinner)").hide();
+  $("#loading-leave-spinner").show();
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    const rangePicker = $("#date_leave_range, #date_leave_range_2");
+
+    // ✔️ Đặt giá trị mặc định nếu input rỗng
+    if (!rangePicker.val()) {
+        const today = new Date();
+        const nextMonth = new Date();
+        nextMonth.setMonth(nextMonth.getMonth() + 1); // Cộng thêm 1 tháng
+
+        const formattedStart = flatpickr.formatDate(today, "d/m/Y");
+        const formattedEnd = flatpickr.formatDate(nextMonth, "d/m/Y");
+
+        rangePicker.val(`${formattedStart} đến ${formattedEnd}`);
+    }
+
+
+
+    // Khởi tạo flatpickr
+    rangePicker.each(function () {
+        const $input = $(this);
+
+        const existingInstance = $input.data('flatpickrInstance');
+        if (existingInstance) {
+            existingInstance.destroy();
+        }
+
+        const fp = $input.flatpickr({
+          mode: "range",
+          dateFormat: "d/m/Y",
+          locale: "vn",
+          enableTime: false,
+          showMonths: 1,
+
+          // ✅ Hiển thị selector tháng & năm rõ ràng
+          monthSelectorType: "dropdown",
+          yearSelectorType: "dropdown", // Hiển thị selector năm
+
+          // ✅ Giới hạn khoảng năm
+          minDate: "today",
+          maxDate: "31/12/2030",
+
+          onChange: function (selectedDates, dateStr, instance) {
+              const formatted = dateStr.replace(' to ', ' đến ');
+              $(instance.input).val(formatted);
+              console.log("Chọn khoảng:", formatted);
+          },
+
+          onReady: function (selectedDates, dateStr, instance) {
+            // 🔹 Tạo nút "Hủy"
+            const clearBtn = document.createElement("button");
+            clearBtn.type = "button";
+            clearBtn.className = "flatpickr-clear-btn btn btn-secondary mt-2";
+            clearBtn.textContent = "Hủy";
+            clearBtn.style.cursor = "pointer";
+            clearBtn.style.float = "right";
+
+            // 🔹 Tạo nút "Xác nhận"
+            const acceptBtn = document.createElement("button");
+            acceptBtn.type = "button";
+            acceptBtn.className = "flatpickr-clear-btn btn btn-primary mt-2";
+            acceptBtn.textContent = "Xác nhận";
+            acceptBtn.style.cursor = "pointer";
+            acceptBtn.style.float = "right";
+
+            clearBtn.addEventListener("click", function () {
+                instance.clear();
+                $input.val("");
+            });
+
+            acceptBtn.addEventListener("click", function () {
+                instance.close();
+            });
+
+            instance.calendarContainer.appendChild(acceptBtn);
+            instance.calendarContainer.appendChild(clearBtn);
+          }
+
+      });
+        $input.data('flatpickrInstance', fp);
+    });
+});
+</script>

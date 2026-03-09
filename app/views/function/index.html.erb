@@ -1,0 +1,169 @@
+<%= stylesheet_link_tag '/assets/mystyle/functions.css'%>
+<div class="bmtu_header_dashboard">
+    <h3 class="mt-2 overview_text"><%= lib_translate("List_function")  %></h3>
+    <div class="card mb-3">
+        <div class="card-body pt-0">
+            <div class="tab-content">
+              <% if is_access(session["user_id"], "FUNCTION","ADD") %>
+                <button onclick="openFormAddfunction()" class="btn btn-primary btn-add-function mt-3" id="btn-add-function" data-bs-toggle="modal" data-bs-target="#modal-functions">
+                    <%= lib_translate("New_Functions")  %>
+                </button>
+                   <% end %>
+                <div class="tab-pane preview-tab-pane active" role="tabpanel" aria-labelledby="tab-dom-5a3c857c-8deb-4307-af64-a62f27089443" id="dom-5a3c857c-8deb-4307-af64-a62f27089443" >
+                        <div class="table-responsive scrollbar">
+                        <%= render_search_pagination(functions_index_path()).html_safe %>
+                            <table id="table_function" class="table table-bordered fs--1 mb-0 table-hover">
+                                <thead class="bg-200 text-900">
+                                    <tr>
+                                        <th class="sort" data-sort="function_sname" style="text-align: center; cursor: pointer;"><%= lib_translate("Name")  %> </th>
+                                        <th class="sort" data-sort="function_scode" style="text-align: center; cursor: pointer;"><%= lib_translate("Code")  %></th>
+                                        <th class="sort" data-sort="sel_status" style="text-align: center; cursor: pointer;"><%= lib_translate("Status")  %></th>
+                                     <% if (is_access(session["user_id"], "FUNCTION","EDIT") || is_access(session["user_id"], "FUNCTION","DEL")) %>
+                                        <th class="no-sort" style="text-align: center"></th>
+                                      <% end %>
+                                    </tr>
+                                </thead>
+                                <tbody class="list">
+                                    <% @functions.each do |function| %>
+                                    <tr>
+                                        <td style="white-space: nowrap;" class="function_sname">
+                                        <%= function.sname %>
+                                        </td>
+                                        <td style="text-align: center;min-width: 100px;" class="function_scode">
+                                        <%= function.scode %>
+                                        </td>
+                                        <td style="text-align: center;min-width: 161px;" class="sel_status">
+                                                <%= ( if function.status=="ACTIVE"
+                                                        lib_translate("ac_icon") 
+                                                        else function.status=="INACTIVE" 
+                                                        lib_translate("inac_icon")
+                                                        end ) %>
+                                                </td>    
+                                       <% if (is_access(session["user_id"], "FUNCTION","EDIT") || is_access(session["user_id"], "FUNCTION","DEL")) %>                           
+                                      <td style="text-align: center; min-width: 110px">
+                                        <% if is_access(session["user_id"], "FUNCTION","EDIT") %>
+                                        <a style="cursor:pointer;" onclick="openFormUpdatefunction(      '<%= function.id %>',
+                                                                                                '<%= function.sname %>',
+                                                                                                '<%= function.scode %>', 
+                                                                                                '<%= function.status %>')" data-bs-toggle="modal" data-bs-target="#modal-functions">
+                                            <span class="text-primary fas fa-edit me-3"></span>
+                                        </a>
+                                      <% end %>
+                                       <% if is_access(session["user_id"], "FUNCTION","DEL") %>
+                                        <a data-toggle="modal" data-target="#exampleModal-#{<%= function.id %>}" style="cursor: pointer;">
+                                            <span class="text-danger fas fa-trash" style="width : 15px"></span>
+                                        </a>
+                                      <% end %>
+
+                                        <div class="modal fade" id="exampleModal-#{<%= function.id %>}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                <h5 class="modal-title" id="exampleModalLabel"><%= lib_translate("Are_you_sure")  %>
+                                                </h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="border: none; background: none" >
+                                                    <span aria-hidden="true" style="font-size: 20px"  >&times;</span>
+                                                  </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <%= lib_translate("confirm_delete_message")  %>:<span style="font-weight:bold; color:red;"> <%= function.sname %> </span>?
+                                                </div>
+                                                <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal"><%= lib_translate("Close")  %></button>
+                                                <%= link_to lib_translate("Delete") , url_for(action: :del, id: function.id), method: :delete, class: "btn btn-danger", onclick: "delete_loading_function(this)" %>
+                                                <div id="loading_button_delete_function" class= "btn btn-danger" style="opacity: 0.8; display:none;" >
+                                                        <i class ="fa fa-spinner fa-spin"> </i>  <%=lib_translate("Deleting")%> 
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            </div>
+                                        </div>
+                                      </td>
+                                       <% end %>
+                                    </tr>
+                                    <% end %>
+                                </tbody>
+                            </table>
+                            <%= render_pagination_limit_offset(functions_index_path(lang: session[:lang], per_page: session[:per_page], search: session[:search]), 10, @functions.count).html_safe %>
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- modal -->
+<div class="modal fade" id="modal-functions" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content position-relative">
+      <div class="position-absolute top-0 end-0 mt-2 me-2 z-index-1">
+        <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0">
+        
+        <div class="rounded-top-lg py-3 ps-4 pe-6 bg-light">
+          <h4 class="mb-1" id="cls_bmtu_form_add_function_title"><%= lib_translate("Create_functions")  %></h4>
+        </div>
+        <div class="p-4 pb-0">
+          <div id="error_explanation" class="text-danger" style="text-align: center;font-size: 13px;"></div>
+            <div class="form-add-function">
+              <%= form_for Function.new, :url=> functions_update_path, html: {method: :post, id:"form_add_function", class:'col-12' } do |f| %>
+                <div class="erro_labble mb-2">
+                    <p style="display:none; color: rgb(197 82 82);border: 1px solid rgb(199 136 136 / 23%);background: rgb(255 54 54 / 16%);border-radius: 5px;padding: 10px"
+                    id="erro_lable_function">
+                    </p>
+                </div>
+                <div class="row mb-3" style="display:none;">
+                  <%= f.label :id, class: "col-sm-4 col-lg-3 col-form-label" %>
+                  <div class="col-sm-8 col-lg-9">
+                        <%= f.text_field :id, class: 'form-control' , name: 'function_id', id:  'function_id' %>
+                  </div>
+                </div>
+                <div class="row mb-3"> 
+                      <label class="col-sm-4 col-lg-3 col-form-label" for="inputEmail3"><%= lib_translate("Name") %>:</label>
+                  <div class="col-sm-8 col-lg-9">
+                  <%= f.text_field :sname, class: 'form-control',  name:'function_sname',  id:'function_sname' %>
+                  </div>
+                </div>
+                <div class="row mb-3"> 
+                      <label class="col-sm-4 col-lg-3 col-form-label" for="inputEmail3"><%= lib_translate("Code") %>:</label>
+                  <div class="col-sm-8 col-lg-9">
+                              <%= f.text_field :scode, class: 'form-control' , name: 'function_scode' , id: 'function_scode'%>
+                  </div>
+                </div>
+                <fieldset>
+                  <div class="row mb-3" style="align-items: center;">
+                    <label class="col-sm-4 col-lg-3 col-form-label" for="inputEmail3"><%= lib_translate("Status") %>:</label>
+                    <div class="col-sm-8 col-lg-9">
+                      <div class="row">
+                        <div class="col-auto">
+                          <input checked type="radio" id="departtypes_status_active" class="form-check-input" value="ACTIVE" name="sel_status"/> <label class="form-check-label" for="departtypes_status_active" style="cursor: pointer"> ACTIVE</label>
+                        </div>
+                        <div class="col-auto">
+                          <input  type="radio" id="departtypes_status_inactive" class="form-check-input" value="INACTIVE" name="sel_status"/> <label class="form-check-label" for="departtypes_status_inactive" style="cursor: pointer"> INACTIVE</label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </fieldset>
+                <div class="modal-footer border-0 p-0 mb-2">
+                     <%= f.submit "Add function" , type:"button" , id:"btn_add_new_function", class: "btn btn-warning border-red border-pink-600 cls-bmtu-text-red md:group-hover:bg-pink-50 btn-block btn-block text-uppercase " %>
+                    <div id="loading_button_function" class= "btn btn-warning border-red border-pink-600 cls-bmtu-text-red md:group-hover:bg-pink-50 btn-block btn-block text-uppercase " style="opacity: 0.8;display:none;" >
+                          <i class ="fa fa-spinner fa-spin"> </i>  <%=lib_translate("Save")%> 
+                    </div>
+                </div>
+              <% end %>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>   
+  let newDepart = "<%= lib_translate("New_functions")  %>";
+  let updateDepart = "<%= lib_translate("Update_functions")  %>";
+</script>
+<%= javascript_include_tag '/assets/myjs/functions.js'%>
+<%= javascript_include_tag '/assets/lib_hrm/jquery-3.2.1.slim.min.js', integrity: 'sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN', crossorigin: 'anonymous' %>
+<%= javascript_include_tag '/assets/lib_hrm/bootstrap.min.js', integrity: 'sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl', crossorigin: 'anonymous'%>

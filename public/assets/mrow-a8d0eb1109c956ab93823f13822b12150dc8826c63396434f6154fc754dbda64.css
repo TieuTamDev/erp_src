@@ -1,0 +1,129 @@
+/* line 1, /apps/platform/app/assets/stylesheets/mrow.scss */
+.row-spacer {
+  padding: 5px 0px 5px 0px;
+}
+
+/* line 6, /apps/platform/app/assets/stylesheets/mrow.scss */
+.row-header {
+  border-bottom: 1px solid #ccc;
+  line-height: 35px;
+  text-align: left;
+  overflow: hidden;
+  padding: 0;
+  background: linear-gradient(top, #eee 0%, #e0e0e0);
+  background: #e7e7e7;
+  background: -webkit-gradient(linear, left top, left bottom, from(#eee), to(#e0e0e0));
+}
+
+/* line 21, /apps/platform/app/assets/stylesheets/mrow.scss */
+.row-extension {
+  border-bottom: solid 1px #E4E4E4;
+  padding: 3px 0px 3px 0px;
+}
+
+/* line 30, /apps/platform/app/assets/stylesheets/mrow.scss */
+.row-header-item-sort {
+  float: right;
+  width: 16px;
+  height: 16px;
+}
+
+/* line 42, /apps/platform/app/assets/stylesheets/mrow.scss */
+.row-item-state-running {
+  display: block;
+  width: 16px;
+  height: 16px;
+  line-height: 50px;
+  border-radius: 50%;
+  text-align: center;
+  text-decoration: none;
+  float: left;
+  margin: 2px 5px;
+  background-image: url("/mywork/assets/mplatform/state-running-45594c154ac711f1cac0f7d641884a27fbf08fc5132f7d23dc838d114807e94b.png");
+  background-repeat: no-repeat;
+}
+
+/* line 57, /apps/platform/app/assets/stylesheets/mrow.scss */
+.row-item-state-stopped {
+  display: block;
+  width: 16px;
+  height: 16px;
+  line-height: 50px;
+  border-radius: 50%;
+  text-align: center;
+  text-decoration: none;
+  float: left;
+  margin: 2px 5px;
+  background-image: url("/mywork/assets/mplatform/state-stopped-cc455b40e6563ad566774c9b2aca4b2c5a0314a02af6ad0f36f77c9ab26681b8.png");
+  background-repeat: no-repeat;
+}
+
+/* line 73, /apps/platform/app/assets/stylesheets/mrow.scss */
+.row-item-state-pending {
+  display: block;
+  width: 16px;
+  height: 16px;
+  line-height: 50px;
+  border-radius: 50%;
+  text-align: center;
+  text-decoration: none;
+  float: left;
+  margin: 2px 5px;
+  background-image: url("/mywork/assets/mplatform/state-pending-45d2a2562d1a496b4f44e3ec918619c4f400cc8d25820abb450e8797fbf83e5d.png");
+  background-repeat: no-repeat;
+}
+
+/* line 88, /apps/platform/app/assets/stylesheets/mrow.scss */
+.row-item-header-sort-asc {
+  display: block;
+  width: 16px;
+  height: 16px;
+  line-height: 50px;
+  border-radius: 50%;
+  text-align: center;
+  text-decoration: none;
+  float: left;
+  margin: 8px 3px;
+  background-image: url("/mywork/assets/mplatform/sort-asc-b0cf6d6b6ebd9557b8625611995eda6c1d169af7d90b5cf4d58701762e8fe7b8.png");
+  background-repeat: no-repeat;
+}
+
+/* line 103, /apps/platform/app/assets/stylesheets/mrow.scss */
+.row-item-header-sort-desc {
+  display: block;
+  width: 16px;
+  height: 16px;
+  line-height: 50px;
+  border-radius: 50%;
+  text-align: center;
+  text-decoration: none;
+  float: left;
+  margin: 8px 3px;
+  background-image: url("/mywork/assets/mplatform/sort-desc-406786bf0ebae493e3248025b59705a7761434b39f8bd304e32becbbf5fb1c27.png");
+  background-repeat: no-repeat;
+}
+
+/* line 118, /apps/platform/app/assets/stylesheets/mrow.scss */
+.row-item-header-sort-desc-active {
+  display: block;
+  width: 16px;
+  height: 16px;
+  line-height: 50px;
+  border-radius: 50%;
+  text-align: center;
+  text-decoration: none;
+  float: left;
+  margin: 8px 3px;
+  background-image: url("/mywork/assets/mplatform/sort-desc-active-c027d819fae40de8d32998722144f0a4108ddc8c7bea377b5059fb8221681340.png");
+  background-repeat: no-repeat;
+}
+
+/* line 133, /apps/platform/app/assets/stylesheets/mrow.scss */
+.row-item-content-right {
+  text-align: right;
+}
+
+/* line 137, /apps/platform/app/assets/stylesheets/mrow.scss */
+.row-left {
+  margin-left: 0px;
+}

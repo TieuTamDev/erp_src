@@ -1,0 +1,4 @@
+<script defer>
+    $("#loading").css("display", "flex");
+    window.location.href = "<%= survey_answer_path(appointsurvey_id: @notice.username, lang: session[:lang]) %>";
+</script>

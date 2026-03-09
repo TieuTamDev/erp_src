@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        color: #333;
+        background-color: #f9f9f9;
+        padding: 20px;
+      }
+
+      .container {
+        background-color: #ffffff;
+        border: 1px solid #ddd;
+        padding: 20px;
+        border-radius: 5px;
+      }
+
+      h2 {
+        color: #2c3e50;
+      }
+
+      .footer {
+        margin-top: 30px;
+        font-size: 12px;
+        color: #999;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>📢 Thông báo điều chỉnh ngày nghỉ BHXH</h2>
+
+      <p>Xin chào,</p>
+
+      <p>Bạn nhận được thông báo từ hệ thống ERP liên quan đến điều chỉnh nghỉ BHXH:</p>
+
+      <blockquote style="background-color:#f2f2f2;padding:10px;border-left:5px solid #2c3e50;">
+        <%= simple_format(@content) %>
+      </blockquote>
+      <p>Vui lòng đăng nhập vào hệ thống để xem chi tiết và xử lý nếu cần.</p>
+
+      <p>Trân trọng,<br/>Hệ thống ERP</p>
+
+      <div class="footer">
+        Email này được gửi tự động từ hệ thống, vui lòng không phản hồi lại email này.
+      </div>
+    </div>
+  </body>
+</html>

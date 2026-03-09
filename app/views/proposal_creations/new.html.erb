@@ -1,0 +1,568 @@
+<%= stylesheet_link_tag "select2-bootstrap-5-theme.min" %>
+<%= stylesheet_link_tag "select2.min" %>
+<%= javascript_include_tag 'select2.min.js'%>
+<%= javascript_include_tag '/assets/myjs/tinymce.min.js' %>
+<%= javascript_include_tag '/assets/myjs/pdf/pdf.min.js' %>
+<%= javascript_include_tag '/assets/myjs/pdf/pdf.worker.min.js' %>
+<%= javascript_include_tag '/assets/myjs/pdf/pdf-sign.min.js' %>
+
+<style>
+    .hidden-style{
+        display:none !important;
+    }
+</style>
+
+<% content_for :head do %>
+    <%= stylesheet_link_tag '/assets/mystyle/proposal_creation.css' %>
+<% end %>
+
+<%
+    stype_text = lib_translate("appointment.#{@appointment.stype}")
+%>
+
+<%= breadcrumbs([
+  { title: 'Tác vụ nhân sự', path: appointments_path },
+  { title: stype_text.upcase_first, path: appointment_path(@appointment) },
+  { title: 'Lập tờ trình', path: appointment_path(@appointment.id) },
+]) %>
+
+
+<div class="card mb-3">
+    <div class="card-header bg-body-tertiary mb-2">
+      <h3 class="mb-2" data-anchor="data-anchor">Lập tờ trình</h3>
+      <p class="mb-1"><strong>Thông tin chi tiết nhân sự</strong></p>
+    </div>
+
+    <div class="row pe-3 ps-4 mb-3">
+        <!-- Thông tin cá nhân của nhân sự -->
+        <%= render "proposal_creations/info_user" %>
+
+        <!-- Thông tin tờ trình -->
+        <div class="col-12 col-sm-12 col-md-5 col-lg-5 col-xl-5 col-xxl-5">
+            <%= form_tag proposal_submit_appointment_proposal_creations_path(@appointment), method: :post, id: "proposalForm", remote: true do %>
+                <div class="row mb-3">
+                    <div class="col-md-12 mb-3">
+                        <label for="taskName" class="form-label text-dark">Số văn bản</label>
+                        <input type="number" class="form-control" id="taskName" name="sno" value="<%= @mandoc&.sno || '' %>">
+                        <div class="invalid-feedback fst-italic" id="sno-error"></div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="contents" class="form-label text-dark">Căn cứ</label>
+                        <div class="textarea-container">
+                            <textarea 
+                                class="form-control custom-textarea" 
+                                id="contents" 
+                                name="contents" 
+                                rows="15" 
+                                placeholder="Nhập nội dung căn cứ tại đây..."
+                            ></textarea>
+                            <div class="invalid-feedback fst-italic" id="contents-error"></div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="department" class="form-label text-dark">Thuộc đơn vị</label>
+                        <select class="form-select" id="department" name="department_id" disabled>
+                            <option value="<%= @department.id %>" selected><%= @department.name %></option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="position" class="form-label text-dark">Vị trí <%= stype_text%></label>
+                        <select class="form-select" id="position" name="position_id" disabled>
+                            <option value="<%= @position.id %>" selected><%= @position.name %></option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="appointment_date" class="form-label text-dark">Thời gian <%= stype_text%></label>
+                        <div id="datepicker-container" class="datepicker-container">
+                            <span style="position: relative;" class="outline-element-container">
+                            <% appointment_date = (@appointment&.appointment_date || 15.days.from_now).strftime("%d/%m/%Y") %>
+                            <input 
+                                value="<%= appointment_date %>"
+                                maxlength="10"
+                                id="appointment_date"
+                                type="text"
+                                name="appointment_date"
+                                class="form-control flatpickr_appointment_date"
+                                placeholder="dd/mm/yyyy"
+                                objtype="7"
+                                name="action_element"
+                                objindex=""
+                                aria-label="Select Date">
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-3 flex-wrap">
+                        <button type="button" class="btn btn-outline-primary px-3 me-2 d-none" onclick="clickViewDocument()" id="btnViewDocument">
+                            <i class="fa-solid fa-eye"></i>
+                            Xem tờ trình
+                        </button>
+                        <%= render "appointments/buttons/submit_buttons" %>
+                    </div>
+
+                </div>
+            <% end %>
+        </div>
+        <!-- Thông tin tờ trình -->
+    </div>
+</div>
+
+<!-- Submission Modal (Trình Ban giám hiệu) -->
+<div class="modal fade" id="submissionModal" tabindex="-1" aria-labelledby="submissionModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-fullscreen-sm-down">
+        <div class="modal-content">
+            <%= form_tag department_approval_submit_appointment_proposal_creations_path(@appointment), method: :post, id: "confirmSubmitToManagement" do %>
+                <div class="modal-header">
+                    <h5 class="modal-title" id="submissionModalLabel">
+                        <% if is_access(session[:user_id], "APPOINTMENT-APPROVE-PROPOSAL", "READ") && is_access(session[:user_id], "APPOINTMENT-APPROVE-PROPOSAL", "EDIT") %>
+                            Thông báo
+                        <% else %>
+                            <% if @appointment.status == 'proposal_creation' && is_access(session[:user_id], "APPOINTMENT-APPROVE-PROPOSAL", "READ") %>
+                                Trình Trưởng phòng TCHC
+                            <% elsif @appointment.status == 'proposal_creation' && !is_access(session[:user_id], "APPOINTMENT-APPROVE-PROPOSAL", "READ") %>
+                                Trình Phó phòng TCHC
+                            <% end %>
+                        <% end %>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <% if is_access(session[:user_id], "APPOINTMENT-APPROVE-PROPOSAL", "READ") && is_access(session[:user_id], "APPOINTMENT-APPROVE-PROPOSAL", "EDIT") %>
+                        <span>Bạn có đồng ý với thao tác này không?</span>
+                    <% else %>
+                        <div class="mb-3">
+                            <label for="recipient_user_id" class="form-label">
+                                <% if @appointment.status == 'proposal_creation' && is_access(session[:user_id], "APPOINTMENT-APPROVE-PROPOSAL", "READ") %>
+                                    Trưởng phòng TCHC
+                                <% elsif @appointment.status == 'proposal_creation' && !is_access(session[:user_id], "APPOINTMENT-APPROVE-PROPOSAL", "READ") %>
+                                    Phó phòng TCHC
+                                <% end %>
+                            </label>
+                            <select class="form-select" id="recipient_user_id" name="recipient_user_id"></select>
+                            <div id="recipient_user_id_error" class="invalid-feedback" style="display: none;">
+                                Vui lòng chọn <%= case @appointment.status
+                                                    when 'proposal_creation' then "Trưởng phòng TCHC"
+                                                    when 'department_approval' then "Ban giám hiệu"
+                                                end %>
+                            </div>
+                        </div>
+                    <% end %>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn btn-primary" id="confirmSubmitToManagementBtn" onclick="this.disabled=true; this.innerHTML='Đang xử lý...';">Đồng ý</button>
+                </div>
+            <% end %>
+        </div>
+    </div>
+</div>
+
+<div id="popup-view-document" class="modal modal-full fade" role="dialog" aria-hidden="true" data-bs-focus="false">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Tờ trình <%= stype_text%></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="pdf-container" class="pdf-container"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const positionIdSelect = '<%= @appointment.new_position.to_i %>';
+    const departmentIdSelect = '<%= @appointment.new_dept.to_i %>';
+    const checkCurrentDepartment = '<%= @next_department_scode %>';
+    const nextDepartmentId = `<%= @form_data[:stream_datas].find { |data| data[:result] == 'assign' }&.dig(:next_department_id) %>`;
+    const nextStatus = `<%= @form_data[:stream_datas].find { |data| data[:result] == 'assign' }&.dig(:next_status) %>`;
+    const appointmentStatus = '<%= @appointment.status %>';
+    const appointmentId = '<%= @appointment.id %>';
+    var department_head = <%= (@appointment.status == 'proposal_creation' && !is_access(session[:user_id], "APPOINTMENT-APPROVE-PROPOSAL", "READ")).to_json %>;
+    
+    flatpickr(".flatpickr_trust_collection_period", {
+        dateFormat: "d/m/Y",
+        defaultDate: null,
+        minDate: "today"
+    });
+
+    flatpickr(".flatpickr_appointment_date", {
+        dateFormat: "d/m/Y",
+        defaultDate: null,
+        minDate: "today"
+    });
+  
+    function initTinymceAppoint() {
+        var tinymceOptions = {
+          content_style: `
+            body {
+                font-family: "Times New Roman", Times, serif;
+                font-size: 13pt;
+                line-height: 1.5;
+            }
+            p { margin: 0; line-height: 1.5; }
+         `,
+          elementpath: false,
+          paste_as_text: false,
+          valid_elements: '*[*]',
+          invalid_styles: '*',
+          visual: true,
+          table_default_attributes: {
+            border: '0'
+          },
+          plugins: ['advlist', 'lists', 'preview', 'table', 'token', 'print'],
+          content_css: 'writer',
+          toolbar: 'bold italic underline | undo redo',
+          menubar: false,
+          statusbar: false,
+          toolbar_location: 'bottom',
+          height: "250",
+          setup: function(editor) {
+            editor.on('init', function() {
+              editor.setContent('<%= j @mandoc&.contents ? @mandoc.contents.to_s.html_safe : "" %>');
+            });
+      
+            editor.on('change', function() {
+              editor.save();
+            });
+          }
+        };
+      
+        tinymce.init({
+          selector: '#contents',
+          ...tinymceOptions
+        });
+      
+        var styleElement = document.createElement('style');
+        styleElement.textContent = `
+          .tox-toolbar__group:last-child {
+            margin-left: auto !important;
+          }
+        `;
+        document.head.appendChild(styleElement);
+    }
+  
+    $(document).ready(function() {
+        initTinymceAppoint();
+        var day1 = '<%= oContract = @user.contracts.where(status: "ACTIVE").order(created_at: :asc).first
+        (oContract && oContract.dtfrom.to_date > Date.today) ? Time.now.strftime("%Y/%m/%d") : oContract ? oContract.dtfrom.strftime("%Y/%m/%d") : Time.now.strftime("%Y/%m/%d") %>';
+        var day2 = '<%= Time.now.strftime("%Y/%m/%d") %>';
+        var [yearfrom, monthfrom, dayfrom] = day1.split('/').map(Number);
+        var [yearto, monthto, dayto] = day2.split('/').map(Number);
+        var start_date = [yearfrom, monthfrom - 1, dayfrom];
+        var end_date = moment({years: yearto, months: monthto - 1, days: dayto});
+        $('#time_start_work').text(getTimeWork(moment(start_date), moment(end_date)) + " <%= lib_translate("Ngay_lam_viec") %>");
+
+        // Handle confirm button trong modal
+        $("#confirmSubmitToManagementBtn").click(function() {
+            let selectedValue = $("#recipient_user_id").val();
+            let button = this;
+
+            if (!selectedValue || selectedValue === "") {
+                button.disabled = false;
+                button.innerHTML = 'Đồng ý';
+
+                $("#recipient_user_id").addClass("is-invalid");
+                $("#recipient_user_id").next('.select2-container').find('.select2-selection').addClass("is-invalid");
+                $("#recipient_user_id_error").show();
+            } else {
+                $("#recipient_user_id").removeClass("is-invalid");
+                $("#recipient_user_id").next('.select2-container').find('.select2-selection').removeClass("is-invalid");
+                $("#recipient_user_id_error").hide();
+
+                let formData = {
+                    appointment_id: '<%= @appointment.id %>',
+                    recipient_user_id: selectedValue,
+                    next_status: nextStatus
+                };
+
+                // Hiển thị loading
+                showLoading(true);
+
+                // Gửi AJAX request
+                $.ajax({
+                    url: '<%= department_approval_submit_appointment_proposal_creations_path(@appointment) %>',
+                    type: 'POST',
+                    data: formData,
+                    dataType: 'json',
+                    success: function (response) {
+                        showLoading(false);
+                        if (response.status === 'success') {
+                            showFlash('success', response.message);
+                            $('#submissionModal').modal('hide');
+                            window.location.href = `${ERP_PATH}appointments/${appointmentId}`;
+                        } else {
+                            showFlash('error', response.message);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        showLoading(false);
+                        button.disabled = false;
+                        button.innerHTML = 'Đồng ý';
+                        showFlash('error', 'Đã xảy ra lỗi khi gửi yêu cầu, vui lòng thử lại!');
+                    }
+                });
+            };
+
+            $("#proposalForm").on("submit", function(e) {
+                e.preventDefault();
+                return false;
+            });
+        });
+
+        function setDefaultValue(selectId, url, formatItem) {
+            $.ajax({
+              url: url,
+              type: "GET",
+              data: { page: 1 },
+              success: function (data) {
+                if (data.items.length > 0) {
+                  let firstItem = data.items[0];
+                  let displayText = formatItem ? formatItem(firstItem) : firstItem.name;
+                  // Thêm option vào select
+                  let newOption = new Option(displayText, firstItem.id, true, true);
+                  $(selectId).append(newOption);
+                  // Cập nhật giá trị cho Select2
+                  $(selectId).val(firstItem.id).trigger('change');
+                }
+              }
+            });
+        };
+
+        $("#recipient_user_id").on("change", function () {
+            let departmentId = nextDepartmentId;
+            if (departmentId) {
+              setDefaultValue("#manager", `<%= @ROOT_PATH%>/appointments/get_managers?department_id=${departmentId}`, 
+                function (item) {
+                  return `${item.last_name} ${item.first_name} (${item.sid})`;
+                }
+              );
+            }
+        });
+
+        // set text button
+        var buttonText;
+        if (!department_head) {
+            buttonText = "Lưu và gửi Trưởng phòng TCHC";
+        } else {
+            buttonText = "Lưu và gửi Phó phòng TCHC";
+        }
+        $(".proposal_creation[data-result='assign']").text(buttonText);
+    });
+
+    window.submitForm = function(showModal, callbackAfterSubmit) {
+        showLoading(true);
+        
+        let formData = {
+            sno: $("#taskName").val(),
+            contents: $("#contents").val(),
+            is_survey: $("input[name='is_survey']:checked").val(),
+            appointment_date: $("#appointment_date").val(),
+            trust_collection_period: $("#trust_collection_period").val()
+        };
+
+        $.ajax({
+            url: $("#proposalForm").attr('action'),
+            type: 'POST',
+            data: formData,
+            dataType: 'json',
+            success: function(response) {
+                showLoading(false);
+                showFlash(response.success ? 'success' : 'error', response.message);
+                
+                if (response.success && showModal) {
+                    $("#submissionModal").modal('show');
+                }
+
+                if (response.success && !showModal) {
+                    $("#btnViewDocument").click();
+                }
+
+                if (!response.success && response.errors) {
+                    response.errors.forEach(function(error) {
+                        if (error.includes('Sno')) {
+                            $('#sno-error').text(error).show();
+                        }
+                        if (error.includes('Contents')) {
+                            $('#contents-error').text(error).show();
+                        }
+                    });
+                }
+
+                if (typeof callbackAfterSubmit === 'function') {
+                    callbackAfterSubmit();
+                }
+            },
+            error: function(xhr, status, error) {
+                showLoading(false);
+                showFlash('error', 'Đã xảy ra lỗi khi lưu dữ liệu');
+                if (typeof callbackAfterSubmit === 'function') {
+                    callbackAfterSubmit();
+                }
+            }
+        });
+    };
+
+    function clickSubmitAppointProcess(status, results, next_department_id, next_department_scode, next_status) {
+        if (tinymce.get('contents')) {
+            tinymce.get('contents').save();
+        }
+
+        if (validateForm()) {
+            const buttons = document.querySelectorAll('.proposal_creation');
+            buttons.forEach(btn => {
+                btn.disabled = true;
+                btn.dataset.originalText = btn.innerHTML;
+                btn.innerHTML = 'Đang xử lý...';
+            });
+    
+            if (status == 'proposal_creation' && results == 'created') {
+                window.submitForm(false, function () {
+                    buttons.forEach(btn => {
+                        btn.disabled = false;
+                        btn.innerHTML = btn.dataset.originalText || 'Lưu';
+                    });
+                });
+            } else {
+                window.submitForm(true, function () {
+                    buttons.forEach(btn => {
+                        btn.disabled = false;
+                        btn.innerHTML = btn.dataset.originalText || 'Lưu và gửi Trưởng phòng TCHC';
+                    });
+                });
+            }
+        }
+    }
+
+    // Hàm validate form
+    function validateForm() {
+        let isValid = true;
+    
+        // Reset errors
+        $("#taskName, #contents, #appointment_date, #trust_collection_period").removeClass("is-invalid");
+        $("#sno-error, #contents-error, #appointment-date-error, #trust-collection-error, #survey-error").hide().text("");
+    
+        // Validate sno
+        const snoInput = document.getElementById("taskName");
+        const snoRawValue = snoInput.value;
+        const snoValue = snoRawValue.trim();
+        const snoNumber = snoInput.valueAsNumber;
+        const numberRegex = /^[0-9]+$/;
+    
+        if (!snoRawValue || snoRawValue.match(/^\s*$/)) {
+            $("#taskName").addClass("is-invalid");
+            $("#sno-error").text("Vui lòng nhập số văn bản.").show();
+            isValid = false;
+        } else if (!numberRegex.test(snoValue)) {
+            $("#taskName").addClass("is-invalid");
+            $("#sno-error").text("Số văn bản chỉ được chứa số (0-9), không chứa chữ hoặc ký tự đặc biệt.").show();
+            isValid = false;
+        } else if (isNaN(snoNumber)) {
+            $("#taskName").addClass("is-invalid");
+            $("#sno-error").text("Số văn bản không hợp lệ.").show();
+            isValid = false;
+        }
+    
+        // Validate contents
+        const contentsRawValue = $("#contents").val();
+        const contents = contentsRawValue.trim();
+        if (!contentsRawValue || contentsRawValue.match(/^\s*$/)) {
+            $("#contents").addClass("is-invalid");
+            $("#contents-error").text("Vui lòng nhập nội dung căn cứ.").show();
+            isValid = false;
+        }
+        // Validate appointment_date
+        const appointmentDate = $("#appointment_date").val().trim();
+        if (!appointmentDate) {
+            $("#appointment_date").addClass("is-invalid");
+            if ($("#appointment-date-error").length === 0) {
+                $("#appointment_date").after('<div class="invalid-feedback fst-italic d-block" id="appointment-date-error">Vui lòng chọn ngày <%= stype_text%>.</div>');
+            } else {
+                $("#appointment-date-error").text("Vui lòng chọn ngày <%= stype_text%>.").show();
+            }
+            isValid = false;
+        }
+
+    
+        return isValid;
+    }    
+
+    $('#recipient_user_id').select2({
+        theme: 'bootstrap-5',
+        language: {
+            searching: function () {
+                return 'Đang tìm kiếm...';
+            },
+            loadingMore: function () {
+                return 'Đang tải...';
+            }
+        },
+        placeholder: 'Chọn người xử lý ...',
+        ajax: {
+            delay: 1000,
+            url: `<%= @ROOT_PATH%>/appointments/get_managers`,
+            data: function (params) {
+                return {
+                    search: params.term,
+                    department_id: checkCurrentDepartment ? $("#department").val() : nextDepartmentId,
+                    department_head: department_head
+                };
+            },
+            processResults: function (data, params) {
+                let results = data.items.map(function (item) {
+                    return { id: item.id, text: `${item.last_name} ${item.first_name} (${item.sid})` };
+                });
+        
+                return {
+                    results: results
+                };
+            }
+        }
+    });
+
+    // Function hiển thị flash message
+    function showFlash(type, message) {
+        let alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+        let flashHtml = `
+        <div class="alert_show alert ${alertClass} alert-dismissible fade show" role="alert">
+            <span class="me-5">${message}</span>
+            <button class="btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        `;
+
+        $('.alert_show').remove();
+        $('body').prepend(flashHtml);
+
+        setTimeout(function() {
+            $(".alert_show").fadeOut();
+        }, 5000);
+    }
+
+    // Giữ nguyên function showLoading của bạn
+    function showLoading(bShow) {
+        if(bShow) {
+            $("#loading_handle").css("display", "flex");
+        } else {
+            $("#loading_handle").css("display", "none");
+        }
+    }
+
+    $(document).on('click', '.btn-close', function() {
+        $(this).parent('.alert_show').remove();
+    });
+
+    // pdf view
+    var pdfSign = $("#pdf-container").pdfSign({
+        loadSigndocPath: '<%= request.base_url%><%= load_signdoc_appointment_path(params[:appointment_id], signdoc_id: @form_data[:signdoc_id], status: @form_data[:status]).html_safe%>',
+    });
+
+    function clickViewDocument() {
+        $("#popup-view-document").modal('show');
+        pdfSign.loadSigndocById('',false);
+    }
+    
+</script>

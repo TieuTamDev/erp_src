@@ -1,0 +1,2 @@
+class Mylog < ApplicationRecord
+end

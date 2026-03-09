@@ -1,0 +1,2 @@
+class Tbhospital < ApplicationRecord
+end

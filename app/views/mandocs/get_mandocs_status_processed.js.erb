@@ -1,0 +1,207 @@
+var items = `
+<% @mandocWithULogin&.each_with_index do |mandoc, i| %>
+<%  oUhandle1 = ""
+    checkHandle = false
+    oDhandles1 = Mandocdhandle.where(mandoc_id: mandoc.id).last
+    oMandocUhandle1 = Mandocuhandle.where(mandocdhandle_id: oDhandles1&.id, user_id: session[:user_id] ).last %>
+    
+<%if oMandocUhandle1&.status == "CHUAXULY" && oMandocUhandle1&.srole == "XULY" 
+    oUhandle1 = 'background-color: #fefde8'
+    else
+    oUhandle1 = ''
+    checkHandle = true
+end %>
+<%= i = i+1 %>
+<tr style="<%=oUhandle1%>">  
+        <td style="vertical-align: middle; text-align: center;"><%= i %></td>
+        <td style="vertical-align: middle;">
+            <%( if (mandoc.sno.nil?)%>
+            <div style="text-align: start;  display: flex;flex-direction: column;">
+                <label style="  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;font-weight: bold !important;" class="m-0" ><%= lib_translate("Received_date")%>: <span style="font-weight: normal;white-space: normal !important;"> <%= mandoc.created_at&.strftime('%d/%m/%Y')%></span></label>
+            </div>
+            <%else%>
+            <div style="text-align: start;  display: flex;flex-direction: column;">
+                <label style="  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;font-weight: bold !important;" class="m-0" ><%= lib_translate("Received_date")%>: <span style="font-weight: normal;white-space: normal !important;"> <%= mandoc.created_at&.strftime('%d/%m/%Y')%></span></label>
+                <label style="  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;font-weight: bold !important;" class="m-0"><%= lib_translate("Sno_book")%>: <span style="font-weight: normal;white-space: normal !important;"><%= mandoc.ssymbol %></span></label>
+            </div>
+            <%end)%>
+            <div style="text-align: start;  display: flex;flex-direction: column;">
+                <label style=" cursor:pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;font-weight: bold !important;" class="m-0 text-overlap"><%= lib_translate("Type_book")%>:<span style="font-weight: normal;white-space: normal !important;"><%= mandoc.type_book.present? ? Mandocbook.where(scode: mandoc.type_book).first&.name : "" %></span></label>
+                <label style=" cursor:pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;font-weight: bold !important;" class="m-0 text-overlap"><%= lib_translate("Documents_type")%>:
+                    <span style="font-weight: normal;">
+                        <% if mandoc.stype.present? && Mandoctype.where(scode: mandoc.stype).exists? %>
+                            <%= Mandoctype.where(scode: mandoc.stype).first&.name %>
+                        <% else %>
+                        
+                        <% end %>
+                    </span>
+                </label>
+            </div>
+        </td> 
+        <td style="vertical-align: middle;">
+            <%
+                uUser = User.where(email: mandoc.signed_by).first
+                if !uUser.nil?
+                    fullNameU = uUser.last_name + ' ' + uUser.first_name
+                end
+            %>
+            <% if !mandoc.sfrom.nil? %>
+            <div style="text-align: start;  display: flex;flex-direction: column;">
+                <label style="  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;font-weight: bold !important;" class="m-0" ><%=lib_translate('Excerpts_from_content')%>: <span style="font-weight: normal;white-space: normal !important;"><%= mandoc.contents %></span></label>
+                <label style="  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;font-weight: bold !important;" class="m-0"><%= lib_translate("Sent_from")%>: <span style="font-weight: normal;white-space: normal !important;"><%= mandoc.sfrom %></span></label>
+                <label style="  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;font-weight: bold !important;" class="m-0"><span style="font-weight: bold !important;"><%=lib_translate("Urgency")%>:  </span><span style="font-weight: bold; color: <%= Mandocpriority.where(name: mandoc.spriority).first.note%>"><%= mandoc.spriority%></span></label>
+                <%if !mandoc.effective_date.nil?%>
+                <label style="  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;font-weight: bold !important;" class="m-0"><%= lib_translate('Ngay_ban_hanh')%>: <span style="font-weight: normal;white-space: normal !important;"><%= mandoc.effective_date.in_time_zone('Asia/Ho_Chi_Minh')&.strftime('%d/%m/%Y') %></span></label>
+                <%else%>
+                <label class="m-0 d-none"></label>
+                <%end%>
+            </div>
+            <% else %>
+            <div style="text-align: start;  display: flex;flex-direction: column;">
+                <label style="  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;font-weight: bold !important;" class="m-0 text-overlap" ><%=lib_translate('Excerpts_from_content')%>: <span style="font-weight: normal; white-space: normal !important;"><%= mandoc.notes %></span></label>
+                <label style="  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;font-weight: bold !important;" class="m-0 text-overlap" ><%=lib_translate('Department')%>: <span style="font-weight: normal; white-space: normal !important;"><%= mandoc.mdepartment %></span></label>
+                <label style="  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;font-weight: bold !important;" class="m-0 text-overlap" ><%=lib_translate('Signed_by')%>: <span style="font-weight: normal; white-space: normal !important;"><%= fullNameU %></span></label>
+                <label style="  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;font-weight: bold !important;" class="m-0 text-overlap" ><%=lib_translate('Docs_Writer')%>: <span style="font-weight: normal; white-space: normal !important;"><%= mandoc.created_by %></span></label>
+                <label style="  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;font-weight: bold !important;" class="m-0 text-overlap"><%= lib_translate('Effective_date')%>: <span style="font-weight: normal; white-space: normal !important;"><%= mandoc.received_at&.strftime('%d/%m/%Y') %></span></label>
+                <label style="  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;font-weight: bold !important;" class="m-0 text-overlap"><%= lib_translate('Urgency')%>: <span style="font-weight: bold; color: <%= Mandocpriority.where(name: mandoc.spriority).first.note%>"><%= mandoc.spriority%></span></label>
+            </div>
+            <% end %>
+        </td>                         
+        <td style="vertical-align: middle; text-align: center;">
+            <%=if (mandoc.deadline.nil?)
+            mandoc.created_at&.strftime('%d/%m/%Y')
+            else
+            mandoc.deadline&.strftime('%d/%m/%Y')
+            end
+            %>
+        </td>                         
+        <td style="vertical-align: middle; text-align: center;">
+            <% if mandoc.status == "RECEIVE"%>
+            <span class="text-info" style="font-weight: bold;"> <%=lib_translate('Receive_handle')%></span>
+            <% elsif mandoc.status == "INPROGRESS"%>
+            <span class="text-warning" style="font-weight: bold;"> <%=lib_translate('Inprogress_handle')%></span>
+            <% elsif mandoc.status == "DELETE"%>
+            <span class="text-danger" style="font-weight: bold;"> <%=lib_translate('Cancel_handle')%></span>
+            <%else%>
+            <span class="text-success" style="font-weight: bold;"> <%=lib_translate('Success_handle')%></span>
+            <% end %>
+            <br>
+            <button class="btn btn-outline-success mt-2"  data-toggle="modal" data-target="#tinh_trang_proindex_<%=mandoc.id%>" style="font-size: 12px; width: 70%; margin: auto; "> <%=lib_translate('CHITIETXULY')%> </button>
+            <div class="modal fade" id="tinh_trang_proindex_<%=mandoc.id%>" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style=" background: rgba(0, 0, 0, 0.84); overflow-y: scroll;">
+                <div class="modal-dialog" style="max-width: 80%; width: 100%; display: flex; align-items: center;">
+                <div class="modal-content p-3" style=" background: var(--falcon-avatar-status-border-color);">
+                    <div class="position-absolute top-0 end-0 mt-2 me-2 z-index-1">
+                    <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-header d-flex justify-content-left" >
+                        <p class="fs-1 fw-bold"><%= lib_translate("Document_processing") %></p> 
+                    </p>
+                    </div> 
+                    <div style=" background: var(--falcon-avatar-status-border-color);padding: 20px;">
+                    <h5 style="float:left; opacity: .5;"><span class="fw-bold"><%= lib_translate("Status") %>: </span>
+                        <% if mandoc.status == "INACTIVE"%>
+                            <span class="text-success" ><%= lib_translate("Document_processed_status") %></span>
+                        <% elsif mandoc.status == "DELETE"%>
+                            <span class="text-danger" ><%= lib_translate("Cancel_handle") %></span>
+                        <% else%>
+                            <span class="text-warning" ><%= lib_translate("Document_processing_status") %></span>
+                        <%end%>     
+                    </h5>
+                    <table class="table table-bordered fs-0 mb-0 table-hover ">
+                        <thead class="text-white" style="background: var(--falcon-bg-circle-shape-bg);">
+                            <tr>
+                                <th ><%= lib_translate("Handler") %></th>
+                                <th style="width: 6%;"><%= lib_translate("Role") %></th>
+                                <th style="width: 12%;"><%= lib_translate("Day_Process") %></th>
+                                <th style="width: 7%;"><%= lib_translate("Deadline_process") %></th>
+                                <th style="width: 15%;"><%= lib_translate("Content_process") %></th>
+                                <th style="width: 7%;"><%= lib_translate("Status") %></th>
+                                <th style="width: 4%;"><%= lib_translate("Read") %></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <%  mandoc = Mandoc.where(id: mandoc.id).first
+                                                            if !mandoc.nil? %>
+                                                                    <tr style="text-align: left" data-show="TIEPNHAN">
+                                                                    <td class="text-success"> <%= mandoc.created_by %> <b>[<%= if mandoc.sfrom.nil?
+                                                                        mandoc.mdepartment
+                                                                    else
+                                                                        id_department_first = Mandocdhandle.where(mandoc_id: mandoc.id).first&.department_id
+                                                                        Department.where(id: id_department_first).first&.name
+                                                                    end%>]</b></td>
+                                                                    <td><%= !mandoc.contents.nil? && !mandoc.contents.empty? ? lib_translate("TIEPNHAN") : lib_translate("SOANTHAO") %></td>
+                                                                    <td><%= mandoc.created_at&.strftime("%k:%M %d/%m/%Y")%></td>
+                                                                    <td></td> 
+                                                                    <td><div style="white-space: pre-line;">Thiết lập văn bản</div></td>
+                                                                    <td><%= lib_translate("DAXULY")%></td>
+                                                                    <td><%= lib_translate("CO")%></td>
+                                                                    </tr>
+                                                                    <%
+                                                                    
+                                                                    mandoc&.mandocuhandles&.order(created_at: :asc).each do |uhan|
+                            
+                                                                    %>  
+                                                                    
+                                                                    <tr style="text-align: left" data-show="<%= uhan.srole == "TIEPNHAN" ? "XULY" : uhan.srole %>">
+                                                                        <td style="white-space: pre-line;"> <span class="fas fa-grip-lines"></span><span class="fas fa-chevron-right"></span> <%= uhan.user.last_name%> <%= uhan.user.first_name%>  <b>[<%= uhan&.mandocdhandle&.department&.name%>]</b></td>
+                                                                        <td><%= uhan.srole == "XULY" ? lib_translate("XULY") : uhan.srole == "DEBIET" ? lib_translate("DEBIET") : uhan.srole == "PHOIHOPXL" ? lib_translate("PHOIHOPXL") : lib_translate("XULY")%></td>
+                                                                        <td><%= uhan.created_at&.strftime("%k:%M %d/%m/%Y")%></td>
+                                                                        <%if !uhan.deadline.nil?%>
+                                                                        <td><%= uhan.deadline&.strftime("%d/%m/%Y")%></td>
+                                                                        <%else%>
+                                                                            <td></td>
+                                                                        <%end%>
+                                                                        <td><div style="white-space: pre-line;"><%= uhan.contents %></div></td>
+                                                                        <td class="<%= uhan.status %> md-<%= uhan.mandocdhandle_id %> uid-<%= uhan.user_id %>"><%= uhan.sothers == "HUYBOXULY" ? "Thay thế" : uhan.status == "DAHUY" ? lib_translate("Cancel_handle") : uhan.status == "CHUAXULY" ? lib_translate("CHUAXULY") : uhan.status == "PHOIHOPXL" ? lib_translate("PHOIHOPXL") : uhan.status == "DAXULY" && uhan.srole != "PHOIHOPXL" ? lib_translate("DAXULY") : lib_translate("PHOIHOPXL") %></td>
+                                                                        <td><%= uhan.sothers == "HUYBOXULY" ? "" : uhan.sread == "KHONG" ? lib_translate("KHONG") : uhan.sread == "CO" ? lib_translate("CO") : lib_translate("KHONG") %></td>  
+                                                                    </tr> 
+                
+                                                                <% end %>
+                                                            <% end %>
+                        </tbody>
+                    </table>
+                    </div>
+                </div>
+                </div>
+            </div>
+            <button class="btn btn-outline-info preview-mandoc mt-2" style="font-size: 12px; width: 70%; margin: auto;" onclick="viewMandoc(<%= mandoc.id%>)" data-id="<%= mandoc.id%>" data-toggle="tooltip" data-placement="top" title="<%=lib_translate('View_document')%>">
+                <%=lib_translate('XEMTAILIEU')%>
+            </button>
+        </td> 
+
+        <td style="vertical-align: middle; text-align: center; padding:0">
+            <% if checkHandle == true %>
+                <b class="text-success"><%=lib_translate('DAXULY')%></b>
+            <%else%>
+                <b class="text-warning"><%=lib_translate('CHUAXULY')%></b>
+            <% end %>
+        </td>                       
+    </tr>
+        <%if i >= 50
+        break
+        end
+    %>
+<% end %>
+`
+$("#documents_processed_follow .list").html(items);
+$('#documents_processed_follow').DataTable(optionTableStyle);
+$("#loading_screen").css("display", "none");   
+$("table").addClass("resizable");
+(function($) {
+    $('table.resizable').resizableColumns();
+        var arr_show_col = window.localStorage.getItem('list_options_table_mandocs');
+    if (arr_show_col == null) {localStorage.setItem('list_options_table_mandocs', ['TIEPNHAN', 'XULY', 'DEBIET', 'PHOIHOPXL'])}
+    arr_show_col = window.localStorage.getItem('list_options_table_mandocs');
+    if (Array.isArray(arr_show_col.split(","))) {
+        $('input[name="select_view_schedule"]').prop('disabled', false);
+        $('input[name="select_view_schedule"]').prop('checked', false);
+        $(`[data-show="TIEPNHAN"]`).addClass("hide-responsive-mobile");
+        $(`[data-show="XULY"]`).addClass("hide-responsive-mobile");
+        $(`[data-show="DEBIET"]`).addClass("hide-responsive-mobile");
+        $(`[data-show="PHOIHOPXL"]`).addClass("hide-responsive-mobile");
+        arr_show_col.split(",").forEach(item => {
+            $(`input[id="${item}"]`).prop("checked", true);
+            $(`[data-show="${item}"]`).removeClass("hide-responsive-mobile");
+        });
+    }
+})(jQuery);

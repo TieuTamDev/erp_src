@@ -1,0 +1,47 @@
+
+  .highcharts-background {
+    background-color: #ffffff00;
+    fill: none !important;
+  }
+  .highcharts-credits {
+    display: none !important;
+  }
+  .highcharts-title {
+    font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+      font-size: 0.8333333333rem !important;
+      font-weight: 500;
+  }
+  .datepicker-years{
+    /* background-color: #b3bfd1; */
+    color:  var(--falcon-heading-color);
+  }
+  .datepicker{
+    color:  var(--falcon-heading-color);
+  }
+  .dataTables_wrapper{
+    width: 100% !important;
+  }
+
+  /* notice */
+  .item_notice:hover{
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    border-radius: 10px;
+    background-color: #ededed;
+  }
+  .item_notice a:hover{
+    text-decoration: none;
+    color: #5e6e82;
+  }
+  /* end notice */
+  .scroll_item{
+    height:500px;
+    overflow-y:scroll;
+  }
+  .css_scroll::-webkit-scrollbar{
+      width:10px;
+  }
+  .css_scroll::-webkit-scrollbar-thumb {
+      background-color:silver;
+      border-radius: 10px;
+      /* border: 3px solid rgba(var(--falcon-light-rgb), var(--falcon-bg-opacity)) !important; */
+  }

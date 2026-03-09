@@ -1,0 +1,3166 @@
+/* CSS Document */
+/* line 3, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+.show_mobile {
+  display: none;
+  visibility: hidden;
+}
+
+/*IPhone 5 */
+@media only screen and (min-width: 100px) and (max-width: 350px) {
+  /* line 9, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .tab-user-edit {
+    font-size: 12px;
+  }
+
+  /* line 12, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .modal-body-user .col-xs-10 {
+    padding-left: 0px;
+  }
+
+  /* line 15, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .modal-body-user .col-xs-2 {
+    padding-left: 2px;
+  }
+
+  /* line 18, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .path_label {
+    margin-left: 0px;
+  }
+
+  /* line 21, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .path_label {
+    margin-left: 0px !important;
+  }
+
+  /* line 24, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .mlabel_edit_role_permission {
+    padding-top: 0;
+  }
+
+  /* line 27, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .col-sm-2.alert-default {
+    margin-top: 100px !important;
+  }
+
+  /* line 30, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  footer ul {
+    font-size: 12px;
+  }
+
+  /* line 33, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .btn-xs {
+    font-size: 11px;
+  }
+
+  /* line 36, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  #sub_menu {
+    margin-top: -5px;
+  }
+
+  /* line 39, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form_tab {
+    font-size: 13px;
+  }
+
+  /* line 42, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .wrap_header_member {
+    font-size: 13px;
+  }
+
+  /* line 45, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  #delete_stage {
+    font-size: 11px;
+    margin-left: 21px;
+  }
+
+  /* line 49, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .nopadding .fa-plus-circle {
+    margin-left: -8px;
+  }
+
+  /* line 52, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .paging-component {
+    padding-right: 0px;
+  }
+
+  /* line 55, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .btn-create-stage {
+    font-size: 11px !important;
+  }
+
+  /* line 58, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .welcome_left button {
+    font-size: 11.7px;
+  }
+
+  /* line 61, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .body-mstyle {
+    margin: 0px;
+  }
+
+  /* line 64, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .mpanel-standard .col-sm-2.alert-default {
+    margin-top: 0px !important;
+  }
+
+  /* line 67, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .mpanel-standard td .col-sm-2.alert-default, .mpanel-standard td .col-sm-2.alert-default {
+    padding: 0px 2px 25px 2px !important;
+  }
+
+  /* line 70, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-contact-info-acc .fa-minus {
+    left: 25% !important;
+  }
+
+  /* line 73, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-contact-info-acc .col-sm-offset-3 {
+    margin-left: 57% !important;
+  }
+
+  /* line 76, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-contact-information .form-control {
+    width: 260px !important;
+  }
+
+  /* line 79, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .group-btn-continue .col-sm-offset-2 {
+    margin-left: 47% !important;
+  }
+
+  /* line 82, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .content-sign-up-info .form-control {
+    width: 230px !important;
+  }
+
+  /* line 85, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .sign-up-info .step-create-new-clients ul li span {
+    width: 248px !important;
+  }
+}
+@media only screen and (min-width: 100px) and (max-width: 450px) {
+  /* line 90, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .content-sign-up-info {
+    width: 100%;
+  }
+
+  /* line 91, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .panel-sign-in-mp {
+    width: 100% !important;
+    padding: 0 10px !important;
+  }
+
+  /* line 95, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-login .input-group {
+    margin-left: 0px !important;
+  }
+
+  /* line 98, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .sign-up-info .step-create-new-clients ul li span {
+    width: 290px;
+  }
+
+  /* line 101, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .underline {
+    width: 47%;
+  }
+
+  /* line 104, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .underline-site {
+    width: 40%;
+  }
+
+  /* line 107, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .box_wrap_stream .span_palette {
+    width: 100%;
+    float: none;
+    display: block;
+    margin: 0 auto;
+  }
+
+  /* line 113, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .welcome_left .name_tool {
+    padding-left: 20px;
+  }
+
+  /* line 116, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .box_wrap_stream .span_palette #myPalette {
+    width: 100%;
+    margin: 0px auto;
+    height: 400px;
+  }
+
+  /* line 121, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .btn_add_new_stream, .btn_delete_stream, .btn_save_stream {
+    display: none;
+  }
+
+  /* line 124, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .welcome_right {
+    height: 105px !important;
+  }
+
+  /* line 127, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .welcome_right .name_diagram {
+    line-height: 50px !important;
+  }
+
+  /*.stream_wrap_left{
+  	width: 100%; 
+  	height: 84px; 
+  	position: absolute;
+  	background: #fff; 
+  	z-index: 10000;
+  }*/
+  /* line 137, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .span_diagram {
+    width: 100%;
+    padding-left: 0px;
+    border-left: none;
+  }
+
+  /* line 143, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .diagram_hearder_left button {
+    margin-top: -90px;
+    height: 30px;
+  }
+
+  /* line 147, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .diagram_hearder_right a {
+    margin-top: -90px;
+    height: 30px;
+  }
+
+  /*
+  .diagram_hearder_right button{
+    margin-top: -240px;
+    margin-right: 10px;
+  }*/
+  /* line 156, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .modal-content .panel-body {
+    padding: 0px;
+  }
+
+  /* line 159, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .modal-content .modal-body-content {
+    padding: 15px 3px;
+  }
+
+  /* line 162, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .modal-content table {
+    font-size: 12px;
+  }
+
+  /* line 165, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .modal-content table th {
+    padding-left: 3px !important;
+    padding-right: 3px !important;
+  }
+
+  /* line 169, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  h3.modal-title-prod {
+    font-size: 20px;
+  }
+
+  /* line 172, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .body-mstyle .col-xs-2 {
+    width: 40%;
+  }
+
+  /* line 175, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .body-mstyle .col-xs-10 {
+    width: 60%;
+  }
+
+  /* line 178, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .body-mstyle .col-xs-9, .body-mstyle .col-xs-3 {
+    width: 50% !important;
+  }
+
+  /* line 182, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .body-mstyle .col-xs-3 {
+    margin-top: 10px !important;
+    padding-right: 0px;
+  }
+
+  /* line 186, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .new-stage-wrap-select .col-xs-3.nopadding {
+    margin-top: 0 !important;
+  }
+
+  /* line 189, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .input-group {
+    margin-left: -15px;
+  }
+
+  /* line 192, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  #search_name {
+    padding: 3px !important;
+    font-size: 13px !important;
+  }
+
+  /* line 196, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .input-group button {
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+
+  /* line 200, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .create_input {
+    width: 100%;
+  }
+
+  /* line 203, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .wrap_header_member .col-xs-7 {
+    width: 100%;
+    margin-left: -10px;
+  }
+
+  /* line 207, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .wrap_header_member .col-xs-5 {
+    width: 100% !important;
+    margin-left: 27px;
+  }
+
+  /* line 211, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .mpanel-standard td .col-sm-4.alert-default {
+    width: 100%;
+  }
+
+  /* line 214, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .mpanel-standard .path_label {
+    margin-left: 0px;
+  }
+
+  /* line 217, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .mpanel-standard .checkbox-inline {
+    margin-left: 0px;
+  }
+
+  /* line 220, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .mpanel-standard .fa-plus-circle {
+    margin-left: 20px !important;
+    margin-bottom: 10px !important;
+  }
+
+  /* line 224, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .mpanel-standard .col-sm-2.alert-default {
+    margin-top: -20px;
+  }
+
+  /* line 227, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .mpanel-standard .mtext_field_edit_role_permission {
+    width: 120px;
+  }
+
+  /* line 230, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-new-user .col-md-3 {
+    width: 90% !important;
+  }
+
+  /* line 233, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .role-settings .form-control {
+    width: 180px;
+    margin-left: 10px;
+  }
+
+  /* line 237, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  #add_another_field_div {
+    left: -7px !important;
+  }
+
+  /* line 240, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-sign-up .input-group {
+    margin-left: 0px;
+  }
+
+  /* line 243, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .panel-sign-in-mp {
+    padding: 20px 10px !important;
+  }
+}
+@media only screen and (min-width: 100px) and (max-width: 600px) {
+  /* line 248, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .search-mp {
+    width: 100%;
+  }
+
+  /* line 251, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .feature_for_app_name {
+    padding-left: 10px;
+    padding-bottom: 10px;
+  }
+
+  /* line 255, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-create-platform .btn-create-platform {
+    margin-top: 15px !important;
+  }
+
+  /* line 256, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .site_domain {
+    float: right;
+    margin-top: -12px;
+  }
+
+  /* line 260, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .name-step-create .form-confi {
+    width: 100% !important;
+  }
+
+  /* line 263, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .modal-dialog {
+    width: 100% !important;
+    margin-left: 0px !important;
+  }
+
+  /* line 267, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .btn-xs {
+    margin-bottom: 4px !important;
+  }
+
+  /* line 270, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .border-tab #user_info_content {
+    margin-left: 0px !important;
+  }
+
+  /* line 273, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .infomation-form .name-step-create {
+    padding-left: 10px;
+    padding-right: 5px;
+  }
+
+  /* line 277, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .group_name {
+    padding: 12px 1px 2px 0px;
+  }
+
+  /* line 280, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  #group_address input {
+    margin-bottom: 0px;
+  }
+
+  /* line 283, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  #group_organisation input {
+    margin-bottom: 0px;
+  }
+
+  /* line 286, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .infomation-form label {
+    margin-bottom: 0px;
+  }
+
+  /* line 289, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  #add_country, #org_department {
+    margin-top: -30px;
+  }
+
+  /* line 292, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  #add_postcode, #org_company {
+    margin-bottom: 15px !important;
+  }
+
+  /* line 295, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  #client_username, #client_last_name {
+    margin-bottom: 13px;
+  }
+
+  /* line 298, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-new-user .col-md-2 {
+    width: 79%;
+    text-align: left;
+    margin-bottom: 10px;
+  }
+
+  /* line 303, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-new-user .col-md-3 {
+    text-align: left;
+    width: 85%;
+    margin-bottom: 10px;
+  }
+
+  /* line 308, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .header_mcontent {
+    height: 25px;
+  }
+
+  /* line 311, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .btn-create-user-info button {
+    margin-left: 0px;
+  }
+
+  /* line 314, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .lable-name-role {
+    margin-left: 8.3%;
+  }
+
+  /* line 317, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-config-role-to-user.infomation-form {
+    margin: 10px 0px;
+  }
+
+  /* line 320, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .border-create-user {
+    border: none;
+    margin-top: 0px;
+  }
+
+  /* line 324, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  header.header-main-content {
+    margin-bottom: 20px;
+  }
+
+  /* line 327, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .list-item {
+    height: 90px !important;
+    width: 90px !important;
+    margin-right: 5px;
+  }
+
+  /* line 332, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .img-logo img {
+    width: 70px !important;
+    height: 70px !important;
+    margin: 10px !important;
+  }
+
+  /* line 337, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .container-item .col-md-4 {
+    padding: 0px;
+  }
+
+  /* line 340, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .col-md-12.link-item {
+    padding: 3px 0 14px 3px;
+    margin-bottom: 20px;
+  }
+
+  /* line 344, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .container-item .col-xs-6 {
+    width: 100%;
+  }
+}
+@media only screen and (min-width: 100px) and (max-width: 650px) {
+  /* line 349, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .panel-sign-in {
+    width: 95% !important;
+  }
+}
+@media only screen and (min-width: 100px) and (max-width: 795px) {
+  /* line 354, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-contact-info-acc #wrap_phone_view .lable-contact-info-acc {
+    margin-top: 43px;
+  }
+
+  /* line 357, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  #payment_group_address_new input {
+    margin-bottom: 5px;
+  }
+
+  /* line 358, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .content-sign-up-info #group_address input {
+    margin-right: 60px;
+  }
+
+  /* line 361, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .content-sign-up-info .group_name {
+    float: right;
+    margin-top: -40px;
+  }
+
+  /* line 365, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-signup-info {
+    margin-bottom: 10px;
+  }
+
+  /* line 368, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .btn-add-another-field.col-sm-offset-2 {
+    margin-left: 0px;
+  }
+
+  /* line 371, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .content-sign-up-info .fa-plus {
+    float: right;
+    position: static;
+    margin-right: -15px;
+    margin-top: -26px;
+  }
+
+  /* line 377, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .content-sign-up-info #group_address {
+    margin-top: -40px;
+  }
+
+  /* line 380, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .content-sign-up-info .web-input {
+    margin-left: 2px;
+  }
+
+  /* line 383, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .content-sign-up-info #group_website .group-field {
+    height: 70px;
+  }
+
+  /* line 386, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .content-sign-up-info .fa-minus {
+    float: right;
+    position: static;
+    margin-right: -15px;
+    margin-top: -17px;
+  }
+
+  /* line 392, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .content-sign-up-info .form-control {
+    width: 270px;
+  }
+
+  /* line 395, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .content-sign-up-info .col-sm-6 {
+    padding: 0px 4px;
+  }
+
+  /* line 398, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .content-sign-up-info .control-label.col-sm-3 {
+    width: 50%;
+    padding: 0px;
+  }
+
+  /* line 402, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-signup-info li span {
+    margin-bottom: 5px !important;
+  }
+
+  /* line 405, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .minput-bottom-margin15 input {
+    margin-bottom: 0px;
+  }
+
+  /* line 408, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  td {
+    padding: 3px !important;
+    vertical-align: bottom !important;
+  }
+
+  /* line 412, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  #search_name, #data_search, #search_price {
+    margin-left: 17px;
+  }
+
+  /* line 415, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .infomation-form .form-control {
+    width: 70% !important;
+  }
+
+  /* line 418, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .fa-plus, .fa-minus {
+    float: right;
+    position: absolute;
+    left: 65px;
+    top: -23px;
+  }
+
+  /* line 424, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .infomation-form .col-sm-1 {
+    clear: both;
+    float: right;
+    position: relative;
+    top: -31px;
+    right: 23px;
+  }
+
+  /* line 431, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .group-name {
+    padding: 6px 4px;
+  }
+
+  /* line 434, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .content-bottom .btn {
+    width: 110px;
+    padding: 10px 0px;
+  }
+
+  /* line 438, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  body {
+    width: 100% !important;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 0px;
+    float: left;
+  }
+
+  /* line 445, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .header_background {
+    height: 130px;
+    background-image: url("/assets/mplatform/bg-f98399b3b4f3e0f21a6dd1b2ac8b31da48a4ce8255d112456e6352e8253c9c7b.jpg");
+    background-repeat: repeat-x;
+    margin-top: 0px;
+  }
+
+  /* line 452, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .clickme {
+    display: block;
+    visibility: visible;
+  }
+
+  /* line 456, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .clickme_top {
+    display: block;
+    visibility: visible;
+  }
+
+  /* line 460, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .showmenu {
+    display: block !important;
+    visibility: visible !important;
+    position: relative !important;
+  }
+
+  /* line 465, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .navi_header_menu ul a {
+    padding: 0 7px;
+  }
+
+  /* line 468, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .navi_header_top_menu ul a {
+    padding: 0 7px;
+  }
+
+  /* line 472, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .headline {
+    margin-bottom: 5px !important;
+  }
+
+  /* line 475, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .hide_mobile {
+    display: none;
+    visibility: hidden;
+  }
+
+  /* line 479, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .hidemenu {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  /* line 483, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .show_mobile {
+    display: block;
+    visibility: visible;
+  }
+
+  /* line 487, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .formatmenutitle:hover {
+    cursor: pointer;
+  }
+
+  /* line 490, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .formatmenutitle {
+    background-image: url("/mywork/assets/mplatform/navigation/navi-toggle-094b27a91adc1c76d45ed468ccb0659bf0999ab5621c6790de894ef17f801159.png");
+    background-repeat: no-repeat;
+    background-position: center right;
+    height: 40px;
+    background-color: #E8E8E8;
+    clear: both;
+    float: none;
+    width: 100%;
+    color: white;
+    margin-bottom: 0px;
+  }
+
+  /* line 502, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .formatmenutitle_top:hover {
+    cursor: pointer;
+  }
+
+  /* line 505, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .formatmenutitle_top {
+    background-image: url("/mywork/assets/mplatform/navigation/navi-toggle-094b27a91adc1c76d45ed468ccb0659bf0999ab5621c6790de894ef17f801159.png");
+    background-repeat: no-repeat;
+    background-position: center right;
+    height: 40px;
+    background-color: #E8E8E8;
+    clear: both;
+    float: none;
+    margin-top: 0px;
+    width: 100%;
+    color: white;
+    margin-bottom: 0px;
+  }
+
+  /* line 518, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .closeme {
+    background-image: url("/mywork/assets/mplatform/navigation/navi-close-24f786b5f73ba17be09704efeca9c5b40389b26f1fe48ba1e34246355809ccf6.png");
+  }
+
+  /* line 521, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .closeme_top {
+    background-image: url("/mywork/assets/mplatform/navigation/navi-close-24f786b5f73ba17be09704efeca9c5b40389b26f1fe48ba1e34246355809ccf6.png");
+  }
+
+  /* line 524, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  #header {
+    width: 100%;
+    height: auto;
+  }
+
+  /* line 528, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .navi_header_menu {
+    width: 100%;
+    background-image: none;
+    background-color: #89B3DA;
+    top: 0px;
+  }
+
+  /* line 534, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .navi_header_menu ul {
+    width: 100%;
+  }
+
+  /* line 537, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .navi_header_menu ul {
+    padding-left: 0px;
+    background-color: #509ddc;
+  }
+
+  /* line 541, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .navi_header_menu ul li {
+    display: block;
+    float: none;
+    width: 100%;
+    clear: both;
+    position: relative;
+  }
+
+  /* line 548, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .navi_header_menu ul ul {
+    width: 98%;
+    background-image: none !important;
+    padding-left: 2%;
+    border-bottom: none;
+  }
+
+  /* line 554, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .navi_header_menu ul ul li a {
+    color: white !important;
+  }
+
+  /* line 557, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .navi_header_menu ul ul, .navi_header_menu ul a:hover ul ul {
+    display: block;
+    visibility: visible;
+    position: relative;
+  }
+
+  /* line 562, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .navi_header_top_menu {
+    width: 100%;
+    background-image: none;
+    background-color: #89B3DA;
+    top: 0px;
+  }
+
+  /* line 568, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .navi_header_top_menu ul {
+    width: 100%;
+  }
+
+  /* line 571, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .navi_header_top_menu ul {
+    padding-left: 0px;
+    background-color: #509ddc;
+  }
+
+  /* line 575, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .navi_header_top_menu ul li {
+    display: block;
+    float: none;
+    width: 100%;
+    clear: both;
+    position: relative;
+  }
+
+  /* line 582, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .navi_header_top_menu ul ul {
+    width: 98%;
+    background-image: none !important;
+    padding-left: 2%;
+    border-bottom: none;
+  }
+
+  /* line 588, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .navi_header_top_menu ul ul li a {
+    color: white !important;
+  }
+
+  /* line 591, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .navi_header_top_menu ul ul, .navi_header_top_menu ul a:hover ul ul {
+    display: block;
+    visibility: visible;
+    position: relative;
+  }
+
+  /* line 596, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .infomation-form {
+    margin: 0;
+  }
+
+  /* line 599, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .navi_header_top_menu {
+    width: 100%;
+    background-image: none;
+    background-color: #89B3DA;
+    top: 0px;
+  }
+
+  /* line 605, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .navi_header_top_menu ul {
+    width: 100%;
+  }
+
+  /* line 608, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .navi_header_top_menu ul {
+    padding-left: 0px;
+    background-color: #509ddc;
+  }
+
+  /* line 613, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .navi_header_top_menu ul li {
+    display: block;
+    float: none;
+    width: 100%;
+    clear: both;
+    position: relative;
+  }
+
+  /* line 620, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .navi_header_top_menu ul ul {
+    width: 98%;
+    background-image: none !important;
+    padding-left: 2%;
+    border-bottom: none;
+  }
+
+  /* line 627, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .navi_header_top_menu ul ul li a {
+    color: white !important;
+  }
+
+  /* line 630, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .navi_header_top_menu ul ul, .navi_header_top_menu ul a:hover ul ul {
+    display: block;
+    visibility: visible;
+    position: relative;
+  }
+
+  /* line 635, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .row-header {
+    line-height: 22px;
+    padding: 0 5px;
+  }
+
+  /* line 639, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .row-header h4 b {
+    margin-left: 34px;
+  }
+
+  /* line 642, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  footer ul {
+    font-size: 13px;
+    padding-left: 10px;
+  }
+
+  /* line 646, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  #accesshistories td {
+    word-break: normal !important;
+  }
+
+  /* line 649, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .paging_content {
+    font-size: 12.5px;
+  }
+
+  /* line 652, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-horizontal .col-xs-6 {
+    width: 100% !important;
+    padding-left: 4px !important;
+  }
+
+  /* line 656, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .border-tab {
+    border-top: solid 1px #ddd !important;
+  }
+
+  /* line 659, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  #user_info_content .form-group {
+    margin: 10px 0 0 0 !important;
+  }
+
+  /* line 662, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  #user_info_content .form-group:last-child {
+    margin-bottom: 20px !important;
+  }
+
+  /* line 665, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .modal-footer {
+    padding: 5px;
+    border: none;
+  }
+
+  /* line 669, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .title_action {
+    padding-bottom: 5px;
+  }
+
+  /* line 672, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  #dialog_user {
+    padding: 10px !important;
+  }
+
+  /* line 675, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .infomation-form.form-config-role-to-user {
+    margin-top: -40px;
+  }
+
+  /* line 678, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .text-field-user .col-sm-1 {
+    float: left;
+    top: 0px;
+    right: 0px;
+    width: auto;
+  }
+
+  /* line 684, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .text-field-user .form-control {
+    width: 100% !important;
+  }
+
+  /* line 687, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .notification-features {
+    margin: 50px 10px 20px 15px;
+  }
+
+  /* line 690, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .btn-create-platform {
+    margin-top: -20px;
+  }
+
+  /* line 693, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-config-role-to-user .mpanel-standard {
+    margin: 0px 10px;
+  }
+
+  /* line 696, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  span.remove_field_id {
+    margin-left: 0px !important;
+  }
+
+  /* line 699, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-contact-info-acc .col-sm-3 {
+    width: 100%;
+  }
+
+  /* line 702, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-contact-info-acc .form-group .col-sm-6 {
+    width: 100%;
+  }
+
+  /* line 705, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-contact-info-acc .col-sm-1.micon_group {
+    height: 3px;
+  }
+
+  /* line 708, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-contact-info-acc .col-sm-3.micon_group {
+    height: 3px;
+  }
+
+  /* line 711, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-contact-info-acc #group_website .input-group {
+    width: 86%;
+    margin-left: 5%;
+  }
+
+  /* line 715, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-contact-info-acc .col-sm-6.mfield_country {
+    margin-top: 10px;
+  }
+
+  /* line 718, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-contact-info-acc .col-sm-6.mfield_department {
+    margin-top: 10px;
+  }
+
+  /* line 721, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .mgroup {
+    margin-bottom: 34px;
+    width: 100%;
+    left: 0;
+    padding: 0px 5px;
+  }
+
+  /* line 727, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-contact-info-acc .fa-minus {
+    left: 24%;
+  }
+
+  /* line 730, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .col-xs-10.mprofile-right {
+    padding: 0px;
+  }
+
+  /* line 733, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .micon-edit-group {
+    right: 0%;
+    margin-top: -30px;
+  }
+
+  /* line 737, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-contact-info-acc .lable-contact-info-acc {
+    left: -3%;
+    top: -40%;
+  }
+
+  /* line 741, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-contact-info-acc #client_username, #client_last_name {
+    margin-bottom: 25px;
+  }
+
+  /* line 744, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-contact-info-acc .col-sm-12 {
+    padding: 0px;
+  }
+
+  /* line 747, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-contact-info-acc .col-sm-offset-3 {
+    margin-left: 59%;
+  }
+
+  /* line 750, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-submit-update-acc .col-sm-9 {
+    width: 100%;
+  }
+
+  /* line 753, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-contact-info-acc .col-sm-1.mgroup_value {
+    padding-right: 0px;
+  }
+
+  /* line 756, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .mgroup-edit-profile #wrap_phone_view .lable-contact-info-acc {
+    top: -20%;
+  }
+
+  /* line 759, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .mgroup-edit-profile #wrap_address_view .lable-contact-info-acc {
+    top: -35%;
+  }
+
+  /* line 762, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .tabs-edit-user nav li:first-child a span {
+    padding-left: 0em;
+  }
+
+  /* line 765, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-contact-information #group_website .fa-minus,
+  .step-create-contact-information #group_phone .fa-minus,
+  .step-create-contact-information #group_organisation .fa-minus {
+    left: 90px;
+    top: -21px;
+  }
+
+  /* line 772, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .content-sign-up-info .mgroup_value {
+    margin-left: 0px;
+  }
+}
+@media only screen and (min-width: 900px) {
+  /* line 777, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  #app_menu, #navi_header_middle {
+    display: block;
+  }
+
+  /* line 778, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  #button-menu-middle, #button-menu-top {
+    display: none;
+  }
+}
+@media only screen and (min-width: 100px) and (max-width: 900px) {
+  /* line 781, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  #app_menu, #navi_header_middle {
+    display: none;
+  }
+
+  /* line 782, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  #button-menu-middle, #button-menu-top {
+    display: block;
+  }
+
+  /* line 783, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .panel-sign-up-mp .simple_captcha_refresh_button {
+    margin-left: 0px !important;
+  }
+
+  /* line 786, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .table-active-scroll td:last-child {
+    width: 100% !important;
+  }
+
+  /* line 789, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .panel.mpanel-product-setting {
+    margin-bottom: 50px;
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+
+  /* line 794, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .underline {
+    width: 36%;
+  }
+
+  /* line 797, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .underline-site {
+    width: 34%;
+  }
+
+  /* line 800, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .site-infor-form .input-group {
+    margin-left: 0px;
+  }
+
+  /* line 803, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  #contact_information {
+    text-align: left;
+  }
+
+  /* line 806, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-paging .mbutton_padding_color {
+    margin-top: 2px;
+  }
+
+  /* line 809, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-top .minput_pagging {
+    height: 23px;
+  }
+
+  /* line 812, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .search-mp.input-group button {
+    height: 27px;
+    margin-top: 4px;
+  }
+
+  /* line 816, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .search-mp {
+    position: relative;
+    margin-top: 30px;
+  }
+
+  /* line 820, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-paging {
+    margin-top: -60px;
+    right: 0px;
+    position: static;
+  }
+
+  /* line 825, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-new-user {
+    margin-left: 0px;
+  }
+
+  /* line 828, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .table-role-for-user td:first-child {
+    width: auto;
+  }
+
+  /* line 831, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  #remove-user-info {
+    margin-left: 0px;
+  }
+
+  /* line 834, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .infomation-form .mborder_style {
+    border-top: none !important;
+    border-right: none !important;
+    border-left: none !important;
+    border-bottom: 1px solid #f19533 !important;
+    border-radius: 0px !important;
+    -webkit-box-shadow: none !important;
+            box-shadow: none !important;
+  }
+
+  /* line 842, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .modal {
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+  }
+
+  /* line 846, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .navi_header_menu {
+    display: none;
+  }
+
+  /* line 849, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .hidemenu {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  /* line 853, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .body_pagging_role_stage {
+    padding-bottom: 0;
+  }
+
+  /* line 856, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .panel-heading {
+    padding: 5px 10px;
+  }
+
+  /* line 860, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .new-stage-wrap-select {
+    padding: 0px 4px;
+  }
+
+  /* line 863, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .breadcrumbs {
+    margin-top: -10px;
+  }
+
+  /* line 866, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .welcome {
+    height: 290px;
+  }
+
+  /* line 870, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .welcome_left .box_tool .name_diagram {
+    border-left: none;
+    padding-left: 0px;
+  }
+
+  /* line 874, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .infomation-form {
+    margin: 0px;
+  }
+
+  /* line 877, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .confi-role-user .config_role_for_user_right.col-sm-9 input {
+    width: 100%;
+  }
+
+  /* line 880, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .content-create {
+    padding: 10px;
+  }
+
+  /* line 883, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .scroll-table-mobile td.table-bottom {
+    padding-left: 0px !important;
+  }
+
+  /* line 886, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .thead-mobile {
+    display: none;
+  }
+
+  /* line 889, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .td_width40, .td_width20 {
+    width: 100% !important;
+  }
+
+  /* line 892, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .scroll_table {
+    overflow-y: visible;
+    height: auto;
+  }
+
+  /* line 896, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .scroll_table table {
+    margin-top: -3px;
+  }
+
+  /*responsive for table*/
+  /* line 901, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .scroll-table-mobile table,
+  .scroll-table-mobile thead,
+  .scroll-table-mobile tbody,
+  .scroll-table-mobile th,
+  .scroll-table-mobile td,
+  .scroll-table-mobile tr {
+    display: block;
+  }
+
+  /* Hide table headers (but not display: none;, for accessibility) */
+  /* line 911, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .scroll-table-mobile thead tr {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+
+  /* line 917, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .scroll-table-mobile td {
+    /* Behave  like a "row" */
+    border: none;
+    border-bottom: 1px solid #eee;
+    position: relative;
+    padding-left: 50% !important;
+    white-space: normal;
+    text-align: left;
+    word-break: break-all;
+  }
+
+  /* line 928, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .scroll-table-mobile td:before {
+    /* Now like a table header */
+    position: absolute;
+    /* Top/left values mimic padding */
+    top: 6px;
+    left: 6px;
+    width: 45%;
+    padding-right: 10px;
+    white-space: nowrap;
+    text-align: left;
+    font-weight: bold;
+  }
+
+  /* line 941, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .scroll-table-mobile td:before {
+    content: attr(data-title);
+    margin-right: 30px;
+  }
+
+  /* line 945, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .scroll-table-mobile td:after {
+    content: ".";
+    color: #eee;
+  }
+
+  /* line 949, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .header_mcontent {
+    height: 23px !important;
+  }
+
+  /* line 952, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .border-client {
+    border: none;
+    padding-left: 0px;
+  }
+
+  /* line 956, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .error-create-contact {
+    margin-left: 5%;
+  }
+
+  /* line 959, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .error-info {
+    margin-left: 0%;
+    width: 100%;
+  }
+
+  /* line 963, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .error-confi-security {
+    margin-left: 0px;
+    width: 100%;
+  }
+
+  /* line 967, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .assign-check .config_role_for_user_left.col-sm-2 {
+    margin-top: 0px;
+  }
+
+  /* line 970, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .title-role-to-user label.col-sm-1 {
+    float: none;
+    top: 0px;
+    right: 0px;
+  }
+
+  /* line 975, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .mpanel-body .field-step {
+    margin: 0px;
+  }
+
+  /* line 978, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  td.check-radio-table {
+    width: auto;
+  }
+
+  /* line 981, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .td_width20.check-radio-table {
+    width: 100% !important;
+  }
+
+  /* line 984, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .name-role-user .col-sm-2 {
+    text-align: left;
+  }
+
+  /* line 987, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .table-role-for-user th:nth-child(2) {
+    width: auto;
+  }
+
+  /* line 990, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .table-role-for-user td:nth-child(2) {
+    width: auto;
+  }
+
+  /* line 993, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .create-new-roles .panel-top {
+    max-height: 200px;
+    margin-bottom: 10px;
+  }
+
+  /* line 997, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .container-fluid.container-new-client {
+    margin: 0;
+    padding: 0px;
+  }
+
+  /* line 1001, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-new-clients ul li span {
+    line-height: 25px;
+    height: 25px;
+    width: 275px;
+    margin-bottom: 5px;
+    font-size: 12px;
+  }
+
+  /* line 1008, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-new-clients ul li span:after {
+    border-top: 13px solid transparent;
+    border-bottom: 12px solid transparent;
+  }
+
+  /* line 1012, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-new-clients ul li span:before {
+    border-top: 13px solid transparent;
+    border-bottom: 12px solid transparent;
+  }
+
+  /* line 1016, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-contact-information .col-sm-3 {
+    width: 100%;
+  }
+
+  /* line 1019, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-contact-information .col-sm-12 {
+    padding: 0px;
+  }
+
+  /* line 1022, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-contact-information .form-control {
+    width: 270px;
+  }
+
+  /* line 1025, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .content-bottom {
+    margin-top: 0px;
+  }
+
+  /* line 1028, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-contact-information .group_name {
+    margin-left: 0px;
+  }
+
+  /* line 1031, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .group-btn-continue .col-sm-offset-2 {
+    margin-left: 52%;
+  }
+
+  /* line 1034, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-contact-information .micon-plus {
+    line-height: 0px;
+  }
+
+  /* line 1037, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  #confirmation .col-sm-12 {
+    padding: 0px;
+  }
+
+  /* line 1040, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  #payment_information .col-sm-12 {
+    padding: 0px;
+  }
+
+  /* line 1043, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .panel-sign-in #payment_information .expr_date .col-sm-6 {
+    padding-left: 15px;
+  }
+
+  /* line 1046, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  #payment_information .expr_date .col-sm-6 {
+    padding: 0px;
+  }
+
+  /* line 1049, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-contact-information #group_website .input-group {
+    margin-left: 1%;
+  }
+}
+/*galaxy S6, Xperia Z3*/
+@media only screen and (min-width: 360px) and (max-width: 365px) {
+  /* line 1055, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .path_label {
+    margin-left: 15px !important;
+    margin-top: -10px;
+  }
+
+  /* line 1059, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .mpanel-standard .col-sm-2.alert-default {
+    margin-top: 0px !important;
+  }
+
+  /* line 1062, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .col-sm-2.alert-default {
+    height: 10px !important;
+    margin-top: 90px !important;
+    margin-bottom: 10px !important;
+  }
+
+  /* line 1067, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .mpanel-standard td .col-sm-2.alert-default, .mpanel-standard td .col-sm-2.alert-default {
+    padding-top: 0px !important;
+    padding-bottom: 25px !important;
+  }
+
+  /* line 1071, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .group-btn-continue .col-sm-offset-2 {
+    margin-left: 54%;
+  }
+}
+/*Nexus 6, Iphone 6 plus, Galaxy note 4*/
+@media only screen and (min-width: 400px) and (max-width: 500px) {
+  /* line 1077, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  #delete_stage {
+    margin-left: 0px !important;
+  }
+
+  /* line 1080, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .mpanel-standard .col-sm-6.alert-info {
+    width: 70%;
+  }
+
+  /* line 1083, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .mpanel-standard td .col-sm-2.alert-default, .mpanel-standard td .col-sm-2.alert-default {
+    padding: 0 0 40px 0 !important;
+  }
+
+  /* line 1086, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .mpanel-standard .col-sm-2.alert-default {
+    margin: 0px;
+    float: right;
+  }
+
+  /* line 1090, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .mpanel-standard .mtext_field_edit_role_permission {
+    width: 165px;
+  }
+
+  /* line 1093, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .lable-name-role {
+    margin-left: 6%;
+  }
+
+  /* line 1096, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-contact-info-acc .fa-minus {
+    left: 21% !important;
+  }
+}
+/**/
+@media only screen and (min-width: 430px) and (max-width: 900px) {
+  /* line 1102, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .diagram_hearder_left {
+    height: 50px;
+  }
+
+  /* line 1105, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .welcome, .welcome_left {
+    height: 220px;
+  }
+
+  /* line 1108, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-contact-info-acc .fa-minus {
+    left: 18% !important;
+  }
+
+  /* line 1111, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-contact-info-acc .col-sm-offset-3 {
+    margin-left: 66%;
+  }
+}
+/**/
+@media only screen and (min-width: 450px) and (max-width: 500px) {
+  /* line 1117, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .content-sign-up-info .form-control {
+    width: 360px;
+  }
+
+  /* line 1120, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .sign-up-info .step-create-new-clients ul li span {
+    width: 358px;
+  }
+
+  /* line 1123, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  #title {
+    margin-right: 40px;
+  }
+
+  /* line 1126, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .mpanel-standard .checkbox-inline {
+    margin-left: 0px;
+  }
+
+  /* line 1129, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-contact-info-acc .lable-contact-info-acc {
+    left: -3%;
+  }
+
+  /* line 1132, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-new-clients ul li span {
+    width: 355px;
+  }
+
+  /* line 1135, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-contact-information .form-control {
+    width: 360px;
+  }
+
+  /* line 1138, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .group-btn-continue .col-sm-offset-2 {
+    margin-left: 64%;
+  }
+}
+@media only screen and (min-width: 450px) and (max-width: 600px) {
+  /* line 1143, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .panel-sign-in-mp {
+    width: 80% !important;
+    padding: 20px !important;
+  }
+}
+/**/
+@media only screen and (min-width: 455px) and (max-width: 790px) {
+  /* line 1150, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .body-mstyle .col-xs-9 {
+    width: 70% !important;
+  }
+
+  /* line 1153, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .body-mstyle .col-xs-3 {
+    width: 30% !important;
+    margin-top: 7px !important;
+  }
+
+  /* line 1157, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .col-xs-9.nopadding {
+    margin-top: 5px !important;
+  }
+}
+/**/
+@media only screen and (min-width: 500px) and (max-width: 550px) {
+  /* line 1163, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .content-sign-up-info .form-control {
+    width: 360px;
+  }
+
+  /* line 1166, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .sign-up-info .step-create-new-clients ul li span {
+    width: 420px;
+  }
+
+  /* line 1169, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  #title {
+    margin-right: 110px;
+  }
+
+  /* line 1172, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .alert-default a {
+    margin-left: 43px;
+  }
+
+  /* line 1175, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .mpanel-standard .col-sm-6.alert-info {
+    width: 80%;
+  }
+
+  /* line 1178, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .mpanel-standard td .col-sm-2.alert-default, .mpanel-standard td .col-sm-2.alert-default {
+    padding: 0 0 40px 0 !important;
+  }
+
+  /* line 1181, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .mpanel-standard .col-sm-2.alert-default {
+    margin: 0px;
+    float: right;
+  }
+
+  /* line 1185, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .mpanel-standard .alert-default a {
+    margin-left: 0px;
+  }
+
+  /* line 1188, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .mpanel-standard .mtext_field_edit_role_permission {
+    width: 176px;
+  }
+
+  /* line 1191, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .lable-name-role {
+    margin-left: 4.7%;
+  }
+
+  /* line 1194, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-new-clients ul li span {
+    width: 385px;
+  }
+
+  /* line 1197, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-contact-information .form-control {
+    width: 420px;
+  }
+}
+@media only screen and (max-width: 767px) {
+  /* line 1202, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .mpadding-left-mobile {
+    padding-left: 0 !important;
+  }
+
+  /* line 1203, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .rails-bootstrap-forms-datetime-select select {
+    margin-bottom: 5px;
+  }
+
+  /* line 1204, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-create-products button {
+    margin-top: 15px !important;
+  }
+
+  /* line 1205, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-config-role-to-user .mpanel-standard {
+    margin-bottom: 10px;
+  }
+
+  /* line 1208, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  #payment_group_address_new .col-sm-8 {
+    padding: 0;
+  }
+}
+/**/
+@media only screen and (max-width: 550px) and (min-width: 100px) {
+  /* line 1213, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .input-group input {
+    width: 60% !important;
+  }
+
+  /* line 1216, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .alert-info {
+    background: none;
+    border: none;
+  }
+
+  /* line 1220, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .col-sm-2.alert-default {
+    height: 10px;
+    margin-top: 30px;
+    margin-bottom: 10px;
+  }
+
+  /* line 1225, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .path_label {
+    margin-left: 40px;
+  }
+
+  /* line 1228, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  #role_permissions td {
+    padding-bottom: 25px;
+  }
+
+  /* line 1231, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .m_add_edit_btn .fa-plus-circle {
+    margin: 5px 20px 0px 10px;
+  }
+
+  /* line 1234, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .mnopadding {
+    width: 100% !important;
+  }
+
+  /* line 1237, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .mprofile-right {
+    width: 100% !important;
+    margin-top: 20px;
+    border-left: none !important;
+  }
+
+  /* line 1242, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .sidebar ul li a {
+    padding-left: 10px !important;
+  }
+
+  /* line 1245, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .sidebar ul li a:hover {
+    cusor: pointer;
+  }
+
+  /* line 1248, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .nav li a {
+    padding: 10px 0px !important;
+  }
+
+  /* line 1251, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .container-fluid .col-xs-2 {
+    width: 41% !important;
+    font-size: 13px;
+  }
+
+  /* line 1255, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .container-fluid .col-xs-10 {
+    width: 59% !important;
+    font-size: 13px;
+  }
+
+  /* line 1259, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .panel-success {
+    width: 100% !important;
+  }
+
+  /* line 1262, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  #delete_stage {
+    margin-left: 13px;
+    padding: 7px;
+  }
+
+  /* line 1266, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .nopadding .fa-plus-circle {
+    padding-left: 6px;
+  }
+
+  /* line 1269, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .btn-create-stage {
+    padding: 0px 5px 6px 11px !important;
+  }
+
+  /* line 1272, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .panel-body {
+    padding: 9px;
+  }
+}
+/**/
+@media only screen and (min-width: 550px) and (max-width: 620px) {
+  /* line 1278, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .alert-info {
+    background: none !important;
+    border: none !important;
+  }
+
+  /* line 1282, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .col-sm-2.alert-default {
+    top: 80px;
+  }
+
+  /* line 1285, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .path_label {
+    position: absolute;
+    top: 47px;
+    left: 55px;
+  }
+
+  /* line 1290, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .m_add_edit_btn .fa-plus-circle {
+    margin-left: 15px;
+    margin-top: 10px;
+  }
+
+  /* line 1294, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  #role_permissions td {
+    padding-bottom: 25px;
+  }
+
+  /* line 1297, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  #path {
+    margin-left: 70px;
+    width: 74%;
+  }
+
+  /* line 1301, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .lable-name-role {
+    margin-left: 4.7%;
+  }
+
+  /* line 1304, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .col-xs-10.mprofile-right {
+    padding-left: 10px;
+  }
+
+  /* line 1307, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-contact-info-acc .lable-contact-info-acc {
+    left: -3%;
+  }
+
+  /* line 1310, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-new-clients ul li span {
+    width: 400px !important;
+  }
+
+  /* line 1313, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-contact-information .form-control {
+    width: 442px;
+  }
+
+  /* line 1316, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .group-btn-continue .col-sm-offset-2 {
+    margin-left: 71%;
+  }
+
+  /* line 1319, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .content-sign-up-info .form-control {
+    width: 360px;
+  }
+}
+/**/
+@media only screen and (min-width: 620px) and (max-width: 700px) {
+  /* line 1325, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .alert-info {
+    background: none !important;
+    border: none !important;
+  }
+
+  /* line 1329, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .col-sm-5.alert-default {
+    width: 100%;
+  }
+
+  /* line 1332, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .col-sm-5.alert-info {
+    width: 8%;
+  }
+
+  /* line 1335, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .col-sm-2.alert-default {
+    width: 100%;
+    height: 0px;
+  }
+
+  /* line 1339, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .path_label {
+    margin-left: 10px;
+  }
+
+  /* line 1342, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .m_add_edit_btn .fa-plus-circle {
+    margin-right: 20px;
+    margin-left: 40px;
+  }
+
+  /* line 1346, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .alert-default button, .alert-default a {
+    margin-bottom: 4px;
+  }
+
+  /* line 1349, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .text-field-user .form-control {
+    width: 57% !important;
+    float: right;
+  }
+
+  /* line 1353, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .header_mcontent {
+    height: 25px;
+  }
+
+  /* line 1356, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .border-create-user {
+    border: none;
+    margin-top: 0px;
+  }
+
+  /* line 1360, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .col-xs-10.mprofile-right {
+    padding-left: 10px;
+  }
+
+  /* line 1363, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-contact-info-acc .lable-contact-info-acc {
+    left: -3%;
+  }
+
+  /* line 1366, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .col-xs-10.mprofile-right {
+    padding-left: 10px;
+  }
+
+  /* line 1369, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-new-clients ul li span {
+    width: 500px;
+  }
+
+  /* line 1372, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-contact-information .form-control {
+    width: 510px;
+  }
+
+  /* line 1375, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .group-btn-continue .col-sm-offset-2 {
+    margin-left: 74%;
+  }
+
+  /* line 1378, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-contact-information #group_website .input-group {
+    margin-left: 0;
+  }
+
+  /* line 1381, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .sign-up-info .step-create-new-clients ul li span {
+    width: 428px;
+  }
+
+  /* line 1384, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .content-sign-up-info .form-control {
+    width: 400px;
+  }
+}
+/**/
+@media only screen and (min-width: 600px) and (max-width: 799px) {
+  /* line 1390, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .panel-sign-in-mp {
+    width: 70% !important;
+    padding: 20px 30px !important;
+  }
+
+  /* line 1394, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .group_name {
+    padding-right: 5px;
+  }
+
+  /* line 1397, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create span.contact_info {
+    margin-left: 37px !important;
+  }
+
+  /* line 1400, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .infomation-form label {
+    margin-bottom: 0px;
+  }
+
+  /* line 1403, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  #add_postcode, #org_company {
+    margin-bottom: 15px !important;
+  }
+
+  /* line 1406, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  #client_username, #client_last_name {
+    margin-bottom: 13px;
+  }
+
+  /* line 1409, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .border-tab #user_info_content {
+    margin-left: 0px !important;
+  }
+
+  /* line 1412, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .infomation-form .col-sm-1 {
+    right: 60px !important;
+    padding-right: 1px;
+  }
+
+  /* line 1416, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .text-field-user .col-sm-1 {
+    margin-left: 60px;
+  }
+
+  /* line 1419, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-new-user .col-md-2 {
+    width: 40%;
+    text-align: left;
+    margin-bottom: 10px;
+  }
+
+  /* line 1424, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-new-user .col-md-3 {
+    text-align: left;
+    width: 40%;
+    margin-bottom: 10px;
+  }
+
+  /* line 1429, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .text-field-user .col-sm-6 {
+    width: 90%;
+  }
+
+  /* line 1432, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .btn-create-user-info .col-sm-offset-1 {
+    margin-left: 0px;
+  }
+
+  /* line 1435, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .text-field-user .form-control {
+    width: 57% !important;
+    float: right;
+  }
+
+  /* line 1439, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .panel-sign-in {
+    width: 75% !important;
+  }
+
+  /* line 1442, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .lable-name-role {
+    margin-left: 4.3%;
+  }
+
+  /* line 1445, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .lable-name-role {
+    margin-left: 3.8%;
+  }
+
+  /* line 1448, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .btn-create-user-info button {
+    margin-left: 38.5%;
+  }
+
+  /* line 1451, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .title-role-to-user label.col-sm-1 {
+    right: 0px !important;
+  }
+
+  /* line 1454, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .border-create-user {
+    border: none;
+    margin-top: 0px;
+  }
+
+  /* line 1458, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .btn-create-platform {
+    margin-top: 10px;
+  }
+
+  /* line 1461, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .col-xs-10.mprofile-right {
+    padding-left: 10px;
+  }
+
+  /* line 1464, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-contact-info-acc .lable-contact-info-acc {
+    left: -2.5%;
+  }
+}
+/**/
+@media only screen and (min-width: 700px) and (max-width: 750px) {
+  /* line 1470, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .content-sign-up-info .form-control, .sign-up-info .step-create-new-clients ul li span {
+    width: 450px;
+  }
+
+  /* line 1473, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .panel-sign-in {
+    width: 85% !important;
+  }
+
+  /* line 1476, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .alert-info {
+    background: none;
+    border: none;
+  }
+
+  /* line 1480, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .col-sm-2.alert-default {
+    height: 0px;
+  }
+
+  /* line 1483, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .alert-default button {
+    margin-left: 20px;
+    margin-top: -15px;
+  }
+
+  /* line 1487, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .alert-default a {
+    margin-left: 45px;
+  }
+
+  /* line 1490, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .m_add_edit_btn .fa-plus-circle {
+    margin-left: 12px;
+  }
+
+  /* line 1493, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .path_label {
+    margin-left: 8px;
+  }
+
+  /* line 1496, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .diagram_hearder_right button {
+    margin-right: 40px;
+  }
+
+  /* line 1499, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .text-field-user .col-sm-1 {
+    margin-left: 60px;
+  }
+
+  /* line 1502, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-new-user .col-md-2 {
+    width: 40%;
+    text-align: left;
+    margin-bottom: 10px;
+  }
+
+  /* line 1507, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-new-user .col-md-3 {
+    text-align: left;
+    width: 40%;
+    margin-bottom: 10px;
+  }
+
+  /* line 1512, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .header_mcontent {
+    height: 25px;
+  }
+
+  /* line 1515, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-contact-info-acc .fa-minus {
+    left: 14% !important;
+  }
+
+  /* line 1518, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-new-clients ul li span {
+    width: 200px;
+  }
+
+  /* line 1521, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-contact-information .form-control {
+    width: 530px;
+  }
+
+  /* line 1524, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .group-btn-continue .col-sm-offset-2 {
+    margin-left: 69%;
+  }
+
+  /* line 1527, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-contact-information #group_website .input-group {
+    margin-left: 0;
+  }
+
+  /* line 1530, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .content-sign-up-info #group_address input {
+    margin-right: 70px;
+  }
+}
+/**/
+@media only screen and (min-width: 750px) and (max-width: 799px) {
+  /* line 1536, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .text-field-user .form-group {
+    margin-bottom: 7px;
+  }
+
+  /* line 1539, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-new-clients ul li span {
+    width: 210px;
+  }
+
+  /* line 1542, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-contact-information .form-control {
+    width: 530px;
+  }
+
+  /* line 1545, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .group-btn-continue .col-sm-offset-2 {
+    margin-left: 63%;
+  }
+
+  /* line 1548, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-contact-information .group_name {
+    margin-left: 0px;
+  }
+
+  /* line 1551, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-contact-information #group_website .input-group {
+    margin-left: 0;
+  }
+
+  /* line 1554, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .content-sign-up-info .form-control, .sign-up-info .step-create-new-clients ul li span {
+    width: 450px;
+  }
+}
+@media only screen and (min-width: 768px) and (max-width: 799px) {
+  /* line 1559, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-contact-info-acc .fa-minus {
+    left: 14% !important;
+  }
+
+  /* line 1562, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-contact-info-acc .col-sm-3 {
+    width: 20%;
+  }
+
+  /* line 1565, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-contact-info-acc .fa-plus {
+    left: 0px !important;
+    top: 7px;
+  }
+
+  /* line 1569, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-contact-info-acc .form-group .col-sm-6 {
+    width: 50%;
+  }
+
+  /* line 1572, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .mgroup {
+    width: 49%;
+    left: 21%;
+  }
+
+  /* line 1576, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-contact-info-acc .lable-contact-info-acc {
+    left: -26.5%;
+  }
+
+  /* line 1579, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .micon-edit-group {
+    right: -60%;
+    margin-top: 0px;
+  }
+
+  /* line 1583, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-contact-info-acc .col-sm-offset-3 {
+    margin-left: 21%;
+  }
+
+  /* line 1586, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-contact-info-acc .fa-minus {
+    left: 34% !important;
+    top: 8px !important;
+  }
+
+  /* line 1590, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-contact-information .fa-plus, .step-create-contact-information.fa-minus {
+    top: 7px;
+    left: 0px;
+  }
+
+  /* line 1594, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-contact-information .group_name {
+    margin-left: 200px;
+  }
+
+  /* line 1597, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .content-sign-up-info .minput-bottom-margin15 input {
+    margin-bottom: 10px;
+  }
+
+  /* line 1600, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .content-sign-up-info .group_name {
+    margin-top: 0px;
+  }
+
+  /* line 1603, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .content-sign-up-info .fa-plus {
+    margin-right: 0px;
+    margin-top: 10px;
+  }
+
+  /* line 1607, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .content-sign-up-info .group_name {
+    margin-left: 160px;
+  }
+
+  /* line 1610, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .content-sign-up-info .fa-minus {
+    margin-right: -11px;
+    margin-top: 20px;
+  }
+}
+@media only screen and (min-width: 750px) and (max-width: 900px) {
+  /* line 1616, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .sign-in-mplatform .panel-sign-in {
+    margin-top: 40px;
+  }
+
+  /* line 1619, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .col-sm-5.alert-default {
+    width: 80%;
+  }
+
+  /* line 1622, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .col-sm-5.alert-info {
+    width: 8%;
+  }
+
+  /* line 1625, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .col-sm-2.alert-default {
+    width: 12%;
+  }
+
+  /* line 1628, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .alert-info {
+    border: none;
+    background: none;
+  }
+
+  /* line 1632, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .alert-default button {
+    margin-bottom: 5px;
+  }
+
+  /* line 1635, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .wrap_header_member .col-xs-7 {
+    width: 40%;
+  }
+
+  /* line 1638, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .wrap_header_member .col-xs-5 {
+    width: 60%;
+  }
+
+  /* line 1641, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .name_diagram button {
+    padding: 6px 3px !important;
+  }
+
+  /* line 1644, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .infomation-form .form-control {
+    width: 100% !important;
+  }
+
+  /* line 1647, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .infomation-form .col-sm-1 {
+    right: 1%;
+    padding-right: 1px;
+  }
+
+  /* line 1651, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .fa-plus, .fa-minus {
+    left: 65px;
+  }
+
+  /* line 1654, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .border-tab #user_info_content {
+    margin-left: 0px;
+  }
+
+  /* line 1657, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-new-user .col-md-2 {
+    width: 40%;
+    text-align: left;
+    margin-bottom: 10px;
+  }
+
+  /* line 1662, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-new-user .col-md-3 {
+    text-align: left;
+    width: 40%;
+    margin-bottom: 10px;
+  }
+
+  /* line 1667, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .header_mcontent {
+    height: 25px;
+  }
+
+  /* line 1670, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .title-role-to-user label.col-sm-1 {
+    float: left;
+    margin-right: 20px;
+    width: 20%;
+  }
+
+  /* line 1675, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .lable-name-role {
+    margin-left: 0%;
+  }
+
+  /* line 1678, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .infomation-form input.feature_field_name, .infomation-form input.feature_field_value {
+    padding-left: 2px;
+    margin: 0px;
+  }
+
+  /* line 1682, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .feature_group td {
+    height: 32px;
+  }
+
+  /* line 1685, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .infomation-form .select_field {
+    margin: 2px 2px 5px 1px;
+  }
+
+  /* line 1688, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .col-xs-10.mprofile-right {
+    padding-left: 10px;
+  }
+}
+@media only screen and (min-width: 799px) and (max-width: 900px) {
+  /* line 1693, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .panel-sign-in-mp {
+    width: 70% !important;
+  }
+
+  /* line 1696, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-contact-info-acc .lable-contact-info-acc {
+    left: -29.5%;
+  }
+
+  /* line 1699, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .content-sign-up-info .mgroup_value {
+    margin-left: 90px;
+  }
+
+  /* line 1702, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .mgroup {
+    width: 54%;
+  }
+
+  /* line 1705, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .panel-sign-in {
+    width: 90% !important;
+  }
+
+  /* line 1708, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-contact-info-acc .col-sm-1.mgroup_value {
+    padding: 0px;
+  }
+
+  /* line 1711, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-contact-info-acc .col-sm-offset-3 {
+    margin-left: 19%;
+  }
+
+  /* line 1714, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-new-clients ul li span {
+    width: 230px;
+  }
+
+  /* line 1717, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-contact-information .form-control {
+    width: 530px;
+  }
+
+  /* line 1720, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .group-btn-continue .col-sm-offset-2 {
+    margin-left: 0%;
+  }
+
+  /* line 1723, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-contact-information .group_name {
+    margin-left: 169px;
+  }
+
+  /* line 1726, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-contact-information .fa-plus, .step-create-contact-information.fa-minus {
+    top: 7px;
+    left: 0px;
+  }
+
+  /* line 1730, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .content-sign-up-info .form-control {
+    width: 400px;
+  }
+
+  /* line 1733, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .sign-up-info .step-create-new-clients ul li span {
+    width: 185px;
+  }
+
+  /* line 1736, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .panel-sign-in-mp {
+    width: 60%;
+    padding: 0 30px;
+  }
+}
+/**/
+@media only screen and (min-width: 900px) and (max-width: 1100px) {
+  /* line 1743, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .panel-sign-in-mp {
+    width: 55% !important;
+    padding: 20px 30px !important;
+  }
+
+  /* line 1747, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .content-sign-up-info .form-control {
+    width: 400px;
+  }
+
+  /* line 1750, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .panel-sign-in {
+    width: 80% !important;
+  }
+
+  /* line 1753, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .content-sign-up-info .mgroup_value {
+    margin-left: 90px;
+  }
+
+  /* line 1756, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .sign-up-info .step-create-new-clients ul li span {
+    width: 200px !important;
+  }
+
+  /* line 1759, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-new-user .col-md-2 {
+    width: 23%;
+    text-align: left;
+    margin-bottom: 15px;
+  }
+
+  /* line 1764, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-new-user .col-md-3 {
+    width: 32%;
+    text-align: left;
+    margin-bottom: 15px;
+  }
+
+  /* line 1769, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .text-field-user .col-sm-1 {
+    width: 19%;
+  }
+
+  /* line 1772, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .error-info {
+    margin-left: 20%;
+    width: 48%;
+  }
+
+  /* line 1776, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .btn-create-user-info button {
+    margin-left: 19.7%;
+  }
+
+  /* line 1779, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .error-confi-security {
+    margin-left: 6.5%;
+    width: 47.3%;
+  }
+
+  /* line 1783, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .background-hide {
+    left: 20%;
+  }
+
+  /* line 1786, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .infomation-form .button_field, span.remove_field_id {
+    width: 20%;
+  }
+
+  /* line 1789, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-new-clients ul li span {
+    width: 225px !important;
+  }
+
+  /* line 1792, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-contact-information .form-control {
+    width: 460px !important;
+  }
+
+  /* line 1795, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-contact-information .group_name {
+    margin-left: 119px;
+  }
+
+  /* line 1798, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .btn-create-contact-info {
+    margin-left: 3%;
+  }
+}
+@media only screen and (min-width: 600px) and (max-width: 1200px) {
+  /* line 1803, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .list-item {
+    height: 90px !important;
+    width: 90px !important;
+    margin-right: 5px;
+  }
+
+  /* line 1808, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .panel-sign-up-mp .simple_captcha_refresh_button {
+    margin-left: 10px !important;
+  }
+
+  /* line 1811, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .img-logo img {
+    width: 70px !important;
+    height: 70px !important;
+    margin: 10px !important;
+  }
+
+  /* line 1816, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .container-item .col-md-4 {
+    padding: 0px;
+  }
+
+  /* line 1819, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .col-md-12.link-item {
+    padding: 3px 0 14px 3px;
+    margin-bottom: 20px;
+  }
+}
+@media only screen and (min-width: 1100px) and (max-width: 1280px) {
+  /* line 1825, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .content-sign-up-info .form-control {
+    width: 510px;
+  }
+
+  /* line 1828, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .content-sign-up-info .mgroup_value {
+    margin-left: 120px;
+  }
+
+  /* line 1831, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .sign-up-info .step-create-new-clients ul li span {
+    width: 218px;
+  }
+
+  /* line 1834, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-new-clients ul li span:after {
+    right: -34px;
+    border-bottom: 19.9px solid transparent;
+  }
+
+  /* line 1838, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-new-clients ul li span:before {
+    right: -34px;
+    border-bottom: 19.9px solid transparent;
+  }
+
+  /* line 1842, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-new-clients ul li span {
+    width: 315px;
+  }
+
+  /* line 1845, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-contact-information .form-control {
+    width: 670px;
+  }
+
+  /* line 1848, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-contact-information .group_name {
+    margin-left: 210px;
+  }
+
+  /* line 1851, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .panel-sign-in-mp {
+    width: 51% !important;
+  }
+
+  /* line 1854, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .panel-sign-in-mp .simple_captcha_refresh_button {
+    margin-left: 20px;
+  }
+}
+@media only screen and (min-width: 900px) and (max-width: 1280px) {
+  /* line 1859, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .col-sm-5.alert-default {
+    width: 70%;
+  }
+
+  /* line 1862, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-contact-info-acc .col-sm-offset-3 {
+    margin-left: 16.1%;
+  }
+
+  /* line 1865, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .col-sm-5.alert-info {
+    width: 10%;
+  }
+
+  /* line 1868, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .col-sm-2.alert-default {
+    width: 20%;
+  }
+
+  /* line 1871, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .infomation-form .form-control {
+    width: 100% !important;
+  }
+
+  /* line 1874, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  #phone_value, #email_value {
+    margin-top: 2px;
+  }
+
+  /* line 1877, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .infomation-form .col-sm-1 {
+    right: 1%;
+    padding-right: 1px;
+  }
+
+  /* line 1881, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .fa-plus, .fa-minus {
+    left: 65px;
+  }
+
+  /* line 1884, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .border-tab #user_info_content {
+    margin-left: 0px;
+  }
+
+  /* line 1887, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .infomation-form {
+    margin: 0px;
+  }
+
+  /* line 1890, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .group_name {
+    padding: 6px 3px 6px 0px;
+  }
+
+  /* line 1893, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-new-user {
+    margin-left: 0px;
+  }
+
+  /* line 1896, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  #remove-user-info {
+    margin-left: 0px;
+  }
+
+  /* line 1899, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-new-user.col-md-9 {
+    width: 95%;
+  }
+
+  /* line 1902, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .mgroup {
+    width: 54%;
+    left: 16.5%;
+  }
+
+  /* line 1906, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-contact-info-acc .col-sm-3 {
+    width: 16%;
+  }
+
+  /* line 1909, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .search-mp {
+    width: 60%;
+  }
+}
+@media only screen and (min-width: 1500px) {
+  /* line 1917, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .panel-sign-in-mp {
+    margin: 25% auto !important;
+  }
+
+  /* line 1920, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .error-payment {
+    margin-left: 2.5%;
+    width: 95%;
+  }
+
+  /* line 1924, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .error-confi-security {
+    margin-left: 10%;
+    width: 44%;
+  }
+
+  /* line 1928, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .infomation-form .col-sm-4.btn-create-contact-info {
+    margin-left: 1.5%;
+  }
+
+  /* line 1931, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-submit-update-acc .col-sm-2 {
+    width: 11%;
+  }
+
+  /* line 1934, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .tabs-edit-user {
+    max-width: 100%;
+  }
+
+  /* line 1937, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .tabs nav ul {
+    max-width: 100%;
+  }
+
+  /* line 1940, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .search-role {
+    width: 86%;
+  }
+
+  /* line 1943, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-new-clients ul li span {
+    width: 445px;
+  }
+
+  /* line 1946, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-contact-information .col-sm-3 {
+    width: 14%;
+  }
+
+  /* line 1949, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-contact-information .form-control {
+    width: 950px;
+  }
+
+  /* line 1952, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-contact-information .group_name {
+    margin-left: 270px;
+  }
+
+  /* line 1955, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .sign-up-info .step-create-new-clients ul li span {
+    width: 338px;
+  }
+
+  /* line 1958, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .content-sign-up-info .form-control {
+    width: 740px !important;
+  }
+
+  /* line 1961, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .content-sign-up-info .mgroup_value {
+    margin-left: 220px !important;
+  }
+
+  /* line 1964, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .content-sign-up-info .group_name {
+    margin-left: 0px !important;
+  }
+
+  /* line 1967, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .btn-create-contact-info.col-sm-offset-1 {
+    margin-left: 11%;
+  }
+
+  /* line 1970, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .underline {
+    width: 13.5%;
+  }
+
+  /* line 1973, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .underline-site {
+    width: 11%;
+  }
+
+  /* line 1976, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .list-item {
+    height: 110px;
+    width: 110px;
+  }
+
+  /* line 1980, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .img-logo img {
+    width: 80px;
+    height: 80px;
+    margin: 15px;
+  }
+
+  /* line 1985, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .description {
+    padding-top: 20px;
+  }
+
+  /* line 1988, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .container-item {
+    height: 1000px;
+  }
+}
+@media only screen and (min-width: 1650px) {
+  /* line 1993, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .error-create {
+    margin-left: 126px;
+  }
+
+  /* line 1996, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .error-confi-security {
+    margin-left: 10.6%;
+    width: 43.6%;
+  }
+
+  /* line 2000, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .infomation-form .col-sm-4.btn-create-contact-info {
+    margin-left: -0.5%;
+  }
+
+  /* line 2003, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .form-submit-update-acc .col-sm-2 {
+    width: 11%;
+  }
+
+  /* line 2006, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .tabs-edit-user {
+    max-width: 100%;
+  }
+
+  /* line 2009, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .tabs nav ul {
+    max-width: 100%;
+  }
+
+  /* line 2012, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-new-clients ul li span:after {
+    border-bottom: 20px solid transparent;
+    right: -34px;
+  }
+
+  /* line 2016, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-new-clients ul li span {
+    width: 505px;
+  }
+
+  /* line 2019, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-contact-information .group_name {
+    margin-left: 350px;
+  }
+
+  /* line 2022, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .step-create-contact-information .form-control {
+    width: 1100px;
+  }
+
+  /* line 2025, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .btn-create-contact-info {
+    margin-left: 2%;
+  }
+
+  /* line 2028, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  #group_website .input-group select {
+    padding: 8px 0;
+  }
+
+  /* line 2031, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .sign-up-info .step-create-new-clients ul li span {
+    width: 380px;
+  }
+
+  /* line 2034, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .content-sign-up-info .form-control {
+    width: 830px;
+  }
+
+  /* line 2037, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .content-sign-up-info .mgroup_value {
+    margin-left: 240px;
+  }
+
+  /* line 2040, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .btn-create-contact-info.col-sm-offset-1 {
+    margin-left: 6%;
+  }
+
+  /* line 2043, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .content-sign-up-info .micon_group {
+    margin-left: -2%;
+  }
+
+  /* line 2046, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .input-site-info .input-group-addon {
+    padding-top: 7px;
+    padding-bottom: 7px;
+  }
+
+  /* line 2050, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .input-site-info .input-domain {
+    width: 64.5% !important;
+  }
+}
+@media only screen and (min-width: 1800px) {
+  /* line 2055, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .group_name {
+    padding: 6px 4px 6px 0px;
+  }
+
+  /* line 2058, /apps/platform/app/assets/stylesheets/mreponsive.scss */
+  .error-create {
+    margin-left: 140px;
+  }
+}

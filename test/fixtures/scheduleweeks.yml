@@ -1,0 +1,15 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  week_num: 1
+  year: 1
+  start_date: 2025-07-28 13:10:20
+  end_date: MyString
+  status: MyString
+
+two:
+  week_num: 1
+  year: 1
+  start_date: 2025-07-28 13:10:20
+  end_date: MyString
+  status: MyString

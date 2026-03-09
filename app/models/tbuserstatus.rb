@@ -1,0 +1,2 @@
+class Tbuserstatus < ApplicationRecord
+end

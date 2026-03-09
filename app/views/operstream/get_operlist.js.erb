@@ -1,0 +1,76 @@
+
+<% if !@action.nil? && @action != "" && @action == "ADD" %>
+    if ($("[name='oOperstream_list_item']").length >=1) {
+        $("[name='oOperstream_list_item']").remove();
+    }
+
+    <%  @oOperstream.each do |operstream|%>
+
+        document.getElementById("table_operstream_body").innerHTML +=
+        `
+        
+        <tr name ="oOperstream_list_item" <% if !operstream.valid_to.nil?                            
+                                        if operstream.valid_to.to_date < Time.now.to_date%>
+                                            style="color: red;"
+                                        <% elsif (operstream.valid_to.to_date - Time.now.to_date).to_i <= 1  %>         
+                                            style="color: orange;"
+                                        <%end 
+                                    end %>   >
+            <td><%= operstream.function_id.present? ? Function.where(id: operstream.function_id).first.sname : "" %></td> 
+            <td><%= operstream.organization_id.present? ? Organization.where(id: operstream.organization_id).first.name : "" %></td> 
+            <td><%= operstream.stream_id.present? ? Stream.where(id: operstream.stream_id).first.name : "" %></td> 
+            <td><%= operstream.valid_from.strftime('%d/%m/%Y') %></td> 
+            <td><%= operstream.valid_to.strftime('%d/%m/%Y') %></td> 
+            <td style="text-align: center;">
+            <% if is_access(session["user_id"], "OPERSTREAM","EDIT") %>
+            <a onclick="update_operstream(<%=operstream.id%>,'<%=operstream.function_id%>','<%=operstream.organization_id%>','<%=operstream.stream_id%>','<%=operstream.valid_to.to_date.strftime('%d/%m/%Y')%>')" style="background: none !important; border: none !important;cursor: pointer; margin-right:5px" data-bs-toggle="modal" data-bs-target="#modal-operstream">
+                <span class="text-primary fas fa-pen"></span>
+            </a>
+            <%end%>
+            <% if is_access(session["user_id"], "OPERSTREAM","DEL") %>
+            <a data-toggle="modal" data-target="#exampleModal-#{<%= operstream.id %>}" style="cursor: pointer;">
+                <span class="text-danger fas fa-trash" style="width : 15px"></span>
+            </a>
+            <%end%>
+            <div class="modal fade" id="exampleModal-#{<%= operstream.id %>}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><%= lib_translate("Are_you_sure") %></h5>
+                        <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p><%= lib_translate("Are_you_sure_to_delete") %>?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal"><%= lib_translate("Close")  %></button>
+                        <%= link_to lib_translate("Delete") , url_for(action: :delete, id: operstream.id), method: :delete, class: "btn btn-danger" %>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+            </td>
+        </tr>
+        `
+$("#loading_operstream").css("display", "none");    
+        
+    <%end%>
+<%end%>
+$("#loading_operstream").css("display", "none");    
+
+<% if !@action.nil? && @action != "" && @action == "UPDATE" && !@oOperstreamUpdate.nil? %>
+    $('#operstream_id_update').val(<%=@oOperstreamUpdate.id%>);
+	$('#function_id_update').val(<%=@oOperstreamUpdate.function_id%>);
+	$('#organization_id_update').val(<%=@oOperstreamUpdate.organization_id%>);
+	$('#stream_id_update').val(<%=@oOperstreamUpdate.stream_id%>);
+	$('#valid_from_update').val("<%=@oOperstreamUpdate.valid_from.strftime('%d/%m/%Y')%>");
+	$('#valid_to_update').val("<%=@oOperstreamUpdate.valid_to.strftime('%d/%m/%Y')%>");
+    $("#loading_operstream").css("display", "none");    
+
+<%end%>
+
+
+  
+
+                         

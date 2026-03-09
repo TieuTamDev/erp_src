@@ -1,0 +1,23 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: MyString
+  scode: MyString
+  parents: MyString
+  children: MyString
+  issued_date: 2022-11-11 11:42:04
+  issued_by: MyString
+  issued_place: MyString
+  note: MyText
+  status: MyString
+
+two:
+  name: MyString
+  scode: MyString
+  parents: MyString
+  children: MyString
+  issued_date: 2022-11-11 11:42:04
+  issued_by: MyString
+  issued_place: MyString
+  note: MyText
+  status: MyString

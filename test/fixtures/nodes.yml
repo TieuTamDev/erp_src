@@ -1,0 +1,23 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  department: one
+  color: MyString
+  width: MyString
+  height: MyString
+  px: MyString
+  py: MyString
+  note: MyText
+  status: MyString
+  stream: one
+
+two:
+  department: two
+  color: MyString
+  width: MyString
+  height: MyString
+  px: MyString
+  py: MyString
+  note: MyText
+  status: MyString
+  stream: two

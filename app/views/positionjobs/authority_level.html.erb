@@ -1,0 +1,230 @@
+<style>
+    li a.active {
+        color: #2C7BE5 !important;
+        font-weight: bold !important;
+        font-size: 1rem !important;
+    }
+
+    .r-count {
+        border: 1px solid #d3d3d3;
+        padding: 0px 7px 0px 7px;
+        border-radius: 30px;
+        text-align: center;
+        font-weight: bold;
+    }
+</style>
+<div class="mb-2">
+    <a class="text-info" href="<%= positionjob_authority_level_path %>">Danh sách đơn vị</a>
+</div>
+<div class="card" style="flex-grow: 1;">
+    <div class="card-body p-3">
+        <h4 class="mb-3">Cấp độ quyền hạn</h4>
+        <div class="mt-2">
+            <div class="row">
+                <div class="col-md-6 me-auto">
+                    <div class="col-md-6">
+                        <%= form_tag positionjob_authority_level_path(lang: session[:lang]), method: :post do %>
+                            <div class="input-group">
+                                <%= text_field_tag :search, params[:search], class: "form-control", id: "function_search", placeholder: "Tìm kiếm" %>
+                                <span class="input-group-text bg-white">
+                                    <span class="fas fa-search" style="color:#999999"></span>
+                                </span>
+                            </div>
+                        <% end %>
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <%= link_to new_positionjob_path, class: "btn btn-primary", id: "btn-add-function", onclick: "showLoadding(true);", remote: true do %>
+                        <i class="fas fa-plus"></i> Thêm cấp độ quyền hạn
+                    <% end %>
+                </div>
+            </div>
+        </div>
+        <table id="table_positionjobs" class="table table-customs table-bordered fs--1 mb-0" style="margin-top: 15px !important; margin-bottom: 0px !important">
+            <thead>
+                <tr style="background-color: #EFF2F1;">
+                    <th class="no-sort" style="width: 10%;">#</th>
+                    <th class="no-sort" style="width: 50%;">Tên chức năng</th>
+                    <th class="no-sort" style="width: 50%;">Quyền hạn</th>
+                    <!-- <th class="no-sort" style="width: 50%;">Số lượng nhân sự</th> -->
+                    <th class="no-sort" style="width: 30%;">Ghi chú</th>
+                    <th class="no-sort" style="width: 10%;">Hành động</th>
+                </tr>
+            </thead>
+            <tbody class="list">
+                <% @positionjobs.each_with_index do |p, index|
+                    start_index = (session[:page].to_i - 1) * session[:per_page].to_i
+                %>
+                    <tr>
+                        <td><%= start_index + index + 1 %></td>
+                        <td class="text-start"><%= p.name %></td>
+                        <td class="text-start"><%= p.iorder %></td>
+                        <!-- <td class="text-start"><%= p.amount %></td> -->
+                        <td class="text-start"><%= p.note %></td>
+                        <td class="text-center">
+                            <div class="d-flex justify-content-center align-items-center">
+                                <!-- <i class="text-primary fas fa-pen"></i>
+                                <i class="text-danger fas fa-trash"></i> -->
+                                <%= link_to edit_positionjob_path(p), class: 'btn btn-link', onclick: "showLoadding(true);",
+                                    data: { bs_toggle: 'tooltip', bs_placement: 'top', bs_title: 'Chỉnh sửa' },
+                                    remote: true do %>
+                                    <i class="text-primary fas fa-pen"></i>
+                                <% end %>
+                                <%= link_to positionjob_path(p), class: 'btn btn-link delete-positionjob-btn', 
+                                            method: :delete,
+                                            data: { 
+                                                bs_toggle: 'tooltip', 
+                                                bs_placement: 'top', 
+                                                bs_title: 'Xóa',
+                                                can_delete: p.can_be_deleted,
+                                                positionjob_name: p.name,
+                                                positionjob_id: p.id,
+                                                remote: true
+                                            } do %>
+                                    <i class="text-danger fas fa-trash"></i>
+                                <% end %>
+                            </div>
+                        </td>
+                    </tr>
+                <% end %>
+            </tbody>
+        </table>
+        
+        <div class='d-flex justify-content-between align-items-center mt-3'>
+            <div style="font-size: 14px; font-weight: 400; color: #4E606E;">
+                <%=lib_translate('Show')%> <%= @positionjobs.size %> <%=lib_translate('Up_to')%> <%= @total_records %> <%=lib_translate('Record')%>
+            </div>
+            <div>
+                <%= render_pagination_limit_offset(positionjob_authority_level_path(lang: session[:lang], per_page: session[:per_page], search: session[:search]), 10, @positionjobs.count).html_safe %>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modal-add-positionjob" tabindex="-1" role="dialog" aria-hidden="true" data-bs-focus="false">
+    <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 500px">
+        <div class="modal-content position-relative">
+            <div class="position-absolute top-0 end-0 mt-2 me-2 z-1">
+                <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base"
+                    data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form>
+                <div class="modal-body p-0">
+                    <div
+                        class="rounded-top-3 py-3 ps-4 pe-3 bg-body-tertiary d-flex align-items-center justify-content-between">
+                        <h4 class="mb-1" id="modalExampleDemoLabel">Thêm vị trí công việc </h4>
+                    </div>
+                    <div class="p-4 pb-0">
+                        <div class="mb-3">
+                            <label class="col-form-label" for="recipient-name">Tên cấp độ quyền hạn</label>
+                            <input type="text" name="name" class="form-control" id="text_name" onkeyup="getTextToASCII()">
+                        </div>
+                        <div class="mb-3">
+                            <label class="col-form-label" for="recipient-name">Mã</label>
+                            <input type="text" name="scode" class="form-control" id="text_scode">
+                        </div>
+                        <div class="mb-3">
+                            <label class="col-form-label" for="recipient-name">Quyền hạn</label>
+                            <select name="level" class="form-select" id="">
+                                <% (1..10).each do |level| %>
+                                    <option value="<%= level %>"><%= level %></option>
+                                <% end %>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Đóng</button>
+                <button class="btn btn-primary" type="button">Thêm trực tiếp</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+
+        document.querySelectorAll('.delete-positionjob-btn').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const canDelete = this.getAttribute('data-can-delete') === 'true';
+                const positionjobName = this.getAttribute('data-positionjob-name');
+                
+                if (canDelete) {
+                    if (confirm(`Xác nhận xóa cấp quyền hạn ${positionjobName}?`)) {
+                        showLoadding(true);
+
+                        const token = $('meta[name="csrf-token"]').attr('content');
+                        
+                        $.ajax({
+                            url: this.getAttribute('href'),
+                            type: 'DELETE',
+                            dataType: 'script',
+                            headers: {
+                                'X-CSRF-Token': token
+                            },
+                            success: function(response) {
+                            },
+                            error: function(xhr) {
+                                showLoadding(false);
+                                alert('Có lỗi xảy ra khi xóa cấp quyền hạn');
+                            }
+                        });
+                    }
+                } else {
+                    alert("Đối với các cấp quyền hạn đã được gán cho nhân sự, hệ thống sẽ không hiển thị nút xóa. Để xóa cấp quyền hạn, vui lòng xóa toàn bộ các quyền hạn liên quan tới các nhân sự trước!");
+                }
+                
+                return false;
+            });
+        });
+    });
+</script>
+
+
+<script>
+    function getTextToASCII() {
+        var value_name = document.getElementById("text_name").value;
+        var value_scode = document.getElementById("text_scode");
+        if (value_name) {
+        var content = removeVietnameseTones(value_name).replace(/ /g, '-');
+            if (value_scode) {
+                value_scode.value = content.toUpperCase()
+            }
+        }
+    }
+    function removeVietnameseTones(str) {
+        str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g,"a"); 
+        str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g,"e"); 
+        str = str.replace(/ì|í|ị|ỉ|ĩ/g,"i"); 
+        str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g,"o"); 
+        str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g,"u"); 
+        str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g,"y"); 
+        str = str.replace(/đ/g,"d");
+        str = str.replace(/À|Á|Ạ|Ả|Ã|Â|Ầ|Ấ|Ậ|Ẩ|Ẫ|Ă|Ằ|Ắ|Ặ|Ẳ|Ẵ/g, "A");
+        str = str.replace(/È|É|Ẹ|Ẻ|Ẽ|Ê|Ề|Ế|Ệ|Ể|Ễ/g, "E");
+        str = str.replace(/Ì|Í|Ị|Ỉ|Ĩ/g, "I");
+        str = str.replace(/Ò|Ó|Ọ|Ỏ|Õ|Ô|Ồ|Ố|Ộ|Ổ|Ỗ|Ơ|Ờ|Ớ|Ợ|Ở|Ỡ/g, "O");
+        str = str.replace(/Ù|Ú|Ụ|Ủ|Ũ|Ư|Ừ|Ứ|Ự|Ử|Ữ/g, "U");
+        str = str.replace(/Ỳ|Ý|Ỵ|Ỷ|Ỹ/g, "Y");
+        str = str.replace(/Đ/g, "D");
+        // Some system encode vietnamese combining accent as individual utf-8 characters
+        // Một vài bộ encode coi các dấu mũ, dấu chữ như một kí tự riêng biệt nên thêm hai dòng này
+        str = str.replace(/\u0300|\u0301|\u0303|\u0309|\u0323/g, ""); // ̀ ́ ̃ ̉ ̣  huyền, sắc, ngã, hỏi, nặng
+        str = str.replace(/\u02C6|\u0306|\u031B/g, ""); // ˆ ̆ ̛  Â, Ê, Ă, Ơ, Ư
+        // Remove extra spaces
+        // Bỏ các khoảng trắng liền nhau
+        str = str.replace(/ + /g," ");
+        str = str.trim();
+        // Remove punctuations
+        // Bỏ dấu câu, kí tự đặc biệt
+        str = str.replace(/!|@|%|\^|\*|\(|\)|\+|\=|\<|\>|\?|\/|,|\.|\:|\;|\'|\"|\&|\#|\[|\]|~|\$|_|`|-|{|}|\||\\/g," ");
+        return str;
+    }
+</script>

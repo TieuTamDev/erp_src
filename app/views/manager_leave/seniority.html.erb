@@ -1,0 +1,87 @@
+<style>
+.result-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  font-family: "Segoe UI", Arial, sans-serif;
+  margin-top: 20px;
+}
+
+/* Header */
+.result-header {
+  display: grid;
+  grid-template-columns: 
+      1fr     /* Mã nhân sự */
+      2fr     /* Tên nhân sự */
+      2fr     /* Phòng/khoa */
+      2fr     /* Vị trí */
+      1fr     /* Năm thâm niên */
+      1fr     /* Số phép */
+      1fr;    /* Ngày vào làm */
+  background: #4c6ef5;
+  color: #fff;
+  font-weight: bold;
+  padding: 12px 15px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+}
+
+/* Rows */
+.result-row {
+  display: grid;
+  grid-template-columns: 
+      1fr 
+      2fr
+      2fr
+      2fr
+      1fr
+      1fr
+      1fr;
+  padding: 12px 15px;
+  background: #f8f9fc;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.result-row:hover {
+  background: #eef2ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+}
+
+.col {
+  display: flex;
+  align-items: center;
+}
+</style>
+
+
+
+<div class="result-container">
+  <div class="result-header">
+    <div class="col col-id">Mã nhân sự</div>
+    <div class="col col-name">Tên nhân sự</div>
+    <div class="col col-department">Phòng/khoa</div>
+    <div class="col col-positionjob">Vị trí</div>
+    <div class="col col-years">Năm thâm niên</div>
+    <div class="col col-x">Số phép thâm niên</div>
+    <div class="col col-date">Ngày vào làm</div>
+  </div>
+
+  <% @result.each do |row| %>
+    <div class="result-row">
+      <div class="col col-id"><%= row[:sid] %></div>
+      <div class="col col-name"><%= row[:full_name] %></div>
+      <div class="col col-department"><%= row[:department_name] %></div>
+      <div class="col col-positionjob"><%= row[:positionjob_name] %></div>
+      <div class="col col-years"><%= row[:years] %></div>
+      <div class="col col-x"><%= row[:x] %></div>
+      <div class="col col-date"><%= row[:dtfrom] %></div>
+    </div>
+  <% end %>
+</div>
+
+

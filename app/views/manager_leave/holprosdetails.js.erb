@@ -1,0 +1,342 @@
+var dataInfo = <%= @data_info.to_json.html_safe %>;
+
+if (!dataInfo || Object.keys(dataInfo).length === 0) {
+  alert("Đơn đã bị hủy");
+  window.location.reload();
+}
+else{
+var details_handle = <%= @result.to_json.html_safe %>;
+$("#leaveDetailContent").empty();
+$("#info_user_leaver").empty();
+var isTheoDoi = <%= @theo_doi ? 'true' : 'false' %>;
+var bien_phong = <%= @bien_phong ? 'true' : 'false' %>;
+if (bien_phong) {
+  if (isTheoDoi) {
+    $('#btn-approve-leave').addClass('d-none');
+    $('#btn-user-handle-leave').removeClass('d-none');
+  } else {
+    $('#btn-approve-leave').removeClass('d-none');
+    $('#btn-user-handle-leave').addClass('d-none');
+  }
+}
+
+
+
+var check_holprosdetails = <%= @check_holprosdetails %>;
+if (check_holprosdetails === true) {
+  $("#info_user_leaver").hide();
+} else {
+  $("#leaveAccordion").closest(".row").show(); 
+  $("#cancelAccordion").closest(".row").hide();
+  $("#info_user_leaver").show();
+}
+
+$("#editDetailContent").empty();
+
+<% if @array_cancel.present? %>
+  var cancelHtml = "";
+
+  <% @array_cancel.each do |item| %>
+    cancelHtml += `
+      <div class="mb-4">
+        <h6 class="fw-bold mb-2"><%= item[:sholtype] %></h6>
+        <div class="ps-3 d-flex flex-column gap-1">
+          <% item[:changes].each do |change| %>
+            <div class="text-body" style=" font-size: 14px; "><b><%= j change %></b></div>
+          <% end %>
+        </div>
+      </div>
+    `;
+  <% end %>
+  $("#editDetailContent").html(cancelHtml);
+<% end %>
+
+var dataResult = <%= @data_result.to_json.html_safe %>;
+var notesHtml = '';
+if (dataInfo.note) {
+  notesHtml = `<div class="col-12">Lý do hủy: <span style="font-weight: bold;">${dataInfo.note}</span></div>`;
+}
+if (dataInfo.note_cancel) {
+  notesHtml = `<div class="col-12">Lý do từ chối điều chỉnh: <span style="font-weight: bold;">${dataInfo.note_cancel}</span></div>`;
+}
+$("#info_user").empty();
+  var userHtml = `
+    <div class="w-100">
+      <div class="col-12">Đơn vị: <span style="font-weight: bold;">${dataInfo.department_name ?? "Chưa rõ"}</span></div>
+      <div class="col-12">Tên nhân sự: <span style="font-weight: bold;">${dataInfo.full_name ?? "Chưa rõ"}</span></div>
+      <div class="col-12">Trạng thái đơn: <span style="font-weight: bold;">${dataInfo.type_temp ?? "Chưa rõ"}</span></div>
+      <div class="col-12">Tổng thời gian nghỉ: <span style="font-weight: bold;">${dataInfo.dttotal ?? "Chưa rõ"} ngày</span></div>
+      ${notesHtml}
+    </div>
+`;
+$("#info_user").append(userHtml);
+
+if (Object.keys(dataResult).length > 0) {
+  const phep_duoc_sd_theo_thang = Number(dataResult.phep_duoc_sd_theo_thang ?? 0);
+  const phep_duoc_ung_theo_thang = Number(dataResult.phep_duoc_ung_theo_thang ?? 0);
+  const con_lai_phep_ton = Number(dataResult.con_lai_phep_ton ?? 0);
+  const tong_used = Number(dataResult.tong_used ?? 0);
+  const total_ton = Number(dataResult.total_ton ?? 0);
+  const check_ton = dataResult.check_ton
+  var total = 0;
+  if (phep_duoc_sd_theo_thang >= 0) {
+    total = phep_duoc_sd_theo_thang + phep_duoc_ung_theo_thang;
+    if (check_ton) {
+      total += total_ton;
+    }
+  }
+
+  let ket_qua_don = "";
+  if (tong_used <= total) {
+    ket_qua_don = `<span class="text-success">Đơn hợp lệ</span>`;
+  } else {
+    ket_qua_don = `<span class="text-danger"><b>Đơn không hợp lệ</b></span>`;
+  }
+  let infoHtml = `
+    <div class="mb-2 border p-3 rounded shadow-sm">
+      <h5 class="mb-3 text-primary">
+        <i class="fas fa-info-circle me-2"></i>Thông tin phép của nhân sự
+      </h5>
+      <div class="row mb-2">
+        <div class="col-7 col-md-8 text-muted">Số phép được sử dụng năm:</div>
+        <div class="col-5 col-md-4 fw-semibold"><strong>${dataResult.so_phep_nam != null ? dataResult.so_phep_nam + " Ngày" : "Chưa cập nhật"}</strong></div>
+      </div>
+      <div class="row mb-2">
+        <div class="col-12 col-md-4 text-muted mb-1 mb-md-0">Số phép tồn:</div>
+        <div class="col-12 col-md-8">
+          <div>
+            <span class="fw-semibold">
+              ${dataResult.phep_ton != null ? dataResult.phep_ton + " Ngày" : "Chưa cập nhật"} 
+              HSD: ${dataResult.thoi_gian_sd ?? "Chưa cập nhật"}
+            </span>
+          </div>
+          <div>
+            ${dataResult.phep_ton_da_sd ? `
+              <small class="text-muted">Đã dùng: ${dataResult.phep_ton_da_sd} ngày</small>
+            ` : ""}
+          </div>
+        </div>
+      </div>
+      <div class="row mb-2">
+        <div class="col-5 col-md-4 text-muted">Số đã dùng:</div>
+        <div class="col-7 col-md-8 fw-semibold"><strong>${dataResult.phep_da_dung != null ? dataResult.phep_da_dung + " Ngày" : "Chưa cập nhật"}</strong></div>
+      </div>
+      <div class="row mb-2">
+        <div class="col-7 col-md-8 text-muted">Số phép trong tháng ${dataResult.thang_hien_tai ?? ""}:</div>
+        <div class="col-5 col-md-4 fw-semibold"><strong>${dataResult.phep_duoc_sd_theo_thang != null ? dataResult.phep_duoc_sd_theo_thang + " Ngày" : "Chưa cập nhật"}</strong></div>
+      </div>
+      <div class="row mb-2">
+        <div class="col-7 col-md-8 text-muted">Số phép được ứng:</div>
+        <div class="col-5 col-md-4 fw-semibold"><strong>${dataResult.phep_duoc_ung_theo_thang != null ? dataResult.phep_duoc_ung_theo_thang + " Ngày" : "Chưa cập nhật"}</strong></div>
+      </div>
+      ${dataResult.tong_used ? `
+        <div class="row mb-2">
+          <div class="col-5 col-md-7 text-muted">Số phép đăng ký trong đơn:</div>
+          <div class="col-7 col-md-5 fw-semibold">
+            <strong>${dataResult.tong_used != null ? dataResult.tong_used + " Ngày" : "Chưa cập nhật"}</strong> ${ket_qua_don}
+          </div>
+        </div>
+      ` : ""}
+    </div>
+  `;
+
+  $("#info_user_leaver").append(infoHtml);
+}
+
+
+var grouped_handle = {};
+details_handle.forEach(item => {
+  const type = item.sholtype || "Khác";
+  if (!grouped_handle[type]) grouped_handle[type] = [];
+  grouped_handle[type].push(item);
+});
+
+Object.keys(grouped_handle).forEach(type => {
+  let html = `
+    <div class="mb-4 border p-3 rounded shadow-sm">
+      <div class="bg-light px-2 py-1 rounded fw-bold mb-2">${type}</div>
+  `;
+
+  grouped_handle[type].forEach(item => {
+    const detailFormatted = formatDetailDays(item.details)
+      ? formatDetailDays(item.details)
+          .split('<br>')
+          .filter(line => line.trim() !== '')
+          .sort((a, b) => {
+            const dateA = new Date(a.split(' ')[0].split('/').reverse().join('-'));
+            const dateB = new Date(b.split(' ')[0].split('/').reverse().join('-'));
+            return dateA - dateB;
+          })
+          .map(line => `<div>${line}</div>`)
+          .join('')
+      : '';
+
+    const receiverFormatted_first = formatReceivers_first(item.handover_receiver);
+    const receiverFormatted = formatReceivers(item.handover_receiver);
+    $("#user_support").val(receiverFormatted_first);
+    const location = item.place_before_hol || "Không rõ";
+    const note = item.note || "Không có";
+    const dtFrom = new Date(item.dtfrom).toLocaleDateString("vi-VN");
+    const dtTo = new Date(item.dtto).toLocaleDateString("vi-VN");
+    const locationType = item.issued_place === "IN-COUNTRY" ? "Trong nước" : "Ngoài nước";
+    const country = item.country || "";
+    const noteFormatted = note.replace(/\r?\n/g, '<br>');
+
+    html += `
+      <div class="row mb-2">
+        <div class="col-12 col-sm-4 text-muted">Thời gian nghỉ:</div>
+        <div class="col-12 col-sm-8 fw-bold">${detailFormatted}</div>
+      </div>
+      <div class="row mb-2">
+        <div class="col-12 col-sm-4 text-muted">Người nhận bàn giao công việc:</div>
+        <div class="col-12 col-sm-8 fw-bold">${receiverFormatted}</div>
+      </div>
+      <div class="row mb-2">
+        <div class="col-12 col-sm-4 text-muted">Địa điểm:</div>
+        <div class="col-12 col-sm-8 fw-bold">${locationType}</div>
+      </div>
+      <div class="row mb-2">
+        <div class="col-12 col-sm-4 text-muted">Địa chỉ nghỉ:</div>
+        <div class="col-12 col-sm-8 fw-bold">${location}</div>
+      </div>
+      ${country ? `
+      <div class="row mb-2">
+        <div class="col-12 col-sm-4 text-muted">Quốc gia:</div>
+        <div class="col-12 col-sm-8 fw-bold">${country}</div>
+      </div>` : ""}
+      <div class="row mb-2">
+        <div class="col-12 col-sm-4 text-muted">Lý do:</div>
+        <div class="col-12 col-sm-8 fw-bold">${noteFormatted}</div>
+      </div>
+    `;
+  });
+
+  html += `</div>`;
+  $("#leaveDetailContent").append(html);
+});
+
+
+var timeline = <%= @timeline_data.to_json.html_safe %>;
+$("#processTimeline").empty();
+var finalApprovedIndex = (function () {
+  var lastIndex = -1;
+  timeline.forEach((step, i) => {
+    if (step.status === "Đã xử lý") {
+      lastIndex = i;
+    }
+  });
+  return lastIndex;
+})();
+
+timeline.forEach((step, i) => {
+  var time = `<div>${step.time.split(" ")[0]}</div><div>${step.time.split(" ")[1]}</div>`;
+  var separatorClass = `timeline__separator ${step.first ? "first" : ""} ${step.last ? "last" : ""} ${step.handled ? "handled" : ""}`.trim();
+  var handlerLabel = step.first ? "Người làm đơn" : "Người xử lý";
+
+  var isFinalApproved = step.status === "Đã xử lý" && i === finalApprovedIndex;
+  var statusWithIcon = (i === 0)
+    ? `Đăng ký nghỉ`
+    : isFinalApproved
+      ? `${step.status} <i class="fas fa-check-circle" style="color: green; margin-left: 6px;"></i>`
+      : step.status;
+  var noteHtml = '';
+  if (step.note && step.note.trim() !== '') {
+    const noteAssign = step.note.replace(/\r?\n/g, '<br>');
+    noteHtml = `
+      <div class="row mt-2">
+        <div class="col-12 col-sm-4 text-muted">Nội dung cần xử lý:</div>
+        <div class="col-12 col-sm-8 fw-bold">${noteAssign}</div>
+      </div>
+    `;
+  }
+
+  var item = `
+    <div class="timeline__date">${time}</div>
+    <div class="${separatorClass}"></div>
+    <div class="timeline__content">
+        <div class="timeline__title"><strong>${statusWithIcon}</strong></div>
+        <div class="timeline__description">
+            ${handlerLabel}: <br><span style="color: #005FBE;font-weight: bold;">${step.user}</span> <br>Chức vụ: <br><span style="color: #333; font-weight: bold;">${step.user_position}</span><br>${noteHtml}
+        </div>
+    </div>
+  `;
+
+  $("#processTimeline").append(item);
+});
+var timelineCancel = <%= @timeline_data_cancel.to_json.html_safe %>;
+$("#cancelTimeline").empty();
+timelineCancel.forEach((step, i) => {
+  var time = `<div>${step.time.split(" ")[0]}</div><div>${step.time.split(" ")[1]}</div>`;
+  var separatorClass = `timeline__separator ${step.first ? "first" : ""} ${step.last ? "last" : ""} ${step.handled ? "handled" : ""}`.trim();
+  var handlerLabel = step.first ? "Người y/c hủy" : "Người xử lý";
+
+  var isFinalApproved = step.status === "Đã xử lý" && i === finalApprovedIndex;
+  var statusWithIcon = (i === 0)
+    ? `Đăng ký hủy`
+    : isFinalApproved
+      ? `${step.status} <i class="fas fa-check-circle" style="color: red; margin-left: 6px;"></i>`
+      : step.status;
+  var noteHtml = '';
+  if (step.note && step.note.trim() !== '') {
+    const noteAssign = step.note.replace(/\r?\n/g, '<br>');
+    noteHtml = `
+      <div class="row mt-2">
+        <div class="col-12 col-sm-4 text-muted">Nội dung cần xử lý:</div>
+        <div class="col-12 col-sm-8 fw-bold">${noteAssign}</div>
+      </div>
+    `;
+  }
+
+  var item = `
+    <div class="timeline__date">${time}</div>
+    <div class="${separatorClass}"></div>
+    <div class="timeline__content">
+        <div class="timeline__title"><strong>${statusWithIcon}</strong></div>
+        <div class="timeline__description">
+            ${handlerLabel}: <br><span style="color: #005FBE;font-weight: bold;">${step.user}</span> <br>Chức vụ: <br><span style="color: #333; font-weight: bold;">${step.user_position}</span><br>${noteHtml}
+        </div>
+    </div>
+  `;
+
+  $("#cancelTimeline").append(item);
+});
+
+showLoadding(false);
+function mapStatus(status) {
+  switch (status) {
+    case "CHUAXULY": return "Đang chờ xử lý";
+    case "DAXULY": return "Đã xử lý";
+    default: return status;
+  }
+}
+
+
+$("#holDetailModal").modal('show');
+function formatDetailDays(detailString) {
+  const map = {
+    "ALL": "Cả ngày",
+    "AM": "Buổi sáng",
+    "PM": "Buổi chiều"
+  };
+
+  if (!detailString) return "";
+  return detailString.split("$$$").map(detail => {
+    const [day, part] = detail.split("-");
+    return `${day} (${map[part] || part})`;
+  }).join("<br>");
+}
+
+function formatReceivers(receiverString) {
+  if (!receiverString) return "";
+  return receiverString.split("|||")
+    .map(item => item.split("$$$")[1] || "")
+    .join("<br>");
+}
+function formatReceivers_first(receiverString) {
+  if (!receiverString) return "";
+  return receiverString.split("|||")
+    .map(item => item.split("$$$")[0] || "")
+    .join("<br>");
+}
+
+}

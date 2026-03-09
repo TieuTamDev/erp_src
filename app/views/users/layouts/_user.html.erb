@@ -1,0 +1,19 @@
+<%= yield :style_profile %>
+<div class="content-user">
+  <div class="infomation_user_layout">
+    <%= render partial: "users/layouts/profile_layout/infomation"%>   
+  </div>
+  <div class="bank_user_layout">
+    <%= render partial: "users/layouts/profile_layout/bank"%>   
+  </div>
+  <div class="educational_user_layout">
+    <%= render partial: "users/layouts/profile_layout/educational"%>   
+  </div>
+  <div class="work_history_user_layout">
+    <%= render partial: "users/layouts/profile_layout/work_history"%>   
+  </div>  
+  <div class="cvs_user_layout">
+    <%= render partial: "users/layouts/profile_layout/cvs"%>   
+  </div>
+</div>
+<%= yield :javascript_profile %>

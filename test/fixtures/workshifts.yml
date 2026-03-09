@@ -1,0 +1,19 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: MyText
+  start_time: MyString
+  end_time: MyString
+  checkin_start: MyString
+  checkin_end: MyString
+  checkout_start: MyString
+  checkout_end: MyString
+
+two:
+  name: MyText
+  start_time: MyString
+  end_time: MyString
+  checkin_start: MyString
+  checkin_end: MyString
+  checkout_start: MyString
+  checkout_end: MyString

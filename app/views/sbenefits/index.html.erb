@@ -1,0 +1,425 @@
+<%# sbenefits %>
+<%= stylesheet_link_tag '/assets/mystyle/sbenefits.css'%>
+<!-- modal  -->
+<div class="modal fade" id="staticBackdrop" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 1800px">
+    <div class="modal-content border-0">
+      <div class="position-absolute top-0 end-0 mt-3 me-3 z-index-1">
+        <button id="btn_close_modal_config "class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div class="bg-light rounded-top-lg py-3 ps-4 pe-6">
+          <h4 class="mb-1" id="staticBackdropLabel"><%= lib_translate("Add_multiple_benefit")%></h4>
+        </div>
+        <div class="">
+          <div class="row">
+            <div >
+              <div class="card theme-wizard">
+                <div class="card-header pt-3 pb-2">
+                  <ul class="nav justify-content-between nav-wizard">
+                    <li class="nav-item"><a id="tab_1" class="nav-link active fw-semi-bold" style="cursor: context-menu;" href="#bootstrap-wizard-tab1" data-bs-toggle="" data-wizard-step=""><span class="nav-item-circle-parent"><span class="nav-item-circle"><span class="fas fa-cogs"></span></span></span><span class="d-none d-md-block mt-1 fs--1"><%= lib_translate("Tab_1_title") %></span></a></li>
+                    <li class="nav-item"><a id="tab_2" class="nav-link fw-semi-bold" style="cursor: context-menu;" href="#bootstrap-wizard-tab2" data-bs-toggle="" data-wizard-step=""><span class="nav-item-circle-parent"><span class="nav-item-circle"><span class="fas fa-user"></span></span></span><span class="d-none d-md-block mt-1 fs--1"><%= lib_translate("Tab_2_title") %></span></a></li>
+                    <li class="nav-item"><a id="tab_3" class="nav-link fw-semi-bold" style="cursor: context-menu;" href="#bootstrap-wizard-tab3" data-bs-toggle="" data-wizard-step=""><span class="nav-item-circle-parent"><span class="nav-item-circle"><span class="fas fa-dollar-sign"></span></span></span><span class="d-none d-md-block mt-1 fs--1"><%= lib_translate("Tab_3_title") %></span></a></li>
+                  </ul>
+                </div>
+                <div class="card-body py-4">
+                  <div class="tab-content">
+                        <div class="tab-pane active px-sm-3 px-md-5" role="tabpanel" aria-labelledby="bootstrap-wizard-tab1" id="bootstrap-wizard-tab1">
+                          <form novalidate="novalidate">
+                            <input class="form-control d-none" type="email" name="email" placeholder="Email address" pattern="^([a-zA-Z0-9_.-])+@(([a-zA-Z0-9-])+.)+([a-zA-Z0-9]{2,4})+$" required="required" id="bootstrap-wizard-wizard-email" data-wizard-validate-email="true" />
+                          </form>
+                          <div class="row mb-3" style="align-items: center;">
+                            <label class="col-1 "><%= lib_translate("Target") %>:</label>
+                            <div class="col">
+                              <div class="row">
+                                <div class="col-auto">
+                                  <input checked type="radio" id="target_id_NAM" class="form-check-input" value="NAM" name="user_target"/> <label class="form-check-label" for="target_id_NAM" style="cursor: pointer"> <%= lib_translate("Male") %></label>
+                                </div>
+                                <div class="col-auto">
+                                  <input  type="radio" id="target_id_NU" class="form-check-input" value="NU" name="user_target"/> <label class="form-check-label" for="target_id_NU" style="cursor: pointer"> <%= lib_translate("Female") %></label>
+                                </div>
+                                <div class="col-auto">
+                                  <input  type="radio" id="target_id_TATCA" class="form-check-input" value="TATCA" name="user_target"/> <label class="form-check-label" for="target_id_TATCA" style="cursor: pointer"><%= lib_translate("All") %></label>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="row">
+                          <div class="col-1">
+                            <label ><%= lib_translate("Benefits_type") %>:</label>
+                          </div>
+                          <div class="col">
+                            <select class="form-select" name="user_benefits_type" id="user_benefits_type">     
+                                <option value="1">Loại 1</option>
+                                <option value="2">Loại 2</option>
+                                <option value="3">Loại 3</option>      
+                            </select>
+                          </div>     
+                          </div>
+                          <input value="<%=@year%>" id="selected_year" class="d-none">
+                        </div>
+                        <div class="tab-pane px-sm-3 px-md-5" role="tabpanel" aria-labelledby="bootstrap-wizard-tab2" id="bootstrap-wizard-tab2">
+                          <div class="card mb-3">
+                            <div class="card-body pt-0">
+                                <div class="tab-content">
+                                    <div class="tab-pane preview-tab-pane active" role="tabpanel"aria-labelledby="tab-dom-5a3c857c-8deb-4307-af64-a62f27089443"id="dom-5a3c857c-8deb-4307-af64-a62f27089443">
+                                        <div id="" data-list='{"valueNames":["id","username","email","sid","insurance_no","gender","nationality","ethnic","religion","marriage","education","academicrank","status"],"page":<%= session[:number_paging_table] %>,"pagination":true}'>
+                                            <div >
+                                                <div class="row ">
+                                                    <div class="col-xl-5">
+                                                        <div class="mt-3">                                    
+                                                                <h3 ><%= lib_translate("List_of_staff") %></h3>                                     
+                                                        </div>
+                                                    </div>                                                  
+                                                </div>
+                                            </div>
+                                            <div class="tab-content " id="myTabContent">
+                                              <div style="display: flex" id="loading_user">
+                                                <div class="spinner_handle"></div>
+                                                <p style="color: var(--falcon-avatar-status-border-color);"><%= lib_translate("Inprogress_handle")  %>...</p>
+                                              </div>
+                                                <div class="pb-3 table-responsive tab-pane fade show active" id="tab-home" role="tabpanel" aria-labelledby="home-tab">
+                                                    <hr class="mt-3 mb-0" style="width: 100%">
+                                                    <div id="pill-myTabContent" class="tab-content pt-1">
+                                                        <div class="tab-pane fade show active " id="pill-tab-home" role="tabpanel" aria-labelledby="home-tab">
+                                                        <div class="table-responsive scrollbar" style="max-height: 400px;">
+                                                            <table id="" class="table table-sm table-responsive-sm table-bordered fs--2 mb-0">
+                                                                <thead class ="bg-200 text-900" style="vertical-align: middle !important; ">
+                                                                    <tr>
+                                                                        <th  class="no-sort" data-sort="ID" style="text-align: center; width: 20px !important" class="align-middle white-space-nowrap">
+                                                                            <div class="form-check mb-0">
+                                                                                <input onclick="checkAllUser(this.checked)" class="form-check-input users" style="margin-left: -1.8em !important; margin-top:0.5em !important" type="checkbox" data-bulk-select='{"body":"bulk-select-body","actions":"bulk-select-actions","replacedElement":"bulk-select-replace-element"}' checked/>
+                                                                            </div>
+                                                                        </th>
+                                                                        <th style="text-align:left;font-weight: bolder; width: 250px;" ><%= lib_translate("employee_code") %></th>
+                                                                        <th style="text-align:left;font-weight: bolder; width: 250px;" ><%= lib_translate("Full_name") %></th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody class="list" id="list_users" style="vertical-align: middle !important;">                   
+                                                                        <tr>
+                                                                          <td>
+                                                                          </td>
+                                                                          <td>
+                                                                          </td>
+                                                                          <td>
+                                                                          </td>
+                                                                        </tr>    
+                                                                </tbody>
+                                                            </table> 
+                                                        </div> 
+                                                        </div>
+                                                    </div>                 
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="tab-pane px-sm-3 px-md-5" role="tabpanel" aria-labelledby="bootstrap-wizard-tab3" id="bootstrap-wizard-tab3">
+                          <div style="display: flex" id="loading_benefits">
+                            <div class="spinner_handle"></div>
+                            <p style="color: var(--falcon-avatar-status-border-color);"><%= lib_translate("Inprogress_handle")  %>...</p>
+                          </div>
+                            <div class="table-responsive scrollbar" style="max-height: 400px;">
+                              <table id="positonjob_table" class="table table-sm table-responsive-sm table-bordered fs--2 mb-0">
+                                  <thead class ="bg-200 text-900" style="vertical-align: middle !important; ">
+                                      <tr>
+                                          <th  class="no-sort" data-sort="ID" style="text-align: center; width: 20px !important" class="align-middle white-space-nowrap">
+                                              <div class="form-check mb-0">
+                                                  <input onclick="checkAllBenefit(this.checked)" class="form-check-input benefit" style="margin-left: -1.8em !important; margin-top:0.5em !important" type="checkbox" data-bulk-select='{"body":"bulk-select-body","actions":"bulk-select-actions","replacedElement":"bulk-select-replace-element"}' checked />
+                                              </div>
+                                          </th>
+                                          <th class="no-sort" style="text-align:left;font-weight: bolder; width: 250px;" data-sort="username"><%= lib_translate("Benefit_content") %></th>
+                                          <th class="no-sort" style="text-align:left;font-weight: bolder; width: 250px;" data-sort="username"><%= lib_translate("Value") %></th>
+                                      </tr>
+                                  </thead>
+                                  <tbody class="list" id="list-benefit" style="vertical-align: middle !important;">                   
+                                          <tr>
+                                            <td class="d-none"></td>
+                                            <td class="d-none"></td>
+                                            <td class="d-none"></td>
+                                          </tr>     
+                                          
+                                  </tbody>
+                              </table> 
+                          </div>
+
+                          <%= form_for @benefit, :url=> sbenefits_add_multiply_benefits_path, html: {method: :post, id:"form_add_users_benefits", autocomplete: "off" } do |f| %>
+                              <input class="d-none" id="userArray" name="userArray" >
+                              <input class="d-none" id="benefitArray" name="benefitArray" >
+                              <input class="d-none" value="<%= @year %>" name="staff_selected_year" >
+                              
+                          <%end%>
+
+
+                        </div>
+                    </div>
+                  </div>
+                  <div class="card-footer" id="card-footer">
+                    <div class="px-sm-3 px-md-5">
+                      <ul class="pager wizard list-inline mb-0">
+                        <li class="previous">
+                          <button id="btn_prev" class="btn btn-link ps-0" type="button"><span class="fas fa-chevron-left me-2" data-fa-transform="shrink-3"></span><%= lib_translate("Previous") %></button>
+                        </li>
+                        <li class="next">
+                          <button id="btn_next" class="btn btn-warning px-5 px-sm-6" type="submit" onclick="getUserList()"><%= lib_translate("Next") %><span class="fas fa-chevron-right ms-2" data-fa-transform="shrink-3"> </span></button>
+                          <button style="float: right;display: none;width: 100%;" class="btn btn-warning" id="btn_submit" type="button" data-bs-toggle="modal" data-bs-target="#confirm-modal">
+                            <%=lib_translate("Save")%> 
+                          </button>                        
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- modal -->
+<div class="tab-content" id="myTabContent">
+  <div class="tab-pane fade show active" id="tab-sbenefits" role="tabpanel" aria-labelledby="sbenefits-tab">
+      <div class="">
+          <div class="card mb-3">
+            <h3 class="mt-2 ms-3 overview_text"><%= lib_translate("List_sbenefits")  %></h3>
+            <div class="card-body pt-0">
+              <div class="tab-content">
+                <div class="table-add-sbenefit mt-4" >            
+              <% if @year >= Time.zone.now.year.to_s%>
+                <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#update_benefit_by_year"><%= lib_translate("Update_data")%></button>    
+                <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#staticBackdrop"><%= lib_translate("Add_multiple_benefit") %></button>
+                  
+                <div class="modal fade" id="update_benefit_by_year" tabindex="-1" role="dialog" aria-hidden="true">
+                  <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content position-relative">
+                      <div class="position-absolute top-0 end-0 mt-2 me-2 z-index-1">
+                        <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body p-0">
+                        <div class="rounded-top-lg py-3 ps-4 pe-6 bg-light">
+                          <h4 class="mb-1" id="modalExampleDemoLabel"><%= lib_translate("Updata_data_title")%> <%= @year.to_i-1%></h4>
+                        </div>
+                        <%= form_for @sbenefits, :url=> sbenefits_update_benefit_last_year_path, html: {method: :post, id:"" } do |f| %>
+                            <div class="col py-3 ps-4 pe-6 bg-light">
+                                  <label class="col-form-label"><%= lib_translate("tbbenefit_name") %>:</label> 
+                                  <div id="select-sbenefit-name" style="display: flex;flex-direction: column;"> 
+                                      <div class="form-check form-check-inline mb-0" >
+                                        <input onclick="checkAllItemBenefitOther(this.checked)" id="checkAllItemBenefit" class="form-check-input" type="checkbox" />
+                                        <label class="form-check-label cursor-pointer mb-0" for="checkAllItemBenefit"><%= lib_translate("Choose_all")   %></label>
+                                      </div>
+                                      <% @tbenefits.each do |tbenefits| %>  
+                                          <div class="form-check form-check-inline mb-0" >
+                                              <input class="form-check-input cursor-pointer" id="<%= tbenefits.scode %>" type="checkbox" value="<%= tbenefits.name %>" name="sbenefits_name_update_by_year[]" />
+                                              <label class="form-check-label cursor-pointer mb-0" for="<%= tbenefits.scode %>"><%= tbenefits.name  %></label>
+                                          </div>  
+                                      <% end %>
+                                  </div> 
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                              <input name="last_year" class="d-none" value="<%= @year.to_i-1%>">
+                              <button class="btn btn-secondary" type="button" data-bs-dismiss="modal"><%= lib_translate("Cancle") %></button>
+                              <button class="btn btn-primary" type="submit"><%= lib_translate("Save")%></button>
+                          </div>
+                        <% end %> 
+                    </div>
+                  </div>
+                </div>              
+              <% end %> 
+                    <%= form_for @sbenefits, :url=> sbenefits_update_path, html: {method: :post, class:"mt-3" } do |f| %>
+                      <div style="display:flex;justify-content: end;" >
+                        <div class="col-xl-6">
+                        
+                          <select class="form-select " name="sbenefits_syear_add" id="sbenefits_syear_select">
+                                    <%(Time.zone.now.year.to_i - 5..Time.zone.now.year.to_i + 5).each do |year| %>
+                                          <option <%= 'selected' if year.to_s == @year%> value="<%= year %>"><%= year %></option>
+                                    <%end %>  
+                          </select>
+                          
+                        </div>    
+                        <div class="col-xl-3" style="display: flex;justify-content: flex-end;" class="btn-add-lib-benefit mt-2">             
+                        <% if is_access(session["user_id"], "SBENEFITS","ADD") %>
+                          <button class="btn btn-primary" class="btn" onclick='openFormAddsbenefits("<%=@allbenefit.pluck(:name).join("") %>")' type="button" data-bs-toggle="modal" data-bs-target="#modal-add-benefits"> <%= lib_translate("Create_tbbenefits")  %> </button>
+                            <% end %>
+                        </div>
+                      </div>
+
+                      <div class="row mb-3" style="display:none;">
+                          <%= f.label :id, class: "col-sm-3 col-form-label" %>
+                          <div class="col-sm-9"> 
+                                <%= f.text_field :id, class: 'form-control' , name: 'sbenefits_add_type', id:  'sbenefits_add_type', value:"2" %>
+                          </div>
+                        </div>
+                      
+                      <table id="table_sbenefits" class="table table-bordered fs--1 mb-0 " style="margin-top: 0px !important; margin-bottom: 0px !important">                
+                        <thead class="bg-200 text-900">
+                          <tr >
+                            <th class="sort" valign="middle" rowspan="2" data-sort="tbbenefit_id" style="text-align: center;"><%= lib_translate("Oder")  %></th>
+                            <th class="sort" valign="middle" rowspan="2" data-sort="tbbenefit_name" style="text-align: center;"><%= lib_translate("tbbenefit_name")  %></th>
+                            <th class="background_type_1" colspan="2" data-sort="syear" style="text-align: center;"><%= lib_translate("Stype")  %> 1 </th>
+                            <th class="background_type_2" colspan="2" style="text-align: center;" data-sort="amount"><%= lib_translate("Stype")  %> 2</th>
+                            <th class="bg-200" colspan="2" style="text-align: center;" data-sort="stype"><%= lib_translate("Stype")  %> 3</th>                   
+                          </tr>
+                          <tr>
+                            <th class="sort background_type_1" style="text-align: center;"><%= lib_translate("amount_sbenefits")  %></th>
+                            <th class="sort background_type_1" style="text-align: center;"><%= lib_translate("Desc")  %></th>
+                            <th class="sort background_type_2" style="text-align: center;"><%= lib_translate("amount_sbenefits")  %></th>
+                            <th class="sort background_type_2" style="text-align: center;"><%= lib_translate("Desc")  %></th>
+                            <th class="sort bg-200" style="text-align: center;"><%= lib_translate("amount_sbenefits")  %></th>
+                            <th class="sort bg-200" style="text-align: center;"><%= lib_translate("Desc")  %></th>
+                                          
+                          </tr>
+                        </thead>
+                        <tbody>
+                        <% @list_sbenefit.each_with_index do |sbenefit, index|%>
+                          <tr>
+                            <td  style="text-align: center;"><%= index.to_i + 1 %></td>
+                            <td  style="text-align: center;"><%= sbenefit[:name]%></td>
+                            <td class="background_type_1" style="text-align: center;"><input maxlength="11" onkeyup="on_amount_change(this)" onkeypress="on_amount_change(this)" name="amount_benefit_<%= sbenefit[:"1"][:id]%>" class="form-control" type="text" value="<%= number_to_currency(sbenefit[:"1"][:amount]).to_s.gsub('$','').gsub('.00','')%>"/> <p class="d-none" > <%= sbenefit[:"1"][:amount]%> </p> </td>
+                            <td class="background_type_1" style="text-align: center;"><input name="desc_benefit_<%= sbenefit[:"1"][:id]%>" class="form-control" type="text" value="<%= sbenefit[:"1"][:desc]%>" > <p class="d-none" > <%= sbenefit[:"1"][:desc]%> </p> </td>
+                            <td class="background_type_2" style="text-align: center;"><input maxlength="11" onkeyup="on_amount_change(this)" onkeypress="on_amount_change(this)" name="amount_benefit_<%= sbenefit["2"][:id]%>" class="form-control" type="text" value="<%= number_to_currency(sbenefit["2"][:amount]).to_s.gsub('$','').gsub('.00','')%>" /> <p class="d-none" > <%= sbenefit["2"][:amount]%> </p></td>
+                            <td class="background_type_2" style="text-align: center;"><input name="desc_benefit_<%= sbenefit["2"][:id]%>" class="form-control" type="text" value="<%= sbenefit["2"][:desc]%>" > <p class="d-none" > <%= sbenefit["2"][:desc]%> </p></td>
+                            <td class="bg-200" style="text-align: center;"><input maxlength="11" onkeyup="on_amount_change(this)" onkeypress="on_amount_change(this)" name="amount_benefit_<%= sbenefit["3"][:id]%>" class="form-control" type="text" value="<%= number_to_currency(sbenefit["3"][:amount]).to_s.gsub('$','').gsub('.00','')%>" /> <p class="d-none" > <%= sbenefit["3"][:amount]%> </p></td>
+                            <td class="bg-200" style="text-align: center;"><input name="desc_benefit_<%= sbenefit["3"][:id]%>" class="form-control" type="text" value="<%= sbenefit["3"][:desc]%>" > <p class="d-none" > <%= sbenefit["3"][:desc]%> </p></td>                   
+                          </tr>
+                        <%end%>
+                        </tbody>
+
+                      </table>              
+                      <div class="form-group" >
+                            <% if is_access(session["user_id"], "SBENEFITS","EDIT") %>
+                          <%= f.submit lib_translate("Save")  , type:"submit" , id:"btn_update_sbenefits_buttton",
+                            class: "btn btn-primary  mt-3 mb-5 ", style: "width: 100%;" %>
+                            <div id="loading_button_update_sbenefits" class= "btn btn-primary  mt-3 mb-5 " style="opacity: 0.8;width: 100%;display:none;" >
+                                  <i class ="fa fa-spinner fa-spin"> </i>  <%=lib_translate("Save")%> 
+                            </div>
+                      <% end %>
+                        </div>
+
+                        <% end %>
+                </div>  
+                </div>    
+              </div>
+            </div>
+          </div>          
+        </div>
+  </div>
+
+  <div class="modal fade" id="confirm-modal" data-bs-keyboard="false" data-bs-backdrop="static" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg mt-6" role="document">
+      <div class="modal-content border-0">
+        <div class="position-absolute top-0 end-0 mt-2 me-2 z-index-1">
+          <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close" data-bs-toggle="modal" data-bs-target="#staticBackdrop"></button>
+        </div>
+        <div class="modal-body p-0">
+          <div class="rounded-top-lg py-3 ps-4 pe-6 bg-light">
+            <h4 class="mb-1" id="modalExampleDemoLabel"><%=lib_translate("Confirm_action")%> </h4>
+          </div>
+          <div class="p-4 pb-0">
+           <h5> <%=lib_translate("Confirm_content")%>  </h5>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" type="button" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Hủy Bỏ</button>
+          <button class="btn btn-warning" id="btn_confirm" type="button">Xác nhận </button>
+          <div id="loading_button_update_staff_sbenefits" class= "btn btn-warning" style="opacity: 0.8;display:none;" >
+            <i class ="fa fa-spinner fa-spin"> </i>  <%=lib_translate("Save")%> 
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- modal -->
+
+
+<div class="modal fade" id="modal-add-benefits" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content position-relative">
+      <div class="position-absolute top-0 end-0 mt-2 me-2 z-index-1">
+        <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close" ></button>
+      </div>
+      <div class="modal-body p-0">
+        
+        <div class="rounded-top-lg py-3 ps-4 pe-6 bg-light">
+          <h4 class="mb-1" id="cls_bmtu_form_add_title"><%= lib_translate("Create_sbenefits")  %></h4>
+        </div>
+        <div class="p-4 pb-0">
+            <div class="form-add-sbenefits">
+                  <%= form_for @sbenefits, :url=> sbenefits_update_path, html: {method: :post, id:"form_add_sbenefits",class:'col-12' } do |f| %>
+                      <div class="erro_labble mb-2">
+                          <p style="display:none; color: rgb(197 82 82);border: 1px solid rgb(199 136 136 / 23%);background: rgb(255 54 54 / 16%);border-radius: 5px;padding: 10px"
+                          id="erro_labble_content">
+                          </p>
+                      </div>
+                      <div class="row mb-3" style="display:none;">
+                        <%= f.label :id, class: "col-sm-3 col-form-label" %>
+                        <div class="col-sm-9"> 
+                              <%= f.text_field :id, class: 'form-control' , name: 'sbenefits_id_add', id:  'sbenefits_id_add' %>
+                        </div>
+                      </div>
+
+                      <div class="row mb-3" style="display:none;">
+                        <%= f.label :id, class: "col-sm-3 col-form-label" %>
+                        <div class="col-sm-9"> 
+                              <%= f.text_field :id, class: 'form-control' , name: 'sbenefits_add_type', id:  'sbenefits_add_type', value:"1" %>
+                        </div>
+                      </div>
+
+                      <div class="row "> 
+                        <div class="col">
+                          <label class="col-form-label"><%= lib_translate("tbbenefit_name") %>:</label> <a class="ms-2" href="<%= tbbenefits_index_path() %>"><span style="width:10px; color:#98a7b9" class="fas fa-database"></span></a>
+                          <div id="select-sbenefit-name" style="display: flex;flex-direction: column;"> 
+                              <div class="form-check form-check-inline mb-0" >
+                                <input onclick="checkAllItemBenefitOther(this.checked)" id="checkAllItemBenefit" class="form-check-input" type="checkbox" />
+                                <label class="form-check-label cursor-pointer mb-0" for="checkAllItemBenefit"><%= lib_translate("Choose_all")   %></label>
+                              </div>
+                              <% @tbenefits.each do |tbenefits| %>  
+                                  <div class="form-check form-check-inline mb-0" >
+                                      <input class="form-check-input cursor-pointer" id="<%= tbenefits.id %>" type="checkbox" value="<%= tbenefits.name %>" name="sbenefits_name_add[]" />
+                                      <label class="form-check-label cursor-pointer mb-0" for="<%= tbenefits.id %>"><%= tbenefits.name  %></label>
+                                  </div>  
+                              <% end %>
+                          </div> 
+                        </div>
+                        
+                      </div>
+                      <div class="modal-footer border-0 p-0 mb-2">
+                        <%= f.submit lib_translate("Save") , type:"submit" , id:"btn_add_new_sbenefits_buttton",class: "btn btn-warning" %>
+                        <div id="loading_button_sbenefits" class= "btn btn-warning " style="opacity: 0.8;display:none;" >
+                              <i class ="fa fa-spinner fa-spin"> </i>  <%=lib_translate("Save")%> 
+                        </div>
+                    </div>
+                      <div class="row mb-3 d-none">  
+                        <div class="col-xl-6">
+                          <label style="text-transform: capitalize;" class="col-form-label"><%= lib_translate("year") %>:</label>
+                          <%= f.text_field :id, class: 'form-control' , name: 'sbenefits_syear_add', id:  'sbenefits_syear_add' %>
+                        </div>   
+                    
+                  <% end %>
+            </div>       
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%# function sbenefits - Dat code %>
+
+<script>
+  let createsbenefits = "<%= lib_translate('Save')  %>";
+  let updatesbenefits = "<%= lib_translate('Update_sbenefits')  %>";
+  let urlChosesYear = "<%= sbenefits_index_path(lang: session[:lang]) %>" 
+  let urlGetUserList = "<%=sbenefits_get_selected_users_path%>";
+
+</script> 
+
+<!-- Hoang Tuan Dat -->
+<%= javascript_include_tag '/assets/myjs/sbenefits.js' %>
+

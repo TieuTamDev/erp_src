@@ -1,0 +1,19 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  appointment: one
+  user: one
+  result: MyString
+  dtsent: 2025-03-29 13:47:08
+  dtfinished: 2025-03-29 13:47:08
+  status: MyString
+  note: MyText
+
+two:
+  appointment: two
+  user: two
+  result: MyString
+  dtsent: 2025-03-29 13:47:08
+  dtfinished: 2025-03-29 13:47:08
+  status: MyString
+  note: MyText

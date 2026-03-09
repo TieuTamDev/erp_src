@@ -1,0 +1,31 @@
+.calendar-wrap{
+    display: flex;
+    align-items: center;
+    padding-right: 6px;
+    cursor: pointer;
+}
+.calendar-display{
+    min-width: 100px;
+    height: 24px;
+    margin: 0;
+    padding:0px 35px 0px 8px;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    cursor: pointer;
+}
+.calendar-clear{
+    font-size: 1rem;
+    cursor: pointer;
+}
+.calendar-clear:hover{
+    transform: scale(1.1);
+    color: var(--falcon-btn-falcon-danger-active-color) !important;
+}
+.edit-effect{
+    cursor: pointer;
+
+}
+.edit-effect:hover{
+    
+}

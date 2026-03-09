@@ -1,0 +1,228 @@
+<style>
+    .pdf-container{
+        margin:0 auto;
+        position:relative;
+        width: fit-content;
+    }
+    .pdf-sign-list{
+        padding: 5px;
+        border: 1px solid #c1c1c1;
+        overflow: hidden;
+        background: #858585;
+    }
+    .pdf-sign-list .pdf-sign-image{
+        cursor: grab;
+        max-width: 130px;
+        margin-bottom:4px;
+    }
+    .pdf-sign-list .pdf-sign-image:hover{
+        box-shadow: 0px 0px 6px 0px #6e6d6d;
+        border-radius: 5px;
+    }
+    .pdf-page-list{
+        display:flex;
+        flex-direction:column;
+        background: #8f8f8f;
+        padding: 12px;
+        max-height: 700px;
+        overflow-y: scroll;
+        border: 1px solid #c1bdbd;
+    }
+    .pdf-page-wrap{
+        position:relative;
+    }
+    .pdf-page-space{
+        height:5px;
+    }
+    .pdf-canvas{
+
+    }
+    .pdf-page-edit-wrap{
+        position: absolute;
+        top:0;
+        left:0;
+        z-index:1;
+        width:100%;
+        height:100%;
+    }
+    .pdf-page-edit-area{
+        position:relative;
+        width:100%;
+        height:100%;
+        overflow: hidden;
+    }
+    .grap-preview{
+        position:absolute;
+        top:0;
+        left:0;
+        z-index: 1;
+        pointer-events: none;
+        box-shadow: 0px 0px 0px 2px #dfa43d;
+    }
+    .pdf-edit-element{
+        position:absolute;
+        top:0;
+        left:0;
+        cursor:move;
+    }
+
+    .pdf-edit-element-container{
+        display:flex;
+    }
+    .pdf-edit-element-wrap{
+        position: relative;
+    }
+    .element-selected .pdf-edit-element-wrap{
+        box-shadow: 0px 0px 0px 2px #3edf3d;
+    }
+    .pdf-edit-element-tool-wrap{
+        display:none;
+    }
+    .element-selected .pdf-edit-element-tool-wrap{
+        display: flex;
+        margin-bottom: 4px;
+        align-items: baseline;
+        width: fit-content;
+        position: absolute;
+        top: -29px;
+    }
+    .element-selected .scale-button{
+        display:flex;
+    }
+    .scale-button{
+        display:none;
+        justify-content: center;
+        align-items: center;
+        position: absolute;
+        top: 100%;
+        left: 100%;
+        transform: translate(-50%, -50%);
+        cursor: nwse-resize;
+    }
+    .tool-delete{
+        background: #ef5656;
+        border: 1px solid #db8585;
+        display: flex;
+        color: white;
+        font-size: 13px;
+        cursor: pointer;
+        padding:5px;
+        border-radius: 5px;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .page-state{
+        display: flex;
+        position: absolute;
+        top: 0;
+        left: 0;
+        padding: 5px 5px 5px 5px;
+        border-bottom-right-radius: 5px;
+        justify-content: center;
+        align-items: center;
+        background: #28272794;
+        color: white;
+        z-index: 3;
+        pointer-events: none;
+    }
+
+    .image-container {
+        position: relative;
+        width: 200px;
+    }
+
+    .image {
+        display: block;
+        width: 100%;
+        height: auto;
+        transition: transform 0.5s;
+    }
+
+    .image-container:hover .image {
+        transform: scale(1.2);
+    }
+
+    .preview {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .preview-item {
+        position: relative;
+        border-radius: 4px;
+        overflow: hidden;
+        border: 1px solid #c5c5c5;
+        width: 100px;
+        height: 100px;
+    }
+
+    .container-image {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        grid-gap: 10px;
+    }
+
+    .remove-btn {
+        position: absolute;
+        top: 0;
+        right: 0;
+        background-color: #ff0000;
+        color: #ffffff;
+        border: none;
+        padding: 2px 6px;
+        cursor: pointer;
+        font-size: 12px;
+    }
+
+    .inputfile {
+        width: 0.1px;
+        height: 0.1px;
+        opacity: 0;
+        overflow: hidden;
+        position: absolute;
+        z-index: -1;
+    }
+
+    .preview-item-add img {
+        position: relative;
+        margin: 5px;
+        width: 50%;
+        cursor: pointer;
+    }
+
+    .hiddenRow {
+        padding: 0 !important;
+    }
+    .hidden-style{
+        display:none !important;
+    }
+
+    .accordian-body {
+        padding: 10px;
+    }
+
+    /* Chrome, Safari, Edge, Opera */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    /* Firefox */
+    input[type=number] {
+        -moz-appearance: textfield;
+    }
+</style>
+<div id="pdf-container" class="pdf-container mt-3"></div>
+<div class="modal-footer border-0 px-4 pb-4">
+  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+</div>
+
+<script>
+    var pdfSign = $("#pdf-container").pdfSign({
+        loadSigndocPath: '<%= request.base_url%><%= load_signdoc_appointment_path(params[:appointment_id], signdoc_id: @form_data[:signdoc_id], status: @form_data[:status]).html_safe%>',
+    });
+
+    pdfSign.loadSigndocById('',false);
+</script>

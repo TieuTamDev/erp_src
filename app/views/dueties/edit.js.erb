@@ -1,0 +1,5 @@
+$('#popupMediumModal .modal-content').html("<%= j(render 'form') %>");
+$('#popupMediumModal .modal-content').prepend("<%= j(render 'shared/new_modal_title', title: 'Cập nhật nhiệm vụ') %>");
+$('#popupMediumModal').attr('data-bs-focus', false);
+$('#popupMediumModal').modal('show');
+showLoadding(false);

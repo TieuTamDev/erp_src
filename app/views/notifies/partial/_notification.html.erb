@@ -1,0 +1,195 @@
+<a class="nav-link px-0 fa-icon-wait" href="<%= notifies_show_path %>" data-remote="true" id="navbarDropdownNotification" role="button" aria-haspopup="true" aria-expanded="false" data-hide-on-body-scroll="data-hide-on-body-scroll">
+    <% if (!@notices_total.nil? && @notices_total > 0) || (!@notices_count.nil? && @notices_count > 0) %>
+    <p style="font-weight: 300; font-size: 13px; position: absolute;left: 15px;min-width: 18px;height: 18px;text-align: center;padding-left: 5px;padding-right: 5px;border-radius: 20px;background-color: var(--falcon-btn-falcon-danger-color);color: white;box-shadow: 0px 0px 0px 2px var(--falcon-bg-navbar-glass);" class="m-0 ripple-effect">
+        <span><%= (!@notices_total.nil? && @notices_total > 100) || (!@notices_count.nil? && @notices_count > 100) ? '99+' : @notices_total || @notices_count %></span>
+    </p>
+    <span class="fas fa-bell bell-shake" data-fa-transform="shrink-6" style="font-size: 33px;"></span>
+    <% else %>
+    <span class="fas fa-bell" data-fa-transform="shrink-6" style="font-size: 33px;"></span>
+    <% end %>
+</a>
+<div id="modal-notifications" class="dropdown-menu dropdown-caret dropdown-menu-end dropdown-menu-card dropdown-menu-notification dropdown-caret-bg <%= !@notices_total.nil? && @isShow.nil? ? 'show' : '' %> " aria-labelledby="navbarDropdownNotification" data-bs-popper="static">
+    <div class="card card-notification shadow-none">
+    <div class="card-header" style="border-bottom: 1px solid;">
+        <div class="row justify-content-between align-items-center">
+        <div class="col-auto">
+            <h6 class="card-header-title mb-0"><%= lib_translate("Thông báo mới") %></h6>
+        </div>
+        <div class="col-auto ps-0 ps-sm-3">
+            <a class="card-link fw-normal read-all-btn" href="<%= notifies_show_path(stype: "ALL") %>" data-remote="true"><span class="fas fa-check-double"></span> <%= lib_translate("Mark_all_as_read") %></a>
+            <a class="card-link fw-normal refresh-noti-btn" href="<%= notifies_show_path %>" data-remote="true"><span class="fas fa-sync-alt" ></span> <%= lib_translate("Làm mới") %></a>
+            <a class="card-link fw-normal close-dropdown" href="javascript:void(0);" style="font-weight: 600;"><%= lib_translate("Đóng") %></a>
+        </div>
+        </div>
+    </div>
+    <div style="position: relative; overflow: hidden; scrollbar-width: thin; scrollbar-color: #a0a0a0 #ffffff;">
+        <div id="loading_notification">
+            <div class="spinner_handle"></div>
+            <p class="mt-1" style="color: var(--falcon-avatar-status-border-color);">Đang làm mới...</p>
+        </div>
+        <div class="scrollbar-overlay" style="max-height: 30rem; overflow: hidden scroll;">
+            <div class="list-group list-group-flush fw-normal fs-10" style="min-height: 9rem;">
+                <% if @notices.present? %>
+                    <% @notices.each do |notice| %>
+                        <div class="list-group-item" >
+                            <a class="notifications notification-flush handle_btn" href="<%= @ERP_PATH %>notifies/render_modal/<%= notice.id %>" data-remote="true" style="<%= notice.isread == true ? '' : 'background: #ffebeb;' %>">
+                                <div class="notification-avatar">
+                                    <div class="avatar avatar-2xl me-3">
+                                        <div class="d-inline-block notification-indicator notification-indicator-warning fa-icon-wait">
+                                            <span class="fas fa-bell fs-4" data-fa-transform="down-2"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="notification-body w-100">
+                                    <div class="tag d-flex justify-content-between">
+                                        <% if @STYPE[notice.stype].present? %>
+                                            <span class='badges badges-warning mb-1 mt-2'>Loại: <%= lib_translate(@STYPE[notice.stype]).capitalize %></span>
+                                            <span class='mb-1 mt-2'> <span class="fas fa-link"></span> <u>Bấm vào để xử lý</u></span>
+                                        <% else %>
+                                            <span class='badges badges-pending mb-1 mt-2'>Loại: <%= lib_translate(@STYPE["NOTIFICATION"]) %></span>
+                                        <% end %>
+                                    </div>
+                                    <p class="mb-1 fw-semi-bold fs--1"><%= notice.title&.html_safe %></p>
+                                    <p class="mb-1 content-notice"><%= notice.contents&.html_safe %></p>
+                                    <p class="notification-time" style="font-style: italic;">Người gửi: <%= notice.senders %></p>
+                                    <div class="d-flex justify-content-between">
+                                        <p class="notification-time" style="font-style: italic;">Ngày nhận: <%= notice.created_at.strftime("%H:%M %d/%m/%Y") %></p>
+                                        <p class="notification-time" style="font-style: italic;"><%= notice.isread == true ? "<span class='far fa-envelope-open'></span> Đã đọc".html_safe : "<span class='far fa-envelope'></span> Chưa đọc".html_safe %></p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    <% end %>
+                <% else %>
+                        <div class="list-group-item d-flex justify-content-center pt-6 pb-6">
+                            <p class="notification-time" style="font-style: italic;">Không có thông báo nào mới</p>
+                        </div>
+                <% end %>
+            </div>
+        </div>
+    </div>
+    <div class="card-footer text-center border-top">
+        <a class="card-link d-block" href="<%= notifies_index_path(lang: session[:lang]) %>"><span class="fas fa-layer-group"></span> Xem tất cả</a>
+    </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        $('.close-dropdown').on('click', function (e) {
+            e.preventDefault();
+            const $dropdown = $(this).closest('.dropdown-menu-notification');
+            $dropdown.removeClass('show');
+            sessionStorage.setItem("isShowNotification", true);
+            $('#navbarDropdownNotification').attr('href', '<%= notifies_show_path %>').data('remote', true);
+        }); 
+        
+        $('.refresh-noti-btn').on('click', function(e) {
+            const $icon = $(this).find('svg'); 
+            $icon.addClass('fa-spin'); 
+            $("#loading_notification").css("display", "flex");
+        });
+
+        $('.read-all-btn').on('click', function(e) { 
+            $("#loading_notification").css("display", "flex");
+        });
+
+        $('#navbarDropdownNotification').on('click', function (e) {
+            e.preventDefault();
+            const $dropdown = $(this).siblings('.dropdown-menu-notification');
+            sessionStorage.setItem("isShowNotification", true);
+            if ($dropdown.hasClass('show')) {
+                $dropdown.removeClass('show');
+                $(this).removeAttr('href').data('remote', false);
+            } else {
+                $dropdown.addClass('show');
+                $(this).attr('href', '<%= notifies_show_path %>').data('remote', true);
+                $("#loading_notification").css("display", "flex");
+            }
+        }); 
+        
+        $(document).on('click', function (e) {
+            if (
+                !$(e.target).closest('#navbarDropdownNotification').length &&
+                !$(e.target).closest('.dropdown-menu-notification').length &&
+                !$(e.target).hasClass('close-dropdown')
+            ) {
+                // Không làm gì cả, giữ dropdown hiển thị
+            }
+        });
+    });
+
+    // Yêu cầu quyền hiển thị thông báo
+    initRequestNotificationPermission(); 
+
+    // Lấy danh sách các ID đã hiển thị từ localStorage
+    function getDisplayedNoticeIds() {
+        const data = localStorage.getItem("displayedNoticeIds");
+        return data ? new Set(JSON.parse(data)) : new Set();
+    }
+
+    // Lưu lại danh sách ID vào localStorage
+    function saveDisplayedNoticeIds(idSet) {
+        localStorage.setItem("displayedNoticeIds", JSON.stringify([...idSet]));
+    }
+
+    function checkAndNotify() {
+        const displayedNoticeIds = getDisplayedNoticeIds();
+
+        $.ajax({
+            url: ERP_PATH + "api/v1/mapi_utils/get_notice_new_today_erp?user_id=<%= session[:user_id] %>",
+            method: "GET",
+            timeout: 0,
+        }).done(function (response) {
+            const notices = response["notices"] || [];
+
+            let updated = false;
+
+            notices.forEach(notice => {
+                const noticeId = notice.id;
+                const title = notice.title || "Thông báo mới";
+                const message = notice.contents || "Bạn có thông báo mới.";
+
+                if (!displayedNoticeIds.has(noticeId)) {
+                    setupSystemNotification(title, message);
+                    displayedNoticeIds.add(noticeId);
+                    updated = true;
+                }
+            });
+
+            if (updated) {
+                saveDisplayedNoticeIds(displayedNoticeIds);
+            }
+        });
+    }
+
+    // Gọi khi vừa tải trang
+    // checkAndNotify();
+
+    // Lặp lại mỗi 5 phút
+    // setInterval(checkAndNotify, 5 * 60 * 1000);
+
+    // Gửi thông báo hệ thống
+    function setupSystemNotification(title, message) {
+        if (Notification.permission === "granted") {
+            new Notification(title, {
+                body: message,
+                icon: "https://capp.bmtu.edu.vn/masset/assets/logowebsite-26fdbab2af6ef13d7bb04d08c73f069e65940b09099341f167a7993b93aa7704.png"
+            });
+        }
+    }
+
+    // Yêu cầu quyền thông báo
+    function initRequestNotificationPermission() {
+        if ("Notification" in window) {
+            Notification.requestPermission().then((permission) => {
+                if (permission === "granted") {
+                    console.log("Thông báo được cho phép!");
+                } else {
+                    console.warn("Người dùng từ chối thông báo!");
+                }
+            });
+        }
+    }
+
+</script>

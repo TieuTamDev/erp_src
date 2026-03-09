@@ -1,0 +1,536 @@
+<style>
+/* Đảm bảo tháng và năm nằm cùng dòng */
+.flatpickr-current-month {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Đảm bảo dropdown tháng và năm không bị chiếm full width */
+.flatpickr-monthDropdown-months,
+.flatpickr-yearDropdown {
+  display: inline-block;
+  width: auto;
+  max-width: 170px;
+}
+
+.timeline__create {
+    display: grid;
+    grid-column-gap: 1rem;
+    grid-template-columns: 5rem 0.125rem 1fr;
+    position: relative;
+}
+
+.timeline__date {
+    text-align: right;
+}
+
+.timeline__separator {
+    background: rgb(203 213 225);
+    position: relative;
+    margin-top: 0;
+}
+.timeline__separator::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    background: inherit;
+    border-radius: 50%;
+    height: 1rem;
+    width: 1rem;
+    z-index: 1;
+}
+
+/* Remove line above first and below last */
+.timeline__separator.first {
+    background: transparent;
+}
+.timeline__separator.first::before {
+    background: inherit;
+}
+
+.timeline__separator.last {
+    height: 1rem; /* chỉ đủ cao để chứa dấu chấm */
+}
+
+.timeline__separator.last::before {
+    background: rgb(203 213 225); /* hoặc màu xanh nếu cần */
+}
+
+
+/* Highlight handled step */
+.timeline__separator.handled {
+    background: rgb(14 165 233); /* blue line */
+}
+.timeline__separator.handled::before {
+    background: rgb(14 165 233); /* blue dot */
+}
+
+.timeline__title {
+    font-weight: 500;
+}
+
+.timeline__description {
+    margin-bottom: 1rem;
+}
+#leaveDetailContent {
+  max-height: 400px;
+  overflow-y: auto;
+  font-size: 14px;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  white-space: normal;
+}
+#processTimeline, #info_user_leaver{
+  font-size: 14px;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  white-space: normal;
+}
+/* --- Timeline: HỦY NGÀY PHÉP --- */
+/* Timeline hủy phép: tông đỏ */
+.timeline__cancel {
+  display: grid;
+  grid-column-gap: 1rem;
+  grid-template-columns: 5rem 0.125rem 1fr;
+  position: relative;
+  margin-top: 1rem;
+}
+
+.timeline__cancel .timeline__date {
+  font-size: 14px;
+  text-align: right;
+}
+.timeline__cancel .timeline__content {
+  text-align: left;
+  font-size: 14px;
+}
+
+.timeline__cancel .timeline__separator {
+  background: rgb(248 113 113); /* đỏ nhạt */
+  position: relative;
+  margin-top: 0;
+}
+
+.timeline__cancel .timeline__separator::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgb(220 38 38); /* đỏ đậm */
+  border-radius: 50%;
+  height: 1rem;
+  width: 1rem;
+  z-index: 1;
+}
+
+.timeline__cancel .timeline__separator.first {
+  background: transparent;
+}
+.timeline__cancel .timeline__separator.first::before {
+  background: rgb(220 38 38);
+}
+
+.timeline__cancel .timeline__separator.last {
+  height: 1rem;
+}
+.timeline__cancel .timeline__separator.last::before {
+  background: rgb(220 38 38);
+}
+.timeline__cancel .timeline__separator.handled {
+    background: rgb(220 38 38); /* blue line */
+}
+.timeline__cancel .timeline__separator.handled::before {
+    background: rgb(220 38 38); /* blue dot */
+}
+.timeline__cancel .timeline__title {
+  font-weight: 500;
+  color: rgb(220 38 38);
+}
+
+.timeline__cancel .timeline__description {
+  margin-bottom: 1rem;
+}
+/* Custom width cho modal */
+@media (min-width: 768px) {
+  .custom-modal-width {
+    max-width: 900px; /* hoặc bất kỳ giá trị nào bạn muốn */
+  }
+}
+</style>
+<div class="mb-2 mt-1 d-flex justify-content-end">
+    <%= form_tag dashboards_index_path, method: :get, 
+        class: "row g-2 align-items-center" do %>
+        
+        <%= hidden_field_tag :lang, session[:lang] %>
+        <%= hidden_field_tag :current_tab, "tab_1" %>
+
+        <div class="col-12 col-md-auto">
+        <%= text_field_tag :search, params[:search],
+            placeholder: "Tìm mã nhân sự hoặc tên",
+            class: "form-control",
+            maxlength: 100, id: "search_input" %>
+        </div>
+
+        <div class="col-12 col-md-auto">
+        <%= select_tag :department_id,
+                options_from_collection_for_select(@departments, :id, :name, params[:department_id]),
+                { include_blank: "Tất cả", class: "form-select" } %>
+        </div>
+
+        <div class="col-12 col-md-auto text-end">
+        <%= submit_tag "Lọc", class: "btn btn-primary w-100 w-md-auto" %>
+        </div>
+
+    <% end %>
+</div>
+
+<div class="table-responsive">
+    <table id="table_dashboard_management" class="table table-bordered table-sm fs--1 mb-0" style="table-layout: unset !important;">
+        <thead class="bg-200 text-900">
+        <tr>
+            <th class="align-middle text-center p-0">STT</th>
+            <th>Người gửi</th>
+            <th>Mã nhân sự</th>
+            <th>Khoa/phòng</th>
+            <th>Thời gian gửi</th>
+            <th>Loại nghỉ</th>
+            <th>Thời gian nghỉ</th>
+            <th>Trạng thái</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <% @data&.each_with_index do |item, index| %>
+            <% details = item[:details] || [] %>
+            <% grouped_details = details.group_by { |d| d[:leave_type] } %>
+            <% rows = grouped_details.map do |type, records| 
+                {
+                    leave_type: type,
+                    days: records.flat_map { |r| r[:days] }.join(", ")
+                }
+                end %>
+            <% rowspan = rows.size %>
+
+            <% rows.each_with_index do |row, i| %>
+            <tr data-holpros="<%= item[:holpros_id] %>">
+                <% if i == 0 %>
+                <td class="align-middle text-center p-0" rowspan="<%= rowspan %>"><%= index + 1 %></td>
+                <td class="align-middle" rowspan="<%= rowspan %>"><%= item[:sender] %></td>
+                <td class="align-middle" rowspan="<%= rowspan %>"><%= item[:sender_sid] %></td>
+                <td class="align-middle" rowspan="<%= rowspan %>"><%= item[:department] %></td>
+                <td class="align-middle" rowspan="<%= rowspan %>"><%= item[:time] %></td>
+                <% end %>
+
+                <td class="align-middle" style="padding-left: 4px; "><%= row[:leave_type] %></td>
+                <td class="align-middle text-truncate" style="max-width: 160px;">
+                <%= row[:days] %>
+                </td>
+
+                <% if i == 0 %>
+                <td class="align-middle" rowspan="<%= rowspan %>"><%= item[:status] %></td>
+                <td class="align-middle" rowspan="<%= rowspan %>">
+                    <button type="button" class="btn btn-info btn-show-detail"
+                    data-holpros-id="<%= item[:holpros_id] %>"
+                    data-uhandle-id="<%= item[:uhandle_id] %>"
+                    data-user-id="<%= item[:user_id] %>">
+                    Chi tiết
+                    </button>
+                </td>
+                <% end %>
+            </tr>
+            <% end %>
+        <% end %>
+
+        </tbody>
+
+    </table>
+    </div>
+    <div class="d-flex justify-content-center align-items-center mt-3 flex-wrap gap-3">
+    <div class="d-flex align-items-center gap-3">
+        <nav>
+        <ul class="pagination mb-0">
+            <% if @page > 1 %>
+            <li class="page-item">
+                <%= link_to '« Trước', dashboards_index_path(search: params[:search], status: params[:status], daterange: params[:daterange],per_page: @per_page, page: @page - 1, current_tab: "tab_1", lang: session[:lang]), class: "page-link" %>
+            </li>
+            <% end %>
+
+            <% (1..@total_pages).each do |p| %>
+            <li class="page-item <%= 'active' if p == @page %>">
+                <%= link_to p, dashboards_index_path(search: params[:search], status: params[:status], daterange: params[:daterange],per_page: @per_page, page: p, current_tab: "tab_1", lang: session[:lang]), class: "page-link" %>
+            </li>
+            <% end %>
+
+            <% if @page < @total_pages %>
+            <li class="page-item">
+                <%= link_to 'Sau »', dashboards_index_path(search: params[:search],status: params[:status], daterange: params[:daterange], per_page: @per_page, page: @page + 1, current_tab: "tab_1", lang: session[:lang]), class: "page-link" %>
+            </li>
+            <% end %>
+        </ul>
+        </nav>
+        
+        <%= form_tag dashboards_index_path, method: :get, class: "d-inline-flex align-items-center" do %>
+        <%= hidden_field_tag :lang, session[:lang] %>
+        <%= hidden_field_tag :search, params[:search] %>
+        <%= hidden_field_tag :status, params[:status] %>
+        <%= hidden_field_tag :current_tab, "tab_1" %>
+        <%= hidden_field_tag :page, 1 %>
+        
+        <label class="me-2 mb-0">Hiển thị:</label>
+        <%= select_tag :per_page,
+                options_for_select([10, 20, 50, 100], @per_page.to_i),
+                class: "form-select form-select-sm w-auto",
+                onchange: "this.form.submit();" %>
+        <% end %>
+    </div>
+</div>
+<div class="modal fade" id="holDetailModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="holDetailModalLabel" aria-hidden="true">
+  <div class="modal-dialog custom-modal-width modal-fullscreen-sm-down">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="holDetailModalLabel">Chi tiết <%= @check_holprosdetails %></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="d-flex justify-content-between flex-wrap" id="info_user"></div>
+        <hr>
+
+        <!-- Section chỉnh sửa -->
+        <div class="row" id="edit_section_row">
+          <div class="col-12">
+            <div class="accordion" id="cancelAccordion">
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="aditHeading">
+                  <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#cancelCollapse" aria-expanded="true" aria-controls="cancelCollapse">
+                    Thông tin điều chỉnh đơn
+                  </button>
+                </h2>
+                <div id="cancelCollapse" class="accordion-collapse collapse show" aria-labelledby="aditHeading" data-bs-parent="#cancelAccordion">
+                  <div class="accordion-body">
+                    <div class="row">
+                      <div class="col-12 col-md-6 mb-3">
+                        <div id="editDetailContent" class="mb-4"></div>
+                      </div>
+                      <div class="col-12 col-md-6">
+                        <h5 class="fw-bold border-bottom pb-2 mb-3">Quy trình điều chỉnh</h5>
+                        <ul class="timeline__cancel" id="cancelTimeline"></ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section nghỉ -->
+        <div class="row" id="leave_section_row">
+          <div class="col-12">
+            <div class="accordion" id="leaveAccordion">
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="leaveHeading">
+                  <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#leaveCollapse" aria-expanded="true" aria-controls="leaveCollapse">
+                    Thông tin nghỉ
+                  </button>
+                </h2>
+                <div id="leaveCollapse" class="accordion-collapse collapse show" aria-labelledby="leaveHeading" data-bs-parent="#leaveAccordion">
+                  <div class="accordion-body">
+                    <div class="row">
+                      <div class="col-12 col-md-6 mb-3">
+                        <div id="leaveDetailContent" class="mb-4"></div>
+                      </div>
+                      <div class="col-12 col-md-6">
+                        <div id="info_user_leaver" class="mb-3"></div>
+                        <h5 class="fw-bold border-bottom pb-2 mb-3">Quy trình xử lý</h5>
+                        <ul class="timeline__create" id="processTimeline"></ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <% if params[:current_tab] == "tab_1" || params[:current_tab].blank? %>
+          <button type="button" class="btn btn-danger btn-refuse-leave" data-bs-dismiss="modal">Từ chối</button>
+          <% if session[:organization].to_a.include?("BMU") || session[:organization].to_a.include?("BMTU") %>
+            <button type="button" class="btn btn-primary btn-approve-leave" id="btn-approve-leave" data-bs-dismiss="modal">Phê duyệt</button>
+            <button type="button" class="btn btn-success btn-user-handle-leave" id="btn-user-handle-leave" data-bs-dismiss="modal">Trình</button>
+          <% else %>
+            <% if @faculty == "PTCHC(BUH)" || @check_button == "FINAL_HANDLE" %>
+              <button type="button" class="btn btn-primary btn-approve-leave" id="btn-approve-leave" data-bs-dismiss="modal">Phê duyệt</button>
+            <% end %>
+            <% if @faculty != "BGD(BUH)" %>
+              <button type="button" class="btn btn-success btn-user-handle-leave" id="btn-user-handle-leave" data-bs-dismiss="modal">Trình</button>
+            <% end %>
+          <% end %>
+        <% end %>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="processModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="processModalLabel" aria-hidden="true" data-bs-focus="false">
+
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="processModalLabel">Xử lý yêu cầu</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <label for="nextHandler" class="form-label">Người xử lý tiếp theo</label>
+          <select id="nextHandler" class="form-select selectpicker">
+            <option selected disabled>-- Chọn người xử lý --</option>
+            
+          </select>
+        </div>
+        <div class="mb-3">
+          <label for="processNote" class="form-label">Nội dung xử lý</label>
+          <textarea id="processNote" class="form-control" rows="3"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+        <button type="button" class="btn btn-primary btn-handle-leave" id="confirmProcess">Xác nhận</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="refuseLeaveModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="refuseLeaveModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="refuseLeaveModalLabel">Từ chối đơn xin nghỉ</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+      </div>
+      <div class="modal-body">
+        <p>Bạn có chắc chắn muốn từ chối đơn này không?</p>
+        <div class="mb-3">
+          <label for="refuse_note" class="form-label">Lý do từ chối:</label>
+          <textarea id="refuse_note" class="form-control" rows="3"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+        <button type="button" class="btn btn-danger" id="confirm-refuse-leave">Xác nhận từ chối</button>
+      </div>
+    </div>
+  </div>
+</div>
+<%= form_tag manager_leave_get_user_handle_path, method: :get, remote: true, id: "get-user-form" do %>
+  <%= hidden_field_tag :next_department_id, @depart %>
+  <%= hidden_field_tag :holpros_id, "" %>
+  <%= hidden_field_tag :user_register %>
+<% end %>
+<%= form_tag manager_leave_holprosdetails_path, method: :get, remote: true, id: "show-holpros-form" do %>
+  <%= hidden_field_tag :holpros_id, "" %>
+  <%= hidden_field_tag :user_id, "" %>
+  <%= hidden_field_tag :current_tab, params[:current_tab] %>
+<% end %>
+<%= form_tag manager_leave_refuse_leave_path, method: :post, id: "refuse-leave-form" do %>
+  <%= hidden_field_tag :holpros_id, "" %>
+  <%= hidden_field_tag :user_id, "" %>
+  <%= hidden_field_tag :note, "" %>
+<% end %>
+<%= form_tag manager_leave_approve_leave_path, method: :post, id: "approve-leave-form" do %>
+  <%= hidden_field_tag :holpros_id, "" %>
+  <%= hidden_field_tag :user_id, "" %>
+  <%= hidden_field_tag :uhandle_id, "" %>
+<% end %>
+
+<%= form_tag manager_leave_handle_leave_path, method: :post, id: "handle-leave-form" do %>
+  <%= hidden_field_tag :holpros_id, "" %>
+  <%= hidden_field_tag :next_department_id, @depart %>
+  <%= hidden_field_tag :user_support, "" %>
+  <%= hidden_field_tag :user_handle, "" %>
+  <%= hidden_field_tag :uhandle_id, "" %>
+  <%= hidden_field_tag :user_id, "" %>
+  <%= hidden_field_tag :note, "" %>
+<% end %>
+
+<script>
+  $(document).on("click", ".btn-show-detail", function () {
+    const holprosId = $(this).data("holpros-id");
+    const userId = $(this).data("user-id");
+    const uhandleId = $(this).data("uhandle-id");
+    $("#show-holpros-form input[name='holpros_id']").val(holprosId);
+    $("#refuse-leave-form input[name='holpros_id']").val(holprosId);
+    $("#handle-leave-form input[name='holpros_id']").val(holprosId);
+    $("#approve-leave-form input[name='holpros_id']").val(holprosId);
+    $("#get-user-form input[name='holpros_id']").val(holprosId);
+
+    $("#get-user-form input[name='user_register']").val(userId);
+    $("#show-holpros-form input[name='user_id']").val(userId);
+    $("#approve-leave-form input[name='user_id']").val(userId);
+    $("#handle-leave-form input[name='user_id']").val(userId);
+    $("#refuse-leave-form input[name='user_id']").val(userId);
+
+    $("#approve-leave-form input[name='uhandle_id']").val(uhandleId);
+    $("#handle-leave-form input[name='uhandle_id']").val(uhandleId);
+    $("#show-holpros-form").submit();
+    showLoadding(true);
+  });
+  $(document).on("click", "#holDetailModal .btn-success", function () {
+    $('#holDetailModal').modal('hide');
+    $('#processModal').modal('show');
+  });
+  $(document).on("click", "#confirm-refuse-leave", function () {
+    const note = $("#refuse_note").val().trim();
+    if (note === "") {
+      alert("Vui lòng nhập lý do từ chối.");
+      return;
+    }
+    $("#refuse-leave-form input[name='note']").val(note);
+    $("#refuse-leave-form").submit();
+    showLoadding(true);
+  });
+  $(document).on("click", "#holDetailModal .btn-danger", function () {
+    $('#holDetailModal').modal('hide');
+    $('#refuseLeaveModal').modal('show');
+  });
+  $(document).on("click", ".btn-user-handle-leave", function () {
+      $("#get-user-form").submit();
+      showLoadding(true);
+  });
+  $(document).on("click", ".btn-approve-leave", function () {
+    if (confirm("Bạn xác nhận duyệt đơn?")) {
+      $("#approve-leave-form").submit();
+      showLoadding(true);
+    }
+  });
+  $(document).on("click", ".btn-handle-leave", function () {
+    if (confirm("Bạn có chắc chắn muốn duyệt đơn này không?")) {
+      var nextHandlerVal = $("#nextHandler").val();
+
+      if (!nextHandlerVal || nextHandlerVal.trim() === "") {
+        alert("Vui lòng chọn người xử lý tiếp theo.");
+        return false; // chặn submit
+      }
+
+      $("#handle-leave-form input[name='note']").val($("#processNote").val());
+      $("#handle-leave-form input[name='user_handle']").val(nextHandlerVal);
+      $("#handle-leave-form").submit();
+      showLoadding(true);
+    }
+  });
+
+  function setCurrentStuTab(tabName) {
+      let url = new URL(window.location.href);
+      url.searchParams.set('current_tab', tabName);
+      url.searchParams.set('lang', 'vi'); 
+      window.location.href = url.toString();
+      showLoadding(true);
+  }
+</script>

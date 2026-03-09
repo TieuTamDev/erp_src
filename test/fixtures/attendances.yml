@@ -1,0 +1,23 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  dtcheckin: 2025-06-26 10:55:30
+  dtcheckout: 2025-06-26 10:55:30
+  status: MyString
+  reason: MyText
+  owner: MyText
+  docs: MyText
+  approved_at: 2025-06-26 10:55:30
+  approved_by: MyText
+
+two:
+  user: two
+  dtcheckin: 2025-06-26 10:55:30
+  dtcheckout: 2025-06-26 10:55:30
+  status: MyString
+  reason: MyText
+  owner: MyText
+  docs: MyText
+  approved_at: 2025-06-26 10:55:30
+  approved_by: MyText

@@ -1,0 +1,808 @@
+<% content_for :head do %>
+  <%= javascript_include_tag '/assets/lib_hrm/formmedia.js' %>
+  <%= javascript_include_tag '/assets/myjs/choices.js' %>
+  <%= stylesheet_link_tag '/assets/lib_hrm/formmedia.css' %>
+  <%= stylesheet_link_tag '/assets/mystyle/incoming_index.css'%>
+  <%= stylesheet_link_tag 'jquery-ui.css' %>  
+  <%= stylesheet_link_tag '/assets/mystyle/choices.min.css'%>
+  <%= javascript_include_tag '/assets/myjs/flatpickr.js' %>
+  <%= javascript_include_tag '/assets/myjs/flatpickr_local/vn.js' %>
+  <%= stylesheet_link_tag '/assets/mystyle/flatpickr.min.css' %>
+  <%= javascript_include_tag '/assets/myjs/tinymcev6.min.js' %>
+  <%= stylesheet_link_tag "select2-bootstrap-5-theme.min" %>
+  <%= stylesheet_link_tag "select2.min" %>
+<% end %>
+<%= javascript_include_tag 'jquery.js'%>
+<%= javascript_include_tag 'jquery-ui.js'%>
+<% content_for :bottombody do %>
+  <%= javascript_include_tag '/assets/lib_hrm/moment-with-locales.js' %>  
+  <%= javascript_include_tag '/assets/lib_hrm/bootstrap-datetimepicker.min.js' %>
+  <%= javascript_include_tag '/assets/myjs/jquery_ujs.js' %>
+  <%= javascript_include_tag 'select2.full.min'%>
+  <%= javascript_include_tag 'select2.min.js'%>
+<% end %>
+<div class="row">
+    <div class="col">
+        <h3 class="mt-2 overview_text"><%= lib_translate("Document_to")%></h3>
+    </div>
+    <div class="col mt-2 ">
+        <button class="btn btn-primary float-end" data-bs-toggle="modal" onclick="choose_user()" data-bs-target="#staticBackdrop"  >
+          <%= lib_translate("Import_old_text")%>
+        </button>
+        <button onclick="clickOpenImport()" class="btn btn-warning float-end me-1" data-bs-toggle="modal" data-bs-target="#import_mandoc_excel" id="btn-import-file">
+            <%= lib_translate("Import_from_file")%> <span class="fas fa-file-excel"></span>
+        </button>
+    </div>
+</div>
+<div class="list_users">
+    <div class="card mb-3">
+        <div class="card-body pt-0">
+            <div class="tab-content">
+            <%= render_search_pagination(released_mandocs_incoming_index_path()).html_safe %>
+                <table id="documents_released_incoming" class="table table-bordered fs--1 mb-0 " style="margin-top: 0px !important; margin-bottom: 0px !important">
+                    <thead class="bg-200 text-900" class="display: none;">
+                        <tr>
+                            <th class="sort" style="width: 4%; text-align: center;"><%= lib_translate("Oder")%></th>
+                            <th class="sort" style="width: 15%; text-align: center;"><%= lib_translate("Sno_symbol")%></th>
+                            <th class="sort" style="width: 30%; text-align: center;"><%= lib_translate("Content")%></th>
+                            <th class="sort" style="width: 13%; text-align: center;"><%= lib_translate("Ngay_ban_hanh")%></th>
+                            <th class="sort" style="width: 15%; text-align: center;"><%= lib_translate("Status_handle")%></th>
+                            <th class="no-sort col-4 col-md-3 p-0" style="width: 20%;"></th>
+                        </tr>
+                    </thead>
+                    <tbody class="list">
+                        <% @incoming.each_with_index do |mandoc, i| %>
+                            <tr>  
+                                <td style="vertical-align: middle; text-align: center;"><%= i+1 %></td>
+                                <td style="vertical-align: middle;">
+                                    <%( if (mandoc.sno.nil?)%>
+                                    <div style="text-align: start;  display: flex;flex-direction: column;">
+                                        <label style="  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;font-weight: bold !important;" class="m-0" ><%= lib_translate("Documents_date")%>: <span style="font-weight: normal;"> <%= mandoc.received_at&.strftime('%d/%m/%Y')%></span></label>
+                                    </div>
+                                    <%else%>
+                                    <div style="text-align: start;  display: flex;flex-direction: column;">
+                                        <label style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;font-weight: bold !important;" class="m-0 text-overlap"><%= lib_translate("Mandoc_Type")%>:<span style="font-weight: normal;"> <%= mandoc.stype.present? ? Mandoctype.where(scode: mandoc.stype).first&.name : ""%></span></label>
+                                        <label style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;font-weight: bold !important;" class="m-0 text-overlap"><%= lib_translate("Incoming_number")%>:<span style="font-weight: normal;"> <%= mandoc.sno %></span></label>
+                                        <label style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;font-weight: bold !important;" class="m-0 text-overlap"><%= lib_translate("Sno_book")%>:<span style="font-weight: normal;"> <%= mandoc.ssymbol %></span></label>
+                                    </div>
+                                    <%end)%>
+                                </td> 
+                                <td style="vertical-align: middle;">
+                                    <div style="text-align: start;  display: flex;flex-direction: column;">
+                                        <label style="  white-space: normal; font-weight: bold !important;" class="m-0" ><%=lib_translate('Excerpts_from_content')%>: <span style="font-weight: normal;"><%= mandoc.contents %></span></label>
+                                        <label style="  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;font-weight: bold !important;" class="m-0"><%= lib_translate("Sent_from")%>: <span style="font-weight: normal;"><%= mandoc.sfrom %></span></label>
+                                        <label style="  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;font-weight: bold !important;" class="m-0"><%= lib_translate("Receive_handle")%>: <span style="font-weight: normal;"><%= mandoc.created_by %></span></label>
+                                        <label style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;font-weight: bold !important;" class="m-0" ><%= lib_translate("Documents_date")%>: <span style="font-weight: normal;"> <%= mandoc.received_at&.strftime('%d/%m/%Y')%></span></label>
+                                   
+                                    </div>
+                                </td>                         
+                                <td style="vertical-align: middle; text-align: center;">                                  
+                                    <%= if !mandoc.effective_date.nil?
+                                          mandoc.effective_date.strftime('%d/%m/%Y')
+                                        else
+                                          mandoc.effective_date
+                                        end
+                                    %>
+                                </td>                         
+                                <td style="vertical-align: middle; text-align: center;">
+                                    <% if mandoc.status == "RECEIVE"%>
+                                    <span class="text-info" style="font-weight: bold;"> <%=lib_translate('Receive_handle')%></span>
+                                    <% elsif mandoc.status == "INPROGRESS"%>
+                                    <span class="text-warning" style="font-weight: bold;"> <%=lib_translate('Inprogress_handle')%></span>
+                                    <% elsif mandoc.status == "DELETE"%>
+                                    <span class="text-danger" style="font-weight: bold;"> <%=lib_translate('Cancel_handle')%></span>
+                                    <%else%>
+                                    <span class="text-success" style="font-weight: bold;"> <%=lib_translate('Success_handle')%></span>
+                                    <% end %>
+                                </td>                         
+                                <td style="vertical-align: middle; text-align: center; padding:0">
+                                 <%# Nút xem văn bản %>
+                                    <% oMandocDhandleRelease = Mandocdhandle.where(mandoc_id: mandoc.id ).first
+                                      check_dhandle = ""
+                                      if !oMandocDhandleRelease.nil?
+                                      check_dhandle = oMandocDhandleRelease.id
+                                      end
+                                     %>
+                                    <%# Nút view media%>
+                                      <button  class="btn btn-light p-0 " style="padding: 6px 17px !important" id="btn_again_release" onclick='clickAgainRelease(<%= mandoc.to_json %>, <%= mandoc.stype.present? ? Mandoctype.where(scode: mandoc.stype).first&.name.to_json : ""%>,<%= mandoc.publish_to_departments&.include?("all") ? ["Tất cả phòng ban #{@organization_name != "" ? "[#{@organization_name}]" : "" }"].push(Department.where(id: mandoc.publish_to_departments&.split(",")).pluck(:name)) : Department.where(id: mandoc.publish_to_departments&.split(",")).pluck(:name) %>, <%= mandoc.publish_to_staffs == "all" ? [{"last_name":"Tất cả nhân sự","first_name":"#{@organization_name != "" ? "[#{@organization_name}]" : ""}"}].to_json : User.select("id, last_name, first_name").where(id: mandoc.publish_to_staffs&.split(",")).to_json %>)' data-toggle="tooltip" data-placement="top" title="Ban hành văn bản đến các đơn vị/ nhân sự">
+                                              <span class="fas fa-paper-plane text-info"></span>
+                                      </button>
+                                      <button class="btn btn-light" onclick="clickEditMandocMedias(this,<%=mandoc.id%>)" data-check-dhandle="<%=check_dhandle%>" data-toggle="tooltip" data-placement="top" title="<%=lib_translate('Upload_file')%>">
+                                        <span class="fas fa-folder-open icon text-warning"></span>
+                                      </button>
+                                      <button class="btn btn-light preview-mandoc d-none" data-id="<%= mandoc.id%>" data-toggle="tooltip" data-placement="top" title="<%=lib_translate('View_document')%>">
+                                          <span class="far fa-eye">
+                                      </button>
+                                   
+                                      <button class="btn btn-light" data-bs-toggle="modal" data-bs-target="#tinh_trang_outgoing_TT_<%=mandoc.id%>" data-toggle="tooltip" data-placement="top" title="<%=lib_translate('View_status')%>">
+                                          <span class="fas fa-list-ol text-success">
+                                      </button>
+
+                                      <div class="modal fade" id="tinh_trang_outgoing_TT_<%=mandoc.id%>" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style=" background: rgba(0, 0, 0, 0.84); overflow-y: scroll;">
+                                              <div class="modal-dialog" style="max-width: 70%; width: 100%; display: flex; align-items: center;">
+                                                <div class="modal-content p-3" style=" background: var(--falcon-avatar-status-border-color);">
+                                                    <div class="position-absolute top-0 end-0 mt-2 me-2 z-index-1">
+                                                    <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                  </div>
+                                                  <div class="modal-header d-flex justify-content-left" >
+                                                    <p class="fs-1 fw-bold"><%= lib_translate("Document_processing") %></p> 
+                                                  </div> 
+                                                  <div style=" background: var(--falcon-avatar-status-border-color);padding: 20px;">
+                                                    <h5 style="float:left; opacity: .5;"><span class="fw-bold"><%= lib_translate("Status") %>: </span>
+                                                        <% if mandoc.status == "RECEIVE"%>
+                                                        <span class="text-info" style="font-weight: bold;"> <%=lib_translate('Receive_handle')%></span>
+                                                        <% elsif mandoc.status == "INPROGRESS"%>
+                                                        <span class="text-warning" style="font-weight: bold;"> <%=lib_translate('Inprogress_handle')%></span>
+                                                        <% elsif mandoc.status == "DELETE"%>
+                                                        <span class="text-danger" style="font-weight: bold;"> <%=lib_translate('Cancel_handle')%></span>
+                                                        <%else%>
+                                                        <span class="text-success" style="font-weight: bold;"> <%=lib_translate('Success_handle')%></span>
+                                                        <% end %>   
+                                                    </h5>
+                                                    <table class="table table-bordered fs-0 mb-0 table-hover " >
+                                                        <thead class="text-white" style="background: var(--falcon-bg-circle-shape-bg);">
+                                                              <tr>
+                                                                <th style="width: 30%;"><%= lib_translate("Handler") %></th>
+                                                                <th style="width: 6%;"><%= lib_translate("Role") %></th>
+                                                                <th style="width: 10%;"><%= lib_translate("Day_Process") %></th>
+                                                                <th style="width: 10%;"><%= lib_translate("Deadline_process") %></th>
+                                                                <th style="width: 20%;"><%= lib_translate("Content_process") %></th>
+                                                                <th style="width: 8%;"><%= lib_translate("Status") %></th>
+                                                                <th style="width: 6%;"><%= lib_translate("Read") %></th>
+                                                              </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <%  mandoc = Mandoc.where(id: mandoc.id).first
+                                                                    if !mandoc.nil? %>
+                                                                          <tr style="text-align: left">
+                                                                            <td class="text-success"> <%= mandoc.created_by %> <b>[<%= if mandoc.sfrom.nil?
+                                                                              mandoc.mdepartment
+                                                                            else
+                                                                              id_department_first = Mandocdhandle.where(mandoc_id: mandoc.id).first&.department_id
+                                                                              Department.where(id: id_department_first).first&.name
+                                                                            end%>]</b></td>
+                                                                            <td><%= lib_translate("Người soạn")%></td>
+                                                                            <td><%= mandoc.created_at&.strftime("%k:%M %d/%m/%Y")%></td>
+                                                                            <td></td> 
+                                                                            <td><div style="white-space: pre-line;"><%= mandoc.contents %></div></td>
+                                                                            <td><%= lib_translate("DAXULY")%></td>
+                                                                            <td><%= lib_translate("CO")%></td>
+                                                                          </tr>
+                                                                          <%
+                                                                            
+                                                                            mandoc.mandocuhandles&.order(created_at: :asc).each do |uhan|
+                                    
+                                                                          %>  
+                                                                         
+                                                                            <tr style="text-align: left">
+                                                                                <td> <span class="fas fa-grip-lines"></span><span class="fas fa-chevron-right"></span> <%= uhan&.user&.last_name%> <%= uhan&.user&.first_name%>  <b>[<%= uhan&.mandocdhandle&.department&.name%>]</b></td>
+                                                                                <td><%= uhan.srole == "XULY" ? lib_translate("XULY") : uhan.srole == "DEBIET" ? lib_translate("DEBIET") : uhan.srole == "PHOIHOPXL" ? lib_translate("PHOIHOPXL") : lib_translate("XULY")%></td>
+                                                                                <td><%= uhan.created_at&.strftime("%k:%M %d/%m/%Y")%></td>
+                                                                                <%if !uhan.deadline.nil?%>
+                                                                                <td><%= uhan.deadline&.strftime("%d/%m/%Y")%></td>
+                                                                                <%else%>
+                                                                                  <td></td>
+                                                                                <%end%>
+                                                                                <td><div style="white-space: pre-line;"><%= uhan.contents %></div></td>
+                                                                                <td><%= uhan.sothers == "HUYBOXULY" ? "Thay thế" : uhan.status == "DAHUY" ? lib_translate("Cancel_handle") : uhan.status == "CHUAXULY" ? lib_translate("CHUAXULY") : uhan.status == "PHOIHOPXL" ? lib_translate("PHOIHOPXL") : uhan.status == "DAXULY" ? lib_translate("DAXULY") : lib_translate("CHUAXULY") %></td>
+                                                                                <td><%= uhan.sothers == "HUYBOXULY" ? "" : uhan.sread == "KHONG" ? lib_translate("KHONG") : uhan.sread == "CO" ? lib_translate("CO") : lib_translate("KHONG") %></td> 
+                                                                            </tr> 
+                        
+                                                                        <% end %>
+                                                                   <% end %>
+                                                        </tbody>
+                                                    </table>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                      </div>
+                                      <% if mandoc.publish_to_departments.nil? && mandoc.publish_to_staffs.nil? %>
+                                      <a class="btn btn-light" onclick="clickDeleteMandoc('<%= mandoc.id %>',`<%= !mandoc.notes.nil? &&  mandoc.notes != '' ? mandoc.notes : mandoc.contents %>`)" style="cursor: pointer;" data-toggle="tooltip" data-placement="top" title="<%=lib_translate('Delete')%>">
+                                        <span class="text-danger fas fa-trash" style="width: 12px;"></span>
+                                      </a>
+                                      <% end %>
+                                </td>                        
+                            </tr>
+                        <% end %>
+                    </tbody>
+                </table>
+              <%= render_pagination_limit_offset(released_mandocs_incoming_index_path(lang: session[:lang], per_page: session[:per_page], search: session[:search]), 10, @incoming.count).html_safe %>
+            
+            </div>
+        </div>
+    </div>
+</div>
+<div style="display:none;">
+  <p id="import-action" hidden><%= url_for(released_mandocs_import_mandoc_path)%></p>
+</div><%# Model inport file %>
+<div class="modal fade" data-bs-keyboard="false" data-bs-backdrop="static" id="import_mandoc_excel" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 500px">
+    <div class="modal-content position-relative">
+      <div class="position-absolute top-0 end-0 mt-1 me-2 z-index-1">
+        <button id="btn_X" class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base button-cancel-import" style="width: 2rem;height: 2rem;" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div class="rounded-top-lg py-3 ps-4 pe-6 bg-light">
+          <h5 class="mb-1"><%= lib_translate("Import_from_file")%></h5>
+        </div>
+        <%# File preview/process %>
+          <div class="border rounded-1 mt-2 me-2 ms-2" id="import-file-containter" style="display:none;">
+            <div class="ps-2" style="display: flex;align-items: center;">
+                <%= image_tag("/assets/image/excel.png") %>
+                <div class="ms-2">
+                    <p class="m-0" id="import-file-name" style="font-size: 0.9em;font-weight: 600;">...</p>
+                    <p class="m-0" id="import-file-size" style="font-size: 0.8em;">...</p>
+                </div>
+            </div>
+            <div class="progress me-2 ms-2 mb-1" style="height:7px">
+                <div class="progress-bar bg-success" id="file-process" role="progressbar" style="transition: width 0.2s ease; width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                </div>
+            </div>
+          </div>
+        <div class="pe-3 ps-3 pt-3 pb-2">
+          <%# Form import file user %>
+          <div>
+            <input id="file-import-user" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" type="file" name="file" hidden>
+            <label for="file-import-user" id="label-select-file" class="btn btn-warning m-0"><%= lib_translate("select_files")%></label>
+            <button class="btn btn-primary btn-secondary disabled" onclick="clickImportFile()" id="button-upload-file" type="submit">
+              <%# icon %>
+              <span class="spinner-border spinner-border-sm upload-process" role="status" aria-hidden="true"></span>
+              <%# text %>
+              <span class="upload-text"><%= lib_translate("Upload")%><span class="fas fa-upload ms-1"></span></span>
+            </button>
+            <div class="btn btn-primary" id="reupload-button" style="display: none;" onclick="clickReupload()"><%= lib_translate("Continue_import")%></div>
+          </div>
+          <div id="import-server-error" style="display:none;">
+            <span class="badge badge-soft-danger">Lỗi khi xử lý dữ liệu. Vui lòng kiểm tra và thử lại.</span>
+          </div>
+          <%# Import result %>
+          <div id="import-result" class="border rounded-1 mt-2 collapse">
+            <h5 class="p-2 fs-0 bg-200"><%= lib_translate("Processing_result")%>:<span id="result-total"></span></h5>
+            <div class="p-2">
+              <p class="m-0">
+                <span style="font-weight: 500;font-size: 17px;"><%= lib_translate("Total")%>:</span>
+                <span id="result_total" style="font-size: 18px;color: black;font-weight: 800;">0</span>
+              </p>
+              <p class="m-0">
+                <span style="font-weight: 500;font-size: 17px;"><%= lib_translate("Success")%>:</span>
+                <span id="success_count" class="text-success" style="font-size: 18px;color: black;font-weight: 800;">0</span>
+              </p>
+              <p class="m-0">
+                <span style="font-weight: 500;font-size: 17px;"><%= lib_translate("Update")%>:</span>
+                <span id="update_count" class="text-info" style="font-size: 18px;color: black;font-weight: 800;">0</span>
+                <span id="update-all-button" onclick="uploadAllImport()" class="btn btn-primary btn-sm ms-4" style="padding: 0px 7px;font-size: 0.7em;display:none;"><%= lib_translate("Update_all")%></span>
+              </p>
+              <div id="update_list" class="ps-2 mt-2 scrollbar" style="max-height: 300px;"></div>
+              <p class="m-0">
+                <span style="font-weight: 500;font-size: 17px;"><%= lib_translate("Not_Success")%>:</span>
+                <span id="error_count" class="text-danger" style="font-size: 18px;color: black;font-weight: 800;">0</span>
+              </p>
+              <div id="error_list" class="ps-3 scrollbar" style="max-height: 300px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btn_close" class="btn btn-secondary button-cancel-import" type="button" data-bs-dismiss="modal"><%= lib_translate("Close")%></button>
+      </div>
+    </div>
+  </div>
+</div>
+<%# Form upload file mandoc %>
+<div class="modal fade" id="upload_file_mandoc" tabindex="-1" style=" background: rgba(0, 0, 0, 0.84); overflow-y: scroll;">
+  <div class="modal-dialog" style="max-width: 70%; width: 100%; height: 100%; display: flex; align-items: center;">
+    <div class="modal-content">
+      <div class="modal-header d-flex justify-content-center ">
+        <h5 class="mb-0"><%= lib_translate('Attached_files')%></h5>
+        <button type="button" class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="card-body bg-light p-3" id="upload_mandoc_file"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<%# Preview %>
+<div class="modal modal-lg fade" id="preview-modal" data-bs-keyboard="false" data-bs-backdrop="static">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="preview-title"></h5>
+        <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div id="preview-content" class="modal-dialog-scrollable mt-0 text-black preview-contents" style="padding-left: 40px; padding-right: 40px; padding-bottom: 10px; padding-top: 10px;">
+        <!-- Slider main container -->
+        <div class="swiper" >
+          <!-- Additional required wrapper -->
+          <div class="swiper-wrapper" id="render_mandoc_file"> 
+            <!-- Slides -->
+            <div class="swiper-slide">Slide 1</div>
+            <div class="swiper-slide">Slide 2</div>
+            <div class="swiper-slide">Slide 3</div>
+            ...
+          </div>
+          <!-- If we need pagination -->
+          <div class="swiper-pagination"></div>
+
+          <!-- If we need navigation buttons -->
+          <div class="swiper-button-prev"></div>
+          <div class="swiper-button-next"></div>
+
+          <!-- If we need scrollbar -->
+          <div class="swiper-scrollbar"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="upload_mandoc_file_update" tabindex="-1" style=" background: rgba(0, 0, 0, 0.84); overflow-y: scroll;">
+    <div class="modal-dialog" style="max-width: 70%; width: 100%; height: 100%; display: flex; align-items: center;">
+        <div class="modal-content">
+            <div class="modal-header d-flex justify-content-center ">
+                <h5 class="mb-0"><%= lib_translate('Attached_files')%></h5>
+                <button type="button" class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card-body bg-light" id="upload_mandoc_file_update"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- modal add documents -->
+<div class="modal fade" id="staticBackdrop" data-bs-keyboard="false" data-bs-backdrop="static" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true" data-bs-focus="false">
+  <div class="modal-dialog modal-xl mt-6" role="document">
+    <div class="modal-content border-0">
+      <div class="position-absolute top-0 end-0 mt-3 me-3 z-index-1">
+        <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" id="btn_add_doc_pending_in_close" aria-label="Close" onclick="close_modal_add()"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div class="bg-light rounded-top-lg py-3 ps-4 pe-6">
+          <h4 class="mb-1" id="staticBackdropLabel_add"><%= lib_translate('Add_document_to')%></h4>
+        </div>
+        <div class="p-3">
+          <div class="row">
+            <%= form_for @mandoc, :url=> released_mandocs_incoming_update_path, html: {method: :post, id:"form_add_document_infor", class:"mb-2 p-3" } do |f| %>
+              <%= f.text_field :id, class: 'form-control d-none' , name:'mandoc_id', id:'mandoc_id' %>
+              <input class="depart_id_user" value="<%= @department_id_check%>" id="department_id_user_login" name="department_id_user_login" hidden/>
+              
+              <p class="alert alert-warning border-2 align-items-center" id="err_add" style="display:none"></p>
+              <div class="row">
+                  <div class="col-6 d-flex flex-column">
+                    <!-- Loại sổ -->
+                    <div class="col-12 d-flex flex-row mt-3">
+                      <div class="col-3 d-flex align-items-center justify-content-end me-3">
+                        <%= f.label :type_book, lib_translate("Type_book") ,class:'fw-semi-bold m-0'%> 
+                      </div>
+                      <select class="form-select selectpicker" name="type_book" id="type_book">
+                        <% @mandocbooks.each do |docbook| %>
+                          <option value="<%= docbook.scode %>"><%= docbook.name %></option>
+                        <% end %>
+                      </select>
+                      <div class="ms-2 d-flex align-items-center">
+                        <span class="fas fa-sync-alt" style="cursor: pointer;" id="mandocbook-reload-btn" onclick="clickRefreshOption(this,'get_mandocbook_form')"></span>
+                      </div>
+                      <a class="ms-2 pe-auto d-flex align-items-center" href="<%= mandocbook_index_path()%>"><span style="width:10px; color:#98a7b9" class="fas fa-database"></span></a>
+                    </div>
+      
+                    <!-- Số đến -->
+                    <div class="col-12 d-flex flex-row mt-3">
+                      <div class="col-3 d-flex align-items-center justify-content-end me-3">
+                        <%= f.label :number_book, lib_translate('Incoming_number') ,class:'fw-semi-bold m-0'%> <span class="red">*</span>
+                      </div>
+                      <%= f.text_field :sno, class: 'form-control', name:'sno', id:"sno", value: @value_sno %>
+                    </div>
+      
+                    <!-- Số/Ký hiệu -->
+                    <div class="col-12 d-flex flex-row mt-3">
+                      <div class="col-3 d-flex align-items-center justify-content-end me-3">
+                        <%= f.label :ssymbol, lib_translate("Sno_book") ,class:'fw-semi-bold m-0'%>
+                      </div>
+                      <%= f.text_field :ssymbol, class: 'form-control' , name:'ssymbol',id:"ssymbol" %>
+                    </div>
+      
+                    <!-- Loại văn bản -->
+                    <div class="col-12 d-flex flex-row mt-3">
+                      <div class="col-3 d-flex align-items-center justify-content-end me-3">
+                        <%= f.label :stype, lib_translate('Documents_type'),class:'fw-semi-bold m-0' %>
+                      </div>
+                      <select class="form-select selectpicker" name="stype" id="stype">
+                        <% @mandoctypes.each do |doctype| %>
+                          <option value="<%= doctype.scode %>"><%= doctype.name %></option>
+                        <% end %>
+                      </select>
+                      <div class="ms-2 d-flex align-items-center">
+                        <span class="fas fa-sync-alt" style="cursor: pointer;" id="mandoctype-reload-btn" onclick="clickRefreshOption(this,'get_mandoctype_form')"></span>
+                      </div>
+                      <a class="ms-2 pe-auto d-flex align-items-center" href="<%= mandoctype_index_path() %>" ><span style="width:10px; color:#98a7b9" class="fas fa-database"></span></a>
+                    </div>
+      
+                    <!-- Liên kết văn bản -->
+                    <div class="col-12 d-flex flex-row mt-3">
+                      <div class="col-3 d-flex align-items-center justify-content-end me-3">
+                        <%= f.label :slink, lib_translate('Documents_link'),class:'fw-semi-bold m-0' %> 
+                      </div>
+                      <%= f.text_field :slink, class: 'form-control' , name: 'slink',id:'slink' %>
+                    </div>
+
+                    <!-- Số trang -->
+                    <div class="col-12 d-flex flex-row mt-3">
+                      <div class="col-3 d-flex align-items-center justify-content-end me-3">
+                        <%= f.label :number_pages, lib_translate("Number_pages"),class:'fw-semi-bold m-0' %> 
+                      </div>
+                      <%= f.number_field :number_pages, class: 'form-control' , name: 'number_pages',id:'number_pages' %>
+                    </div>
+                    
+                  </div>
+                  
+
+                  
+                  <div class="col-6 d-flex flex-column" >
+                    <!-- Người nhập -->
+                    <div class="col-12 d-flex flex-row mt-3">
+                      <div class="col-4 d-flex align-items-center justify-content-end me-3">
+                        <%= f.label :created_by,lib_translate("Importer") ,class:'fw-semi-bold m-0'%>
+                      </div>
+
+                      <select class="form-select selectpicker" name="created_by" id="created_by" >
+                        <% oUserORG = Uorg.where(user_id: session[:user_id]).first
+                          if !oUserORG.nil?
+                          organization_id = oUserORG.organization_id
+                          streams = Operstream.where(organization_id: organization_id).all
+                            streams.each do |e|
+                                e.stream_id
+                                stream = Stream.where(id: e.stream_id).where("scode LIKE '%QLVB-VB-TOI%'").first
+                                if stream.nil?
+                                    next
+                                elsif !stream.scode.include?("QLVB-VB-TOI")
+                                    next
+                                else
+                                      stream_id = stream.id
+                                      get_department = Node.where(stream_id: stream_id, nfirst: "YES").first
+                                      if !get_department.nil?
+                                      get_department_id= get_department.department_id
+                                      get_positionjob_id= Positionjob.where(department_id: get_department_id)
+                                      works= Work.where(positionjob_id: get_positionjob_id)
+                                      works.each do |work| 
+                                      user=User.where(id: work.user_id).first
+                          %>
+                            <option value="<%= user.last_name.capitalize.titleize%> <%= user.first_name.capitalize.titleize%>" style="text-transform: capitalize !important">
+                                <%= user.last_name.capitalize.titleize%> <%= user.first_name.capitalize.titleize%>
+                            </option>
+                        <%end end end end end %>
+                      </select>
+                      
+                    </div>
+                    <div class="col-12 d-flex flex-row mt-3">
+                      <div class="col-4 d-flex align-items-center justify-content-end me-3">
+                        <%= f.label :created_by, lib_translate("Đơn vị xử lý") ,class:'fw-semi-bold m-0'%>
+                      </div>
+
+                      <select class="form-select selectpicker" name="department_handle_release" id="department_handle_release" >
+                        <% @departments.each do |department| %>
+                            <option value="<%= department.id %>" style="text-transform: capitalize !important">
+                                <%= department.name %>
+                            </option>
+                        <% end %>
+                      </select>
+                      
+                    </div>
+                    <!--Ngày ban hành văn bản-->
+                    <div class="col-12 d-flex flex-row mt-3">
+                      <div class="col-4 d-flex align-items-center justify-content-end me-3">
+                        <%= f.label :effective_date, lib_translate("Ngay_ban_hanh"),class:'fw-semi-bold m-0' %> 
+                      </div>
+                      <div id="datepicker-container" class="datepicker-container col-8 pe-3">
+                        <span style="position: relative;" class="outline-element-container"> 
+                          <input id="dt_document_date" type="text" name="effective_date"  value="<%=Time.now&.strftime('%d/%m/%Y')%>" class="form-control datepicker openemr-datepicker input-textbox outline-element incorrect" objtype="7" name="action_element" objindex=""  aria-label="Select Date" maxlength="10"> 
+                          <span class="correct-incorrect-icon"> </span>
+                        </span>
+                      <div id="datepicker"></div>
+                      </div>
+                    </div>
+                    <!--Ngày hiệu lực văn bản -- fix lỗi trùng id-->
+                    <div class="col-12 d-flex flex-row mt-3">
+                      <div class="col-4 d-flex align-items-center justify-content-end me-3">
+                        <%= f.label :received_at, lib_translate("Document_receipt_date"),class:'fw-semi-bold m-0' %> 
+                      </div>
+                      <div id="datepicker-container" class="datepicker-container col-8 pe-3">
+                        <span style="position: relative;" class="outline-element-container"> 
+                          <input id="dt_document" type="text" name="received_at"  value="<%=Time.now&.strftime('%d/%m/%Y')%>" class="form-control datepicker openemr-datepicker input-textbox outline-element incorrect" objtype="7" name="action_element" objindex=""  aria-label="Select Date" maxlength="10"> 
+                          <span class="correct-incorrect-icon"> </span>
+                        </span>
+                      <div id="datepicker"></div>
+                      </div>
+                    </div>
+                    
+                    <!-- Độ khẩn -->
+                    <div class="col-12 d-flex flex-row mt-3">
+                      <div class="col-4 d-flex align-items-center justify-content-end me-3">
+                        <%= f.label :spriority, lib_translate('Urgency'),class:'fw-semi-bold m-0' %> 
+                      </div>
+                      <div class="col-8 d-flex">
+                        <div class="col-10 d-flex">
+                        <select class="form-select selectpicker" name="spriority" id="spriority">
+                          <% @mandocpriorities.each do |mandocpriority| %>
+                            <option value="<%= mandocpriority.name %>"><%= mandocpriority.name %></option>
+                          <% end %>
+                        </select>
+                        <div class="ms-2 d-flex align-items-center">
+                          <span class="fas fa-sync-alt" style="cursor: pointer;" id="mandocpriority-reload-btn" onclick="clickRefreshOption(this,'get_mandocpriority_form')"></span>
+                        </div>
+                        <a class="ms-2 pe-auto d-flex align-items-center" href="<%=mandocpriority_index_path() %>" ><span style="width:10px; color:#98a7b9" class="fas fa-database"></span></a>
+                      </div>
+                      </div>
+                    </div>
+                    
+                    <!-- Gửi từ -->
+                    <div class="col-12 d-flex flex-row mt-3">
+                      <div class="col-4 d-flex align-items-center justify-content-end me-3">
+                        <%= f.label :sfrom, lib_translate('Sent_from'),class:'fw-semi-bold m-0' %> 
+                      </div>
+                      <div class="col-8 d-flex">
+                        <div class="col-10 d-flex">
+                        <select class="form-select selectpicker " name="sfrom" id="sfrom">
+                          <% @mandocfroms.each do |mandocfrom| %>
+                            <option value="<%= mandocfrom.name %>"><%= mandocfrom.name %></option>
+                          <% end %>
+                        </select>
+                        <div class="ms-2 d-flex align-items-center">
+                          <span class="fas fa-sync-alt" style="cursor: pointer;" id="mandocfrom-reload-btn" onclick="clickRefreshOption(this,'get_mandocfrom_form')"></span>
+                        </div>
+                        <a class="ms-2 pe-auto d-flex align-items-center" href="<%=mandocfroms_index_path() %>" ><span style="width:10px; color:#98a7b9" class="fas fa-database"></span></a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>  
+                </div>
+                <!-- Content -->
+      
+                <div class="row">
+                  <div class="d-flex flex-row mt-3">
+                    <div class="d-flex align-items-center" style="width: 15%;">
+                      <%= f.label :content ,lib_translate('Content_TY'),class:'fw-semi-bold m-0' %><span class="red">*</span>
+                    </div>
+                    <%= f.text_field :contents, class:'form-control ms-2',name:"contents",id:'contents'%>
+                  </div>
+                </div>
+      
+                <!-- Desc -->
+                <div class="row">
+                  <div class="d-flex flex-row mt-3"> 
+                    <div class=" d-flex align-items-center justify-content-end" style="width: 15%;">
+                      <%= f.label :notes ,lib_translate('Note'),class:'fw-semi-bold m-0' %>
+                    </div>
+                    <%= f.text_area :notes, class:'form-control ms-2',name:"notes",id:'notes'%>
+                  </div>
+                </div>
+                <%# Upload media view %>
+                <div class="row mt-3">
+                  <div class="collapse show" id="add-file-medias_mandocsfile">
+                    <div class="card">
+                      <div class="card-header">
+                        <h5 class="mb-0"><%= lib_translate('Attached_files')%></h5>
+                      </div>
+                      <div class="card-body bg-light" id="upload_file_mandocfile">
+                        
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <%# ==== %>
+                <div class="row mt-3 m-auto">
+                  <div class="d-flex flex-row col-12 justify-content-center">
+                    <div class="m-2">
+                      <button class="ps-4 pe-4 btn btn-primary handle_file_btn" type="button" id="add_doc"><%=lib_translate('Save')%></button>
+                      <div id="loading_button_add_doc" class= "ps-4 pe-4 btn btn-primary" style="opacity: 0.8;display:none;" >
+                            <i class ="fa fa-spinner fa-spin"> </i>  <%=lib_translate("Save")%> 
+                      </div>
+                    </div>
+                    <div class="m-2 d-none">
+                      <button class="ps-6 pe-6 btn btn-info" type="button"><%=lib_translate('Send_to_unit_leader')%></button>
+                    </div>
+                    <div class="m-2">
+                      <button class="ps-4 pe-4 btn btn-danger" type="button" data-bs-dismiss="modal" aria-label="Close" onclick="close_modal_add()"><%=lib_translate('Close')%></button>
+                    </div>
+                  </div>
+                </div>  
+            <% end %>
+            
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- end modal -->
+<%= form_tag 'find_one',controller: 'released_mandocs',method:'GET',id:'get_mandoc_form',remote:true,authenticity_token: true do %>
+  <input type="text" name="mandoc_id" hidden>
+  <input type="text" name="func_name" hidden>
+  <input type="text" name="type" hidden>
+<%  end %>
+
+<div class="modal fade" id="modal-release-mandoc" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style=" background: rgba(0, 0, 0, 0.84); overflow-y: scroll;" data-bs-focus="false">
+  <div class="modal-dialog" style="max-width: 80%; width: 100%; display: flex;">
+    <div class="modal-content p-3" style=" background: var(--falcon-avatar-status-border-color);">
+      <div class="position-absolute top-0 end-0 mt-2 me-2 z-index-1">
+        <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="py-3 pe-6">
+        <h3 class="mb-1" id="staticBackdropLabel"><%= lib_translate("Ban hành văn bản đến các đơn vị/ nhân sự")%></h3>
+      </div>
+      <%= form_for "", :url=> mandocs_release_docs_path , html: {method: :post, id:"form_release_mandoc" } do |f| %>
+        <input class="d-none" name="mandoc_id" id="mandoc_id_release" value="">
+        <input value="outgoing" class="d-none" name="release_mandoc_type">
+        <div class="error_release" style="color: red;"></div>
+        <div class="show_info_mandoc">
+        </div>
+
+        <!-- Soạn thảo nội dung email -->
+        <div class="mt-3" style="background: var(--falcon-soft-primary); border-radius: 5px;">
+          <a class="nav-link dropdown-indicator" id="compose_email_content_collapse" href="#compose_email_content" role="button" data-bs-toggle="collapse"  aria-expanded="false" aria-controls="compose_email_content">
+            <div class="p-2 d-flex align-items-center"><span class="nav-link-icon"></span><h5 class="nav-link-text ps-1 text-600"><%= lib_translate("Nội dung email")  %> </h5>
+            </div>
+          </a>
+          <div class="p-3 pt-0 pb-0 collapse show" id="compose_email_content">
+            <div class="mt-2">
+              <% 
+                name_department = ""
+                works = @current_user.works.order(created_at: :desc)
+                works.each do |work|
+                    if !work&.positionjob.nil? && !work&.positionjob&.department.nil?
+                      name_department = work&.positionjob&.department&.name
+                    end
+                end
+              %>
+              <label for="subject_email"  style="font-size: 1rem" class="mb-0"><%= lib_translate("Gửi từ") %>: </label>
+              <select class="form-select selectpicker" name="department_send_email" id="department_send_email">
+                <option value="Hệ Thống Văn Bản ERP">Hệ Thống Văn Bản ERP</option>
+                <% @departments.each do |depart| %>
+                  <option value="<%= depart.name %>" <%= name_department.include?(depart.name) ? "selected" : "" %>><%= depart.name %></option>
+                <% end %>
+              </select>
+            </div>
+            <div class="mt-3"> 
+              <label for="subject_email" style="font-size: 1rem" class="mb-0"><%= lib_translate("Subject_email") %><span class="red">*</span>:</label>
+              <input type="text" class="form-control" id="subject_email" name="subject_email">
+            </div>
+            <div class="mt-3 pb-3"> 
+              <label for="content_email"  style="font-size: 1rem" class="mb-0"><%= lib_translate("Content_email") %>:</label>
+              <div class="mt-0">
+                <textarea name="content_email" id="content_email"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- File đính kèm -->
+        <div class="mt-3" style="border-radius: 5px; box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;">
+          <a class="nav-link dropdown-indicator" id="compose_meida_file_collapse" href="#media_file_content" role="button" data-bs-toggle="collapse"  aria-expanded="false" aria-controls="media_file_content">
+            <div class="p-2 d-flex align-items-center"><span class="nav-link-icon"></span><h5 class="nav-link-text ps-1 text-600"><%= lib_translate("File đính kèm")  %><span class="red">*</span> </h5>
+            </div>
+          </a>
+          <div class="p-3 pt-0 pb-0 collapse show" id="media_file_content">
+              <div id="upload_mandoc_file_release_mandoc"></div>
+          </div>
+        </div>
+
+        <!-- Chọn phòng ban/đơn vị -->
+        <div class="mt-3" id="div_choose_release_department">
+          <%= f.label :ssymbol, lib_translate("Chọn đơn vị nhận email") ,class:'fw-semi-bold m-0'%> 
+          <select class="form-select selectpicker" id="select_release_department" multiple="multiple" size="1" name="select_release_department[]" data-options='{"removeItemButton":true,"placeholder":true}'>
+            <option value="all">Tất cả phòng ban <%= @organization_name != "" ? "[#{@organization_name}]" : "" %></option>
+            <% @departments.each do |department| %>
+              <option value="<%= department.id %>"><%= department.name %></option>
+            <% end %>
+          </select>
+        </div>
+        <!-- Chọn nhân sự -->
+        <div class="mt-3">
+          <%= f.label :ssymbol, lib_translate("Chọn nhân sự nhận email") ,class:'fw-semi-bold m-0'%> 
+          <select class="form-select selectpicker" multiple="multiple" size="1" id="select_release_staff" name="select_release_staff[]" data-options='{"removeItemButton":true,"placeholder":true}'>
+            <option value="all">Tất cả nhân sự <%= @organization_name != "" ? "[#{@organization_name}]" : "" %></option>
+            <% @list_users_uorg.each do |user| 
+                @name_department = ""
+                @job_name = ""
+                works = user.works
+                works.each do |work|
+                    if !work.positionjob.nil? && !work.positionjob.department.nil?
+                      @name_department = work.positionjob.department.name
+                      @job_name = work.positionjob.name
+                    end
+                end
+            %>
+              <option value="<%= user.id %>"><%= user.last_name %> <%= user.first_name %> <%= @name_department != "" ? "- [#{@name_department}]" : "" %></option>
+            <% end %>
+          </select>
+        </div>
+        <div class="mt-3 row " style="display: flex; justify-content: space-evenly;">
+          <button type="button" id="vt_ban_hanh" class="btn btn-primary col-3"><%= lib_translate("Ban_Hanh_Bo_Sung")%></button>
+          <button class="btn btn-warning col-3" onclick="backFormRelease()" type="button"> <%=lib_translate("Cancel")%> </button>
+        </div>
+      <%end%>
+    </div>
+  </div>
+</div>
+
+<script>
+  let mess_del= "<%= lib_translate('Are_you_sure_to_delete_this_mandocfile_of')%>";
+  let time_now= "<%=Time.now&.strftime('%d/%m/%Y')%>";
+  let blank_created_by = "<%= lib_translate('blank_created_by')%>";
+  let blank_signed_by= "<%= lib_translate('blank_signed_by')%>";
+  let blank_ssymbol= "<%= lib_translate('blank_ssymbol')%>";
+  let blank_contents= "<%= lib_translate('No_space_stask_name')%>";
+  let trans_skip = "<%= lib_translate("Skip")%>"
+  let blank_sno= "<%= lib_translate('blank_sno')%>";
+  let root_path_mandoc="<%= root_path%>";
+  let value_sno ="<%= @value_sno%>";
+  let User_full_name = '<%=@current_user.last_name%> <%=@current_user.first_name%>';
+  let mess_del_man= "<%=lib_translate("Are_you_sure_to_delete_this_bank")%>";
+  let blank_contents_vaild = "<%= lib_translate("Please_enter_content") %>";
+  let key_check = "<%= lib_translate("Check_kiem_tra_trang_thai") %>";
+
+  let trans_update = "<%= lib_translate("Update")%>"
+  let trans_upload = "<%= lib_translate("Upload")%>";
+  let trans_uploading = "<%= lib_translate("Uploading")%>"
+  let trans_processing = "<%= lib_translate("Processing")%>"
+    let mandocfile_upload_mediafile = '<%= url_for(action: :mandocfile_upload_mediafile)%>';
+  let mandocfile_upload_mediafile_new = '<%= url_for(action: :mandocfile_upload_mediafile_new)%>';
+  let action_del = '<%= url_for(action: :delete_mandocfile)%>';
+  let Choose_date = "<%= lib_translate("Choose_date") %>";
+  let closeText = "<%= lib_translate("closeText") %>";
+  let prevText = "<%= lib_translate("prevText") %>";
+  let nextText = "<%= lib_translate("nextText") %>";
+  let currentText = "<%= lib_translate("currentText") %>";
+  let Jan = "<%= lib_translate("Jan") %>";
+  let Feb = "<%= lib_translate("Feb") %>";
+  let Mar = "<%= lib_translate("Mar") %>";
+  let Apr = "<%= lib_translate("Apr") %>";
+  let May = "<%= lib_translate("May") %>";
+  let Jun = "<%= lib_translate("Jun") %>";
+  let Jul = "<%= lib_translate("Jul") %>";
+  let Aug = "<%= lib_translate("Aug") %>";
+  let Sep = "<%= lib_translate("Sep") %>";
+  let Oct = "<%= lib_translate("Oct") %>";
+  let Nov = "<%= lib_translate("Nov") %>";
+  let Dec = "<%= lib_translate("Dec") %>";
+  let Mon = "<%= lib_translate("Mon") %>";
+  let Tue = "<%= lib_translate("Tue") %>";
+  let Wed = "<%= lib_translate("Wed") %>";
+  let Thu = "<%= lib_translate("Thu") %>";
+  let Fri = "<%= lib_translate("Fri") %>";
+  let Sat = "<%= lib_translate("Sat") %>";
+  let Sun = "<%= lib_translate("Sun") %>";
+  let datepicker_buttonImage = "<%= image_path('icon-calender-datepicker.png') %>";
+  var media_trans = {
+    upload_guide_1:'<%= lib_translate("upload_guide_1") %>',
+    upload_guide_2:'<%= lib_translate("upload_guide_2") %>',
+    upload_guide_3:'<%= lib_translate("upload_guide_3") %>',
+    confirm_delete:'<%= lib_translate("confirm_delete") %>',
+    confirm_delete_all:'<%= lib_translate("confirm_delete_all") %>',
+    select_files:'<%= lib_translate("select_files") %>',
+    cancel:'<%= lib_translate("Cancel") %>',
+    confirm:'<%= lib_translate("Confirm") %>',
+    message:'<%= lib_translate("Message") %>',
+    remove:'<%= lib_translate("Remove") %>',
+    upload:'<%= lib_translate("Upload") %>',
+    error:'<%= lib_translate("error") %>',
+    try_again:'<%= lib_translate("try_again") %>',
+    file_name:'<%= lib_translate("File_name") %>',
+    create_date:'<%= lib_translate("Create_date") %>',
+    created_by:'<%= lib_translate("Created_by") %>'
+  }
+
+  let action_del_mandocs ="<%= mandocs_del_path %>";
+  let action_upload_file_tinymce ="<%= released_mandocs_upload_file_tinymce_path %>";
+  let action_send_email_test ="<%= mandocs_send_email_test_path %>";
+  
+// datepick local
+  <%= if session[:lang] == "vi"
+    'flatpickr.localize(flatpickr.l10ns.vn);'.html_safe
+      end%>
+
+</script>
+
+<%= javascript_include_tag '/assets/lib_hrm/moment-with-locales.js' %>
+<%= javascript_include_tag '/assets/myjs/import_mandoc_excel.js' %>
+<%= javascript_include_tag '/assets/myjs/release_mandoc_incoming.js' %>
+<%= javascript_include_tag '/assets/myjs/swiper-bundle.min.js' %>

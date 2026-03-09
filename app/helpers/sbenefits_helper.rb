@@ -1,0 +1,2 @@
+module SbenefitsHelper
+end

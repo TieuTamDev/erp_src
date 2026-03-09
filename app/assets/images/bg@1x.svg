@@ -1,0 +1,21 @@
+<svg width="648" height="932" viewBox="0 0 648 932" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g filter="url(#filter0_d_4057_10542)">
+<mask id="mask0_4057_10542" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="28" y="16" width="600" height="884">
+<rect x="28" y="16" width="600" height="884" rx="20" fill="white"/>
+</mask>
+<g mask="url(#mask0_4057_10542)">
+<rect x="28" y="16" width="600" height="884" fill="white"/>
+</g>
+</g>
+<defs>
+<filter id="filter0_d_4057_10542" x="0" y="0" width="648" height="932" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset dx="-4" dy="8"/>
+<feGaussianBlur stdDeviation="12"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0.172549 0 0 0 0 0.247059 0 0 0 0 0.345098 0 0 0 0.02 0"/>
+<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_4057_10542"/>
+<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_4057_10542" result="shape"/>
+</filter>
+</defs>
+</svg>

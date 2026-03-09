@@ -1,0 +1,69 @@
+.is-invalid{
+/* border-color:unset !important; */
+padding-right:1rem;
+background-image:unset !important;
+}
+#id_add_relative:hover{
+color: var(--falcon-btn-falcon-success-color) !important;
+}
+.relative_id_lable_field{
+    margin: 20px 0px 20px 0px;
+    padding: 10px;
+    box-shadow: rgb(99 99 99 / 20%) 0px 2px 8px 0px;
+}
+#table_benefit_filter{
+display: none !important;
+}
+.highcharts-background {
+    background-color: #ffffff00;
+    fill: none !important;
+  }
+  .highcharts-credits {
+    display: none !important;
+  }
+  .highcharts-title {
+    font-family: var(--falcon-body-font-family);
+      font-size: 14px !important;
+      font-weight: 600;
+  }
+  .highcharts-axis-title {
+        font-family: var(--falcon-body-font-family);
+      font-size: 14px !important;
+      font-weight: 600;
+  }
+  .datepicker-years{
+    /* background-color: #b3bfd1; */
+    color:  var(--falcon-heading-color);
+  }
+  .datepicker{
+    color:  var(--falcon-heading-color);
+  }
+  .dataTables_wrapper{
+    width: 100% !important;
+    margin-top: 0px !important;
+  }
+  .name_feild_benefit span {
+    color: var(--falcon-badge-soft-dark-color);
+    font-weight: 600;
+    margin-top: 2px;
+    margin-bottom: 2px;
+  }
+  .name_feild_benefit2 span {
+    color: var(--falcon-badge-soft-dark-color);
+    font-weight: 500;
+    margin-top: 2px;
+    margin-bottom: 2px;
+  }
+   .value_feild_benefit span {
+    color: var(--falcon-btn-link-color);
+    font-weight: 500;
+    margin-top: 2px;
+    margin-bottom: 2px;
+  }
+  .style_table_benefit table td, .style_table_benefit table th {
+    white-space: initial !important;
+    vertical-align: middle;
+  }
+.tb_benefit .dataTables_wrapper {
+    margin-top: -1rem !important;
+} 

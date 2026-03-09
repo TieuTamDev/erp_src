@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <%= render partial: "templates/shared_styles" %>
+  <style>
+    /* max style */
+    p, h1, h2, h3, h4, h5, h6, span {
+      font-family: "Times New Roman", Times, serif;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: "Times New Roman", Times, serif;
+      margin: 0;
+      padding: 0;
+      position: relative;
+    }
+
+    p, h1, h2, h3, h4, h5, h6, span {
+      font-size: 12pt;
+      line-height: 1;
+    }
+
+    body{
+      font-size: 12pt;
+      line-height: 1;
+    }
+
+    table { 
+      width: 100%;
+      border-collapse: collapse; 
+    }
+    
+    .bold{
+      font-family:"Times-bold";
+      font-weight: bold;
+    }
+    .italic{
+      font-family:"Times-italic";
+    }
+    .text-center {
+      text-align: center;
+    }
+    .text-left {
+      text-align: start;
+    }
+    .text-right {
+      text-align: end;
+    }
+    .text-padding {
+      padding-left: 10px;
+    }
+    table th, table td{
+      padding-left: 5px;
+      padding-right: 5px;
+    }
+    th p{
+      font-family:"Times-bold";
+      font-weight: bold !important;
+    }
+    .underline-text {
+      text-decoration: underline;
+    }
+    .uppercase {
+      text-transform: uppercase;
+    }
+    
+    thead {
+      display: table-row-group;
+    }
+    
+    .mgt-10 {
+      margin-top: 10px;
+    }
+    .mgt-5 {
+      margin-top: 5px;
+    }
+    
+    .mar-10 {
+      margin-top: -10px;
+    }
+    
+    .fs-14{
+      font-size: 14px;
+    }
+    .fs-13{
+      font-size: 13px;
+    }
+    .fs-12{
+        font-size: 12px;
+    }
+    
+    .pdl-1em {
+      padding-left: 1em;
+    }
+    .pdl-2em {
+      padding-left: 2em;
+    }
+    .pdl-3em {
+      padding-left: 3em;
+    }
+    .pdl-4em {
+      padding-left: 4em;
+    }
+    .pdl-5em {
+      padding-left: 5em;
+    }
+    .page-break-inside-avoid{
+      min-height: 150px;
+      page-break-inside: avoid;
+    }
+    .page-break-before-always{
+        page-break-before: always;
+    }
+    .limited-width-money{
+        width: 50px; 
+        max-width: 50px; 
+        word-wrap: break-word; 
+        overflow: hidden;
+    }
+    .limited-width-text{
+        width: 100px; 
+        max-width: 100px; 
+        min-width: 30px;
+        word-wrap: break-word; 
+        overflow: hidden;
+    }
+    .limited-width-amount{
+        width: 30px; 
+        max-width: 30px; 
+        word-wrap: break-word; 
+        overflow: hidden;
+    }
+    
+    .container {
+      width: 100%;
+    }
+    
+    .header {
+      width: 100%;
+      display: table;
+      margin-bottom: 20px;
+    }
+    
+    .header-left {
+      display: table-cell;
+      width: 40%;
+      text-align: center;
+      vertical-align: top;
+    }
+
+    .header-right {
+      display: table-cell;
+      width: 60%;
+      text-align: center;
+      vertical-align: top;
+    }
+    
+    .header-left p, .header-right p {
+      margin: 0;
+      padding: 0;
+    }
+    
+    .header-left p:first-child {
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+    
+    .header-right p:first-child {
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+    
+    .document-number {
+      margin: 20px 0;
+    }
+    
+    .document-title {
+      text-align: center;
+      font-size: 15px;
+      text-transform: uppercase;
+    }
+    
+    .document-subtitle {
+      text-align: center;
+    }
+    
+    .field-row {
+      margin: 7px 0;
+    }
+    
+    .field-label {
+      display: inline-block;
+    }
+    
+    .field-value {
+      display: inline-block;
+    }
+    
+    .signature-section {
+      display: table;
+      width: 100%;
+      margin-top: 20px;
+      height: 150px;
+    }
+
+    .approval-section {
+      text-transform: uppercase;
+      font-weight: bold;
+      text-align: center;
+      height: 150px;
+    }
+    
+    .signature-left, .signature-right {
+      display: table-cell;
+      width: 50%;
+      vertical-align: top;
+      font-weight: bold;
+    }
+    
+    .signature-right {
+      text-align: center;
+    }
+    
+    .signature-position {
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+    
+    .border-test{
+      
+    }
+
+    .signature-approval-container {
+      page-break-inside: avoid;
+      page-break-after: auto;
+    }
+
+    strong, strong span {
+      font-family:"Times-bold";
+      font-weight: bold
+    }
+
+    em, em span {
+      font-family:"Times-italic";
+      font-style: italic;
+    }
+  </style>
+</head>
+<%
+  user_name = "#{data[:appointment].user.last_name.upcase} #{data[:appointment].user.first_name.upcase}"
+  positionjob_name = data[:appointment].positionjob.name
+  department_name = data[:appointment].department.name
+%>
+<body class="border-test">
+  <div class="container">
+
+    <div class="header border-test">
+      <div class="header-left">
+        <p>TRƯỜNG ĐẠI HỌC Y DƯỢC</p>
+        <p>BUÔN MA THUỘT</p>
+        <p class="bold underline-text">PHÒNG TỔ CHỨC - HÀNH CHÍNH</p>
+        <p class="document-number">Số: <%=data[:mandoc]&.sno %> /TTr-TCHC</p>
+      </div>
+      <div class="header-right">
+        <p class="bold">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</p>
+        <p class="bold underline-text">Độc lập - Tự do - Hạnh phúc</p>
+        <p>&nbsp;</p>
+        <p class="italic">Đắk Lắk, ngày <%= Date.today.day %> tháng <%= Date.today.month %> năm <%= Date.today.year %></p>
+      </div>
+    </div>
+
+    <div class="document-title bold" style="font-size: 15pt;">TỜ TRÌNH</div>
+    <div class="document-subtitle bold">V/v bổ nhiệm cán bộ giữ chức vụ <%= positionjob_name%>,</div>
+    <div class="document-subtitle bold" style="margin-bottom: 10px;">Trường Đại học Y Dược Buôn Ma Thuột</div>
+
+    <div class="recipient">
+      <p class="bold"><b>Kính gửi: Hiệu trưởng Trường Đại học Y Dược Buôn Ma Thuột.</b></p>
+    </div>
+    
+    <!-- Content -->
+    <div class="content">
+        <div class="field-row">
+          <%= data[:mandoc]&.contents.html_safe %>
+        </div>
+
+        <div class="field-row">
+            <p>Căn cứ nhu cầu phát triển của đơn vị;</p>
+        </div>
+
+        <div class="field-row">
+            <p>Xét năng lực cán bộ và kết quả đánh giá công việc cán bộ;</p>
+        </div>
+
+        <div class="field-row">
+            <p>Theo đề nghị của Trưởng phòng phòng Tổ chức - Hành chính.</p>
+        </div>
+
+        <div class="field-row">
+            <p class="bold" style="text-align: center;">Nay đề nghị xem xét bổ nhiệm chính thức:</p>
+        </div>
+        
+        <div class="field-row">
+            <span class="field-label">Ông/Bà: </span>
+            <span class="field-value"><span class="bold"><%= user_name %></span> (Viết hoa) Sinh ngày <%= data[:appointment].user.birthday.strftime("%d/%m/%Y")%></span>
+        </div>
+        
+        <div class="field-row">
+            <span class="field-label">Trình độ chuyên môn: </span>
+        </div>
+        <% data[:schools].each do |school| %>
+          <div class="field-row">
+              <span class="field-value">- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <%= school&.certificate %>, tại <%= school&.name %></span>
+          </div>
+        <% end %>
+        
+        <div class="field-row">
+            <span class="field-label">Chức vụ hiện tại: </span>
+            <span class="field-value"> <%= data[:current_position_job] %> - <%= data[:current_department] %> </span>
+        </div>
+        
+        <div class="field-row">
+            <span class="field-label bold">Bổ nhiệm vị trí: </span>
+            <span class="field-value"> <%= positionjob_name %> </span>
+        </div>
+        
+        <div class="field-row">
+            <span class="field-label">Thuộc đơn vị: </span>
+            <span class="field-value"> <%= department_name %> </span>
+        </div>
+
+        <div class="field-row">
+            <span class="field-value">Ông/Bà: <%= user_name %> (thực hiện chức năng, nhiệm vụ theo mô tả công việc vị trí <%= positionjob_name %>) </span>
+        </div>
+        
+        <div class="field-row">
+            <span class="field-value">Cấp cán bộ: Quản lý</span>
+        </div>
+
+        <div class="field-row">
+            <span class="field-value">Dự kiến mức lương: Theo Quy chế hiện hành của Trường Đại học Y Dược Buôn Ma Thuột</span>
+            <span class="field-value">
+              Phòng Tổ chức - Hành chính lấy ý kiến đánh giá/tham vấn, tổng hợp thông tin bổ nhiệm trình Hiệu trưởng trước ngày <%= data[:appointment].appointment_date.present? ? data[:appointment].appointment_date.strftime("%d/%m/%Y") : "......../......./........../" %>.
+            </span>
+        </div>
+    </div>
+
+    <div class="signature-approval-container border-test">
+      <!-- Signature section -->
+      <div class="signature-section border-test">
+        <div class="signature-left">
+          <span class="field-label bold">Nơi nhận: </span>
+          <p>- Như trên.</p>
+          <p>- Lưu: P.TCHC.</p>
+        </div>
+        <div class="signature-right">
+          <p class="signature-position bold">TRƯỞNG PHÒNG</p>
+        </div>
+      </div>
+      
+      <div class="approval-section border-test">
+        <p class="bold">Ý KIẾN PHÊ DUYỆT CỦA HIỆU TRƯỞNG</p>
+      </div>
+    </div>
+  </div>
+  <div id="test"></div>
+</body>
+
+<script>
+
+    var header = document.querySelector('.header');
+    var content = document.querySelector('.content');
+    var sign = document.querySelector('.signature-approval-container');
+    window.status = 'ready';
+
+</script>
+</html>

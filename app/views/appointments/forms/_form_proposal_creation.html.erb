@@ -1,0 +1,5 @@
+<% url = new_appointment_proposal_creation_path(@form_data[:appointment_id], next_department_id: @form_data[:next_department_id], next_department_scode: @form_data[:next_department_scode], lang: session[:lang]) %>
+<script defer>
+    $("#loading").css("display", "flex");
+    window.location.href = "<%= raw url %>";
+</script>

@@ -1,0 +1,33 @@
+<div style="width: 100%;">
+  <i><b>Kính gửi: <%= @data[:positionjob] %> <%= @data[:receiving_unit] %></b></i>
+  <p style="margin-top: 2px; margin-bottom: 2px"><i><%= @data[:sending_unit] %> gửi <%= @data[:stype] != nil && @data[:stype] != '' ? @data[:stype] : '' %> <%= @data[:sno] != nil && @data[:sno] != '' ? 'số '+ @data[:sno] : '' %> từ <%= @data[:sfrom] != nil && @data[:sfrom] != '' ? @data[:sfrom] : @data[:create_unit] %></i></p>
+  <% if @data[:symbol] != nil && @data[:symbol] != '' %>
+    <p style="margin-top: 2px; margin-bottom: 2px">Số:  <%= @data[:sno] != nil && @data[:sno] != '' ? @data[:sno] : '' %>/<%= @data[:symbol] %></p>
+  <%end%>
+  <% if @data[:received_at] != nil && @data[:received_at] != '' %>
+    <p style="margin-top: 2px; margin-bottom: 2px">Ngày nhận: <%= @data[:received_at].strftime("%d/%m/%Y") %></p>
+  <%else%>
+    <p style="margin-top: 2px; margin-bottom: 2px">Ngày soạn: <%= @data[:created_at].strftime("%d/%m/%Y") %></p>
+  <%end%>
+  <p style="margin-top: 2px; margin-bottom: 2px;">Độ khẩn: <span style="<%= @data[:spriority] == "Cao" ? 'color: red' : @data[:spriority] == "Trung bình" ? 'color: orange' : @data[:spriority] == "Thấp" ? 'color: green' : '' %>"><%= @data[:spriority] %></span></p>
+  <% if @data[:deadline] != nil && @data[:deadline] != '' %>
+    <p style="margin-top: 2px; margin-bottom: 2px; color: red"><b><i>Hạn xử lý: <%= @data[:deadline].gsub('-', '/') %></i></b></p>
+  <%end%>
+  <% if @data[:note] != nil && @data[:note] != '' %>
+    <p style="margin-top: 2px; margin-bottom: 2px">Nội dung thực hiện: <%= @data[:note].gsub(/[-*+~]/, "<br> -").html_safe %></p>
+  <%end%>
+  <% if @data[:notes] != nil && @data[:notes] != '' %>
+    <p style="margin-top: 2px; margin-bottom: 2px"><i>Trích yếu nội dung: <%= @data[:notes].gsub(/[-*+~]/, "<br> -").html_safe %></i></p>
+  <%end%>
+  <% if @data[:positionjob] == '' %>
+    <a style="border-radius: 4px;margin-top: 2px;padding: 4px 7px;font-size:12px!important;color:#ffffff!important;box-sizing:border-box;display:inline-block;background-color: #5095aa!important;font-weight:bold!important;line-height:20px;text-align:center;text-decoration:none" href="<%= @data[:base_url] %>/mywork/mandocs/process/index?lang=vi" target="_blank">Đến trang xử lý</a>
+  <% end %>
+  <% if (@data[:sfrom] != nil && @data[:sfrom] != '') && @data[:positionjob] != '' %>
+    <a style="border-radius: 4px;margin-top: 2px;padding: 4px 7px;font-size:12px!important;color:#ffffff!important;box-sizing:border-box;display:inline-block;background-color: #5095aa!important;font-weight:bold!important;line-height:20px;text-align:center;text-decoration:none" href="<%= @data[:base_url] %>/mywork/mandocs/incoming/index?lang=vi" target="_blank">Đến trang xử lý</a>
+  <% end %>
+  <% if (@data[:sfrom] == nil || @data[:sfrom] == '') && @data[:positionjob] != '' %>
+    <a style="border-radius: 4px;margin-top: 2px;padding: 4px 7px;font-size:12px!important;color:#ffffff!important;box-sizing:border-box;display:inline-block;background-color: #5095aa!important;font-weight:bold!important;line-height:20px;text-align:center;text-decoration:none" href="<%= @data[:base_url] %>/mywork/mandocs/outgoing/index?lang=vi" target="_blank">Đến trang xử lý</a>
+  <% end %>
+  <p style="margin-top: 2px; margin-bottom: 28px"><i>(Nội dung chi tiết xem file đính kèm)</i></p>
+  <i>Trân trọng!</i>
+</div>

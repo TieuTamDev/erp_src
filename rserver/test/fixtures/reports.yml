@@ -1,0 +1,23 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  mdate: 2022-07-01 11:40:16
+  stype: MyString
+  name: MyString
+  status: MyString
+  docs: MyText
+  frequency: MyString
+  created_for: MyString
+  notes: MyText
+  sending_email: MyString
+
+two:
+  mdate: 2022-07-01 11:40:16
+  stype: MyString
+  name: MyString
+  status: MyString
+  docs: MyText
+  frequency: MyString
+  created_for: MyString
+  notes: MyText
+  sending_email: MyString

@@ -1,0 +1,90 @@
+<%= form_for "", :url=> mandocs_del_path, html: {method: :get, id:"form_delete_uhandle", class:"d-none" } do |f| %>
+    <input name="uhandle_man_id">
+<%end%>
+<%  @mandocs = Mandoc.all.order(created_by: :desc)  %>
+<div class="card mb-3 d-none" id="watch_index_d_none">
+    <div class="card-body pt-0">
+        <table id="table_dashboard_leadership" class="table table-bordered fs--1 mb-0 table-hover" style="margin-top: 0px !important; margin-bottom: 0px !important">
+            <thead class="" style="background-color: var(--falcon-badge-soft-danger-background-color);color: var(--falcon-badge-soft-danger-color)">
+            <tr>
+                <th data-sort="id">ID</th>
+                <% if (is_access(session["user_id"], "RESOURCE","EDIT") || is_access(session["user_id"], "RESOURCE","DEL")) %>
+                <% end %>
+                <th class="no-sort" style="text-align: center"></th>
+            </tr>
+            </thead>
+            <tbody class="list">
+            <% @mandocs.each do |mandoc| %>
+                <tr>
+                    <td style="">
+                        <p><%= mandoc.id %></p>
+                        <p><%= mandoc.signed_by %></p>
+                        <p><%= mandoc.created_by %></p>
+                        <p><%= mandoc.notes %></p>
+                    </td>            
+                    <% if (is_access(session["user_id"], "RESOURCE","EDIT") || is_access(session["user_id"], "RESOURCE","DEL")) %>
+                    
+                    <% end %>
+                    <td style="min-width: 100px;text-align: center;vertical-align: middle;">                  
+                        <% if is_access(session["user_id"], "RESOURCE","DEL") %>
+                            <!-- Button trigger modal -->
+                        <% end %>
+                            <a data-bs-toggle="modal" data-bs-target="#modal-resource-delete-<%= mandoc.id %>" style="cursor: pointer;">
+                            <span class="text-danger fas fa-trash" style="width: 24px;"></span>
+                            </a>
+                        <!-- Modal -->
+                        <div class="modal fade" id="modal-resource-delete-<%= mandoc.id %>" tabindex="-1" role="dialog"
+                        aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="exampleModalLabel"><%= lib_translate("Are_you_sure")  %></h5>
+                                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close" style=" border: none;background: none;">
+                                    <span aria-hidden="true" style="font-size: 20px;">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <%= lib_translate("Xóa mandoc")  %><span style="font-weight:bold; color:red;"> <%= mandoc.id %> </span>?
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal"><%= lib_translate("Close")  %></button>
+                                    <%= link_to lib_translate("Delete"), url_for(action: :del, id: mandoc.id), method: :delete, class: "btn btn-danger", id: "btn_delete_resource"%>
+                                    <div id="loading_button_delete_resource" class= "btn btn-danger" style="opacity: 0.8; display:none;" >
+                                        <i class ="fa fa-spinner fa-spin"> </i>  <%=lib_translate("Deleting")%> 
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <a data-bs-toggle="modal" data-bs-target="#modal-checked-<%= mandoc.id %>" style="cursor: pointer;">
+                            <span class="text-info far fa-check-circle" style="width: 24px;"></span>
+                        </a>
+
+                        <div class="modal fade" id="modal-checked-<%= mandoc.id %>" tabindex="-1" role="dialog"
+                            aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title"><%= lib_translate("Are_you_sure")  %></h5>
+                                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close" style=" border: none;background: none;">
+                                    <span aria-hidden="true" style="font-size: 20px;">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <%= lib_translate("Chuyển trạng thái uhandle")  %><span style="font-weight:bold; color:red;"> <%= mandoc.id %> </span>?
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal"><%= lib_translate("Close")  %></button>
+                                    <%= link_to lib_translate("Delete"), url_for(action: :del, id: mandoc.id), method: :delete, class: "btn btn-danger", id: "btn_delete_resource"%>
+                                </div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            <% end %>
+            </tbody>
+        </table>
+    </div>
+</div>   

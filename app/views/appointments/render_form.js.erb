@@ -1,0 +1,8 @@
+<% modal_id = @status == 'assign' ? 'popupMediumModal' : 'popupLargeModal' %>
+
+$('.modal').modal('hide');
+$('#<%= modal_id %> .modal-content').html("<%= j render partial: "appointments/forms/form_#{@form}" %>");
+$('#<%= modal_id %> .modal-content').prepend("<%= j(render 'shared/new_modal_title', title: lib_translate("appointment.status.#{@status}") + " " + lib_translate("appointment.#{@stype}") ) %>");
+$('#<%= modal_id %>').modal('show');
+
+showLoadding(false);

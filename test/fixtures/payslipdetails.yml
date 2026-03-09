@@ -1,0 +1,19 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  payslip: one
+  amount: 1
+  name: MyString
+  cparent: MyString
+  stype: MyString
+  note: MyText
+  status: MyString
+
+two:
+  payslip: two
+  amount: 1
+  name: MyString
+  cparent: MyString
+  stype: MyString
+  note: MyText
+  status: MyString

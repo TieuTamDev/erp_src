@@ -1,0 +1,63 @@
+<%= stylesheet_link_tag '/assets/lib_ej2/ej2_base_styles_bootstrap5.css' %>
+<%= stylesheet_link_tag '/assets/lib_ej2/ej2_buttons_styles_bootstrap5.css' %>
+<%= stylesheet_link_tag '/assets/lib_ej2/ej2_inputs_styles_bootstrap5.css' %>
+<%= stylesheet_link_tag '/assets/lib_ej2/ej2_popups_styles_bootstrap5.css' %>
+<%= stylesheet_link_tag '/assets/lib_ej2/ej2_lists_styles_bootstrap5.css' %>
+<%= stylesheet_link_tag '/assets/lib_ej2/ej2_navigations_styles_bootstrap5.css' %>
+<%= stylesheet_link_tag '/assets/lib_ej2/ej2_splitbuttons_styles_bootstrap5.css' %>
+<%= stylesheet_link_tag '/assets/lib_ej2/ej2_dropdowns_styles_bootstrap5.css' %>
+<%= stylesheet_link_tag '/assets/lib_ej2/ej2_grids_styles_bootstrap5.css' %>
+<%= stylesheet_link_tag '/assets/lib_ej2/ej2_spreadsheet_styles_bootstrap5.css' %>
+<%= javascript_include_tag '/assets/lib_ej2/ej2-base.min.js' %>
+<%= javascript_include_tag '/assets/lib_ej2/ej2-buttons.min.js' %>
+<%= javascript_include_tag '/assets/lib_ej2/ej2-popups.min.js' %>
+<%= javascript_include_tag '/assets/lib_ej2/ej2-splitbuttons.min.js' %>
+<%= javascript_include_tag '/assets/lib_ej2/ej2-inputs.min.js' %>
+<%= javascript_include_tag '/assets/lib_ej2/ej2-lists.min.js' %>
+<%= javascript_include_tag '/assets/lib_ej2/ej2-data.min.js' %>
+<%= javascript_include_tag '/assets/lib_ej2/ej2-dropdowns.min.js' %>
+<%= javascript_include_tag '/assets/lib_ej2/ej2-navigations.min.js' %>
+<%= javascript_include_tag '/assets/lib_ej2/ej2-excel-export.min.js' %>
+<%= javascript_include_tag '/assets/lib_ej2/ej2-pdf-export.min.js' %>
+<%= javascript_include_tag '/assets/lib_ej2/ej2-calendars.min.js' %>
+<%= javascript_include_tag '/assets/lib_ej2/ej2-compression.min.js' %>
+<%= javascript_include_tag '/assets/lib_ej2/ej2-file-utils.min.js' %>
+<%= javascript_include_tag '/assets/lib_ej2/ej2-grids.min.js' %>
+<%= javascript_include_tag '/assets/lib_ej2/ej2-svg-base.min.js' %>
+<%= javascript_include_tag '/assets/lib_ej2/ej2-charts.min.js' %>
+<%= javascript_include_tag '/assets/lib_ej2/ej2-spreadsheet.min.js' %>
+
+<h3><%= lib_translate('Bảng tính') %></h3>
+<div id="spreadsheet"></div>
+
+
+<script>
+	var spreadsheet = new ej.spreadsheet.Spreadsheet({
+		openUrl: 'https://services.syncfusion.com/js/production/api/spreadsheet/open',
+		saveUrl: 'https://services.syncfusion.com/js/production/api/spreadsheet/save',
+
+		openComplete: function () {
+			var sheets = spreadsheet.sheets;
+			for (var index = 0; index < sheets.length; index++) {
+				var name = spreadsheet.sheets[index].name;
+				var protectSetting = {
+					selectCells: true,
+					formatCells: false
+				};
+
+				spreadsheet.protectSheet(name, protectSetting);
+				var address = ejs.spreadsheet.getRangeAddress([
+					0, 0, sheets[index].usedRange.rowIndex,
+					sheets[index].usedRange.colIndex,
+				]);
+				spreadsheet.lockCells(name + '!' + address, true);
+			}
+		},
+		height: '730px',
+		created: function () {
+			spreadsheet.hideRibbonTabs(['Formulas', 'Data']);
+		}
+	});
+	$('a[style="text-decoration: none;color: #0D6EFD;font-weight: 500;"]').parent().remove();
+	spreadsheet.appendTo('#spreadsheet');
+</script>

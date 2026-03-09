@@ -1,0 +1,283 @@
+<% content_for :head do %>
+    <%= javascript_include_tag '/assets/myjs/jquery.json-editor.min.js'%>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.9/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.9/addon/hint/show-hint.min.css">
+<% end %>
+<% content_for :bottombody do %>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.9/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.9/addon/hint/show-hint.min.js"></script>
+    <%= javascript_include_tag '/assets/myjs/ruby-data.js'%>
+    <%= javascript_include_tag '/assets/myjs/ruby-mode.js' %>
+    <%= javascript_include_tag '/assets/myjs/editer.js'%>
+<% end %>
+<style>
+    .json-property{
+        color: #f1f1f1 !important;
+    }
+    .json-literal-null{
+        color: #569cd6;
+    }
+    .json-string{
+        color:#f98745;
+    }
+    .json-literal-number{
+        color: #e2fda8;
+    }
+    .json-url {
+        color: #2c84db !important;
+    }
+    .json-url:hover{
+      text-decoration: underline;
+    }
+    .CodeMirror {
+      height: 300px;
+      border: 1px solid #ccc;
+      padding: 3px;
+      padding-left: 8px;
+      color: white;
+      background-color: #1F1F1F;
+      font-size: 14px;
+    }
+
+    .CodeMirror-selected {
+      background-color: #3774b1ce !important;
+    }
+
+    .CodeMirror-hints {
+      font-family: Consolas;
+      width: 350px;
+      max-height: 300px;
+      padding: 0px;
+      overflow-y: auto;
+      border: 1px solid #434343;
+      border-radius: 2px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+      background-color: #202020;
+      font-size: 85% !important;
+    }
+
+    .CodeMirror-hint {
+      display: flex;
+      align-items: center;
+      line-height: 1.5;
+      cursor: pointer;
+      padding: 0px;
+      padding-right: 5px !important;
+    } 
+
+    .CodeMirror-hint-active {
+      background-color: #04395E !important;
+    }
+
+    .CodeMirror-hint:hover {
+      background-color: #2A2D2E;
+    }
+
+    .suggestion-icon {
+      margin-right: 6px;
+      margin-left: 2px;
+    }
+
+    .suggestion-value {
+      flex: 1;
+      color: #ebebeb;
+      line-height: 1.2;
+    }
+
+    .suggestion-meta {
+      color: #888;
+      margin-left: 8px;
+      font-size: 0.9em;
+    }
+    .CodeMirror-cursor {
+      border-left: 2px solid #c7c7c7 !important;
+    }
+    .cm-tag{
+      color: #e0e0e0 !important;
+    }
+    .cm-variable{
+      color: #9CDCFE !important;
+    }
+    .cm-operator{
+      color: #f3f3f3 !important;
+    }
+    .cm-number{
+      color: #B5CEA8 !important;
+    }
+    .cm-function{
+      color: #e9e9ab !important;
+    }
+    .cm-class , .cm-model{
+      color: #55e9cb !important;
+    }
+    .cm-string{
+      color: #eda486 !important;
+    }
+    .cm-s-default .cm-comment {
+      color: #6db14e;
+    }
+    .cm-atom{
+      color: #58b3ff !important;
+    }
+    .cm-s-default .cm-def {
+      color: #6666ff;
+    }
+
+    .CodeMirror-vscrollbar::-webkit-scrollbar,
+    .CodeMirror-hscrollbar::-webkit-scrollbar,
+    .CodeMirror-hints::-webkit-scrollbar{
+      width: 8px;
+    }
+
+    .CodeMirror-hints::-webkit-scrollbar-track,
+    .CodeMirror-hscrollbar::-webkit-scrollbar-track,
+    .CodeMirror-vscrollbar::-webkit-scrollbar-track{
+      background: #202020;
+    }
+
+    .CodeMirror-hints::-webkit-scrollbar-thumb,
+    .CodeMirror-hscrollbar::-webkit-scrollbar-thumb,
+    .CodeMirror-vscrollbar::-webkit-scrollbar-thumb{
+      background: #4a4a4a;
+    }
+
+    .CodeMirror-hints::-webkit-scrollbar-thumb:hover,
+    .CodeMirror-hscrollbar::-webkit-scrollbar-thumb:hover,
+    .CodeMirror-vscrollbar::-webkit-scrollbar-thumb:hover{
+      background: #6a6a6a;
+    }
+</style>
+
+
+<div class="card p-2">
+    <%= form_tag regulations_handle_sql_path, class: "d-flex flex-column mb-3", id: "form_sql", method: :post,remote: true,authenticity_token: true do %>
+        <input class="d-none" name="lang" value="<%= session[:lang] %>">
+        <div class="d-flex justify-content-end mb-1">
+            <div class="btn btn-falcon-default btn-sm btn-move btn-left me-2 disabled" onclick="clickMoveQuery(-1)"><span class="fas fa-arrow-left"></span></div>
+            <div class="btn btn-falcon-default btn-sm btn-move btn-right disabled" onclick="clickMoveQuery(1)"><span class="fas fa-arrow-right"></span></div>
+            <div class="btn btn-falcon-default btn-sm ms-3" style="color: #f36e6e;" onclick="clickClean()"><span class="far fa-trash-alt"></span></div>
+            <div onclick="clickSubmit()" id="submit-btn" class="btn btn-sm btn-falcon-default ms-3 d-flex justify-content-center align-items-center" style="width: 76px;">
+                <div class="btn-state-icon">
+                    <span class="fas fa-play text-success"></span>
+                </div>
+                <span class="ms-2">Run</span>
+            </div>
+        </div>
+        <div class="d-flex">
+            <div style="flex-grow: 1;">
+                <textarea style="height: 222px;" id="code-editer" name="function"></textarea>
+            </div>
+        </div>
+    <% end %>
+    <div id="ex_time"></div>
+    <pre id="query-result" class="ps-3 scrollbar scrollbar_menuleft" style="max-height: 500px;outline: none;background:#1f1f1f;"></pre>
+</div>
+
+<script>
+    var editor = new JsonEditor('#query-result',null,{editable:false});
+    var his_query = [];
+    var current_index_query = 0;
+    function update(data) {
+        showLoadding(false);
+        editor.load(data.query);
+        showTimeExecute(data.time_execute);
+        if(data.status){
+            storeQuery(data.time_execute);
+        }
+    }
+
+    // local handle:
+    function storeQuery(time_execute) {
+        let query = codeMirror.getValue();
+        if(query){
+            his_query.push({
+                query: query,
+                time: time_execute
+            });
+            localStorage.setItem("dbquery",JSON.stringify(his_query));
+            current_index_query = his_query.length - 1;
+            updateBtnState();
+        }
+    }
+
+    function showTimeExecute(time_execute) {
+        $("#ex_time").html(`<span>Execute time: </span><span>${time_execute}</span><span> ms</span>`);
+    }
+
+    function loadStoreQuery() {
+        var dbquery = localStorage.getItem("dbquery");
+        try {
+            his_query = JSON.parse(dbquery);
+            if(!his_query){
+                his_query = [];
+            }
+        } catch (error) {
+            his_query = [];
+        }
+        renderQuery(his_query.length - 1);
+    }
+
+    function renderQuery(index) {
+        if(his_query[index]){
+            var data = his_query[index];
+            codeMirror.setValue(data.query);
+            showTimeExecute(data.time);
+            current_index_query = index;
+            updateBtnState();
+        }
+    }
+
+    function clickMoveQuery(step) {
+        var next_index = current_index_query + step;
+        if(next_index >= 0 && next_index <= (his_query.length - 1)){
+            moveToQuery(next_index);
+        }
+    }
+
+    function moveToQuery(next_index) {
+        renderQuery(next_index);
+    }
+
+    function clickClean() {
+        codeMirror.setValue("");
+        $(".btn-move").toggleClass("disabled",true);
+        his_query = [];
+        localStorage.setItem("dbquery",JSON.stringify(his_query));
+    }
+
+    function updateBtnState() {
+        $(".btn-move").toggleClass("disabled",false);
+        if(current_index_query == 0){
+            $(".btn-left").toggleClass("disabled",true);
+        }
+        if(current_index_query == (his_query.length - 1)){
+            $(".btn-right").toggleClass("disabled",true);
+        }
+    }
+
+    function clickSubmit() {
+        showLoadding(true);
+        $('#form_sql [name="function"]').val(codeMirror.getValue());
+        $("#form_sql").submit();
+    }
+
+    function showLoadding(bShow = false) {
+        let btn = $("#submit-btn");
+        btn.toggleClass("disabled",bShow);
+        codeMirror.setOption("readOnly", bShow);
+        if(bShow){
+            btn.find(".btn-state-icon").html(`
+                <div class="spinner-border spinner-border-sm" style="width: 16px;height: 16px;" role="status"></div>
+            `);
+        }else{
+            btn.find(".btn-state-icon").html(`
+                <span class="fas fa-play text-success"></span>
+            `);
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded",()=>{
+        loadStoreQuery();
+    });
+</script>

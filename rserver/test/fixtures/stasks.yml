@@ -1,0 +1,19 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: MyString
+  scode: MyString
+  desc: MyText
+  dtfrom: 2022-11-11 11:37:09
+  dtto: 2022-11-11 11:37:09
+  created_by: MyString
+  status: MyString
+
+two:
+  name: MyString
+  scode: MyString
+  desc: MyText
+  dtfrom: 2022-11-11 11:37:09
+  dtto: 2022-11-11 11:37:09
+  created_by: MyString
+  status: MyString

@@ -1,0 +1,2 @@
+class Hismaintenance < ApplicationRecord
+end

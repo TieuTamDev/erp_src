@@ -1,0 +1,211 @@
+<div class="title mt-3">
+    <h4 class="mb-1" style="color: var(--falcon-btn-falcon-success-active-color);"><%= lib_translate("Work") %></h4>
+    <h6 class="m-0" style="color: var(--falcon-badge-soft-secondary-color);"> <%= lib_translate("Information_work_status") %></h6>
+</div>
+<hr class="mt-4 mb-3" style="width: 100%; height: 4px; background:  var(--falcon-badge-soft-secondary-background-color);">
+<% if !@mailLeader.nil? %>
+    <% if @mailLeader.leader == @mailUser%>
+        <div class="mb-3">
+            <div class="pt-0">
+                <div class="tab-content">
+                    <table id="table_work_leader" class="table table-bordered fs--1 mb-0 " style="margin-top: 0px !important; margin-bottom: 0px !important" >
+                        <thead class="bg-200 text-900">
+                        <tr>
+                            <th class="sort" style="text-align: center; width:4% " ><%=lib_translate("STT")%></th>
+                            <th class="sort" style="text-align: center; width: 10%;" ><%= lib_translate("Type_of_work")%></th>
+                            <th class="sort" style="text-align: center;" ><%= lib_translate("Work_content")%></th>
+                            <th class="sort" style="text-align: center;width: 15%;" ><%= lib_translate("Work_status")%></th>
+                            <th class="sort" style="text-align: center;width: 10%;" ><%= lib_translate("Processing_deadline")%></th>
+                            <th class="sort" style="text-align: center;width: 8%;" ><%=lib_translate("Mandoc_Priority")%></th>
+                            <th class="no-sort" style="text-align: center; width:6% "></th>
+                        </tr>
+                        </thead>
+                        <tbody class="list">
+                            <% @listWorkleader.each_with_index do |leader, i|%>
+                            <tr  <% if !leader.deadline.nil?                            
+                                        if leader.deadline.to_date < Time.now.to_date &&  leader.srole.nil?%>
+                                            style="color: red;"
+                                        <% elsif (leader.deadline.to_date - Time.now.to_date).to_i <= 1%>         
+                                            style="color: orange;"
+                                        <%end 
+                                    end %>                           
+                                    >   
+                                <td style="vertical-align: middle; text-align: center;"><%= i+1 %></td>
+                                <td>
+                                    <%if !leader.mandoc.nil? %>
+                                        <%if leader.mandoc.sfrom.nil?%>
+                                            <%= lib_translate("Document_go")%> 
+                                        <%else%>
+                                            <%= lib_translate("Document_to")%>
+                                        <%end%>
+                                    <%end%>
+                                </td>
+                                <td style="cursor: pointer; text-align: center; vertical-align: middle;">
+                                    <%if !leader.mandoc.nil? %>
+                                      <%= leader.contents%>   
+                                    <%end%>
+                                </td>
+                                <td style="cursor: pointer; text-align: center; vertical-align: middle;">
+                                    <%if !leader.status.nil? && !leader.mandoc.nil?%>
+                                        <%= leader.mandoc.status == "RECEIVE" ? lib_translate("Receive_handle") : leader.mandoc.status == "INPROGRESS" ? lib_translate("Inprogress_handle") : lib_translate("Success_handle") %>
+                                    <%end%>                                
+                                </td>
+                                <td style="cursor: pointer; text-align: center; vertical-align: middle;">
+                                    <%= if !leader.deadline.nil?
+                                            leader.deadline.strftime('%d/%m/%Y')
+                                    end %>
+                                </td>
+                                <td style="cursor: pointer; text-align: center; vertical-align: middle;">
+                                    <%= if !leader.mandoc.nil? 
+                                            leader.mandoc.spriority
+                                    end %>
+                                </td>
+                                <td style="cursor: pointer; text-align: center; vertical-align: middle;">
+                                <%if !leader.id.nil? && !leader.mandoc.nil?  %>        
+                                    <% if  leader.id == leader.max_id %>
+                                        <% if @checkDirectors == true%>
+                                            <%= link_to mandocs_process_index_path do %>
+                                                <i class="fas fa-clipboard-list" style="font-size: 18px" data-bs-toggle="tooltip" data-bs-placement="top" title='<%lib_translate("Handle")%>'></i>
+                                            <% end %>
+                                        <% else %>
+                                            <%if(Mandoc.where(id: leader.mandoc_id).first.sfrom.nil?)%>
+                                                <% if !leader.deadline.nil? %>
+                                                    <% if leader.deadline >= Time.now.strftime("%d/%m/%Y") %>
+                                                        <%= link_to mandocs_outgoing_index_path do %>
+                                                            <i class="fas fa-clipboard-list" style="font-size: 18px" data-bs-toggle="tooltip" data-bs-placement="top" title='<%lib_translate("Handle")%>'></i>
+                                                        <% end %>
+                                                    <% end %>
+                                                <% end %>
+                                            <%else%>
+                                                <% if !leader.deadline.nil? %>
+                                                    <% if leader.deadline >= Time.now.strftime("%d/%m/%Y") %>
+                                                        <%= link_to mandocs_incoming_index_path do %>
+                                                            <i class="fas fa-clipboard-list" style="font-size: 18px" data-bs-toggle="tooltip" data-bs-placement="top" title='<%lib_translate("Handle")%>'></i>
+                                                        <% end %>
+                                                    <% end %>                                   
+                                                <% end %>
+                                            <%end%>
+                                        <% end %>   
+                                    <% end %>  
+                                <%end%>                        
+                                </td>
+                            </tr>
+                            <%end%>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    <%else%>
+    <div class="mb-3">
+        <div class="pt-0">
+            <div class="tab-content">
+                <table id="table_work_user" class="table table-bordered fs--1 mb-0 " style="margin-top: 0px !important; margin-bottom: 0px !important" >
+                    <thead class="bg-200 text-900">
+                    <tr>
+                        <th class="sort" style="text-align: center; width:4% " ><%=lib_translate("STT")%></th>
+                        <th class="sort" style="text-align: center; width: 10%;" ><%= lib_translate("Type_of_work")%></th>
+                        <th class="sort" style="text-align: center;" ><%= lib_translate("Work_content")%></th>
+                        <th class="sort" style="text-align: center;" ><%= lib_translate("Work_status")%></th>
+                        <th class="sort" style="text-align: center;width:8%" ><%= lib_translate("Processing_deadline")%></th>
+                        <th class="sort" style="text-align: center;width:8%" ><%= lib_translate("Status")%></th>
+                        <th class="sort" style="text-align: center;" ><%= lib_translate("Completion_date")%></th>
+                        <th class="no-sort" style="text-align: center; width:6% "></th>
+                    </tr>
+                    </thead>
+                    <tbody class="list">
+                        <% @listWork.each_with_index do |uWork, i| %>
+                        <tr 
+                        <% if !uWork.deadline.nil? %>
+                          <% if (uWork.deadline - 1.days).strftime('%d/%m/%Y') == Time.now.strftime("%d/%m/%Y") || (uWork.deadline).strftime('%d/%m/%Y') == Time.now.strftime("%d/%m/%Y") && uWork.status  == "CHUAXULY" || uWork.status.nil? %>
+                                style="color: orange;"  
+                            <% elsif uWork.deadline < Time.now.strftime("%d/%m/%Y") && uWork.status  == "CHUAXULY"%> 
+                                style="color: red;"          
+                            <% end %>    
+                        <% end %>                
+                        >
+                            <td style="vertical-align: middle; text-align: center;"><%= i+1 %></td>
+                            <td>
+                                <%=if(uWork.mandocdhandle.mandoc.mdepartment.nil?)
+                                    lib_translate("Document_to") 
+                                else
+                                    lib_translate("Document_go")
+                                end%>
+                            </td>
+                            <td style="cursor: pointer; text-align: center; vertical-align: middle;">
+                                <%= uWork.contents%>
+                            </td>
+                            <td style="cursor: pointer; text-align: center; vertical-align: middle;">
+                                <%= uWork.mandocdhandle.mandoc.status == "RECEIVE" ? lib_translate("Receive_handle") : uWork.mandocdhandle.mandoc.status == "INPROGRESS" ? lib_translate("Inprogress_handle") : lib_translate("Success_handle") %>
+                            </td>
+                            <td style="cursor: pointer; text-align: center; vertical-align: middle;">
+                                <% if !uWork.deadline.nil? %>
+                                    <%= uWork.deadline.strftime('%d/%m/%Y') %>
+                                <% end %>
+                            </td>
+                            <td style="cursor: pointer; text-align: center; vertical-align: middle;">
+                                <%= uWork.status == "CHUAXULY" ? lib_translate("CHUAXULY") : uWork.status == "DAXULY" ? lib_translate("DAXULY") : lib_translate("CHUAXULY") %>
+                            </td>
+                            <td style="cursor: pointer; text-align: center; vertical-align: middle;">
+                                 <%= uWork.created_at.strftime('%d/%m/%Y')%>
+                            </td>
+                            <td style="cursor: pointer; text-align: center; vertical-align: middle;">
+                            <% if uWork.id == uWork.max_id %>
+                                <% if !uWork.deadline.nil? %>
+                                    <% if uWork.deadline.strftime("%d/%m/%Y") >= Time.now.strftime("%d/%m/%Y") && uWork.status == "CHUAXULY" && uWork.srole == "XULY"%>
+                                        <%if(uWork.mandocdhandle.mandoc.mdepartment.nil?)%>
+                                            <%= link_to mandocs_incoming_index_path do %>
+                                                <i class="fas fa-clipboard-list" style="font-size: 18px" data-bs-toggle="tooltip" data-bs-placement="top" title='<%lib_translate("Handle")%>'></i>
+                                            <% end %>
+                                        <%else%>
+                                            <%= link_to mandocs_outgoing_index_path do %>
+                                                <i class="fas fa-clipboard-list" style="font-size: 18px" data-bs-toggle="tooltip" data-bs-placement="top" title='<%lib_translate("Handle")%>'></i>
+                                            <% end %>
+                                        <%end%> 
+                                    <%else %>
+                                        <%if(uWork.mandocdhandle.mandoc.mdepartment.nil?)%>
+                                            <%= link_to mandocs_incoming_index_path do %>
+                                                <i class="far fa-eye" style="font-size: 18px" data-bs-toggle="tooltip" data-bs-placement="top" title='<%lib_translate("View")%>'></i>
+                                            <% end %>
+                                        <%else%>
+                                            <%= link_to mandocs_outgoing_index_path do %>
+                                                <i class="far fa-eye" style="font-size: 18px" data-bs-toggle="tooltip" data-bs-placement="top" title='<%lib_translate("View")%>'></i>
+                                            <% end %>
+                                        <%end%> 
+                                    <% end %> 
+                                <% end %>
+                            <% end %>                                    
+                            </td>
+                        </tr>                                                 
+                        <%end%>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <%end%>
+<%else%>
+    <div class="mb-3">
+        <div class="pt-0">
+            <div class="tab-content">
+                <table id="table_new_user" class="table table-bordered fs--1 mb-0 " style="margin-top: 0px !important; margin-bottom: 0px !important" >
+                    <thead class="bg-200 text-900">
+                    <tr>
+                        <th class="sort" style="text-align: center; width:4% " ><%=lib_translate("STT")%></th>
+                        <th class="sort" style="text-align: center;" ><%= lib_translate("Type_of_work")%></th>
+                        <th class="sort" style="text-align: center;" ><%= lib_translate("Work_content")%></th>
+                        <th class="sort" style="text-align: center;" ><%= lib_translate("Work_status")%></th>
+                        <th class="sort" style="text-align: center;" ><%= lib_translate("Processing_deadline")%></th>
+                        <th class="sort" style="text-align: center;" ><%= lib_translate("Status")%></th>
+                        <th class="sort" style="text-align: center;" ><%= lib_translate("Completion_date")%></th>
+                        <th class="no-sort" style="text-align: center; width:6% " ></th>
+                    </tr>
+                    </thead>
+                    <tbody class="list">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+<% end %>
+

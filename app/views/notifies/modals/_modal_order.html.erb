@@ -1,0 +1,10 @@
+<script defer>
+    $("#loading").css("display", "flex");
+    let form = $("#form_redirect_to_masset");
+    if (form.length > 0) {
+        $("#form_redirect_to_masset").append(`<input type="hidden" name="page" value="/orders/process_index">`)
+        $("#form_redirect_to_masset").submit();
+    }else{
+        window.location.href = "<%= @CSVC_PATH %>orders/process_index?lang=<%= session[:lang] %>";
+    }
+</script>

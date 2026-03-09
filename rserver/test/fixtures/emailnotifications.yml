@@ -1,0 +1,27 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: MyString
+  sent_when: MyString
+  slocation: MyString
+  note: MyText
+  email_subject_en: MyString
+  email_content_en: MyText
+  email_subject_ja: MyString
+  status: MyString
+  email_content_ja: MyText
+  auto: MyString
+  scode: MyString
+
+two:
+  name: MyString
+  sent_when: MyString
+  slocation: MyString
+  note: MyText
+  email_subject_en: MyString
+  email_content_en: MyText
+  email_subject_ja: MyString
+  status: MyString
+  email_content_ja: MyText
+  auto: MyString
+  scode: MyString

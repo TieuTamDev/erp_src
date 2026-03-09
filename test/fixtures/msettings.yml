@@ -1,0 +1,17 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  stype: MyString
+  name: MyString
+  scode: MyString
+  svalue: MyText
+  valid_from: 2025-08-08 06:30:23
+  valid_to: 2025-08-08 06:30:23
+
+two:
+  stype: MyString
+  name: MyString
+  scode: MyString
+  svalue: MyText
+  valid_from: 2025-08-08 06:30:23
+  valid_to: 2025-08-08 06:30:23

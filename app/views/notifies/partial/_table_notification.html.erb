@@ -1,0 +1,54 @@
+<style>
+    #table_notifies_wrapper .top {
+        display: none !important;
+    }
+    .table-striped>tbody>tr.text-danger:nth-of-type(even)>* {
+        color: rgba(var(--falcon-danger-rgb), var(--falcon-text-opacity)) !important;
+    }
+</style>
+<div class="mt-2 d-flex justify-content-between align-items-end">
+    <div class="d-flex align-items-center"> 
+        <div>
+            <label for="select_style" class="mb-1">Lọc theo loại: </label>
+            <select class="form-select form-select-sm" id="select_style" name="select_style">
+                <option value="">Tất cả</option>
+                <%= @STYPE.each do |key, value|%>
+                  <option value="<%= key %>"><%= lib_translate(value).capitalize %></option>
+                <%end%>
+            </select> 
+        </div>
+    </div>
+    <div class="w-50">
+        <div class="input-group">
+            <input type="text" class="form-control" id="attend_teacher_table_search" placeholder="Tìm kiếm">
+            <span class="input-group-text bg-white">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                </svg>
+            </span>
+        </div>
+    </div>
+</div>
+<table id="table_notifies" class="table table-bordered fs--1 mb-0 table-striped table-notifies">
+    <thead class="bg-200 text-900">
+        <tr>
+            <th class="no-sort" data-sort="stt" style="width: 5%;" class="text-center"><%= lib_translate("STT") %></th>
+            <th class="no-sort" data-sort="title"><%= lib_translate("Titles") %></th>
+            <th class="no-sort" data-sort="content"><%= lib_translate("Stype") %></th>
+            <th class="no-sort" data-sort="content"><%= lib_translate("Time") %></th>
+            <% if is_handle == true %>
+                <th class="no-sort" data-sort="content"><%= lib_translate("Hạn xử lý") %></th>
+            <% end %>
+            <th class="no-sort" data-sort="sender" style="width: 15%"><%= lib_translate("Content") %></th>
+            <th class="no-sort" data-sort="status" style="width: 10%;" class="text-center"><%= is_handle == true ? '' : lib_translate("Status") %></th>
+        </tr>
+    </thead>
+    <tbody class="list">
+    </tbody>
+</table>
+<% content_for :bottombody do %>
+    <script>
+        var is_handle = <%= is_handle || false %>
+    </script>
+  <%= javascript_include_tag '/assets/myjs/notifications.js'%>
+<% end %>

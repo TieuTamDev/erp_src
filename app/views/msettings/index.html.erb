@@ -1,0 +1,176 @@
+<% content_for :head do %>
+    <%= javascript_include_tag '/assets/myjs/flatpickr.js' %>
+    <%= javascript_include_tag '/assets/myjs/flatpickr_local/vn.js' %>
+    <%= stylesheet_link_tag '/assets/mystyle/flatpickr.min.css' %>
+	<style>
+		/* Đảm bảo hiển thị input năm và dropdown năm */
+        .flatpickr-current-month .numInput.cur-year,
+        .flatpickr-current-month .flatpickr-year-dropdown {
+            display: inline-block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            width: 60px !important; /* Đảm bảo có không gian */
+            height: 30px !important; /* Đồng bộ với dropdown tháng */
+            margin: 0 5px !important; /* Khoảng cách với dropdown tháng */
+            padding: 0 5px !important;
+            border: 1px solid var(--falcon-gray-300); /* Thêm viền để dễ thấy */
+            background: var(--falcon-flatpickr-calendar-bg) !important;
+            color: var(--falcon-body-color) !important;
+            font-size: inherit !important;
+            font-family: var(--falcon-body-font-family) !important;
+            cursor: pointer !important;
+        }
+
+        /* Sửa layout của .flatpickr-current-month */
+        .flatpickr-current-month {
+            display: flex !important; /* Sử dụng flex để sắp xếp tháng và năm */
+            align-items: center !important;
+            justify-content: center !important;
+            position: relative !important; /* Bỏ absolute để tránh che khuất */
+            height: 34px !important;
+            padding: 0 !important;
+            font-size: 135% !important;
+            line-height: 1 !important;
+        }
+        .flatpickr-current-month .cur-year{
+            border: none !important; /* Bỏ viền của năm */
+        }
+        /* Đảm bảo container tháng không che năm */
+        .flatpickr-monthDropdown-months {
+            width: auto !important;
+            max-width: 120px !important; /* Giới hạn chiều rộng dropdown tháng */
+        }
+
+        /* Đảm bảo lịch hiển thị đầy đủ */
+        .flatpickr-calendar {
+            z-index: 9999 !important;
+            width: 320px !important; /* Tăng nhẹ chiều rộng nếu cần */
+        }
+	</style>
+<% end %>
+<div class="card">
+	<div class="card-header">
+		<div class="d-flex justify-content-between align-items-center mb-3">
+			<h4 class="mb-0">Cấu hình chức năng</h4>
+			<% if is_access(session["user_id"], "MSETTINGS", "ADD") %>
+      			<%= link_to raw('Thêm mới'), new_msetting_path(@chapter), class: 'btn btn-primary inline handle_btn', remote: true %>
+			<% end %>
+		</div>
+	</div>
+	<div class="card-body">
+		<div id="msettings-table">
+			<%= render partial: 'table', locals: { msettings: @msettings } %>
+		</div>
+	</div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="msettingModal" tabindex="-1" aria-labelledby="msettingModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title mb-0" id="msettingModalLabel">Cài đặt chức năng</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+			</div>
+			<div class="modal-body" id="msetting-modal-body">
+				<!-- Form sẽ được load bằng AJAX -->
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<script>
+	(function() {
+		function csrfToken() {
+			return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+		}
+
+		function openModalWith(html, title) {
+			$('#msetting-modal-body').html(html);
+			if (title) $('#msettingModalLabel').text(title);
+			var modal = new bootstrap.Modal(document.getElementById('msettingModal'));
+			modal.show();
+		}
+
+		function refreshTable(html) {
+			$('#msettings-table').html(html);
+		}
+
+		// Tự sinh scode từ name (uppercase + kebab)
+		function toKebabUpper(str) {
+			if (!str) return '';
+			// bỏ dấu Unicode, giữ ASCII
+			var noAcc = str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+			return noAcc
+			.replace(/[^a-zA-Z0-9]+/g, '-') // thay khoảng trắng & ký tự lạ thành '-'
+			.replace(/-+/g, '-')
+			.replace(/^-|-$/g, '')
+			.toUpperCase();
+		}
+
+		// // Add
+		// $(document).on('click', '#btn-add-msetting', function(e) {
+		// 	e.preventDefault();
+		// 	var url = $(this).data('new-url');
+		// 	$.get(url, function(html) {
+		// 		openModalWith(html, 'Thêm cài đặt');
+		// 	});
+		// });
+		// // Edit
+		// $(document).on('click', '.btn-edit-msetting', function(e) {
+		// 	e.preventDefault();
+		// 	var url = $(this).data('edit-url'); // lấy trực tiếp
+		// 	$.get(url, function(html) {
+		// 		openModalWith(html, 'Sửa cài đặt');
+		// 	});
+		// });
+
+		// // Delete
+		// $(document).on('click', '.btn-delete-msetting', function(e) {
+		// 	e.preventDefault();
+		// 	var url = $(this).data('delete-url');
+		// 	if (!confirm('Bạn chắc muốn xoá bản ghi này?')) return;
+
+		// 	$.ajax({
+		// 		url: url,
+		// 		type: 'DELETE',
+		// 		headers: { 'X-CSRF-Token': csrfToken() },
+		// 		success: function(html) { refreshTable(html); },
+		// 		error: function() { alert('Xoá thất bại!'); }
+		// 	});
+		// });
+		// $(document).on('click', '.btn-delete-msetting', function (e) {
+		// 	e.preventDefault();
+		// 	var url = $(this).data('delete-url');
+		// 	if (!confirm('Bạn chắc muốn xoá bản ghi này?')) return;
+
+		// 	$.ajax({
+		// 		url: url,
+		// 		type: 'DELETE',
+		// 		headers: { 'X-CSRF-Token': csrfToken() },
+		// 		success: function (html) { refreshTable(html); },
+		// 		error: function () { alert('Xoá thất bại!'); }
+		// 	});
+		// });
+		$(document)
+			// Auto generate scode khi nhập name (nếu scode đang trống hoặc bám theo name)
+			.on('input', '#msetting_name', function() {
+				var name = $(this).val();
+				var $scode = $('#msetting_scode');
+				// nếu user chưa tự sửa scode (giống prefix từ trước), cứ cập nhật theo name
+				if (!$scode.data('touched')) {
+					$scode.val(toKebabUpper(name));
+				}
+			})
+			.on('input', '#msetting_scode', function() {
+				// đánh dấu user đã can thiệp scode, không auto-override nữa
+				$(this).data('touched', true);
+				// chuẩn hoá ngay khi gõ
+				var v = $(this).val();
+				$(this).val(toKebabUpper(v));
+			})
+		;
+	})();
+
+</script>

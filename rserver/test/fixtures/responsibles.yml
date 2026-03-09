@@ -1,0 +1,13 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  stask: one
+  positionjob: one
+  desc: MyText
+  status: MyString
+
+two:
+  stask: two
+  positionjob: two
+  desc: MyText
+  status: MyString

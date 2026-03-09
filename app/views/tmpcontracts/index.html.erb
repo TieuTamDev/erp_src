@@ -1,0 +1,93 @@
+<% content_for :head do %>
+  <%= javascript_include_tag '/assets/myjs/tinymce.min' %>
+<% end %>
+<% content_for :bottombody do %>
+  <%= javascript_include_tag '/assets/myjs/tmpcontract' %>
+<%end%>
+<div class="bmtu_header_dashboard">
+    <h3 class="mt-2 overview_text"><%= lib_translate("List_ContractTemp")%></h3>
+    <div class="card mb-3">
+      <div class="p-4 pb-0 collapse" id="collapse-editer">
+        <h4 class="mt-2 overview_text"><%=lib_translate("Update")%>: <span id="template-name" style="color: var(--falcon-badge-soft-warning-color);"></span></h4>
+        <%= form_tag tmpcontracts_update_path,method:'POST',id: 'temp-contract-form' do %>
+          <input type="text" name="temp_id" id="temp_id" hidden>
+          <input type="text" name="temp_name" id="temp_name" hidden>
+          <div class="mb-3" style="position: relative;">
+            <textarea class="tinymce d-none" id="scontent" name="scontent"></textarea>
+            <div id="loading-screen" style="position:absolute;z-index: 2;width:100%;height:100%">
+              <div style="width:100%;height:100%;background-color: rgba(0, 0, 0, 0.34);display:flex;align-items: center;justify-content: center;">
+                <div class="spinner-border text-light" role="status"></div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary form-button me-3" data-bs-toggle="collapse" data-bs-target="#collapse-editer" type="button"><%= lib_translate("Cancel")%></button>
+            <button class="btn btn-primary form-button" type="submit"><%= lib_translate("Save")%></button>
+          </div>
+        <%end%>
+      </div>
+      <div class="card-body pt-0">
+          <div class="tab-content">
+              <div class="table-responsive scrollbar">
+                <table id="table_ContractType" class="table table-bordered fs--1 mb-0 table-hover" >
+                  <thead class="bg-200 text-900">
+                      <tr>
+                          <th class="no-sort" style="text-align: center; width: 40px; padding-left:4px">#</th>
+                          <th class="no-sort" style="text-align: center;">
+                              <label><%= lib_translate("Name")  %></label>                         
+                          </th>
+                          <th class="no-sort" style="text-align: center" style="text-align: center; cursor: pointer;"></th>
+                      </tr>
+                  </thead>
+                  <tbody class="list">
+                      <%@temp_datas.each_with_index do |temp, index| %>
+                      <tr >
+                          <td style="text-align: center;;min-width: 40px;padding-left:12px;" class="contracttype_scode "><%= index + 1%></td>
+                          <td style="white-space: nowrap;" class="contracttype_name"><%= temp[:name] %></td>
+                          <td style="text-align: center; min-width: 110px" class="">
+                            <% if (is_access(session["user_id"], "USERTYPE","EDIT") || is_access(session["user_id"], "USERTYPE","DEL")) %>
+                              <a style="cursor:pointer;" onclick="clickEditTmp('<%= temp[:id]%>','<%= temp[:name] %>')">
+                                <span class="text-primary far fa-edit me-3"></span>
+                              </a>
+                            <% end  %>
+                            <a onclick="clickCopy('<%= temp[:id]%>')" style="cursor: pointer;">
+                                <span class="far fa-copy" style="width : 15px"></span>
+                            </a>
+                          </td>
+                      </tr>
+                      <% end %>
+                  </tbody>
+                </table>
+              </div>
+          </div>
+      </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal-tempcontract-form" data-bs-keyboard="false" data-bs-backdrop="static" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-lg mt-6" role="document" style="max-width: 65%">
+    <div class="modal-content position-relative">
+      <div class="position-absolute top-0 end-0 mt-2 me-2 z-index-1">
+        <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0">
+        <div class="rounded-top-lg py-3 ps-4 pe-6 bg-light">
+          <h4 class="mb-1" id="modal-tempcontract-label"><%= lib_translate("New_ContractTemp")%></h4>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<%# remote form %>
+<%= form_tag tmpcontracts_find_one_path ,method:'GET',id:'temp-edit-form',remote:true,authenticity_token: true do %>
+  <input id="temp_id_form" type="hidden" name="temp_id" type="text">
+  <input id="temp_name_form" type="hidden" name="temp_name" type="text">
+  <input id="copy" type="hidden" name="copy" type="text">
+<%  end %>
+
+<script>
+  let default_tokens = <%= get_token_list.to_json.html_safe%>;
+  let tiny_lang = '<%= session[:lang] == "vi" ? "vi" : "en"%>'
+</script>

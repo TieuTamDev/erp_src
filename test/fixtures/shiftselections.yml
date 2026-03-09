@@ -1,0 +1,17 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  workshift: one
+  work_date: 2025-07-15 13:13:21
+  approved_by: MyString
+  approved_at: 2025-07-15 13:13:21
+  status: MyString
+
+two:
+  user: two
+  workshift: two
+  work_date: 2025-07-15 13:13:21
+  approved_by: MyString
+  approved_at: 2025-07-15 13:13:21
+  status: MyString

@@ -1,0 +1,2 @@
+class Tbdepartmenttype < ApplicationRecord
+end

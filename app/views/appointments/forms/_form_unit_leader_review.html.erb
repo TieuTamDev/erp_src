@@ -1,0 +1,219 @@
+<div class="modal-body px-4">
+    <div class="row mb-3">
+      <div class="col-6">
+        <label for="taskName" class="form-label text-dark">Tên tác vụ</label>
+        <input type="text" class="form-control" id="taskName" value="Bổ nhiệm nhân sự">
+      </div>
+      
+      <div class="col-6">
+        <label for="level" class="form-label text-dark">Độ khẩn</label>
+        <select class="form-select" id="level">
+          <% @form_data[:levels]&.each do |level| %>
+            <option value="<%= level.scode %>"><%= level.name %></option>
+          <% end %>
+        </select>
+      </div>
+    </div>
+    
+    <div class="mb-3">
+      <label for="department" class="form-label text-dark">Thuộc đơn vị</label>
+      <select class="form-select" id="department">
+      </select>
+    </div>
+    
+    <div class="mb-3">
+      <label for="position" class="form-label text-dark">Vị trí bổ nhiệm</label>
+      <select class="form-select" id="position">
+      </select>
+    </div>
+    
+    <div class="mb-3">
+      <label for="manager" class="form-label text-dark">Người được bổ nhiệm</label>
+      <select class="form-select" id="manager"> 
+      </select>
+    </div>
+    
+    <div class="mb-3">
+      <label for="notes" class="form-label text-dark">Ghi chú</label>
+      <textarea class="form-control" id="notes" rows="3" placeholder="Bổ sung thêm trưởng bộ môn quản lý ..."></textarea>
+    </div>
+</div>
+
+<div class="modal-footer border-0 px-4 pb-4">
+  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+  <%= render "appointments/buttons/submit_buttons"%>
+</div>
+
+<script>
+  var checkCurrentDepartment = <%= @form_data[:next_department_scode] == "DV" %>;
+  var nextDepartmentId = '<%= @form_data[:next_department_id] %>';
+
+  $(document).ready(function () {
+    function setDefaultValue(selectId, url, formatItem) {
+      $.ajax({
+        url: url,
+        type: "GET",
+        data: { page: 1 },
+        success: function (data) {
+          if (data.items.length > 0) {
+            let firstItem = data.items[0];  
+            let displayText = formatItem ? formatItem(firstItem) : firstItem.name;
+            let newOption = new Option(displayText, firstItem.id, true, true);
+            $(selectId).append(newOption).trigger('change');  
+          }
+        }
+      });
+    }
+
+    // Gọi hàm để set giá trị mặc định
+    setDefaultValue("#department", "<%= @ROOT_PATH%>/appointments/get_departments");
+    
+    $("#department").on("change", function () {
+      let departmentId = $(this).val();
+      if (departmentId) {
+        setDefaultValue("#position", `<%= @ROOT_PATH%>/appointments/get_positions?department_id=${departmentId}`);
+        setDefaultValue("#appointee", `<%= @ROOT_PATH%>/appointments/get_users?department_id=${departmentId}`, 
+          function (item) {
+            return `${item.last_name} ${item.first_name} (${item.sid})`;
+          }
+        );
+        setDefaultValue("#manager", `<%= @ROOT_PATH%>/appointments/get_managers?department_id=${checkCurrentDepartment ? departmentId : nextDepartmentId}`, 
+          function (item) {
+            return `${item.last_name} ${item.first_name} (${item.sid})`;
+          }
+        );
+      }
+    });
+  });
+
+  $('#department').select2({
+    theme: 'bootstrap-5',
+    language: {
+      searching: function () {
+        return 'Đang tìm kiếm...';
+      },
+      loadingMore: function () {
+        return 'Đang tải...';
+      }
+    },
+    placeholder: 'Chọn đơn vị ...',
+    ajax: {
+      delay: 1000,
+      url: `<%= @ROOT_PATH%>/appointments/get_departments`,
+      data: function (params) {
+        return {
+          search: params.term
+        };
+      },
+      processResults: function (data, params) {
+        let results = data.items.map(function (item) {
+          return { id: item.id, text: item.name };
+        });
+
+        return {
+          results: results
+        };
+      }
+    }
+  });
+
+  $('#department').on('select2:open', function() {
+      $('#department').empty();
+  });
+
+  $('#position').select2({
+    theme: 'bootstrap-5',
+    language: {
+      searching: function () {
+        return 'Đang tìm kiếm...';
+      },
+      loadingMore: function () {
+        return 'Đang tải...';
+      }
+    },
+    placeholder: 'Chọn vị trí bổ nhiệm ...',
+    ajax: {
+      delay: 1000,
+      url: `<%= @ROOT_PATH%>/appointments/get_positions`,
+      data: function (params) {
+        return {
+          search: params.term,
+          department_id: $("#department").val()
+        };
+      },
+      processResults: function (data, params) {
+        let results = data.items.map(function (item) {
+          return { id: item.id, text: item.name };
+        });
+
+        return {
+          results: results
+        };
+      }
+    }
+  });
+  
+  $('#appointee').select2({
+    theme: 'bootstrap-5',
+    language: {
+      searching: function () {
+        return 'Đang tìm kiếm...';
+      },
+      loadingMore: function () {
+        return 'Đang tải...';
+      }
+    },
+    placeholder: 'Chọn cá nhân bổ nhiệm ...',
+    ajax: {
+      delay: 1000,
+      url: `<%= @ROOT_PATH%>/appointments/get_users`,
+      data: function (params) {
+        return {
+          search: params.term,
+          department_id: $("#department").val()
+        };
+      },
+      processResults: function (data, params) {
+        let results = data.items.map(function (item) {
+          return { id: item.id, text: `${item.last_name} ${item.first_name} (${item.sid})` };
+        });
+
+        return {
+          results: results
+        };
+      }
+    }
+  });
+
+  $('#manager').select2({
+    theme: 'bootstrap-5',
+    language: {
+      searching: function () {
+        return 'Đang tìm kiếm...';
+      },
+      loadingMore: function () {
+        return 'Đang tải...';
+      }
+    },
+    placeholder: 'Chọn người xử lý ...',
+    ajax: {
+      delay: 1000,
+      url: `<%= @ROOT_PATH%>/appointments/get_managers`,
+      data: function (params) {
+        return {
+          search: params.term,
+          department_id: checkCurrentDepartment ? $("#department").val() : nextDepartmentId
+        };
+      },
+      processResults: function (data, params) {
+        let results = data.items.map(function (item) {
+          return { id: item.id, text: `${item.last_name} ${item.first_name} (${item.sid})` };
+        });
+
+        return {
+          results: results
+        };
+      }
+    }
+  });
+</script>

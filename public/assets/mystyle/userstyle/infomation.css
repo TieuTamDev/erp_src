@@ -1,0 +1,49 @@
+#btn_add_new_user:hover, #lable_edit_info:hover, #lable_forensic_information:hover, #btn_add_new_forensic_information:hover,  #lable_btn_identity_information_user, #btn_add_new_social { 
+color: var(--falcon-btn-falcon-success-color) !important;
+}
+.red {
+color: red
+}
+.green {
+color: rgb(70, 241, 104)
+}
+.user-image-container {
+    width: 100%;
+    height: auto;
+    border: 2px dashed var(--falcon-border-color-translucent);
+    border-radius: 5px;
+    line-height: 43px;
+    padding: 0px 10px;
+    cursor: pointer;
+    text-align: center;
+    white-space: nowrap;
+}
+.user-image-preview {
+    width: 280px;
+    height: 280px;
+    margin: 0 auto;
+    overflow: hidden;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+.btn-update-orange { color:#fd7e14; }
+
+@media screen and (max-width: 1199.5px) {
+.name_user {
+margin-top: 1.8rem !important;
+}
+#responsive_tab_3 {
+    flex-direction: row !important;
+}
+#tab_3_col_2 { 
+    padding-left: 1rem !important;
+}
+}
+@media screen and (min-width: 1199.5px) {
+#responsive_tab_3 {
+    flex-direction: column !important;
+}
+#tab_3_col_2 {
+    padding-left: 0rem !important;
+}
+}

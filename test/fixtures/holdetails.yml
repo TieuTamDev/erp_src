@@ -1,0 +1,17 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  holiday: one
+  name: MyText
+  amount: MyString
+  stype: MyString
+  note: 
+  status: MyString
+
+two:
+  holiday: two
+  name: MyText
+  amount: MyString
+  stype: MyString
+  note: 
+  status: MyString

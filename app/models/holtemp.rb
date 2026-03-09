@@ -1,0 +1,2 @@
+class Holtemp < ApplicationRecord
+end

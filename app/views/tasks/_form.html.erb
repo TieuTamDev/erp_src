@@ -1,0 +1,924 @@
+<% content_for :bottombody do %>
+  <%= javascript_include_tag '/assets/myjs/task_upload_media.js' %>
+<% end %>
+
+<style>
+  .is-invalid .tox-tinymce {
+    border-color: #dc3545;
+  }
+  
+  .invalid-feedback {
+    display: block;
+    color: #dc3545;
+    margin-top: 0.25rem;
+  }
+
+  .select2-container.is-invalid .select2-selection {
+    border-color: #dc3545 !important;
+  }
+
+  .select2-container + .invalid-feedback {
+    margin-top: 0.25rem;
+  }
+
+  .invalid-feedback.d-block {
+    display: block !important;
+  }
+
+  .card {
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  }
+  .upload-area {
+    background-color: #e9f0fe;
+    border: 2px dashed #bedaff;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .upload-area.dragover {
+    background-color: #dce7fd;
+    border-color: #0d6efd;
+  }
+  .upload-area:hover {
+    background-color: #dce7fd;
+  }
+  .upload-icon {
+    color: #0d6efd;
+    font-size: 48px;
+    margin-bottom: 15px;
+  }
+  .file-item {
+    border: 1px solid #f0f0f0;
+    border-radius: 10px;
+    padding: 10px 15px;
+    margin-top: 20px;
+  }
+  .file-actions {
+    display: flex;
+    gap: 10px;
+  }
+  .file-actions button {
+    background: none;
+    border: none;
+    padding: 0;
+  }
+  .file-size {
+    color: #6c757d;
+    font-size: 14px;
+  }
+  .badge-file {
+    background-color: #0d6efd;
+    color: white;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-weight: normal;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  
+  .upload-area.drag-over {
+    border-color: #007bff !important;
+    background-color: #f0f8ff !important;
+    border-style: dashed !important;
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
+  }
+  
+  .upload-area .upload-icon {
+    transition: transform 0.2s ease;
+    margin-bottom: 10px;
+  }
+  
+  .upload-area .upload-icon img {
+    width: 48px;
+    height: 48px;
+    opacity: 0.7;
+  }
+  
+  .upload-area:hover .upload-icon {
+    transform: scale(1.1);
+  }
+  
+  .upload-area p {
+    margin: 10px 0 0 0;
+    color: #666;
+    font-size: 16px;
+    font-weight: 500;
+  }
+  
+  .upload-area.drag-over p {
+    color: #007bff;
+    font-weight: 600;
+  }
+
+  @keyframes uploadSuccess {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+  
+  .upload-area.upload-success {
+    animation: uploadSuccess 0.5s ease;
+    border-color: #28a745;
+    background-color: #f8fff9;
+  }
+
+  .upload-area.uploading {
+    pointer-events: none;
+    opacity: 0.7;
+  }
+  
+  .upload-area.uploading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #007bff;
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    transform: translate(-50%, -50%);
+  }
+  
+  @keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+  }
+  
+  .list-group-item:hover {
+    background-color: #f8f9fa;
+    border-color: #007bff;
+  }
+  
+  .action-button {
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    margin-left: 5px;
+  }
+  
+  .action-button:hover {
+    background-color: #e9ecef;
+    transform: scale(1.1);
+  }
+
+  @media (max-width: 768px) {
+    .upload-area {
+      padding: 30px 15px;
+    }
+    
+    .upload-area .upload-icon img {
+      width: 40px;
+      height: 40px;
+    }
+    
+    .upload-area p {
+      font-size: 14px;
+    }
+  }
+</style>
+
+<%= form_for @task, url: (@task.new_record? ? tasks_path : task_path(@task)),
+                         method: (@task.new_record? ? :post : :patch),
+                         html: { multipart: true } do |form| %>
+    <div class="modal-body">
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <div class="form-group">
+            <label for="function_id" class="form-label text-dark">Chức năng</label>
+            <select class="form-select" id="function_id" name="function_id">
+              <% if @selected_function.present? %>
+                <option value="<%= @selected_function.id %>" selected><%= @selected_function.name %></option>
+              <% end %>
+            </select>
+          </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <div class="form-group">
+            <label for="tfunction_id" class="form-label text-dark">Nhiệm vụ</label>
+            <select class="form-select" id="tfunction_id" name="tfunction_id">
+              <% if @selected_duety.present? %>
+                <option value="<%= @selected_duety.id %>" selected><%= @selected_duety.name %></option>
+              <% end %>
+            </select>
+          </div>
+        </div>
+
+        <div class="col-md-12 mb-3">
+          <div class="form-group">
+            <%= required_label(form, :name, 'Tên công việc', class: 'form-label') %>
+            <%= form.text_field :name, class: "form-control", id: 't_name', placeholder: 'Nhập tên công việc' %>
+          </div>
+        </div>
+
+        <div class="col-md-12 mb-3">
+          <div class="form-group d-none">
+            <%= required_label(form, :scode, 'Mã công việc', class: 'form-label') %>
+            <%= form.text_field :scode, class: "form-control", id: 't_scode', placeholder: 'Nhập mã công việc' %>
+          </div>
+        </div>
+
+        <div class="col-md-12 mb-3">
+          <div class="row">
+            <div class="col-md-3">
+              <div class="form-group">
+                <% frequency_options = WorksHelper::FREQUENCY_TYPES.map { |key, value| [value, key] } %>
+
+                <%= required_label(form, :frequency, 'Mức độ thường xuyên', class: 'form-label') %>
+                <%= form.select :frequency, 
+                                options_for_select(frequency_options, @task.frequency),
+                                { include_blank: 'Chọn mức độ thường xuyên' }, 
+                                { class: "form-select" } %>
+
+              </div>
+            </div>
+  
+            <div class="col-md-3">
+              <div class="form-group">
+                <% difficulty_options = WorksHelper::DIFFICULTY_VALUES.map { |value| [value, value] } %>
+
+                <%= required_label(form, :level_difficulty, 'Độ khó', class: 'form-label') %>
+                <%= form.select :level_difficulty, 
+                                options_for_select(difficulty_options, @task.level_difficulty),
+                                { include_blank: 'Chọn độ khó' }, 
+                                { class: "form-select" } %>
+              </div>
+            </div>
+  
+            <div class="col-md-3">
+              <div class="form-group">
+                <% level_handling_options = WorksHelper::PROCESSING_LEVELS.map { |value| [value, value] } %>
+
+                <%= required_label(form, :level_handling, 'Cấp xử lý', class: 'form-label') %>
+                <%= form.select :level_handling, 
+                                options_for_select(level_handling_options, @task.level_handling),
+                                { include_blank: 'Chọn cấp xử lý' }, 
+                                { class: "form-select" } %>
+              </div>
+            </div>
+  
+            <div class="col-md-3">
+              <div class="form-group">
+                <% priority_options = WorksHelper::URGENCY_VALUES.map { |value| [value, value] } %>
+
+                <%= required_label(form, :priority, 'Mức độ ưu tiên', class: 'form-label') %>
+                <%= form.select :priority, 
+                                options_for_select(priority_options, @task.priority),
+                                { include_blank: 'Chọn mức độ ưu tiên' }, 
+                                { class: "form-select" } %>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-12 mb-3">
+          <div class="form-group">
+            <%= form.label :desc, 'Ghi chú', class: 'form-label' %>
+            <%= form.text_area :desc, rows: 3, class: "form-control", placeholder: 'Nhập ghi chú' %>
+          </div>
+        </div>
+
+        <div class="col-md-12 mb-3">
+          <label class="form-label">Quy trình</label>
+          <div class="card p-4">
+            <h5 class="mb-3" style="font-size: 18px; color: #333333;">File đính kèm</h5>
+            <p class="text-secondary mb-4">Vui lòng tải file lên không vượt quá 5MB</p>
+            
+            <label class="upload-area mb-3" for="file-upload" style="cursor: pointer;">
+              <div class="d-flex flex-column align-items-center">
+                <div class="upload-icon">
+                  <img src="<%= image_path('/assets/image/upload.svg') %>">
+                </div>
+                <p class="mb-0">Thả file vào đây</p>
+              </div>
+              <input type="file" name="files[]" id="file-upload" class="d-none" accept=".pdf,.doc,.docx,.png" multiple>
+              <input name="remove_taskdocs" id="remove-media-ids" class="d-none">
+            </label>
+            <div class="scrollbar" style="max-height: 297px;">
+              <ul id="stored-file-list" class="list-group"></ul>
+              <ul id="file-list" class="list-group"></ul>
+            </div>
+            <p class="text-secondary">Chỉ hỗ trợ tải file pdf,word,png.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <a id="link-download" class="d-none" style="display:flex;" hidden></a>
+    <div class="modal-footer border-top-0">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+        <%= form.submit 'Lưu', class: 'btn btn-primary', id: 'submit_form', data: { disable_with: false } %>
+    </div>
+<% end %>
+
+<script>
+  var media_temps = [];
+  var stored_medias = <%= @stored_medias.to_json.html_safe%> || [];
+  var removeMediaIds = [];
+  var root_path = "<%= root_path %>";
+
+  showLoadding(false);
+
+  function getTextToASCII() {
+    var value_name = document.getElementById("t_name").value;
+    var value_scode = document.getElementById("t_scode");
+    if (value_name) {
+    var content = removeVietnameseTones(value_name).replace(/ /g, '-');
+      if (value_scode) {
+        value_scode.value = content.toUpperCase();
+      }
+    }
+  }
+  function removeVietnameseTones(str) {
+    str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g,"a"); 
+    str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g,"e"); 
+    str = str.replace(/ì|í|ị|ỉ|ĩ/g,"i"); 
+    str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g,"o"); 
+    str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g,"u"); 
+    str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g,"y"); 
+    str = str.replace(/đ/g,"d");
+    str = str.replace(/À|Á|Ạ|Ả|Ã|Â|Ầ|Ấ|Ậ|Ẩ|Ẫ|Ă|Ằ|Ắ|Ặ|Ẳ|Ẵ/g, "A");
+    str = str.replace(/È|É|Ẹ|Ẻ|Ẽ|Ê|Ề|Ế|Ệ|Ể|Ễ/g, "E");
+    str = str.replace(/Ì|Í|Ị|Ỉ|Ĩ/g, "I");
+    str = str.replace(/Ò|Ó|Ọ|Ỏ|Õ|Ô|Ồ|Ố|Ộ|Ổ|Ỗ|Ơ|Ờ|Ớ|Ợ|Ở|Ỡ/g, "O");
+    str = str.replace(/Ù|Ú|Ụ|Ủ|Ũ|Ư|Ừ|Ứ|Ự|Ử|Ữ/g, "U");
+    str = str.replace(/Ỳ|Ý|Ỵ|Ỷ|Ỹ/g, "Y");
+    str = str.replace(/Đ/g, "D");
+    str = str.replace(/\u0300|\u0301|\u0303|\u0309|\u0323/g, "");
+    str = str.replace(/\u02C6|\u0306|\u031B/g, "");
+    str = str.replace(/ + /g," ");
+    str = str.trim();
+    str = str.replace(/!|@|%|\^|\*|\(|\)|\+|\=|\<|\>|\?|\/|,|\.|\:|\;|\'|\"|\&|\#|\[|\]|~|\$|_|`|-|{|}|\||\\/g," ");
+    return str;
+  }
+
+  document.getElementById("t_name").addEventListener("keyup", function() {getTextToASCII()} );
+
+  initMediafile();
+
+  function initMediafile() {
+    stored_medias.forEach(doc=>{
+      renderFileItems(null,doc.doc_id,doc.file_name,doc.file_size,doc.file_type,"stored-file-list");
+    });
+    let previousFileCount = 0;
+
+    $("#file-upload").on('change',(e)=>{
+      let files = e.target.files;
+      let currentFileCount = files.length;
+  
+      if(currentFileCount === 0) {
+        if(media_temps.length > 0) {
+          setTimeout(() => {
+            updateInputFile();
+          }, 10);
+        }
+        return;
+      }
+
+      if(currentFileCount > 0) {
+        let beforeProcessCount = media_temps.length;
+        
+        fileChangeHandle(files);
+
+        const uploadArea = document.querySelector('.upload-area');
+        const uploadText = uploadArea.querySelector('p');
+        
+        setTimeout(() => {
+          const { validFiles } = validateFiles(Array.from(files));
+          
+          if (validFiles.length > 0) {
+            uploadText.textContent = `Đã thêm ${validFiles.length} file`;
+            uploadArea.classList.add('upload-success');
+            
+            setTimeout(() => {
+              uploadText.textContent = 'Thả file vào đây';
+              uploadArea.classList.remove('upload-success');
+            }, 2000);
+          } else {
+            uploadText.textContent = 'Thả file vào đây';
+          }
+        }, 100);
+
+        previousFileCount = currentFileCount;
+      }
+    });
+
+    let dialogOpened = false;
+    $("#file-upload").on('click', function() {
+      dialogOpened = true;
+      this.setAttribute('data-previous-files', media_temps.length);
+    });
+
+    $("#file-upload").on('focus', function() {
+      if(dialogOpened) {
+        dialogOpened = false;
+      }
+    });
+
+    initDragAndDrop();
+  }
+
+  function initDragAndDrop() {
+    const uploadArea = document.querySelector('.upload-area');
+    const uploadIcon = uploadArea.querySelector('.upload-icon');
+    const uploadText = uploadArea.querySelector('p');
+    
+    // Prevent default drag behaviors
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      uploadArea.addEventListener(eventName, preventDefaults, false);
+      document.body.addEventListener(eventName, preventDefaults, false);
+    });
+
+    // Highlight drop area when item is dragged over it
+    ['dragenter', 'dragover'].forEach(eventName => {
+      uploadArea.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      uploadArea.addEventListener(eventName, unhighlight, false);
+    });
+
+    // Handle dropped files
+    uploadArea.addEventListener('drop', handleDrop, false);
+
+    function preventDefaults(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    function highlight(e) {
+      uploadArea.classList.add('drag-over');
+      uploadArea.style.backgroundColor = '#f0f8ff';
+      uploadArea.style.borderColor = '#007bff';
+      uploadArea.style.borderStyle = 'dashed';
+      uploadText.textContent = 'Thả file tại đây';
+      
+      // Add animation to upload icon
+      if (uploadIcon) {
+        uploadIcon.style.transform = 'scale(1.1)';
+        uploadIcon.style.transition = 'transform 0.2s ease';
+      }
+    }
+
+    function unhighlight(e) {
+      uploadArea.classList.remove('drag-over');
+      uploadArea.style.backgroundColor = '';
+      uploadArea.style.borderColor = '';
+      uploadArea.style.borderStyle = '';
+      uploadText.textContent = 'Thả file vào đây';
+      
+      // Reset upload icon animation
+      if (uploadIcon) {
+        uploadIcon.style.transform = 'scale(1)';
+      }
+    }
+
+    function handleDrop(e) {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      
+      if (files.length > 0) {
+        // Use the same validation logic as regular file input
+        fileChangeHandle(files);
+        
+        // Show success feedback for valid files
+        const uploadArea = document.querySelector('.upload-area');
+        const uploadText = uploadArea.querySelector('p');
+        
+        setTimeout(() => {
+          const { validFiles } = validateFiles(Array.from(files));
+          
+          if (validFiles.length > 0) {
+            uploadText.textContent = `Đã thêm ${validFiles.length} file`;
+            uploadArea.classList.add('upload-success');
+            
+            setTimeout(() => {
+              uploadText.textContent = 'Thả file vào đây';
+              uploadArea.classList.remove('upload-success');
+            }, 2000);
+          } else {
+            uploadText.textContent = 'Thả file vào đây';
+          }
+        }, 100);
+      }
+    }
+  }
+
+  function validateFiles(files) {
+    const allowedTypes = ['.pdf', '.doc', '.docx', '.png'];
+    const allowedMimeTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'image/png'
+    ];
+    
+    let validFiles = [];
+    let invalidFiles = [];
+    let oversizeFiles = [];
+    
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+      const isValidType = allowedTypes.includes(fileExtension) || allowedMimeTypes.includes(file.type);
+      const isValidSize = file.size / (1024 ** 2) <= 5;
+      
+      if (!isValidType) {
+        invalidFiles.push(file.name);
+      } else if (!isValidSize) {
+        oversizeFiles.push(file.name);
+      } else {
+        validFiles.push(file);
+      }
+    }
+    
+    return {
+      validFiles,
+      invalidFiles,
+      oversizeFiles
+    };
+  }
+
+  function fileChangeHandle(files) {
+    // Handle both FileList and Array
+    const fileArray = Array.isArray(files) ? files : Array.from(files);
+    
+    // Validate files using helper function
+    const { validFiles, invalidFiles, oversizeFiles } = validateFiles(fileArray);
+    
+    // Show error messages for invalid files
+    if (invalidFiles.length > 0) {
+      alert(`Các file sau không được hỗ trợ: ${invalidFiles.join(', ')}\nChỉ hỗ trợ file: PDF, Word (.doc, .docx), PNG`);
+    }
+    
+    if (oversizeFiles.length > 0) {
+      alert(`Các file sau có dung lượng vượt quá 5 MB: ${oversizeFiles.join(', ')}\nVui lòng chọn file khác.`);
+    }
+    
+    // Process valid files
+    for (let i = 0; i < validFiles.length; i++) {
+      let file = validFiles[i];
+      let temp_id = generate_id("file-id");
+      
+      media_temps.push({
+        temp_id: temp_id,
+        file: file
+      });
+      renderFileItems(temp_id, null, file.name, file.size, file.type, "file-list");
+    }
+    
+    if (validFiles.length > 0) {
+      updateInputFile();
+    }
+
+    if (invalidFiles.length > 0 || oversizeFiles.length > 0) {
+      setTimeout(() => {
+        updateInputFile();
+      }, 100);
+    }
+  }
+
+  function generate_id(pre) {
+    let ran_num = [1,2,3,4,5,6,7,8,9,0];
+    let s_ran_num = "";
+    for (let i = 0; i < 5; i++) {
+        let index = randomInteger(0,ran_num.length - 1);
+        s_ran_num += ran_num[index];
+    }
+    let time = new Date().valueOf();
+    return `${pre}-${time}-${s_ran_num}`;
+  }
+
+  function randomInteger(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  function renderFileItems(temp_id,doc_id,name,size,type,listID) {
+    let str_size = formatBytes(size);
+    let file_type = getFileType(type,name.split('.').pop());
+    let itemStyle = "";
+    let warning = "";
+
+    let imageUrl = '<%= root_path %>' + 'assets/image/' + `${file_type}.png`;
+    let ul = $("#"+listID);
+
+    let btnPreview = ``;
+    if(doc_id){
+      btnPreview = `<div class="action-button" onclick="clickViewFile('${name}','${type}')" style="padding: 2px 7px;">
+                <img style="width: 20px;" src="<%= image_path("/assets/image/or_eye.svg") %>" alt="Preview">
+              </div>`;
+    }
+    ul.append(`
+        <li data-temp-id="${temp_id}" data-doc-id="${doc_id}" class="list-group-item" style="display:flex;align-items: center;justify-content: space-between;${itemStyle}">
+            <div style="width: 70%;">
+                <div style="display:flex">
+                  <img style="margin-right: 5px;" src="${imageUrl}" alt="file">
+                  <p class="m-0 form-check-label" style="font-size: 0.9em;font-weight:600;text-overflow: ellipsis;overflow: hidden;">${name}</p>
+                </div>
+                <p class="m-0">${str_size} ${warning}</p>
+            </div>
+            <div class="me-2 d-flex align-items-center">
+              ${btnPreview}  
+              <div class="action-button" onclick="removeItemFile('${temp_id}',${doc_id})" style="padding: 2px 7px;">
+                <img style="width: 14px;" src="<%= image_path("/assets/image/or_trash.svg") %>" alt="Delete">
+              </div>
+            </div>
+        </li>`);
+    $(".preview-list-group").html(ul.html());
+    $(".preview-list-group .btn.btn-danger.btn-sm").addClass("d-none");
+  }
+
+  function formatBytes(a,b=2,k=1024){
+    let d=Math.floor(Math.log(a)/Math.log(k));
+    return 0 == a ? "0 Bytes" : parseFloat((a/Math.pow(k,d)).toFixed(Math.max(0,b)))+" "+["Bytes","KB","MB","GB","TB","PB","EB","ZB","YB"][d]
+  }
+
+  function getFileType(type,ext) {
+    if(type != "" && type.trim().length != 0){
+      let types = {
+        "photo":"image/png image/jpg image/jpeg image/webp image/gif image/tiff",
+        "doc":"application/msword application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "excel":"application/vnd.ms-excel application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "power-point":"application/vnd.ms-powerpoint application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        "text":"text/plain",
+        "pdf":"application/pdf",
+        "video":"video/mp4 video/avi video/x-ms-wmv video/quicktime",
+        "zip":"application/zip application/x-zip-compressed"
+      }
+      for (var key in types){
+        if(types[key].includes(type)){
+          return key;
+        }
+      }
+    }else{
+      if(ext == "rar"){
+        return "zip";
+      }
+      return "file";
+    }
+    return "file"
+  }
+
+  function removeItemFile(temp_id,doc_id) {
+    // remove store file
+    if(doc_id){
+      removeMediaIds.push(doc_id);
+      $("#remove-media-ids").val(removeMediaIds.join(','));
+      $(`[data-doc-id="${doc_id}"]`).remove();
+    }else if(temp_id != 'null'){
+        // remove quest temp media
+        let index = media_temps.findIndex(media=>{return media.temp_id == temp_id});
+        if(index >= 0){
+          media_temps.splice(index,1);
+          updateInputFile();
+        }
+        $(`[data-temp-id="${temp_id}"]`).remove();
+    }
+  }
+
+  function clickViewFile(file_name,type) {
+    var type = getFileType(type,"");
+    let file_url = window.location.origin + "/mdata/hrm/" + file_name;
+    switch (type) {
+      case "photo":
+        window.open(file_url, '_blank');
+        break;
+      case "doc":
+        let viewerUrl = `https://view.officeapps.live.com/op/view.aspx?src=${file_url}`;
+        window.open(viewerUrl, '_blank');
+        break;
+      case "pdf":
+        window.open(file_url, '_blank');
+        break;
+      default:
+        break;
+    }
+  }
+
+  function clickDownloadInputFile(temp_id,doc_id) {
+    if(temp_id != "null"){
+      let media = media_temps.find(media=>{return media.temp_id == temp_id});
+      if(media){
+        let url = URL.createObjectURL(media.file);
+        var link = document.getElementById('link-download');
+        link.setAttribute('download', media.file.name);
+        link.setAttribute('href', url);
+        link.click();
+      }
+
+    }else if(doc_id){
+      media_temps.forEach(media=>{
+        if(media.doc_id == doc_id){
+          var link = document.getElementById('link-download');
+          let url = window.location.origin + "/mdata/sftraining/" + media.file_name;
+          link.setAttribute('download', media.file_name);
+          link.setAttribute('href', url);
+          link.click();
+        }
+      });
+    }
+  }
+
+  function renameFile(originalFile, newName) {
+    let ext = originalFile.name.split('.').pop();
+    newName = newName + "." + ext;
+    return new File([originalFile], newName, {
+        type: originalFile.type,
+        lastModified: originalFile.lastModified,
+    });
+  }
+
+  function updateInputFile() {
+    // media data
+    let mediaTransfer = new DataTransfer();
+      media_temps.forEach(media=>{
+          let convert_file = renameFile(media.file,media.temp_id);
+          mediaTransfer.items.add(convert_file);
+      })
+    document.getElementById("file-upload").files = mediaTransfer.files;
+  }
+
+  $("#function_id").on("change", function () {
+    let departmentId = $(this).val();
+  
+    if (departmentId) {
+      $('#tfunction_id').val(null).empty().trigger('change');
+    }
+  }); 
+
+  $('#function_id').select2({
+    theme: 'bootstrap-5',
+    language: {
+      searching: function () {
+        return 'Đang tìm kiếm...';
+      }
+    },
+    placeholder: 'Chọn chức năng',
+    ajax: {
+      url: `${root_path}tasks/get_functions`,
+      data: function (params) {
+        return {
+          search: params.term
+        };
+      },
+      processResults: function (data) {
+        let results = data.items.map(function (item) {
+          return { id: item.id, text: item.name };
+        });
+
+        return {
+          results: results
+        };
+      }
+    }
+  });
+
+  $('#tfunction_id').select2({
+    theme: 'bootstrap-5',
+    language: {
+      searching: function () {
+        return 'Đang tìm kiếm...';
+      }
+    },
+    placeholder: 'Chọn nhiệm vụ',
+    ajax: {
+      url: `${root_path}tasks/get_duties`,
+      data: function (params) {
+        return {
+          search: params.term,
+          function_id: $('#function_id').val()
+        };
+      },
+      processResults: function (data) {
+        let results = data.items.map(function (item) {
+          return { id: item.id, text: item.name };
+        });
+
+        return {
+          results: results
+        };
+      }
+    }
+  });
+
+  $(document).ready(function() {
+    $('form').on('submit', function(e) {
+      let isValid = true;
+      $('.error-container').remove();
+      $('.is-invalid').removeClass('is-invalid');
+
+      const requiredFields = [
+        { selector: '#t_name', message: 'Vui lòng nhập tên công việc' },
+        { selector: '#t_scode', message: 'Vui lòng nhập mã công việc' },
+        { selector: '#stask_frequency', message: 'Vui lòng chọn mức độ thường xuyên' },
+        { selector: '#stask_level_difficulty', message: 'Vui lòng chọn độ khó' },
+        { selector: '#stask_level_handling', message: 'Vui lòng chọn cấp xử lý' },
+        { selector: '#stask_priority', message: 'Vui lòng chọn mức độ ưu tiên' }
+      ];
+
+      // Validate required fields
+      requiredFields.forEach(function(field) {
+        const $input = $(field.selector);
+        const value = $input.val();
+        const $select2Container = $input.next('.select2-container');
+  
+        if (!value || value === '' || value === 'Chọn mức độ thường xuyên' || value === 'Chọn độ khó' || value === 'Chọn cấp xử lý' || value === 'Chọn mức độ ưu tiên') {
+          isValid = false;
+
+          if ($select2Container.length > 0) {
+            $select2Container.after(`<div class="error-container"><div class="invalid-feedback d-block">${field.message}</div></div>`);
+            $input.addClass('is-invalid');
+            $select2Container.addClass('is-invalid');
+          } else {
+            $input.addClass('is-invalid');
+            $input.after(`<div class="error-container"><div class="invalid-feedback d-block">${field.message}</div></div>`);
+          }
+        } else {
+          $input.removeClass('is-invalid');
+          if ($select2Container.length > 0) {
+            $select2Container.removeClass('is-invalid');
+          }
+          $input.next('.error-container').remove();
+        }
+      });
+
+      // Validate character limits
+      const charLimitFields = [
+        { selector: '#t_name', maxLength: 255, fieldName: 'Tên công việc' },
+        { selector: '#desc', maxLength: 255, fieldName: 'Ghi chú' }
+      ];
+
+      charLimitFields.forEach(function(field) {
+        const $input = $(field.selector);
+        const value = $input.val();
+        
+        if (value && value.length > field.maxLength) {
+          isValid = false;
+          $input.addClass('is-invalid');
+          $input.after(`<div class="error-container"><div class="invalid-feedback d-block">${field.fieldName} không được vượt quá ${field.maxLength} ký tự (hiện tại: ${value.length} ký tự)</div></div>`);
+        }
+      });
+
+      if (!isValid) {
+        e.preventDefault();
+      }
+    });
+
+    // Real-time validation khi người dùng nhập
+    $('input, select, textarea').on('input change', function() {
+      const $input = $(this);
+      const $select2Container = $input.next('.select2-container');
+      const inputId = $input.attr('id');
+  
+      // Remove previous error states
+      $input.removeClass('is-invalid');
+      if ($select2Container.length > 0) {
+        $select2Container.removeClass('is-invalid');
+      }
+      $input.next('.error-container').remove();
+
+      // Real-time character limit validation
+      if (inputId === 't_name' || inputId === 'desc') {
+        const maxLength = 255;
+        const currentLength = $input.val().length;
+        const fieldName = inputId === 't_name' ? 'Tên công việc' : 'Ghi chú';
+        
+        if (currentLength > maxLength) {
+          $input.addClass('is-invalid');
+          $input.after(`<div class="error-container"><div class="invalid-feedback d-block">${fieldName} không được vượt quá ${maxLength} ký tự (hiện tại: ${currentLength} ký tự)</div></div>`);
+        }
+      }
+    });
+
+    // Character counter (optional - hiển thị số ký tự đã nhập)
+    function addCharacterCounter(selector, maxLength) {
+      const $input = $(selector);
+      if ($input.length) {
+        const counterId = selector.replace('#', '') + '_counter';
+        $input.after(`<small id="${counterId}" class="form-text text-muted">0/${maxLength} ký tự</small>`);
+        
+        $input.on('input', function() {
+          const currentLength = $(this).val().length;
+          const $counter = $('#' + counterId);
+          $counter.text(`${currentLength}/${maxLength} ký tự`);
+          
+          if (currentLength > maxLength) {
+            $counter.removeClass('text-muted').addClass('text-danger');
+          } else {
+            $counter.removeClass('text-danger').addClass('text-muted');
+          }
+        });
+      }
+    }
+
+    // Thêm character counter cho các trường
+    addCharacterCounter('#t_name', 255);
+  });
+</script>

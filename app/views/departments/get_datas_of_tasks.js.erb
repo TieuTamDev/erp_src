@@ -1,0 +1,8 @@
+var datas = <%= @datas.to_json.html_safe %>;
+htmlDatas = "";
+datas.forEach((data, index) => {
+    
+    htmlDatas += renderFunctions(data.function_name, index, data.dueties_data)
+});
+$(".render-datas").html(htmlDatas);
+

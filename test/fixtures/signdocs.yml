@@ -1,0 +1,19 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  mandoc: one
+  tmp_file: MyText
+  stype: MyText
+  name: MyText
+  sprocess: MyText
+  status: MyString
+  note: MyText
+
+two:
+  mandoc: two
+  tmp_file: MyText
+  stype: MyText
+  name: MyText
+  sprocess: MyText
+  status: MyString
+  note: MyText

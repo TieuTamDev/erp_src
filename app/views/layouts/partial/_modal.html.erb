@@ -1,0 +1,116 @@
+    <!-- Confirm dialog -->
+    <div class="modal fade" id="capp-confirm-dialog" data-bs-keyboard="false" data-bs-backdrop="static" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <%= lib_translate("Message") %>
+                    </h5>
+                    <i class="fas fa-times text-danger" data-bs-dismiss="modal" style="font-size: 20px;cursor: pointer;"></i>
+                </div>
+                <div class="modal-body">
+                    <div id="message"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close"> <%=lib_translate("Cancel")%> </button>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="confirm"> <%=lib_translate("Confirm") %> </button>
+                </div>
+            </div>
+        </div>
+      </div>
+  
+      <!-- Modal ? -->
+      <div class="modal fade" id="authentication-modal" tabindex="-1" role="dialog" aria-labelledby="authentication-modal-label" aria-hidden="true">
+        <div class="modal-dialog mt-6" role="document">
+          <div class="modal-content border-0"></div>
+        </div>
+      </div>
+  
+      <!-- Popup change pw  --->
+      <div class="modal fade" id="popup-change-pw" data-bs-keyboard="false" data-bs-backdrop="static" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="position-absolute top-0 end-0 mt-2 me-2 z-index-1 close-modal">
+              <button class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <div style="display: flex;flex-direction: column;align-items: center;">
+                <div style="font-size: 34px;background-color: #e0e0e0;padding: 2px;width: 60px;height: 60px;display: flex;align-items: center;justify-content: center;border-radius: 46px;">
+                  <span class="fas fa-lock"></span>
+                </div>
+                <p style="font-size: 1.2em;font-weight: bold;margin-bottom:0px; margin-top:8px"><%=lib_translate("Changed_password")%></p>
+                <%= form_tag url_for(controller: 'users', action: 'change_password'),method:'POST',style:'width: 100%;',id:'change-password-form',remote:true,authenticity_token: true do %>
+                  <div class="form-group">
+                    <label class="m-0"><%= lib_translate("Old_password")%><span style="color:red;">*</span></label>
+                    <div class="form-control" data-wrap="password" style="display: flex;align-items: center;">
+                      <input data-type="pass" name="password" type="password" style="border: none;outline: none;flex-grow: 1;">
+                      <span onclick="clickShowPassword(this)" data-name="password"  data-status="hide" style="cursor: pointer;" class="far fa-eye"></span>
+                    </div>
+                    <span style="font-size:0.75em;font-weight:600;color: rgb(244, 47, 83);" data-name="valid-message" data-filed="password"></span>
+                  </div>
+  
+                  <div class="form-group mt-2">
+                    <label class="m-0"><%= lib_translate("New_password")%><span style="color:red;">*</span></label>
+                    <div class="form-control" data-wrap="new_password" style="display: flex;align-items: center;">
+                      <input data-type="pass" name="new_password" type="password" style="border: none;outline: none;flex-grow: 1;">
+                      <span onclick="clickShowPassword(this)" data-name="new_password"  data-status="hide" style="cursor: pointer;" class="far fa-eye"></span>
+                    </div>
+                    <span style="font-size:0.75em;font-weight:600;color: rgb(244, 47, 83);" data-name="valid-message" data-filed="new_password"></span>
+                  </div>
+                  <div class="form-group mt-2">
+                    <label class="m-0"><%= lib_translate("Confirm_new_password")%><span style="color:red;">*</span></label>
+                    <div class="form-control" data-wrap="confirm_password" style="display: flex;align-items: center;">
+                      <input data-type="pass" name="confirm_password" type="password" style="border: none;outline: none;flex-grow: 1;">
+                      <span onclick="clickShowPassword(this)" data-name="confirm_password"  data-status="hide" style="cursor: pointer;" class="far fa-eye"></span>
+                    </div>
+                    <span style="font-size:0.75em;font-weight:600;color: rgb(244, 47, 83);" data-name="valid-message" data-filed="confirm_password"></span>
+                  </div>
+                  <%
+                    user_profile = User.find(session[:user_id])
+                  %>
+                  <div class="form-group mt-2">
+                    <div class="form-group" id="twofa" style="position: relative;">
+                      <label><%= lib_translate("Bảo mật 2 lớp") %></label> <span style="color:red;" class="red">* </span>
+                      <div class="form-check form-switch" style="margin-bottom:unset;">
+                        <input class="form-check-input" name="twofa" id="checkbox-active" onchange="changeTwoFA(this)" value="<%= user_profile&.twofa == 'YES' ? 'on' : 'off' %>" style="cursor: pointer;" type="checkbox" <%= user_profile&.twofa =='YES' ? 'checked="checked"' : '' %> />
+                        <label style="color: <%= user_profile&.twofa =='YES' ? 'var(--falcon-success)' : 'var(--falcon-danger)' %>; margin: 0;cursor: pointer;" for="checkbox-active"><%= user_profile&.twofa =='YES' ? 'Bật' : 'Tắt' %></label>
+                      </div>
+                    </div>
+                  </div>
+                  <div id="notice"></div>
+                  <input type="text" name="user_id" value="<%= session[:user_id] %>" hidden style="display:none;">
+                  <span style="font-size:0.75em;font-weight:600;color: rgb(244, 47, 83);" data-name="valid-message" data-filed="user_id"></span>
+                  <div class="mt-3" style="display:flex;width:100%;justify-content: center;">
+                    <div type="submit" id="btn-submit-change-password" onclick="onClickSubmit()" style="width:45%" class="btn btn-primary pe-5 ps-5">
+                      <span id="loadding" style="display:none" class="spinner-border spinner-border-sm" role="status"></span>
+                      <span id="save_password"><%=lib_translate("save_password")%></span>
+                    </div>
+                    <button class="btn btn-secondary ms-2 pe-5 ps-5 close-modal" style="width:45%" type="button" data-bs-dismiss="modal"><%= lib_translate("Cancel")%></button>
+                  </div>
+                <%end%>
+                <%= form_tag user_update_2fa_status_path ,method:'POST', class:'d-flex justify-content-end align-items-end',id: "form_update_twofa",remote:true,authenticity_token: true do %>
+                  <input type="hidden" name="user_id" value="<%= session[:user_id] %>"/>
+                  <input type="hidden" name="twofa" id="twofa_ckb">
+                <%end %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <div id="translate">
+        <div data-key="Pwd_invalid_min_8" data-trans="<%= lib_translate('Pwd_invalid_min_8')%>"></div>
+        <div data-key="Pwd_invalid_symbol" data-trans="<%= lib_translate('Pwd_invalid_symbol')%>"></div>
+        <div data-key="Pwd_invalid_contain_regurlar" data-trans="<%= lib_translate('Pwd_invalid_contain_regurlar')%>"></div>
+        <div data-key="Pwd_invalid_contain_upercase" data-trans="<%= lib_translate('Pwd_invalid_contain_upercase')%>"></div>
+        <div data-key="Pwd_invalid_contain_one_number" data-trans="<%= lib_translate('Pwd_invalid_contain_one_number')%>"></div>
+        <div data-key="Pwd_invalid_confirm_pwd" data-trans="<%= lib_translate('Pwd_invalid_confirm_pwd')%>"></div>
+        <div data-key="Show_Pwd" data-trans="<%= lib_translate('Show_Pwd')%>"></div>
+        <div data-key="Hide_Pwd" data-trans="<%= lib_translate('Hide_Pwd')%>"></div>
+        <div data-key="Update_success" data-trans="<%= lib_translate('Update_success')%>"></div>
+      </div>
+      <!-- notification -->
+      <div id="notification" class="alert alert-success alert-dismissible fade show notification" role="alert">
+        <span class="me-5"><%= lib_translate("Change_Status_Successfully")  %>!</span>
+        <button class="btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>

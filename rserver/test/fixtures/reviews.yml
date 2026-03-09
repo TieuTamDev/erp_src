@@ -1,0 +1,21 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  mediafile: one
+  reviewed_by: MyString
+  reviewed_place: MyString
+  reviewed_date: 2022-11-11 11:08:03
+  content: MyText
+  result: MyString
+  status: MyString
+
+two:
+  user: two
+  mediafile: two
+  reviewed_by: MyString
+  reviewed_place: MyString
+  reviewed_date: 2022-11-11 11:08:03
+  content: MyText
+  result: MyString
+  status: MyString

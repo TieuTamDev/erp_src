@@ -1,0 +1,294 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "select2-bootstrap-5-theme.min" %>
+  <%= stylesheet_link_tag "select2.min" %>
+<% end %>
+
+<% content_for :bottombody do %>
+  <%= javascript_include_tag 'select2.full.min' %>
+  <%= javascript_include_tag 'select2.min.js' %>
+<% end %>
+
+<style>
+#leave_days::-webkit-outer-spin-button,
+#leave_days::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+#leave_days {
+  -moz-appearance: textfield;
+}
+
+</style>
+<h4>Cấu hình ngày nghỉ theo vị trí công việc</h4>
+<div class="card">
+    <div class="mb-2 mt-1 d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <!-- Bên trái: Các nút -->
+      <div class="d-flex gap-2 ms-1">
+        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#exportModal">
+          📄 Mẫu file
+        </button>
+        <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#importModal">
+          📥 Import Excel
+        </button>
+      </div>
+
+      <!-- Bên phải: Form tìm kiếm -->
+      <div class="me-1">
+        <%= form_tag manager_leave_position_leave_path, method: :get, class: "d-flex" do %>
+            <%= hidden_field_tag :lang, session[:lang] %>
+            <%= text_field_tag :q, @query, placeholder: "Tìm tên hoặc mã vị trí", class: "form-control me-2", maxlength: 100, id: "search_input" %>
+            <%= select_tag :department_id,
+                    options_from_collection_for_select(@departments, :id, :name, params[:department_id]),
+                    { include_blank: "Tất cả", class: "form-control selectpicker", style: "min-width: 300px;" } %>
+            <%= submit_tag "Tìm kiếm", class: "btn btn-outline-secondary ms-2" %>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="row gx-0 border rounded-2 p-3">
+        <div class="ps-3">
+            <div class="table-responsive scrollbar">
+            <span class="ms-2">Tổng vị trí công việc: <b><%= @total_count%></b></span>
+            <table class="table table-bordered fs--1 mb-0 table-hover">
+              <thead class="bg-700 text-light">
+                <tr>
+                  <th class="text-center" style="width: 5%;">STT</th>
+                  <th>Khoa/Phòng</th>
+                  <th>Vị trí công việc</th>
+                  <th>Code</th>
+                  <th class="text-center">Ngày nghỉ</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <% @positions.each_with_index do |position, index| %>
+                  <tr>
+                    <td class="text-center"><%= (@page - 1) * @per_page + index + 1 %></td>
+                    <td><%= position.department&.name || "" %></td>
+                    <td><%= position.name %></td>
+                    <td><%= position.scode %></td>
+                    <td class="text-center"><%= position.holno&.to_i %></td>
+                    <td class="text-center">
+                      <a href="javascript:void(0)" class="btn-edit-position-leave text-primary me-2"
+                        data-id="<%= position.id %>" data-days="<%= position.holno&.to_i || 0 %>">
+                        <i class="fas fa-edit"></i>
+                      </a>
+                      <a href="javascript:void(0)" class="btn-delete-position-leave text-danger"
+                        data-id="<%= position.id %>" data-name="<%= position.name %>">
+                        <i class="fas fa-trash-alt"></i>
+                      </a>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+
+            <!-- Phân trang -->
+              <div class="d-flex justify-content-center align-items-center mt-3 flex-wrap gap-3">
+                <!-- Ở giữa: Danh sách phân trang và Ô select -->
+                <div class="d-flex align-items-center gap-3">
+                  <nav>
+                    <ul class="pagination mb-0">
+                      <% if @page > 1 %>
+                        <li class="page-item">
+                          <%= link_to '« Trước', manager_leave_position_leave_path(q: @query, department_id: params[:department_id], per_page: @per_page, page: @page - 1, lang: session[:lang]), class: "page-link" %>
+                        </li>
+                      <% end %>
+
+                      <% (1..@total_pages).each do |p| %>
+                        <li class="page-item <%= 'active' if p == @page %>">
+                          <%= link_to p, manager_leave_position_leave_path(q: @query, department_id: params[:department_id], per_page: @per_page, page: p, lang: session[:lang]), class: "page-link" %>
+                        </li>
+                      <% end %>
+
+                      <% if @page < @total_pages %>
+                        <li class="page-item">
+                          <%= link_to 'Sau »', manager_leave_position_leave_path(q: @query, department_id: params[:department_id], per_page: @per_page, page: @page + 1, lang: session[:lang]), class: "page-link" %>
+                        </li>
+                      <% end %>
+                    </ul>
+                  </nav>
+                  <%= form_tag manager_leave_position_leave_path, method: :get, class: "d-inline-flex align-items-center" do %>
+                    <%= hidden_field_tag :q, @query %>
+                    <%= hidden_field_tag :department_id, params[:department_id] %>
+                    <%= hidden_field_tag :lang, session[:lang] %>
+
+                    <%= hidden_field_tag :page, 1 %>
+                    <label class="me-2 mb-0">Hiển thị:</label>
+                    <%= select_tag :per_page,
+                          options_for_select([10, 20, 50, 100], @per_page.to_i),
+                          class: "form-select form-select-sm w-auto",
+                          onchange: "this.form.submit();" %>
+                  <% end %>
+                </div>
+              </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modalEditLeaveDays" tabindex="-1" aria-labelledby="modalEditLeaveDaysLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <%= form_tag update_leave_days_path, method: :post, id: 'formEditLeaveDays', class: 'd-flex flex-column gap-3' do %>
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalEditLeaveDaysLabel">
+
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+        <div class="modal-body">
+          <%= hidden_field_tag :position_id, '', id: 'edit_position_id' %>
+          <%= hidden_field_tag :action_type, '', id: 'action_type' %>
+          <%= hidden_field_tag :q, params[:q] %>
+          <%= hidden_field_tag :page, params[:page] %>
+          <%= hidden_field_tag :department_id, params[:department_id] %>
+          <%= hidden_field_tag :per_page, params[:per_page] %>
+          <div class="mb-3" id="leave-days-input-container">
+            <label for="leave_days" class="form-label">Số ngày nghỉ</label>
+            <%= number_field_tag :leave_days, '', min: 0, class: 'form-control', id: 'leave_days', required: true%>
+          </div>
+
+          <div class="mb-3" id="position-name-container" style="display: none;">
+            <label for="position_name" class="form-label">Vị trí công việc</label>
+            <p id="position_name" class="form-control-plaintext"></p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+          <button type="submit" class="btn btn-primary" id="submitForm">
+          </button>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- Modal -->
+<div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="importModalLabel">📁 Import Danh sách Ngày nghỉ</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <%= form_tag import_excel_leave_request_path, method: :post, id: 'import-form', multipart: true, authenticity_token: true,class: "d-flex flex-column gap-3" do %>
+          <%= file_field_tag :file, class: "form-control", accept: ".xlsx", required: true %>
+          <%= hidden_field_tag :q, params[:q] %>
+          <%= hidden_field_tag :page, params[:page] %>
+          <%= hidden_field_tag :department_id, params[:department_id] %>
+          <%= hidden_field_tag :per_page, params[:per_page] %>
+          <%= submit_tag '📥 Xác nhận Import', class: 'btn btn-success' %>
+        <% end %>
+        <div id="import-result" class="mt-3"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="exportModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true" data-bs-focus="false">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exportModalLabel">Xuất Excel theo phòng ban</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <%= form_tag leave_request_export_excel_path, method: :get, id: "export-form" do %>
+          <div class="form-group">
+            <%= label_tag :department_id, "Chọn phòng ban" %>
+            <%= select_tag :department_id,
+                  options_from_collection_for_select(@departments, :id, :name),
+                  include_blank: "Tất cả",
+                  class: "form-control selectpicker",
+                  id: "department_id" %>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+            <button type="button" class="btn btn-primary" id="download-btn">Tải file</button>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+
+    $(document).ready(function () {
+      $("div.resizer").remove();
+      const $form = $('#formEditLeaveDays');
+      const $submitBtn = $('#submitForm');
+      const $modal = $('#modalEditLeaveDays');
+
+      $form.on('submit', function () {
+        $submitBtn.prop('disabled', true);
+        $submitBtn.html('<span class="spinner-border spinner-border-sm me-1"></span> Đang xử lý...');
+      });
+      $modal.on('hidden.bs.modal', function () {
+        $submitBtn.prop('disabled', false);
+        const actionType = $('#action_type').val();
+        if (actionType === 'delete') {
+          $submitBtn.text('Xóa');
+        } else {
+          $submitBtn.text('Lưu thay đổi');
+        }
+      });
+    });
+
+    $('.btn-edit-position-leave').on('click', function () {
+      const id = $(this).data('id');
+      const days = $(this).data('days');
+      $('#edit_position_id').val(id);
+      $('#leave_days').val(days);
+      $('#action_type').val('edit'); 
+      $('#position-name-container').hide();
+      $('#leave-days-input-container').show();
+      $('#modalEditLeaveDaysLabel').text("Chỉnh sửa ngày nghỉ");
+      $('#submitForm').text("Lưu thay đổi");
+      $('#modalEditLeaveDays').modal('show');
+    });
+
+    $('.btn-delete-position-leave').on('click', function () {
+      const id = $(this).data('id');
+      const position_name = $(this).data('name');
+      $('#edit_position_id').val(id);
+      $('#leave_days').val(0);
+      $('#action_type').val('delete');
+      $('#position_name').text(position_name);
+      $('#position-name-container').show();
+      $('#leave-days-input-container').hide();
+      $('#modalEditLeaveDaysLabel').text("Xóa ngày nghỉ");
+      $('#submitForm').text("Xóa");
+
+      // Mở modal
+      $('#modalEditLeaveDays').modal('show');
+    });
+    $(document).ready(function () {
+      $('#download-btn').on('click', function () {
+        var departmentId = $('#department_id').val();
+
+        // Tạo URL kèm query param
+        var url = new URL('<%= leave_request_export_excel_url %>', window.location.origin);
+        if (departmentId) {
+          url.searchParams.append('department_id', departmentId);
+        }
+
+        // Mở file Excel ở tab mới
+        window.open(url.toString(), '_blank');
+
+        // Đóng modal Bootstrap 5
+        var modal = bootstrap.Modal.getInstance(document.getElementById('exportModal'));
+        modal.hide();
+
+        // (Tuỳ chọn) Reset trạng thái nút
+        // $('#download-btn').prop('disabled', false);
+      });
+    });
+
+
+</script>
+    

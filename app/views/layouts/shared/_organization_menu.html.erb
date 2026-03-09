@@ -1,0 +1,128 @@
+
+<%
+    paths = ["/departments/index","/stasks/index","/stask/edit","/positionjobs/index","/department/streams","/appoints/index","/department/details"]
+%>
+<li class="nav-item">
+    <a class="nav-link dropdown-indicator" href="#Personal_management" role="button" data-bs-toggle="collapse" aria-controls="">
+        <div class="d-flex align-items-center">
+            <span class="nav-link-icon"><span class="fas fa-users-cog"></span></span>
+            <span class="nav-link-text ps-1"><%= lib_translate("Quản lý Cơ cấu tổ chức")%></span>
+        </div>
+    </a>
+</li>
+<ul class="nav collapse <%= 'show' if paths.include?(request.env['PATH_INFO']) %>" id="Personal_management">
+    <li class="nav-item">
+        <li class="nav-item">
+            <% if is_access(session["user_id"], "DEPARTMENTS","READ") || is_access(session["user_id"], "STREAMS","READ") ||is_access(session["user_id"], "POSITIONJOBS","READ") ||is_access(session["user_id"], "STASKS","READ")%>
+            <li class="nav-item">
+                <a class="nav-link dropdown-indicator"  href="#organization_structure" role="button" data-bs-toggle="collapse"  aria-expanded="<%=
+                if ('/departments/index' == request.env['PATH_INFO'])
+                'true'
+                elsif ('/stasks/index' == request.env['PATH_INFO'])
+                'true'
+                elsif ('/stask/edit' == request.env['PATH_INFO'])
+                'true'
+                elsif ('/department/streams' == request.env['PATH_INFO'])
+                'true'
+                elsif ('/positionjobs/index' == request.env['PATH_INFO'])
+                'true'  
+                elsif ('/department/streams' == request.env['PATH_INFO'])
+                'true'
+                else
+                'false'
+                end
+                %>" aria-controls="organization_structure">
+                <div class="d-flex align-items-center"><span class="nav-link-icon"><span class="ierp ico_cau_to_chuc" ></span></span><span class="nav-link-text ps-1"><%= lib_translate("organization_structure")  %></span>
+                </div>
+                </a>
+            </li>
+            <ul class="nav collapse <%= 'show' if paths.include?(request.env['PATH_INFO']) %>" id="organization_structure">
+                <li class="nav-item"><a class="nav-link dropdown-indicator" href="#unit" data-bs-toggle="collapse" aria-expanded="false" aria-controls="unit">
+                <div class="d-flex align-items-center"><span class="nav-link-icon"><span class="ierp idon_vi" ></span></span><span class="nav-link-text ps-1"><%= lib_translate("unit")  %></span>
+                </div>
+                </a>
+
+                <ul class="nav collapse <%= if ('/departments/index' == request.env['PATH_INFO'])
+                'show'
+                elsif ('/department/details' == request.env['PATH_INFO'])
+                'show'
+                elsif ('/stasks/index' == request.env['PATH_INFO'])
+                'show'
+                elsif ('/stask/edit' == request.env['PATH_INFO'])
+                'show'
+                elsif ('/positionjobs/index' == request.env['PATH_INFO'])
+                'show'
+                else
+                end %>" id="unit">
+                <% if is_access(session["user_id"], "DEPARTMENTS","READ") %>
+                <li class="nav-item">
+                    <a class="nav-link <%=
+                    if ('/departments/index' == request.env['PATH_INFO'])
+                    'active'
+                    elsif ('/department/details' == request.env['PATH_INFO'])
+                    'active'
+                    else
+                    end
+                    %>" href="<%= departments_index_path(lang: session[:lang]) %>">
+                    <div class="d-flex align-items-center"><span class="nav-link-icon"><span class="ierp iphong_ban" ></span></span><span class="nav-link-text ps-1">   <%= lib_translate("unit")  %>   </span>
+                    </div>
+                    </a>
+                </li>
+                <% end %>
+                <% if is_access(session["user_id"], "STASKS","READ") %>
+                <li class="nav-item">
+                    <a class="nav-link <%= 'active' if '/stasks/index' == request.env['PATH_INFO'] %>" href="<%= stasks_index_path(lang: session[:lang]) %>">
+                    <div class="d-flex align-items-center"><span class="nav-link-icon"><span class="ierp icong_viec" ></span></span><span class="nav-link-text ps-1">   <%= lib_translate("Task")  %>   </span>
+                    </div>
+                    </a>
+                </li>
+                <% end %> 
+                <% if is_access(session["user_id"], "STASKS","READ") %>
+                <li class="nav-item">
+                    <a class="nav-link <%= 'active' if '/stask/edit' == request.env['PATH_INFO'] %>" href="<%= stask_edit_path(lang: session[:lang]) %>">
+                    <div class="d-flex align-items-center"><span class="nav-link-icon"><span class="ierp ikiem_nghiem" ></span></span><span class="nav-link-text ps-1">   <%= lib_translate("Side_job")  %>   </span>
+                    </div>
+                    </a>
+                </li>
+                <% end %>
+                <% if is_access(session["user_id"], "POSITIONJOBS","READ") %>
+                <li class="nav-item">
+                    <a class="nav-link <%= 'active' if '/positionjobs/index' == request.env['PATH_INFO'] %>" id="postionjobs" href="<%= positionjobs_index_path(lang: session[:lang]) %>">
+                    <div class="d-flex align-items-center"><span class="nav-link-icon"><span class="ierp ivi_tri_cong_viec" ></span></span><span class="nav-link-text ps-1"><%= lib_translate("Job_position")  %></span>
+                    </div>
+                    </a>
+                </li>
+                <% end %>
+                </ul>
+                </li>
+                <% if is_access(session["user_id"], "STREAMS","READ") %>
+                <li class="nav-item"><a class="nav-link <%= 'active' if '/department/streams' == request.env['PATH_INFO'] %>" id="department" href="<%= department_streams_path(lang: session[:lang]) %>">
+                    <div class="d-flex align-items-center"><span class="nav-link-icon"><span class="fas fa-network-wired" ></span></span><span class="nav-link-text ps-1">   <%= lib_translate("diagram_of_relationships_between_units")  %>   </span>
+                    </div>
+                    </a>
+                </li>
+                <% end %>
+            </ul>
+            <% end %>
+            <% if is_access(session["user_id"], "APPOINTS","READ") %>
+            <li class="nav-item">
+                <a class="nav-link dropdown-indicator" href="#Professional_management" role="button" data-bs-toggle="collapse" aria-expanded="false" aria-controls="Calendar_timetable">
+                    <div class="d-flex align-items-center">
+                        <span class="nav-link-icon"><span class="fas fa-server"></span></span><span class="nav-link-text ps-1"><%= lib_translate("Professional_management")  %></span>
+                    </div>
+                </a>
+            </li>
+            <ul class="nav collapse <%=  'show' if '/appoints/index' == request.env['PATH_INFO'] %>" id="Professional_management">
+                <% if is_access(session["user_id"], "APPOINTS","READ") %>
+                <li class="nav-item">
+                    <a class="nav-link  <%= 'active' if '/appoints/index' == request.env['PATH_INFO'] %>" href="<%= appoints_index_path(lang: session[:lang]) %>">
+                        <div class="d-flex align-items-center"><span class="nav-link-icon"><span class="ierp ibo_nghiem"></span></span><span class="nav-link-text ps-1"><%= lib_translate("appoint")  %></span>
+                        </div>
+                    </a>
+                </li>
+                <% end %>
+            </ul>
+            <% end %>
+        </li>
+    </li>
+</ul>

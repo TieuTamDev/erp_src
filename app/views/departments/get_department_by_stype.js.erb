@@ -1,0 +1,135 @@
+<%
+    rows = []
+    status_list = [
+        {status:"0", text:"Hoạt động", style:"success"},
+        {status:"1", text:"Dừng hoạt động", style:"secondary"},
+        {status:"", text:"Đình chỉ", style:"danger"},
+        {status:"", text:"Cần điều động", style:"warning"},
+        {status:"", text:"Giải thể", style:"secondary"},
+        {status:"", text:"Cần tuyển", style:"yellow"}
+    ]
+    
+    @departments.each_with_index do |department, index|
+        status = status_list.select{|item| item[:status] == department.status}.first
+        stt = (index + 1) + ((session[:page].to_i - 1) * session[:per_page].to_i)
+        group_btn = ""
+        
+        if department.has_child == 1
+            group_btn = "<button class='expand-btn-modern' onclick='clickGroups(#{department.id})' data-collapse-btn='target-#{department.id}' data-bs-toggle='collapse'>
+                            <i id='collap-icon-#{department.id}' class='fas fa-chevron-right icon-transition'></i>
+                        </button>"
+        else
+            group_btn = "<div class='expand-btn-modern' style='visibility: hidden;'></div>"
+        end
+
+        rows << "<tr class='department-row' style='cursor: pointer; transition: all 0.3s ease;'>
+                    <td onclick='clickDepartmentRow(#{department.id})' style='text-align: center;'>#{stt}</td>
+                    <td style='text-align: center;'>
+                        #{group_btn}
+                    </td>
+                    <td class='pt-2 pb-2' onclick='clickDepartmentRow(#{department.id})'>
+                        <div>
+                            <p class='department-name-modern'>#{department.name}</p>
+                            <p class='department-name-en-modern'>#{department.name_en}</p>
+                        </div>
+                    </td>
+                    <td onclick='clickDepartmentRow(#{department.id})' font-weight: 500;'>
+                        #{department.email}
+                    </td>
+                    <td onclick='clickDepartmentRow(#{department.id})' style='font-weight: 500;'>
+                        #{department.last_name} #{department.first_name}
+                    </td>
+                    <td onclick='clickDepartmentRow(#{department.id})'>
+                        #{department.office}
+                    </td>
+                    <td style='text-align: center;' onclick='clickDepartmentRow(#{department.id})'>
+                        #{department.org_name}
+                    </td>
+                    <td style='text-align: center;' onclick='clickDepartmentRow(#{department.id})'>
+                        <span class='stastus-badge badge-soft-#{status[:style]}'>
+                            #{status[:text]}
+                        </span>
+                    </td>
+                    <td style='text-align: center;' onclick='clickDepartmentRow(#{department.id})'>
+                        #{department.user_count}
+                    </td>
+                </tr>"
+                
+        if department.has_child == 1
+            rows << "<tr>
+                        <td colspan='9' style='padding: 0; background: transparent;'>
+                            <div class='collapsed p-0' data-groups='#{department.id}' id='target-#{department.id}' style='transition: all 0.3s ease;'></div>
+                        </td>
+                    </tr>"
+        end
+    end
+%>
+
+// Clear existing content with fade effect
+var tbody = $("#table-deparments").find("tbody");
+tbody.fadeOut(200, function() {
+    tbody.html("");
+    tbody.append(`<%= rows.join("").html_safe%>`);
+    tbody.fadeIn(300);
+});
+
+// Update pagination and controls
+$(".per-page-wrap").show();
+$(".per_page").html(<%= session[:per_page]%>);
+$(".item_count").html(<%= @departments.size%>);
+$(".total_record").html(<%= @total_records%>);
+
+// Render pagination with improved styling
+var paginWrap = $(".pagin-wrap");
+paginWrap.html(`<%= render_pagination_style_1("clickButtonPage", session[:page], session[:total_pages], session[:per_page]).html_safe%>`);
+
+// Enhanced row hover effects
+$(document).ready(function() {
+    $('.department-row').hover(
+        function() {
+            $(this).css('background', 'linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%)');
+            $(this).css('transform', 'translateX(5px)');
+            $(this).css('box-shadow', '0 0.125rem 0.5rem rgba(0, 0, 0, 0.1)');
+        },
+        function() {
+            $(this).css('background', '');
+            $(this).css('transform', '');
+            $(this).css('box-shadow', '');
+        }
+    );
+});
+
+function clickGroups(parent_id) {
+    let container = $(`[data-groups="${parent_id}"]`);
+    let iconCollapse = $(`#collap-icon-${parent_id}`);
+    let expandBtn = iconCollapse.closest('.expand-btn-modern');
+
+    let is_collapsed = container.hasClass("collapsed");
+
+    // Enhanced animation
+    container.toggleClass("collapsed", !is_collapsed);
+    container.toggleClass("show", is_collapsed);
+
+    if(is_collapsed) {
+        // Rotate icon with smooth transition
+        iconCollapse.css("transform", "rotate(90deg)");
+        expandBtn.css("background", "#1e5bb8");
+        
+        // Load child departments
+        let form = $("#form-get-department-childs");
+        form.find('[name="parent_id"]').val(parent_id);
+        form.submit();
+        showLoadding(true);
+    } else {
+        // Reset icon and button
+        iconCollapse.css("transform", "");
+        expandBtn.css("background", "var(--falcon-primary)");
+        
+        // Smooth collapse with fade effect
+        container.fadeOut(200, function() {
+            container.html("");
+            container.show();
+        });
+    }
+}
+showLoadding(false);

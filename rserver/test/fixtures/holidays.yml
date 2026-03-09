@@ -1,0 +1,19 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  mediafile: one
+  name: MyString
+  issued_date: 2022-11-11 11:21:49
+  issued_place: MyString
+  status: MyString
+  note: MyText
+
+two:
+  user: two
+  mediafile: two
+  name: MyString
+  issued_date: 2022-11-11 11:21:49
+  issued_place: MyString
+  status: MyString
+  note: MyText

@@ -1,0 +1,46 @@
+$("#staticBackdrop .modal-body").html(`
+  <div class="mb-3">
+    <label class="form-label">Số ngày nghỉ mặc định</label>
+    <input type="number" class="form-control" id="holtype_imax" value="<%= @holtype&.imax || '' %>">
+  </div>
+`);
+
+$("#staticBackdrop").modal("show");
+
+// Gắn sự kiện cho input (validate như trước)
+$(document).on('input', '#holtype_imax', function(){
+  let val = parseInt($(this).val(), 10);
+  if (isNaN(val)) return $(this).val('');
+  if (val < 1) $(this).val(1);
+  if (val > 180) $(this).val(180);
+});
+$(document).off("click", "#btn-save-holtype").on("click", "#btn-save-holtype", function() {
+  let imax = $("#holtype_imax").val();
+  let holtypeId = "<%= @holtype_id %>";
+  let detailId  = "<%= @holtype&.id %>";
+
+  $.ajax({
+    url: "<%= holtypes_save_holtype_path%>",
+    method: "POST",
+    data: {
+      holtype_id: holtypeId,
+      imax: imax,
+      id: detailId
+    },
+    success: function(res) {
+      if(res.status === "ok") {
+        // Đóng modal ngay tại đây
+        var modal = bootstrap.Modal.getInstance(document.getElementById("staticBackdrop"));
+        modal.hide();
+
+        // Thông báo tùy bạn
+        // alert("Lưu thành công");
+        console.log("Lưu thành công");
+      }
+    },
+    error: function() {
+      alert("Lưu thất bại, vui lòng thử lại");
+    }
+  });
+});
+

@@ -1,0 +1,42 @@
+<%
+    rows = []
+    next_index = 0
+    @users.each_with_index do |user,index|
+        next_index = index + 1
+        rows << "
+            <tr>
+                <td style=\"text-align: center;\">#{next_index}</td>
+                <td>#{user.last_name} #{user.first_name}</td>
+                <td>#{user.sid}</td>
+                <td>#{user.birthday&.strftime("%d/%m/%Y")}</td>
+                <td>#{user.education}</td>
+                <td>#{user.email}</td>
+                <td>#{user.mobile || user.phone || ""}</td>
+            </tr>"
+    end
+
+    # amount left
+    count = @positionjob.amount - @users.size
+    count.times do |_|
+        next_index = next_index + 1
+        rows << "<tr>
+                    <td style=\"text-align: center;\">#{next_index}</td>
+                    <td style='color:red'>Cần bổ sung</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>-</td>
+                </tr>"
+    end
+%>
+$(".r-count-<%=@positionjob.id%>").html("<%=@users.size%> / <%=@positionjob.amount%>");
+var tbody = $("#table-<%=@view_id%> tbody");
+tbody.html(`<%= rows.join("").html_safe%>`);
+toggleLoadingTable('<%=@view_id%>',false);
+
+<%# update groups %>
+if(positionjob_groups["<%=@positionjob.id%>"]){
+positionjob_groups["<%=@positionjob.id%>"]["amount"] = <%=@positionjob.amount%>;
+    positionjob_groups["<%=@positionjob.id%>"]["users"] = <%= @users.to_json.html_safe%>;
+}

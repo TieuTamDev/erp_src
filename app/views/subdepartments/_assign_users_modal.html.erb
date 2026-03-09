@@ -1,0 +1,24 @@
+<%= form_tag update_users_subdepartment_path(@subdepartment), method: :patch, remote: true do %>
+  <div class="modal-body">
+    <div class="mb-3">
+      <label class="form-label">Chọn nhân sự</label>
+      <select id="user_ids" name="user_ids[]" class="form-control" multiple="multiple" required="required">
+      </select>
+      <div class="form-text">Chọn các nhân sự để gán vào nhóm này</div>
+    </div>
+  </div>
+  
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+  </div>
+<% end %>
+
+<script>
+  $('#user_ids').select2({
+    theme: "bootstrap-5",
+    placeholder: 'Vui lòng chọn nhân sự',
+    width : 'resolve',
+    closeOnSelect: false
+  });
+</script>

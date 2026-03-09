@@ -1,0 +1,13 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  stable: MyString
+  srowid: MyString
+  fvalue: MyText
+  tvalue: MyText
+
+two:
+  stable: MyString
+  srowid: MyString
+  fvalue: MyText
+  tvalue: MyText

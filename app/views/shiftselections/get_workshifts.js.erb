@@ -1,0 +1,42 @@
+ 
+<%
+    rows = []
+    color_status = {
+        "PENDING" => "#df9a4bff",
+        "APPROVED" => "#58c97c",
+        "REJECTED" => "#f36868",
+    }
+    @scheduleweeks_pagin = [] if @scheduleweeks_pagin.nil?
+    @scheduleweeks_pagin.each do |scheduleweek|
+        checkbox = scheduleweek.status == "PENDING" ? "<input data-check-select name='check-box-#{scheduleweek.id}' value='#{scheduleweek.id}' onchange='onCheckWorkshilf(this)' class='form-check-input' type='checkbox'/>" : ""
+
+        warning = if scheduleweek.time_required.to_f != scheduleweek.time_register.to_f
+                      "text-danger fw-semibold"
+                    else
+                      ""
+                    end
+        rows << "<tr data-row-id='#{scheduleweek.id}'>
+                    <td style='vertical-align: middle;'>#{checkbox}</td>
+                    <td style='vertical-align: middle;'><b>#{scheduleweek.sid}</b></td>
+                    <td style='vertical-align: middle;'><b>#{scheduleweek.user_name}</b></td>
+                    <td style='vertical-align: middle;'>#{ scheduleweek.created_at.strftime("%d/%m/%Y - %H:%M")}</td>
+                    <td style='vertical-align: middle;'>#{scheduleweek.time_required.to_f > 0 ? "#{scheduleweek.time_required} giờ" : ""}</td>
+                    <td class='#{warning}' style='vertical-align: middle;'>#{scheduleweek.time_register.to_f > 0 ? "#{scheduleweek.time_register} giờ" : ""}</td>
+                    <td class='text-center' style='color:#{color_status[scheduleweek.status]};vertical-align: middle;'><b>#{lib_translate("attendance.#{scheduleweek.status}") }</b></td>
+                    <td style='vertical-align: middle;'>
+                        <div class='form-check form-switch m-0 d-flex justify-content-center align-items-center'>
+                            <input class='form-check-input' data-switch-button data-switch-view='#{scheduleweek.id}' value='#{scheduleweek.id}' name='switch-view-#{scheduleweek.id}' onchange='onCheckViewWorkshilf(this)' type='checkbox' checked />
+                        </div>
+                    </td>
+                </tr>"
+    end
+%>
+showLoadding(false);
+$(".workshifts-list").html(`<%= rows.join("").html_safe%>`);
+var pagin_render = `<%= render_pagination_style_1("onClickButtonPage",session[:page], session[:total_pages],session[:per_page]).html_safe %>`;
+$(".pagin-wrap").html(pagin_render);
+$('[name="check_all"]').prop("checked",false);
+var shiftselections = <%= @shiftselections.to_json.html_safe%>;
+scheduleweeks = <%= @scheduleweeks_pagin.to_json.html_safe%>;
+loadEventCalendar();
+

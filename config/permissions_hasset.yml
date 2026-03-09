@@ -1,0 +1,5 @@
+permissions:
+- "ADMIN-ERP"
+- "MASSET-DEV"
+- "MASSET"
+- "SFTRAINING"

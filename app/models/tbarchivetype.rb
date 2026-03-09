@@ -1,0 +1,2 @@
+class Tbarchivetype < ApplicationRecord
+end

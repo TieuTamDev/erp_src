@@ -1,0 +1,4 @@
+<script defer>
+    $("#loading").css("display", "flex");
+    window.location.href = "<%= appointment_path(id: @notice.username, lang: session[:lang]) %>";
+</script>

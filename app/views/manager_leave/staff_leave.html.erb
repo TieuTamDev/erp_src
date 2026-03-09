@@ -1,0 +1,297 @@
+<style>
+[contenteditable="true"] {
+  border-bottom: 1px solid #ced4da;
+  padding: 6px 12px;
+  border-radius: 4px;
+  min-width: 120px;
+}
+
+</style>
+<% content_for :head do %>
+    <%= javascript_include_tag '/assets/myjs/flatpickr.js' %>
+    <%= javascript_include_tag '/assets/myjs/flatpickr_local/vn.js' %>
+    <%= stylesheet_link_tag '/assets/mystyle/flatpickr.min.css' %>
+    <%= stylesheet_link_tag "select2-bootstrap-5-theme.min" %>
+    <%= stylesheet_link_tag "select2.min" %>
+<% end %>
+<% content_for :bottombody do %>
+    <%= javascript_include_tag 'select2.full.min'%>
+    <%= javascript_include_tag 'select2.min.js'%>
+<% end %>
+<h4>Quản lý ngày nghỉ theo nhân sự</h4>
+<div class="card">
+    <div class="mb-2 mt-1 d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div class="d-flex gap-2 ms-1">
+        <% if @count_current > 0 %>
+            <%= form_tag save_all_leave_data_path, method: :post, class: "d-flex gap-2 ms-1" do %>
+                <%= submit_tag "Lưu thông tin", class: "btn btn-outline-success" %>
+            <% end %>
+        <% end %>
+        </div>
+        <div class="me-1">
+            <%= form_tag manager_leave_staff_leave_path, method: :get, class: "d-flex" do %>
+                <%= hidden_field_tag :lang, session[:lang] %>
+                <%= select_tag :department, 
+                    options_for_select([["Tất cả", ""]] + @list_department.pluck(:name, :id), selected: params[:department]),
+                    class: "form-control selectpicker me-2",
+                    data: { live_search: true } %>
+
+                <%= text_field_tag :search, params[:search], placeholder: "Tìm mã nhân sự hoặc tên", class: "form-control me-2", maxlength: 100, id: "search_input" %>
+                <%= submit_tag "Tìm kiếm", class: "btn btn-outline-primary" %>
+            <% end %>
+        </div>
+    </div>
+    <div class="row gx-0 border rounded-2 p-3">
+        <div class="ps-3">
+            <div class="table-responsive scrollbar">
+                <table id="table_list_position_leave" class="table table-bordered fs--1 mb-0 table-hover">
+                    <thead class="bg-700 text-light">
+                        <tr>
+                            <th class="text-center" style="width: 4%;">STT</th>
+                            <th class="">Mã nhân sự</th>
+                            <th class="" style="width: 14%;">Nhân sự</th>
+                            <th class="">Ngày sinh</th>
+                            <th class="">Khoa/Phòng</th>
+                            <th class="">Vị trí CV</th>
+                            <th class="text-center" style="width: 9%;">Phép theo VTCV</th>
+                            <th class="text-center">Thâm niên</th>
+                            <th class="text-center" style="width: 14%;">Phép tồn</th>
+                            <th class="text-center">Tổng phép năm</th>
+                            <th class=""></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <% @leave_data.each do |data| %>
+                        <tr>
+                        <td class="text-center" style="vertical-align: middle;"><%= data[:stt] %></td>
+                        <td style="vertical-align: middle;"><%= data[:code] %></td>
+                        <td style="vertical-align: middle;"><%= data[:full_name] %></td>
+                        <td style="vertical-align: middle;"><%= data[:dob] %></td>
+                        <td style="vertical-align: middle;"><%= data[:department_name] %></td>
+                        <td style="vertical-align: middle;"><%= data[:position_name] %></td>
+                        <td class="text-center" style="vertical-align: middle;"><%= data[:cong_viec] %></td>
+                        <td class="text-center" style="vertical-align: middle;"><%= data[:tham_nien] %></td>
+                        <td style="vertical-align: middle;">
+                            <div class="d-flex justify-content-between">
+                                <span><%= data[:phep_ton] %></span>
+                                <span>Hạn dùng: <%= data[:han_su_dung] %></span>
+                            </div>
+                        </td>
+                        <td class="text-center" style="vertical-align: middle;"><%= data[:tong_phep] %></td>
+                        <td class="text-center" style="vertical-align: middle;">
+                            <% if data[:tong_phep] == 0 %>
+                                <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#createLeaveModal"
+                                    data-user-id="<%= data[:user_id] %>"
+                                    data-user-name="<%= data[:full_name] %> (<%= data[:code] %>)"
+                                    data-department="<%= data[:department_name] %>"
+                                    data-position="<%= data[:position_name] %>"
+                                    data-cong_viec="<%= data[:cong_viec] %>"
+                                    data-tham_nien="<%= data[:tham_nien] %>"
+                                    data-phep_ton="<%= data[:phep_ton] %>"
+                                    data-han_su_dung="<%= data[:han_su_dung] %>"
+                                    >
+                                    Tạo phép
+                                </button>
+                            <% end %>
+                            <% if data[:tong_phep] > 0 %>
+                            <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#editLeaveModal" 
+                                data-user-id="<%= data[:user_id] %>"
+                                data-phep-ton="<%= data[:phep_ton] %>"
+                                data-han-sd="<%= data[:han_su_dung] %>">
+                                Sửa
+                            </button>
+                            <% end %>
+                        </td>
+                        </tr>
+                    <% end %>
+                    </tbody>
+                </table>
+                <!-- Phân trang -->
+                <div class="d-flex justify-content-center align-items-center mt-3 flex-wrap gap-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <nav>
+                        <ul class="pagination mb-0">
+                            <% if @page > 1 %>
+                            <li class="page-item">
+                                <%= link_to '« Trước', manager_leave_staff_leave_path(search: params[:search], per_page: @per_page, page: @page - 1), class: "page-link" %>
+                            </li>
+                            <% end %>
+
+                            <% (1..@total_pages).each do |p| %>
+                            <li class="page-item <%= 'active' if p == @page %>">
+                                <%= link_to p, manager_leave_staff_leave_path(search: params[:search], per_page: @per_page, page: p), class: "page-link" %>
+                            </li>
+                            <% end %>
+
+                            <% if @page < @total_pages %>
+                            <li class="page-item">
+                                <%= link_to 'Sau »', manager_leave_staff_leave_path(search: params[:search], per_page: @per_page, page: @page + 1), class: "page-link" %>
+                            </li>
+                            <% end %>
+                        </ul>
+                        </nav>
+                        
+                        <%= form_tag manager_leave_staff_leave_path, method: :get, class: "d-inline-flex align-items-center" do %>
+                        <%= hidden_field_tag :lang, session[:lang] %>
+                        <%= hidden_field_tag :search, params[:search] %>
+                        <%= hidden_field_tag :page, 1 %>
+                        
+                        <label class="me-2 mb-0">Hiển thị:</label>
+                        <%= select_tag :per_page,
+                                options_for_select([10, 20, 50, 100], @per_page.to_i),
+                                class: "form-select form-select-sm w-auto",
+                                onchange: "this.form.submit();" %>
+                        <% end %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="createLeaveModal" tabindex="-1" aria-labelledby="createLeaveLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <%= form_tag create_leave_path, method: :post, authenticity_token: true do %>
+        <div class="modal-header">
+          <h5 class="modal-title">Tạo phép cho nhân sự</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+
+        <div class="modal-body">
+          <%= hidden_field_tag :user_id, nil, id: "create_user_id" %>
+
+          <p><strong>Nhân sự:</strong> <span id="create_user_name"></span></p>
+          <p><strong>Phòng/Khoa:</strong> <span id="create_department"></span></p>
+          <p><strong>Vị trí công việc:</strong> <span id="create_position"></span></p>
+
+          <div class="mb-2">
+            <label>Phép theo vị trí công việc</label>
+            <%= number_field_tag :phep_cv, nil, step: 0.5, required: true, class: "form-control", id: "phep_cv_c" %>
+          </div>
+          <div class="mb-2">
+            <label>Phép thâm niên</label>
+            <%= number_field_tag :phep_tn, nil, step: 0.5, required: true, class: "form-control", id: "phep_tn_c" %>
+          </div>
+          <div class="mb-2">
+            <label>Phép tồn</label>
+            <%= number_field_tag :phep_ton, nil, step: 0.5, class: "form-control", id: "phep_ton_c" %>
+          </div>
+          <div class="mb-2">
+            <%= label_tag :han_sd, "Hạn sử dụng", class: "form-label" %>
+            <%= text_field_tag :han_sd, nil, class: "form-control", id: "han_su_dung_c" %>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+          <button type="submit" class="btn btn-primary">Tạo phép</button>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Sửa phép tồn -->
+<div class="modal fade" id="editLeaveModal" tabindex="-1" aria-labelledby="editLeaveModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editLeaveModalLabel">Sửa phép tồn</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <%= form_tag update_leave_path, method: :post, id: "editLeaveForm" do %>
+                <%= hidden_field_tag :user_id, nil, id: "user_id" %>
+
+                <div class="mb-3">
+                    <%= label_tag :phep_ton, "Phép tồn", class: "form-label" %>
+                    <%= number_field_tag :phep_ton, nil, class: "form-control", id: "phep_ton", readonly: true %>
+                </div>
+
+                <div class="mb-3">
+                    <%= label_tag :han_su_dung, "Hạn sử dụng", class: "form-label" %>
+                    <%= text_field_tag :han_su_dung, nil, class: "form-control", id: "han_su_dung" %>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <%= submit_tag "Lưu thay đổi", class: "btn btn-primary" %>
+                </div>
+            <% end %>
+        </div>
+    </div>
+</div>
+<script>
+$(function () {
+  $('#search_input').on('input paste', function () {
+    $(this).val(function (_, v) {
+      return v.trim(); // bỏ khoảng trắng đầu và cuối
+    });
+  });
+  
+});
+
+$('#createLeaveModal').on('show.bs.modal', function (event) {
+    var button = $(event.relatedTarget); // Button that triggered the modal
+    var hanSuDung = button.data('han_su_dung');
+    var congViec = button.data('cong_viec');
+    var thamNien = button.data('tham_nien');
+    var phepTon = button.data('phep_ton');
+    $('#create_user_id').val(button.data('user-id'));
+    $('#create_user_name').text(button.data('user-name'));
+    $('#create_department').text(button.data('department'));
+    $('#create_position').text(button.data('position'));
+
+    // Set các trường số và readonly
+    $('#phep_cv_c').val(congViec).prop('readonly', true);
+    $('#phep_tn_c').val(thamNien).prop('readonly', true);
+    $('#phep_ton_c').val(phepTon).prop('readonly', true);
+
+    // Set ngày hạn sử dụng
+    if ($("#han_su_dung_c")[0]._flatpickr) {
+        $("#han_su_dung_c")[0]._flatpickr.destroy();
+    }
+    flatpickr("#han_su_dung_c", {
+        defaultDate: hanSuDung, // Cái này sẽ ưu tiên hiển thị
+        dateFormat: "d/m/Y",
+        locale: "vn"
+    });
+
+    // Cũng có thể set lại thủ công để chắc chắn
+    $('#han_su_dung_c').val(hanSuDung);
+});
+
+$('#editLeaveModal').on('show.bs.modal', function (event) {
+    var button = $(event.relatedTarget);
+    var userId = button.data('user-id');
+    var phepTon = button.data('phep-ton');
+    var hanSuDung = button.data('han-sd'); // Ví dụ: "31/03/2025"
+
+    $('#user_id').val(userId);
+    $('#phep_ton').val(phepTon);
+
+    // Nếu flatpickr đang gắn rồi thì hủy nó
+    if ($("#han_su_dung")[0]._flatpickr) {
+        $("#han_su_dung")[0]._flatpickr.destroy();
+    }
+    console.log("hanSuDung",hanSuDung);
+    
+    // Gắn lại flatpickr với giá trị khởi tạo
+    flatpickr("#han_su_dung", {
+        defaultDate: hanSuDung, // Cái này sẽ ưu tiên hiển thị
+        dateFormat: "d/m/Y",
+        locale: "vn"
+    });
+
+    // Cũng có thể set lại thủ công để chắc chắn
+    $('#han_su_dung').val(hanSuDung);
+});
+
+
+function initFlatpickr() {
+    flatpickr("#han_su_dung", {
+        dateFormat: "d/m/Y",
+        locale: "vn"
+    });
+}
+
+</script>

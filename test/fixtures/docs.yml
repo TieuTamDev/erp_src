@@ -1,0 +1,15 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  mediafile: one
+  udate: 2025-07-04 14:34:58
+  note: MyText
+  status: MyString
+
+two:
+  user: two
+  mediafile: two
+  udate: 2025-07-04 14:34:58
+  note: MyText
+  status: MyString

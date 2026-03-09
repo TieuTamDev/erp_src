@@ -1,0 +1,114 @@
+<% content_for :head do %>
+    <%= stylesheet_link_tag '/assets/mystyle/flatpickr.min.css' %>
+    <%= stylesheet_link_tag "select2.js" %>
+    <%= stylesheet_link_tag "select2-bootstrap-5-theme.min" %>
+    <style>
+    .text-table { color: #61666F; }
+    .bg-thead { background-color: #F9FBFC; }
+    .tox-statusbar__branding { display: none !important; }
+    </style>
+<% end %>
+
+<% content_for :bottombody do %>
+    <%= javascript_include_tag '/assets/myjs/flatpickr.js' %>
+    <%= javascript_include_tag '/assets/myjs/flatpickr_local/vn.js' %>
+    <%= javascript_include_tag '/assets/myjs/holtypes.js' %>
+<% end %>
+
+<div class="card mb-3">
+    <div class="row gx-0 border rounded-2 p-3">
+        <div class="tab-content" style="width: 97%; margin: 0 auto;">
+            <h4>Danh sách loại phép</h4>
+            <% if is_access(session["user_id"], "HOL-TYPES","ADD") %>
+            <%= link_to 'Thêm mới',
+            new_holtype_path,
+            remote: true,
+            class: 'btn btn-primary mb-2 col-1 btn-edit-holtype',
+            data: { bs_toggle: "modal", bs_target: "#holtypeModal" } %>
+            <% end %>
+            <table id="holtype-tbl" class="table table-bordered fs--1 mb-0">
+                <thead class="bg-200 text-900">
+                    <tr>
+                        <th class="text-center" style="width:4%;">STT</th>
+                        <th class="text-center">Tên loại phép</th>
+                        <th class="text-center">Số ngày nghỉ</th>
+                        <th class="text-center">Ghi chú</th>
+                        <th class="text-center">Trạng thái</th>
+                        <th class="text-center" style="width:12%;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% @holtypes.each_with_index do |holtype, index| 
+                    holtypedetail = Holtypedetail.find_by(holtype_id: holtype.id)%>
+                    <tr>
+                        <td class="text-center"><%= index + 1 %></td>
+                        <td class="text-center"><%= holtype.name %></td>
+                        <td class="text-center"><%= holtypedetail&.imax %></td>
+                        <td class="text-center"><%= truncate(holtype.note.to_s, length: 40) %></td>
+                        <td class="text-center">
+                        <%= holtype.status == 'ACTIVE' ? 'Hoạt động' : 'Không hoạt động' %>
+                        </td>
+                        <td class="text-center">
+                        <% if is_access(session["user_id"], "HOL-TYPES","EDIT") %>
+                        <i class="text-success me-3 fas fa-cog btn-show-holtype" data-id="<%= holtype.id %>" style="cursor:pointer"></i>
+
+                        <%= link_to raw('<i class="text-primary fa fa-file-signature"></i>'),
+                            edit_holtype_path(holtype),
+                            remote: true,
+                            class: 'btn-edit-holtype me-3',
+                            data: { bs_toggle: "modal", bs_target: "#holtypeModal" } %>
+                        <% end %>
+
+                        <% if is_access(session["user_id"], "HOL-TYPES","DEL") %>
+
+                        <%= link_to raw('<i class="text-danger fa fa-trash"></i>'),
+                            holtype_path(holtype),
+                            method: :delete,
+                            data: { confirm: 'Bạn có chắc chắn muốn xoá?' },
+                            class: 'me-3' %>
+                        </td>
+                        <% end %>
+
+                    </tr>
+                    <% end %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<%= form_tag details_holtype_holtypes_path ,method:'GET',multipart: true,id:'get_detail_holtype', remote: true,authenticity_token: true do %>
+    <input type="hidden" name="id_holtype" id="id_holtype">
+<% end %>
+<div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="staticBackdropLabel">Cấu hình thông tin</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+        <button type="button" class="btn btn-primary" id="btn-save-holtype">Lưu</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="holtypeModal" tabindex="-1" aria-labelledby="holtypeModalLabel" aria-hidden="true">
+<div class="modal-dialog modal-lg">
+    <div class="modal-content">
+    </div>
+</div>
+</div>
+<script>
+$(document).on('click', '.btn-show-holtype', function() {
+  let id = $(this).data('id');
+  $('#id_holtype').val(id);
+  $('#get_detail_holtype').submit();
+});
+
+</script>
+
+  

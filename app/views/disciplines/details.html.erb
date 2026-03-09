@@ -1,0 +1,180 @@
+<!-- style -->
+<% content_for :head do %>
+  <%= javascript_include_tag '/assets/lib_hrm/formmedia_old.js' %>
+  <%= stylesheet_link_tag '/assets/lib_hrm/formmedia.css' %>
+  <%= stylesheet_link_tag '/assets/lib_hrm/style_user_details.css' %>
+<% end %>
+<!-- style -->
+<% content_for :bottombody do %>
+<%= javascript_include_tag 'jquery.min'%>
+    <%= javascript_include_tag '/assets/lib_hrm/popper.min.js', integrity: 'sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q', crossorigin: 'anonymous' %>
+    <%= javascript_include_tag '/assets/lib_hrm/bootstrap.min.js', integrity: 'sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl', crossorigin: 'anonymous'%>
+<% end %>
+
+<div class="card">
+      <div class="p-3">
+        <div class="table-responsive scrollbar">
+          <table id="table_doccuments_discipline" class="table table-bordered fs--1 mb-0" style="margin-top: 0px !important; margin-bottom: 0px !important">
+            <thead class="bg-200 text-900">
+              <tr>
+                <th class="sort" data-sort="id" style="display: none;">ID</th>
+                <th class="sort" data-sort="name" style="text-align:center"><%=lib_translate("File_name")%></th>
+                <th class="sort" data-sort="create_date" style="text-align:center"><%=lib_translate("Create_date")%></th>
+                <th class="sort" data-sort="create_by" style="text-align:center"><%=lib_translate("Created_by")%></th>
+                <% if (is_access(session["user_id"], "DISCIPLINE-DETAILS","EDIT") || is_access(session["user_id"], "DISCIPLINE-DETAILS","DEL")) %>
+                <th class="no-sort" data-sort="age"></th>
+                  <% end %>
+              </tr>
+            </thead>
+            <tbody class="list">
+              <% @discipline.discdocs.each do |discdoc| %>
+                <tr>
+                  <td class="id" style="display: none;" ><%= discdoc.mediafile.id %></td>
+                  <td class="name" style="text-align: left" ><%= discdoc.mediafile.file_name %></td>
+                  <td class="create_date" style="text-align: center" ><%= discdoc.mediafile.created_at.strftime("%d/%m/%Y") %>
+                  <td class="create_by" style="text-align: left" ><%= discdoc.mediafile.owner %></td>
+                  <% if (is_access(session["user_id"], "DISCIPLINE-DETAILS","EDIT") || is_access(session["user_id"], "DISCIPLINE-DETAILS","DEL")) %>
+                  <td style="text-align: center;">
+                    <a download href="https://capp.bmtu.edu.vn/mdata/hrm/<%= discdoc.note %>" target="_blank" class="me-3" style="text-decoration: none; cursor: pointer;" title="Download" >
+                      <i class = "fas fa-file-download icon"></i>
+                    </a>
+                   <% if is_access(session["user_id"], "DISCIPLINE-DETAILS","DEL") %>
+                    <a data-toggle="modal" onclick="showModalDelete(this)" data-name="<%= discdoc.mediafile.file_name %>" data-action="<%= url_for(action: :del, id: @discipline.id, uid: @discipline.user_id, did: discdoc.id, ck_action: "document")%>"  style="cursor: pointer;">
+                        <span class="text-danger fas fa-trash" style="width : 15px"></span>
+                    </a>
+                     <% end %>
+                  </td>
+                   <% end %>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+        <div class="d-flex justify-content-end">
+           <% if is_access(session["user_id"], "DISCIPLINE-DETAILS","ADD") %>
+            <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample"><%=lib_translate("Add_doccuments")%></button>
+            <% end %>
+        </div>  
+      </div>
+
+      <%# Upload media view %>
+      <div class="collapse" id="collapseExample">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0"><%=lib_translate("Upload_files")%></h5>
+            </div>
+            <div class="card-body bg-light" id="upload_file_discipline">
+             
+            </div>
+          </div>
+      </div>
+      <%# ==== %>
+</div>
+
+<div class="modal fade" id="discipline-confirm" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <%= lib_translate("Message") %>
+        </h5>
+        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close" style="border: none; background: none">
+          <span aria-hidden="true" style="font-size: 20px">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <%= lib_translate("confirm_delete_message") %>
+        <span id="modal-mesasge-delete-name" style="font-weight: bold; color: red"></span>?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="button_close_delete"> <%= lib_translate("Close") %> </button>
+        <a class="btn btn-danger" id="button_delete" rel="nofollow" data-method="delete" href="#"><%=lib_translate("Delete")%></a>
+        <div id="loading_button_delete_discipline" class= "btn btn-danger" style="opacity: 0.8; width: 100%; display:none;" >
+          <i class ="fa fa-spinner fa-spin"> </i>  <%=lib_translate("Deleting")%> 
+        </div>
+      </div> 
+    </div>
+  </div>
+</div>
+
+<%# Upload media code js %>
+<script>
+  $(document).ready(function () {
+        $('#table_doccuments_discipline').DataTable({ 
+            lengthMenu: [
+                [5, 10, 25, 50, -1],
+                ["5 <%= lib_translate('Row')%>", "10 <%= lib_translate('Row')%>", "25 <%= lib_translate('Row')%>", "50 <%= lib_translate('Row')%>", 'All'],
+            ],
+            "info":     false,  
+            "autoWidth": false, 
+            columnDefs: [{ targets: 'no-sort', orderable: false }],
+            "dom": '<"top"Bf>r<"table-responsive scrollbar border-start"t><"mt-3 d-flex justify-content-center align-items-center"pl>',
+            "language": {
+              "lengthMenu": "_MENU_",
+              "decimal":        "",
+              "emptyTable":     noDataTable,  
+              "loadingRecords": loadingTable,
+              "processing":     "",
+              "search":         "_INPUT_",
+              "searchPlaceholder": searchTable,
+              "zeroRecords":    noMatchingTable,
+              "paginate": {
+                  "first":      firstTable,
+                  "last":       lastTable,
+                  "next":       nextTable,
+                  "previous":   previousTable
+              }
+            }, 
+        }); 
+    });
+  const formMedia = new FormMedia("upload_file_discipline");
+  formMedia.setIconPath('<%= root_path%>assets/image/');
+  formMedia.setAction('<%= url_for(action: :discipline_upload_mediafile, id: @discipline.id)%>');
+  formMedia.setTranslate({
+    upload_guide_1:'<%= lib_translate("upload_guide_1") %>',
+    upload_guide_2:'<%= lib_translate("upload_guide_2") %>',
+    upload_guide_3:'<%= lib_translate("upload_guide_3") %>',
+    confirm_delete:'<%= lib_translate("confirm_delete") %>',
+    confirm_delete_all:'<%= lib_translate("confirm_delete_all") %>',
+    select_files:'<%= lib_translate("select_files") %>',
+    cancel:'<%= lib_translate("Cancel") %>',
+    confirm:'<%= lib_translate("Confirm") %>',
+    message:'<%= lib_translate("Message") %>',
+    remove:'<%= lib_translate("Remove") %>',
+    upload:'<%= lib_translate("Upload") %>',
+    error: '<%= lib_translate("error") %>',
+    try_again:'<%= lib_translate("try_again") %>',
+  });
+  formMedia.init();
+  formMedia.addEventListener("uploaddone",(response)=>{
+      let view = `
+      <tr>
+        <td class="name" style="text-align: left" >${response.file_name}</td>
+        <td class="name" style="text-align: left" >${response.file_name}</td>
+        <td class="email" style="text-align: left" >${response.file_owner}</td>
+        <td style="text-align: center; white-space: nowrap;">
+          <a download href="https://capp.bmtu.edu.vn/mdata/hrm/${response.file_name}" target="_blank" class="me-3" style="text-decoration: none; cursor: pointer;" title="Download" >
+            <i class = "fas fa-file-download icon"></i>
+          </a>
+          <a data-toggle="modal" onclick="showModalDelete(this)" data-name="${response.file_name}" data-action="<%= url_for(action: :del, id: @discipline.id, uid: @discipline.user_id, ck_action: "document")%>&did=${response.id_doc}"  style="cursor: pointer;" >
+              <span class="text-danger fas fa-trash" style="width : 15px"></span>
+          </a>
+        </td>
+      </tr>
+      `;
+      $(".list").prepend(view);
+  });
+</script>
+
+<script>
+    function showModalDelete(element) {
+      let href = element.getAttribute("data-action");
+      let name = element.getAttribute("data-name");
+      $("#discipline-confirm").find('#button_delete').attr('href',href);
+      $("#discipline-confirm").find('#modal-mesasge-delete-name').text(name);
+      // show modal
+      $("#discipline-confirm").modal('show');
+
+    }
+    
+</script>

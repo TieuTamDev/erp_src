@@ -1,0 +1,1268 @@
+<%= stylesheet_link_tag "/assets/mystyle/userstyle/infomation.css" %>
+<%= form_for @user, :url=> user_update_path, html: {method: :post, id:"form_add_user" } do |f| %>
+    <div class="title mt-3">
+    <h4 class="mb-1" style="color: var(--falcon-btn-falcon-success-active-color);"><%= lib_translate("Personal_information") %> </h4>
+    <h6 class="m-0" style="color: var(--falcon-badge-soft-secondary-color);"><%= lib_translate("Personal_information_contact_education_and_work_schedule") %> </h6>
+    </div>
+    <% list_uorg_user = []
+    @uorgs.each do |uorg|
+    list_uorg_user.push(uorg.organization_id ? uorg.organization_id : "") 
+    end %>
+    <hr class="mt-4 mb-3" style="width: 100%; height: 4px; background:  var(--falcon-badge-soft-secondary-background-color);">
+    <div class="row">
+        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 col-xxl-12 tag d-flex align-items-center">
+            <h5 class="m-0 mb-2" style="font-size: 17px;"><%= lib_translate("main_information") %></h5> 
+        </div>
+        <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 col-xxl-12 action-right-top d-flex align-items-center justify-content-end">
+        <% if is_access(session["user_id"], request.env["PATH_INFO"] == "/user/details" ? "USER-DETAILS" : request.env["PATH_INFO"] == "/user/profile" ? "USER-PROFILE" : "","EDIT") && request.env["PATH_INFO"] != "/user/profile" %> 
+            <label class="nav-link pe-2 border-end border-2 cursor-pointer mb-0" id="lable_edit_info" onclick="show_feild_checked('info', <%= list_uorg_user %>)" for="show_feild" style="font-size: 13px; font-weight: 700; color: var(--falcon-orange)">
+                    <%=  lib_translate("Edit_infomation") %>
+            </label>
+        <% end %>            
+            <label class="nav-link pe-2 border-end border-2 cursor-pointer mb-0 d-none" id="lable_cancel_edit_info" onclick="show_feild_checked('info', <%= list_uorg_user %>)" for="show_feild" style="font-size: 13px; font-weight: 700">
+                <%=  lib_translate("Cancel_edit_infomation") %> 
+            </label>
+            <input class="d-none" type="checkbox" name="show_feild" id="show_feild">
+            <a  onclick="clickCollapseMainInfo(this)" class="nav-link ms-3 me-2" data-bs-toggle="collapse" href="#open_form_infor" role="button" aria-expanded="false" aria-controls="open_form_infor">
+                <span id="collapse-main-icon-info" class="fas fa-caret-down"></span>
+            </a>
+        </div>
+    </div>
+    <div class="collapse show row mt-2 justify-content-center" id="open_form_infor" style="padding-bottom: 20px;border-radius: 5px;">
+        <div class="mb-3">
+
+            <div class="form-group txt_update_id d-none">
+            <%= f.label :id %> <%= f.text_field :id, class: 'form-control' , name: 'user_id' %>
+            </div>
+            <div class="form-group d-none">
+                <input value="2" type="text" id="type_upadte" name="type_upadte"><br>
+            </div> 
+
+            <div class="form-group d-none" id="id_bmtu_pwd">
+                <%= f.text_field :password_digest , class: 'form-control' , name: 'user_password_add' ,id: 'user_password_add',autocomplete: 'new-password' %>
+            </div>
+        </div>
+        <div class="erro_labble">
+            <p style=" display: none; color: rgb(197 82 82); border: 1px solid rgb(199 136 136 / 23%); background: rgb(255 54 54 / 16%); border-radius: 5px; padding: 10px; margin-left: 15px; margin-right: 15px;" id="erro_labble_content_usser_info" ></p>
+        </div>
+        <div class="col-12 col-sm-6 col-md-6 col-lg-6 col-xl-4 col-xxl-4">
+            <div class="lastname_user">
+                <div id="lable_lastname_user">
+                    <h6 class="m-0" style="color: var(--falcon-badge-soft-secondary-color);">
+                    <%= lib_translate("Last_name") %>:
+                    </h6>
+                    <h6 class="mt-2" style="font-size: 15px;text-transform: capitalize;"><%= @user.last_name ? @user.last_name : " " %></h6>
+                </div>
+                <div id="feild_lastname_user" class="d-none">
+                    <div class="form-group" id="id_add_sid">
+                    <%= f.label lib_translate("Last_name") %><span style="color:red;" class="red">* </span>:
+                    <%= f.text_field :last_name, class: 'form-control',  id:'user_last_name_add' ,  name:'user_last_name_add', autocomplete: 'off', style:"text-transform:capitalize" %>
+                    </div>
+                </div>
+            </div>
+
+            <div class="scode_user mt-4">
+                <div id="lable_scode_user_details">
+                    <h6 class="m-0" style="color: var(--falcon-badge-soft-secondary-color);">
+                    <%= lib_translate("employee_code") %>:
+                    </h6>
+                    <h6 class="mt-2" style="font-size: 15px;"> <%=@user.sid ? @user.sid : " " %></h6>
+                </div>
+                <div id="feild_scode_user_details" class="d-none">
+                        <div class="form-group" id="id_add_sid">
+                            <%= f.label lib_translate("employee_code") %>: 
+                            <%= f.text_field :sid, class: 'form-control' , name:'user_sid_add'  %>
+                        </div>
+                </div>
+            </div>
+
+            <div class="birtday_user mt-4">
+                <div id="lable_ngay_sinh_user">
+                    <h6 class="m-0" style="color: var(--falcon-badge-soft-secondary-color);">
+                        <%= lib_translate("Birthday")  %>: 
+                    </h6>
+                    <h6 class="mt-2" style="font-size: 15px;"><%= @user.birthday ? @user.birthday.strftime("%d/%m/%Y") : " " %></h6>
+                </div>
+                <div id="feild_ngay_sinh_user" class="d-none">
+                        <div class="form-group" >
+                                <%= f.label lib_translate("Birthday")  %>:   
+                                    <div id="datepicker-container" class="datepicker-container">
+                                        <span style="position: relative;" class="outline-element-container"> <input value ="<%=@user.birthday.strftime('%d/%m/%Y')%>"  id="user_birthday_add" type="text" name="user_birthday_add" class="form-control datepicker openemr-datepicker input-textbox outline-element incorrect" objtype="7" name="action_element" objindex=""  aria-label="Select Date"> <span class="correct-incorrect-icon"> </span></span>
+                                        <div id="datepicker"></div>
+                                    </div>
+                            </div> 
+                </div>
+            </div>
+
+            <div class="stype_hr_user mt-4">
+                <div id="lable_stype_hr_user">
+                    <h6 class="m-0" style="color: var(--falcon-badge-soft-secondary-color);">
+                    <%= lib_translate("Stype_HR") %>
+                    </h6>
+                    <h6 class="mt-2" style="font-size: 15px;color: rgb(0, 195, 255)">
+                        <%= 
+                            if @user.stype == "MEMBER"
+                            lib_translate("MEMBER")
+                            else
+                            lib_translate("APPLYER")
+                            end
+                        %>
+                    </h6>
+                </div> 
+                <div id="feild_stype_hr_user" class="d-none">
+                    <div>
+                        <%= f.label lib_translate("Stype_HR") %> 
+                        <div class="" style="border: none;box-shadow: none; height: 36px;">
+                            <input checked type="radio" id="user_style_member" class="form-check-input me-1" value="MEMBER" name="user_stype_add" ></option><label class="form-check-label" for="user_style_member" style="cursor: pointer"><%= lib_translate("MEMBER")%></label>
+                            <input  type="radio" id="user_style_applyer" class="form-check-input ms-2 me-1" value="APPLYER" name="user_stype_add" ></option><label class="form-check-label" for="user_style_applyer" style="cursor: pointer"><%= lib_translate("APPLYER")%></label>
+                        </div>
+                    </div>
+                </div> 
+            </div> 
+            <%
+            name = ""
+            job_name = ""
+              work = @user.works.where("positionjob_id IS NOT NULL").last
+             if !work&.positionjob.nil? && !work&.positionjob&.department.nil?
+               name = work&.positionjob&.department&.name
+               job_name = work&.positionjob&.name
+             end
+            %>
+            <div class="marriage_user mt-4">
+                <div>
+                    <h6 class="m-0" style="color: var(--falcon-badge-soft-secondary-color);">
+                        <%= lib_translate("Vị trí công việc") %>:
+                    </h6>
+                    <h6 class="mt-2" style="font-size: 15px;"><%= job_name %></h6>
+                </div> 
+            </div> 
+
+            <div class="marriage_user mt-4 d-none">
+                <div id="lable_staff_type_department_user">
+                    <h6 class="m-0" style="color: var(--falcon-badge-soft-secondary-color);">
+                        <%= lib_translate("Staff_type") %>:(Test)
+                    </h6>
+                    <h6 class="mt-2" style="font-size: 15px;">Bệnh viện - Trường - Viện</h6>
+                </div> 
+                <div id="feild_staff_type_department_user" class="d-none">
+                    <div class="form-group">
+                        <%= f.label lib_translate("Staff_type") %>:
+                        <select class="form-select " name="user_staff_type_add" id="user_staff_type_add">
+                            <option value=1>Bệnh Viên - Trường - Viện</option>
+                            <option selected value=2>Tất cả</option>                                                     
+                        </select>   
+                    </div>
+                </div> 
+            </div> 
+
+            <div class="marriage_user mt-4">
+                <div id="lable_stype_organization_user" class="">
+                    <h6 class="m-0" style="color: var(--falcon-badge-soft-secondary-color);">
+                        <%= lib_translate("Host_unit") %>:
+                    </h6>
+                    <h6 class="mt-2" style="font-size: 15px;">
+                    <% 
+                    @arrUr = []
+                    @uorgs.each do |uorg|
+                    @arrUr.push(Organization.where(id: uorg.organization_id).first.name, " /")
+                    end
+                    %>
+                    <%=  @arrUr.to_s.gsub('[','').gsub(']','').gsub('"','').gsub(',','').chomp("/")%>
+                    </h6>
+                </div> 
+                <div id="feild_stype_organization_user" class="d-none">
+                    <div class="form-group">
+                        <%= f.label lib_translate("Host_unit") %>: <a class="ms-2" href="<%= organization_index_path() %>" type="button" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="<%= lib_translate('Add_organization') %>"><span style="width:10px; color:#98a7b9" class="fas fa-database"></span></a>
+                        <div id="select_add_organization_bd" class="stype mb-0"> 
+                            <% @organizations.each do |organization| %>  
+                                <div class="form-check form-check-inline mb-0" >
+                                    <input class="form-check-input cursor-pointer" id="<%= organization.id %>" type="checkbox" value="<%= organization.id %>" name="organization_user[]" />
+                                    <label class="form-check-label cursor-pointer mb-0" for="<%= organization.id %>"><%= organization.name  %></label>
+                                </div>  
+                            <% end %>
+                        </div> 
+                    </div>
+                </div> 
+            </div> 
+            
+            <div class="contract_user mt-4">
+                <h6 class="m-0" style="color: var(--falcon-badge-soft-secondary-color);margin-top: 2.6rem !important;">
+                    <%= lib_translate("Current_contract") %>: 
+                </h6>
+                <h6 class="mt-2" style="font-size: 15px;">
+                    <%= 
+                    oUserContracts = Contract.where('dtfrom <= ?', DateTime.now).where(status: "ACTIVE", user_id: @user.id ).last
+                    if !oUserContracts.nil? 
+                    oUserContracts.name
+                    else
+                        "Không"
+                    end
+                    %>
+                </h6>
+            </div>
+            <div class="benefit_type_user mt-4">
+                <div id="lable_benefit_type_user">
+                    <h6 class="m-0" style="color: var(--falcon-badge-soft-secondary-color);">
+                    <%= lib_translate("Benefits_type") %>:
+                    </h6> 
+                    <h6 class="mt-2" style="font-size: 15px;"><%= @user.benefit_type %>
+                    </h6>
+                </div>
+                <div id="feild_benefit_type_user" class="d-none">
+                    <div>
+                        <%= f.label lib_translate("Benefits_type") %>:         
+                        <div class="" style="border: none;height: 36px;box-shadow: none;  font-size: 14px;">
+                            <input type="radio" id="user_benefit_type_0" class="form-check-input me-1" value="1" name="user_benefit_type_add" ></option><label class="form-check-label" for="user_benefit_type_0" style="cursor: pointer">1</label>
+                            <input type="radio" id="user_benefit_type_1" class="form-check-input ms-2 me-1" value="2" name="user_benefit_type_add" ></option><label class="form-check-label" for="user_benefit_type_1" style="cursor: pointer">2</label>
+                            <input checked type="radio" id="user_benefit_type_2" class="form-check-input ms-2 me-1" value="3" name="user_benefit_type_add" ></option><label class="form-check-label" for="user_benefit_type_2" style="cursor: pointer">3</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-6 col-lg-6 col-xl-4 col-xxl-4">
+            <div class="firstname_user">
+                <div id="lable_first_name_user">
+                    <h6 class="m-0" style="color: var(--falcon-badge-soft-secondary-color);">
+                    <%= lib_translate("first_name") %>:
+                    </h6>
+                    <h6 class="mt-2" style="font-size: 15px; text-transform: capitalize;"><%=@user.first_name ? @user.first_name : " " %></h6>
+                </div>
+                <div id="feild_first_name_user" class="d-none">
+                        <div class="form-group" id="id_add_sid">
+                            <%= f.label lib_translate("first_name") %><span style="color:red;" class="red">* </span>:
+                            <%= f.text_field :first_name, class: 'form-control', id:'user_first_name_add' ,  name:'user_first_name_add', autocomplete: 'off', style:"text-transform:capitalize" %>
+                        </div>  
+                </div>
+            </div>
+
+            <div class="gender_user mt-4">
+                <div id="lable_gender_user">
+                    <h6 class="m-0" style="color: var(--falcon-badge-soft-secondary-color);">
+                    <%= lib_translate("Gender_1") %>
+                    </h6>
+                    <h6 class="mt-2" style="font-size: 15px;"><%= if @user.gender == "0" 
+                        lib_translate("Male")
+                        elsif @user.gender == "1"
+                        lib_translate("Female")
+                        elsif @user.gender == "2"
+                        lib_translate("Other") 
+                        else
+                        ""
+                        end
+                        %>
+                    </h6>
+                </div>
+                <div id="feild_gender_user" class="d-none">
+                    <div>
+                        <%= f.label lib_translate("Gender_1") %>         
+                        <div class="" style="border: none;height: 36px;box-shadow: none;  font-size: 14px;">
+                            <input type="radio" id="user_gender_0" class="form-check-input me-1" value="0" name="user_gender_add" ></option><label class="form-check-label" for="user_gender_0" style="cursor: pointer"><%= lib_translate("Male")%></label>
+                            <input type="radio" id="user_gender_1" class="form-check-input ms-2 me-1" value="1" name="user_gender_add" ></option><label class="form-check-label" for="user_gender_1" style="cursor: pointer"><%= lib_translate("Female")%></label>
+                            <input checked type="radio" id="user_gender_2" class="form-check-input ms-2 me-1" value="2" name="user_gender_add" ></option><label class="form-check-label" for="user_gender_2" style="cursor: pointer"><%= lib_translate("Other")%></label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="religion_user mt-4">
+                <div id="lable_religion_user">
+                    <h6 class="m-0" style="color: var(--falcon-badge-soft-secondary-color);">
+                        <%= lib_translate("Religion") %>: 
+                    </h6>
+                    <h6 class="mt-2" style="font-size: 15px;"><%= @user.religion ? @user.religion : "" %></h6>
+                </div> 
+                <div id="feild_religion_user" class="d-none">
+                    <div class="form-group">
+                        <%= f.label lib_translate("Religion") %>: <a class="ms-2" href="<%= religions_index_path() %>" type="button" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="<%= lib_translate('Add_religions') %>"><span style="width:10px; color:#98a7b9" class="fas fa-database"></span></a>
+                        <select class="form-select selectpicker" name="user_religion_add" id="user_religion_add_details">
+                            <%= @religions.each do |religions| %>
+                            <option value="<%= religions.name %>"><%= religions.name %></option>
+                            <% end %>
+                        </select>
+                    </div>
+                </div> 
+            </div> 
+
+            <div class="email_user mt-4">
+                <div id="lable_email_user">
+                    <h6 class="m-0" style="color: var(--falcon-badge-soft-secondary-color);">
+                    Email:
+                    </h6>
+                    <h6 class="m-0 p-0 mt-2" style="font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;"><%=@user.email ? @user.email : " " %></h6>
+                </div>
+                <div id="feild_email_user" class="d-none">
+                    <div class="form-group">
+                        <%= f.label :email %> <span style="color:red;">*</span>:
+                        <%= f.text_field :email , class: 'form-control' , name: 'user_email_add' %>
+                    </div>   
+                </div>
+            </div>
+
+            <div class="marriage_user mt-4">
+                <div id="lable_marriage_user">
+                    <h6 class="m-0" style="color: var(--falcon-badge-soft-secondary-color);">
+                        <%= lib_translate("Marriage") %>
+                    </h6>
+                    <h6 class="mt-2" style="font-size: 15px;"><%= @user.marriage ? lib_translate(@user.marriage) : "" %></h6>
+                </div> 
+                <div id="feild_marriage_user" class="d-none">
+                    <div> 
+                        <%= f.label lib_translate("Marriage") %>
+                        <div class="" style="border: none;box-shadow: none; height: 36px;">
+                            <input type="radio" id="user_Marriage_Single" class="form-check-input me-1" value="Single" name="user_Marriage_add" ></option><label class="form-check-label" for="user_Marriage_Single" style="cursor: pointer"><%= lib_translate("Single")%></label>
+                            <input checked type="radio" id="user_Marriage_Married" class="form-check-input ms-2 me-1" value="Married" name="user_Marriage_add" ></option><label class="form-check-label" for="user_Marriage_Married" style="cursor: pointer"><%= lib_translate("Married")%></label>
+                        </div> 
+                    </div>
+                </div> 
+            </div> 
+
+            <div class="academic_rank_user mt-4">
+                <div id="lable_academic_rank_user">
+                    <h6 class="m-0" style="color: var(--falcon-badge-soft-secondary-color);">
+                        <%= lib_translate("Academic_rank") %>:
+                    </h6>
+                    <h6 class="mt-2" style="font-size: 15px;"><%= @user.academic_rank ? @user.academic_rank : "" %></h6>
+                </div> 
+                <div id="feild_academic_rank_user" class="d-none">
+                    <div class="form-group">
+                    <%= f.label lib_translate("Academic_rank") %>: <a class="ms-2" href="<%= academicrank_index_path() %>" type="button" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="<%= lib_translate('Add_academicrank') %>"><span style="width:10px; color:#98a7b9" class="fas fa-database"></span></a>
+                            <select class="form-select selectpicker" name="user_academic_add" id="user_academic_add"  >
+                                <%= @academicranks.each do |academics| %>
+                                    <option value="<%= academics.name %>"><%= academics.name %></option>
+                                <% end %>                             
+                            </select> 
+                    </div> 
+                </div> 
+            </div> 
+            <%# Hai code 27/12/2022 %>
+            <div class="tbusertype mt-4">
+                    <div id="lable_tbusertype">
+                    <h6 class="m-0" style="color: var(--falcon-badge-soft-secondary-color);">
+                        <%= lib_translate("Tbusertype") %>: 
+                        </h6>
+                        <h6 class="mt-2" style="font-size: 15px;"><%= @user.staff_type ? @user.staff_type : " " %></h6>
+                    </div>
+                    <div id="feild_tbusertype" class="d-none">
+                    <div class="form-group">
+                        <%= f.label lib_translate("Tbusertype") %>: <a class="ms-2" href="<%= tbusertype_index_path %>" type="button" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="<%= lib_translate('Add_tbusertype') %>"><span style="width:10px; color:#98a7b9" class="fas fa-database"></span></a>
+                        <select class="form-select selectpicker" name="user_tbusertype_add" id="user_tbusertype_add">
+                            <%= @tbusertypes.each do |tbusertypes| %>
+                            <option value="<%= tbusertypes.name %>"><%= tbusertypes.name %></option>
+                            <% end %>                               
+                        </select>   
+                    </div>
+                    </div>
+                </div>
+
+            <%# end Hai code %>
+            <!-- unit  -->
+            <%
+                name = ""
+                job_name = ""
+                    work = @user.works.where("positionjob_id IS NOT NULL").first
+                    if !work&.positionjob.nil? && !work&.positionjob&.department.nil?
+                    name = work&.positionjob&.department&.name
+                    job_name = work&.positionjob&.name
+                    end
+            %>
+
+            
+            <div class="unit_user mt-4">
+                <h6 class="m-0" style="color: var(--falcon-badge-soft-secondary-color);">
+                    <%= lib_translate("unit") %>:
+                    </h6>
+                    <h6 class="mt-3" style="font-size: 15px; height: 32px;">
+                        <%= name %>
+                    </h6>
+            </div>
+            
+        </div>
+        <div class="col-12 col-sm-6 col-md-12 col-lg-12 col-xl-4 col-xxl-4 d-flex" id="responsive_tab_3">
+            <div class="col-12 col-sm-6 col-md-6 col-lg-6 col-xl-12 col-xxl-12" id="tab_3_col_1">
+                <div class="name_user">
+                    <div id="lable_username_details">
+                        <h6 class="m-0" style="color: var(--falcon-badge-soft-secondary-color);">
+                        <%= lib_translate("Username") %>:
+                        </h6>
+                        <h6 class="mt-2" style="font-size: 15px;">
+                        <%=@user.username ? @user.username : " " %>
+                        </h6>
+                    </div>
+                    <div id="feild_username_details" class="d-none">
+                    <div class="form-group">
+                        <%= f.label lib_translate("Username") %><span style="color:red;">*</span>:
+                        <%= f.text_field :username, class: 'form-control' , name: 'user_username_add'%>
+                    </div>
+                    </div>
+                </div>
+
+                <div class="status_user mt-4">
+                    <div id="lable_status_user">
+                        <h6 class="m-0" style="color: var(--falcon-badge-soft-secondary-color);">
+                        <%= lib_translate("Status_1") %>
+                        </h6>
+                        <h6 class="mt-2 <%= if (@user.status == 'ACTIVE') 
+                        'green' 
+                        else 'red'
+                        end %>" style="font-size: 15px;"><%= @user.status ? @user.status : " "%></h6>
+                    </div>
+                    <div id="feild_status_user" class="d-none">
+                        <div style="white-space: nowrap;">
+                                <%= f.label lib_translate("Status_1") %>                         
+                                    <div  style="border: none;box-shadow: none; height: 36px;">
+                                    <input checked type="radio" id="user_status_ACTIVE" class="form-check-input me-1" value="ACTIVE" name="user_status_add" ></option><label class="form-check-label" for="user_status_ACTIVE" style="cursor: pointer">Active</label>
+                                    <input  type="radio" id="user_status_INACTIVE" class="form-check-input ms-2 me-1" value="INACTIVE" name="user_status_add" ></option><label class="form-check-label" for="user_status_INACTIVE" style="cursor: pointer">Inactive</label>
+                                    </div>
+                                </div>
+                    </div>
+                </div>
+
+                <div class="education_user mt-4">
+                    <div id="lable_Education_user">
+                    <h6 class="m-0" style="color: var(--falcon-badge-soft-secondary-color);">
+                        <%= lib_translate("Education") %>: 
+                        </h6>
+                        <h6 class="mt-2" style="font-size: 15px;"><%= @user.education ? @user.education : " " %></h6>
+                    </div>
+                    <div id="feild_Education_user" class="d-none">
+                    <div class="form-group">
+                        <%= f.label lib_translate("Education") %>: <a class="ms-2" href="<%= education_edit_path() %>" type="button" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="<%= lib_translate('Add_education') %>"><span style="width:10px; color:#98a7b9" class="fas fa-database"></span></a>
+                        <select class="form-select selectpicker" name="user_education_add" id="user_education_add">
+                            <%= @educations.each do |educations| %>
+                            <option value="<%= educations.name %>"><%= educations.name %></option>
+                            <% end %>                               
+                        </select>   
+                    </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6 col-md-6 col-lg-6 col-xl-12 col-xxl-12" id="tab_3_col_2">
+                <div class="dan_toc_user">
+                    <div id="lable_dan_toc_user" style="margin-top: 1.2rem !important;">
+                        <h6 class="m-0" style="color: var(--falcon-badge-soft-secondary-color);">
+                            <%= lib_translate("Ethnic") %>:
+                            </h6>
+                            <h6 class="mt-2" style="font-size: 15px;"><%= @user.ethnic ? @user.ethnic : " " %></h6>
+                    </div>
+                    <div id="feild_dan_toc_user" class="d-none" style="margin-top: 1.8rem !important;">
+                    <div class="form-group">                            
+                        <%= f.label lib_translate("Ethnic") %>: <a class="ms-2" href="<%= ethnic_index_path() %>" type="button" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="<%= lib_translate('Add_ethnic') %>"><span style="width:10px; color:#98a7b9" class="fas fa-database"></span></a>
+                        <select class="form-select selectpicker" type="text" name="user_ethnic_add" id="user_ethnic_add">
+                            <%= @ethnics.each do |ethnic| %>
+                                <option value="<%= ethnic.name %>"><%= ethnic.name %></option>
+                            <% end %>
+                        </select>
+                    </div> 
+                    </div>
+                </div>
+
+                <div class="nationality_user mt-4">
+                    <div id="lable_nationality_user">
+                        <h6 class="m-0" style="color: var(--falcon-badge-soft-secondary-color);">
+                            <%= lib_translate("Nationality") %>:
+                            </h6>
+                            <h6 class="mt-2" style="font-size: 15px;"><%= @user.nationality ? @user.nationality : " " %></h6>
+                    </div>
+                    <div id="feild_nationality_user" class="d-none">
+                        <div class="form-group">
+                            <label style="margin-bottom: 0px;" for="basic-example"><%= f.label lib_translate("Nationality") %>:</label><a class="ms-2" href="<%= nationality_index_path() %>" type="button" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="<%= lib_translate('Add_nationality') %>"><span style="width:10px; color:#98a7b9" class="fas fa-database"></span></a>
+                            <select class="form-select selectpicker" name="user_nationality_add" id="user_nationality_add_details">
+                                <% @nationalitys.each do |nationalitys|  %>
+                                <option value="<%= nationalitys.name %>" ><%= nationalitys.name %></option>
+                                <% end %>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="working_schedule_user mt-4">
+                    <div id="lable_phone_user" style="margin-top: 1.8rem !important;">
+                        <h6 class="m-0" style="color: var(--falcon-badge-soft-secondary-color);">
+                        <%= lib_translate("Mobile") %>:
+                        </h6>
+                        <h6 class="mt-2" style="font-size: 15px;"><%= @user.mobile %></h6>
+                    </div>
+                    <div id="feild_phone_user" class="d-none">
+                        <div class="form-group">
+                            <%= f.label lib_translate("Mobile") %>:
+                            <%= f.text_field :mobile , class: 'form-control' , name: 'user_mobile_add', id: 'user_mobile_add_user' %>
+                        </div>
+                    </div>
+                </div>
+                <%# Hai code 27/12/2022 %>
+                <div class="tbuserstatus" style="margin-top: 23px;">
+                    <div id="lable_tbuserstatus">
+                    <h6 class="m-0" style="color: var(--falcon-badge-soft-secondary-color);">
+                        <%= lib_translate("Tbuserstatus") %>: 
+                        </h6>
+                        <h6 class="mt-2" style="font-size: 15px;"><%= @user.staff_status ? @user.staff_status : " " %></h6>
+                    </div>
+                    <div id="feild_tbuserstatus" class="d-none">
+                        <div class="form-group">
+                            <%= f.label lib_translate("Tbuserstatus") %>: <a class="ms-2" href="<%= tbuserstatus_index_path %>" type="button" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="<%= lib_translate('Add_tbuserstatus') %>"><span style="width:10px; color:#98a7b9" class="fas fa-database"></span></a>
+                            <select onchange="showTerminationDate()" class="form-select selectpicker" name="user_tbuserstatus_add" id="user_tbuserstatus_add">
+                                <%= @tbuserstatuss.each do |tbuserstatuss| %>
+                                <option value="<%= tbuserstatuss.name %>"><%= tbuserstatuss.name %></option>
+                                <% end %>                               
+                            </select>   
+                        </div>
+                    </div>
+                </div> 
+
+                
+                <div class="termination_date" style="margin-top: 23px;">
+                    <div id="lable_termination_date">
+                    <h6 class="m-0" style="color: var(--falcon-badge-soft-secondary-color);">
+                        <%= lib_translate("Ngày nghỉ việc") %>: 
+                        </h6>
+                        <h6 class="mt-2" style="font-size: 15px;"><%= @user.termination_date&.strftime("%d/%m/%Y") ? @user.termination_date&.strftime("%d/%m/%Y") : " " %></h6>
+                    </div>
+                    <div id="feild_termination_date" class="d-none">
+                        <div class="form-group">
+                            <%= f.label lib_translate("Ngày nghỉ việc") %>:
+                            <input class="form-control" value="<%=@user.termination_date&.strftime('%Y-%m-%d')%>" placeholder="ngày/tháng/năm" type="date" id="termination_date" name="termination_date"> 
+                        </div>
+                    </div>
+                </div> 
+
+            <%# end Hai code %>
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="note_user mt-2">
+            <div id="lable_note_details" class="mt-4">
+                <h6 class="m-0" style="color: var(--falcon-badge-soft-secondary-color);">
+                <%= lib_translate("Note") %>:
+                </h6>
+                <h6 class="mt-2" style="font-size: 15px; text-align: justify;">
+                <%= @user.note %>
+                </h6>
+            </div>
+            <div id="feild_note_details" class="d-none">
+                <div class="form-group">
+                <%= f.label lib_translate("Note") %>: 
+                <%= f.text_area :note , class: 'form-control' , name: 'user_note_add', style: "min-height: 160px" %>
+                </div>
+            </div>
+            </div>
+            <div style="display:none">
+                <%= f.text_field :taxid , class: 'form-control' , name: 'user_taxid_add' %>
+                <%= f.text_field :insurance_no , class: 'form-control' , name: 'user_insurance_No_add' %>
+                <%= f.text_field  :insurance_reg_place  , class: 'form-control' , name: 'user_insurance_placed_add' , id: 'user_insurance_placed_add' %>   
+            </div>
+            <div class="align-items-center mt-2 d-flex">
+                <button type="button" name="commit" value="Lưu thông tin" id="btn_add_new_user" class="btn btn-primary ps-2 pe-2 d-flex align-items-center justify-content-center d-none" style="width: 100%;">
+                    <div class="spinner-border text-success me-2 d-none" id="loading_info" role="status" style="width:20px;height:20px">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <span class="m-0"><%= lib_translate("Save_thong_tin") %></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- UPLOAD IMAGE -->
+    <hr class="mt-4 mb-3" style="width: 100%; height: 4px; background:  var(--falcon-badge-soft-secondary-background-color);">
+    <div class="row">
+      <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 col-xxl-12 tag d-flex align-items-center">
+        <h5 class="m-0 mb-2" style="font-size: 17px;"><%= lib_translate("User_image") %></h5>
+      </div>
+      <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 col-xxl-12 action-right-top d-flex align-items-center justify-content-end">
+        <% if is_access(session["user_id"], request.env["PATH_INFO"] == "/user/details" ? "USER-DETAILS" : request.env["PATH_INFO"] == "/user/profile" ? "USER-PROFILE" : "","ADD") %>
+          <a id="update_image" class="nav-link ps-2 pe-2 border-end border-2" role="button" style="font-size: 13px; font-weight: 600;">
+            <%= lib_translate("Update_image") %>
+          </a>
+        <% end %>
+        <a class="nav-link ms-3 me-2" data-bs-toggle="collapse" href="#upload-user-image" role="button" aria-expanded="true" aria-controls="upload-user-image" onclick="clickCollapseImage(this)">
+          <span class="fas fa-caret-down" id="collapse-icon-image"></span>
+        </a>
+      </div>
+    </div>
+    <div class="collapse show mt-3" id="upload-user-image">
+      <div onclick="clickSelectImage()" class="user-image-container mt-3 pt-2">
+        <div class="user-image-preview" id="user-image-preview" style="background-image: url(<%= @userImage %>)"></div>
+        <div class="mb-2 mt-2 d-none"><i class="fas fa-plus" style="margin-right:5px"></i><%= lib_translate("Update_avatar_select_hint")%></div>
+      </div>
+      <label id="valid-message" class="mt-2" style="color: var(--falcon-badges-soft-danger-color);"></label>
+      <input name="image" id="user-image-edit" type="file" accept="image/*" onchange="onSelectImage(this)" hidden>
+      <div id="image-action-btn" class="mt-2 d-flex justify-content-end d-none">
+        <button id="cancel-image" class="btn btn-secondary btn-sm me-2">Huỷ</button>
+        <button id="save-image"   class="btn btn-primary btn-sm">Lưu</button>
+      </div>
+    </div>
+    <!-- END UPLOAD IMAGE -->
+ 
+    <hr class="mt-4 mb-3" style="width: 100%; height: 4px; background:  var(--falcon-badge-soft-secondary-background-color);">
+    <div class="row">
+    <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 col-xxl-12 tag d-flex align-items-center">
+        <h5 class="m-0 mb-2" style="font-size: 17px;"><%= lib_translate("Additional_Personal_Information") %> </h5> 
+    </div>
+    <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 col-xxl-12 action-right-top d-flex align-items-center justify-content-end">
+        <% if is_access(session["user_id"], request.env["PATH_INFO"] == "/user/details" ? "USER-DETAILS" : request.env["PATH_INFO"] == "/user/profile" ? "USER-PROFILE" : "","ADD") %> 
+            <label class="nav-link pe-2 border-end border-2 cursor-pointer mb-0" id="lable_information_others_information" onclick="show_feild_checked('information_others')" for="show_feild_information_others_information" style="font-size: 13px; font-weight: 700; color: var(--falcon-orange);">
+                <%=  lib_translate("Edit_additional_personal_information") %>
+            </label>
+            <label class="nav-link pe-2 border-end border-2 cursor-pointer mb-0 ms-2" id="lable_address_information_others_information" onclick="show_feild_checked('address_information_others')" for="show_feild_address_information_others" style="font-size: 13px; font-weight: 700; color: var(--falcon-orange);">
+                <%=  lib_translate("Edit_address_information") %>
+            </label>
+        <% end %>
+        <label class="nav-link pe-2 border-end border-2 cursor-pointer mb-0 d-none" id="lable_cancel_information_others_information" onclick="show_feild_checked('information_others')" for="show_feild_information_others_information" style="font-size: 13px; font-weight: 700">
+            <%=  lib_translate("Cancel_Edit_additional_personal_information") %> 
+        </label>
+        <label class="nav-link pe-2 border-end border-2 cursor-pointer mb-0 d-none" id="lable_cancel_address_others_information" onclick="show_feild_checked('address_information_others')" for="show_feild_address_information_others" style="font-size: 13px; font-weight: 700">
+            <%=  lib_translate("Cancel_Edit_address_personal_information") %> 
+        </label>
+        <input class="d-none" type="checkbox" name="show_feild" id="show_feild_information_others_information">
+        <input class="d-none" type="checkbox" name="show_feild" id="show_feild_address_information_others">
+        
+        <a onclick="clickCollapseInfo(this)" class="nav-link ms-3 me-2" data-bs-toggle="collapse" href="#open_form_thong_tin_bo_sung" role="button" aria-expanded="false" aria-controls="open_form_thong_tin_bo_sung"  >
+            <span id="collapse-icon-info"  class="fas fa-caret-down"></span>
+        </a>
+    </div>
+    </div>
+    <div class="collapse show" id="open_form_thong_tin_bo_sung">
+    <div class="mt-2 mb-3"></div>
+    <div class="row" id="open_form_info_other" style="border-radius: 5px;">
+        <div class="col-12 col-sm-12 col-md-3 col-lg-3 col-xl-3 col-xxl-3">
+            <div class="tax_code">
+                <div id="lable_email1_user"> 
+                <h6 class="m-0" style="color: var(--falcon-badge-soft-secondary-color);">
+                    <%= lib_translate("Other_Emails") %>:
+                    </h6>
+                <h6 class="mt-2" style="font-size: 15px; display:inline-block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;">
+                    <%= @user.email1 %>
+                </h6>
+                </div>
+                <div id="feild_email1_user" class="d-none mt-2">
+                <div class="form-group">
+                    <%= f.label lib_translate("Other_Emails") %> 
+                    <%= f.text_field :email1 , class: 'form-control' , name: 'user_email_2_add' %>
+                    </div>
+                </div>
+            </div> 
+        </div>
+        <div class="col-12 col-sm-12 col-md-3 col-lg-3 col-xl-3 col-xxl-3">
+            <div class="tax_code"> 
+                <div id="lable_place_of_birth_user">
+                    <h6 class="m-0" style="color: var(--falcon-badge-soft-secondary-color);">
+                        <%= lib_translate("Hometown") %>:
+                        </h6>
+                    <h6 class="mt-2" style="font-size: 15px;"><%= @user.place_of_birth %></h6>
+                    </div>
+                    <div id="feild_place_of_birth_user" class="d-none mt-2">
+                    <div class="form-group">
+                        <%= f.label lib_translate("Hometown") %> 
+                        <%= f.text_field :place_of_birth  , class: 'form-control' , name: 'user_place_of_birth_add' %>
+                        </div>
+                    </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-12 col-md-3 col-lg-3 col-xl-3 col-xxl-3">
+            <div class="tax_code"> 
+                <div id="lable_m_place_of_birth_user">
+                    <h6 class="m-0" style="color: var(--falcon-badge-soft-secondary-color);">
+                        <%= lib_translate("Place_of_birth") %>:
+                        </h6>
+                    <h6 class="mt-2" style="font-size: 15px;"><%= @user.m_place_of_birth %></h6>
+                    </div>
+                    <div id="feild_m_place_of_birth_user" class="d-none mt-2">
+                    <div class="form-group">
+                        <%= f.label lib_translate("Place_of_birth") %> 
+                        <%= f.text_field :m_place_of_birth  , class: 'form-control' , name: 'user_m_place_of_birth_add' %>
+                        </div>
+                    </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-12 col-md-3 col-lg-3 col-xl-3 col-xxl-3">
+            <div class="tax_code">
+                <div id="lable_nationality_user_other">
+                    <h6 class="m-0" style="color: var(--falcon-badge-soft-secondary-color);">
+                        <%= lib_translate("Phone") %>:
+                        </h6>
+                        <h6 class="mt-2" style="font-size: 15px;"><%= @user.phone %></h6>
+                    </div>
+                    <div id="feild_nationality_user_other" class="d-none mt-2">
+                        <div class="form-group">
+                            <%= f.label lib_translate("Phone") %>
+                            <%= f.text_field :phone , class: 'form-control' , name: 'user_phone_add', id: 'user_phone_add_user' %>
+                        </div>
+                    </div>
+            </div>
+        </div>
+        <div class="align-items-center d-flex">
+            <button type="submit" name="commit" value="Lưu thông tin" id="btn_add_new_information_others_information" class="btn btn-primary ps-2 pe-2 mt-3 mb-3 d-flex align-items-center justify-content-center d-none" onclick="loading('info_other')" style="width: 100%;">
+                <div class="spinner-border text-success me-2 d-none" id="loading_info_other" role="status" style="width:20px;height:20px">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <span class="m-0"><%= lib_translate("Save_thong_tin") %></span>
+            </button>
+        </div>
+    </div>
+<% end %>  
+<%= form_for @address, :url=> user_address_update_user_path, html: {method: :post, class: "row pt-3", id:"open_form_address_other", style:"border-radius: 5px;"} do |f| %>      
+    <div class="m-0">
+        <div class="form-group" style="display:none;"> 
+            <p id="vietnam_local_select_error_user"></p>
+            <%= f.text_field :id, class: 'form-control' , name: 'address_id', id: 'address_id_user', value:  
+            if !@user.addresses.where(stype: "0", status: "0").order(created_at: :desc).first.nil?
+            @user.addresses.where(stype: "0", status: "0").order(created_at: :desc).first.id
+            else
+            ""
+            end %>  
+            <%= f.text_field :name, class: 'form-control', id: "address_usser", name: 'address_name', value:  
+            if !@user.addresses.where(stype: "0", status: "0").order(created_at: :desc).first.nil?
+            @user.addresses.where(stype: "0", status: "0").order(created_at: :desc).first.name
+            else
+            "Địa chỉ nhà"
+            end %> 
+        </div>
+        <div class="form-group" id="id_add_sid" style="display: none;"> 
+            <span style="color: red" class="red">* </span>
+            <%= f.text_field :user_id, class: 'form-control' ,name:'address_user_id', :value => @user.id %>
+            <input checked type="radio" id="sel_adr_status_active_user" class="form-check-input ms-3 me-1" value="0" name="sel_status" />
+            <input checked type="radio" id="sel_adr_stype_active_user" class="form-check-input ms-3 me-1" value="0" name="sel_stype" />
+        </div>
+    </div>
+    <div class="col-12">
+        <div class="tax_code">
+            <div id="lable_address_user">
+                <h6 class="m-0" style="color: var(--falcon-badge-soft-secondary-color);">
+                    <%= lib_translate("Address") %>:
+                    </h6>
+                    <h6 class="mt-2" style="font-size: 15px;"><%= 
+                    @address_user = @user.addresses.where(stype: "0", status: "0").order(created_at: :desc).first 
+                    if !@address_user.nil?
+                    if @address_user.no.nil? || @address_user.street.nil? && @address_user.no == "" || @address_user.street == ""
+                        "#{@address_user.ward}, #{@address_user.district}, #{@address_user.province}, #{@address_user.country}"  
+                    else
+                        "#{@address_user.no} #{@address_user.street}, #{@address_user.ward}, #{@address_user.district}, #{@address_user.province}, #{@address_user.country}" 
+                    end
+                    else
+                    ""
+                    end
+                    %>
+                </h6>
+            </div>
+            <div id="feild_address_user" class="d-none">
+                <div class="row">
+                    <div class="col-xs-12 col-sm-6">
+                        <label><%= lib_translate("Country")  %></label> <span class="red">* </span>
+                        <input class="form-control mb-2" value="<%= 
+                        @address_user = @user.addresses.where(stype: "0", status: "0").order(created_at: :desc).first 
+                        if !@address_user.nil?
+                        @address_user.country
+                        else
+                        ""
+                        end
+                        %>" type="text" name="ls_country_user" id="txt_country_user" placeholder="<%= lib_translate("Choose_Country")  %>" list="dt_country_user">
+                        <datalist id="dt_country_user" style="display: none;">
+                                <option value="Việt Nam">Việt Nam</option>
+                                <option value="Campuchia">Campuchia</option>
+                                <option value="Lào">Lào</option>
+                                <option value="Thái Lan">Thái Lan</option>
+                                <option value="Myanmar">Myanmar</option>
+                                <option value="Malaysia">Malaysia</option>
+                                <option value="Singapore">Singapore</option>
+                                <option value="Indonesia">Indonesia</option>
+                                <option value="Brunei">Brunei</option>
+                                <option value="Philippines">Philippines</option>
+                                <option value="Đông Timor">Đông Timor</option>
+                                <option value="Trung Quốc">Trung Quốc</option>
+                                <option value="Nhật Bản">Nhật Bản</option>
+                                <option value="Mông Cổ">Mông Cổ</option>
+                                <option value="Hàn Quốc">Hàn Quốc</option>
+                                <option value="CHDCND Triều Tiên">CHDCND Triều Tiên</option>
+                                <option value="Đài Loan">Đài Loan</option>
+                                <option value="Hong Kong">Hong Kong</option>
+                                <option value="Macau">Macau</option>
+                                <option value="Ấn Độ">Ấn Độ</option>
+                                <option value="Pakistan">Pakistan</option>
+                                <option value="Bangladesh">Bangladesh</option>
+                                <option value="Nepal">Nepal</option>
+                                <option value="Bhutan">Bhutan</option>
+                                <option value="Sri Lanka">Sri Lanka</option>
+                                <option value="Maldives">Maldives</option>
+                                <option value="British Indian Ocean Territory">British Indian Ocean Territory</option>
+                                <option value="Afghanistan">Afghanistan</option>
+                                <option value="Kazakhstan">Kazakhstan</option>
+                                <option value="Uzbekistan">Uzbekistan</option>
+                                <option value="Turkmenistan">Turkmenistan</option>
+                                <option value="Tajikistan">Tajikistan</option>
+                                <option value="Kyrgyzstan">Kyrgyzstan</option>
+                                <option value="Iran">Iran</option>
+                                <option value="Iraq">Iraq</option>
+                                <option value="Saudi Arabia">Saudi Arabia</option>
+                                <option value="Kuwait">Kuwait</option>
+                                <option value="Qatar">Qatar</option>
+                                <option value="Bahrain">Bahrain</option>
+                                <option value="Palestine">Palestine</option>
+                                <option value="Israel">Israel</option>
+                                <option value="Các tiểu vương quốc Ả Rập thống nhất">Các tiểu vương quốc Ả Rập thống nhất</option>
+                                <option value="Oman">Oman</option>
+                                <option value="Yemen">Yemen</option>
+                                <option value="Jordan">Jordan</option>
+                                <option value="Syria">Syria</option>
+                                <option value="Lebanon">Lebanon</option>
+                                <option value="Turkey">Turkey</option>
+                                <option value="Cyprus">Cyprus</option>
+                                <option value="Northern Cyprus">Northern Cyprus</option>
+                                <option value="Akrotiri và Dhekelia">Akrotiri và Dhekelia</option>
+                                <option value="Azerbaijan">Azerbaijan</option>
+                                <option value="Armenia">Armenia</option>
+                                <option value="Gruzia">Gruzia</option>
+                                <option value="Abkhazia">Abkhazia</option>
+                                <option value="Nam Ossetia">Nam Ossetia</option>
+                                <option value="Nagorno-Karabakh">Nagorno-Karabakh</option>
+                                <option value="Thụy Điển">Thụy Điển</option>
+                                <option value="Phần Lan">Phần Lan</option>
+                                <option value="Na Uy">Na Uy</option>
+                                <option value="Estonia">Estonia</option>
+                                <option value="Latvia">Latvia</option>
+                                <option value="Litva">Litva</option>
+                                <option value="Đan Mạch">Đan Mạch</option>
+                                <option value="Vương quốc Liên hiệp Anh và Bắc Ireland">Vương quốc Liên hiệp Anh và Bắc Ireland</option>
+                                <option value="Ireland">Ireland</option>
+                                <option value="Iceland">Iceland</option>
+                                <option value="Quần đảo Faroe">Quần đảo Faroe</option>
+                                <option value="Đảo Man">Đảo Man</option>
+                                <option value="Jersey">Jersey</option>
+                                <option value="Guernsey">Guernsey</option>
+                                <option value="Svalbard">Svalbard</option>
+                                <option value="Quần đảo Åland">Quần đảo Åland</option>
+                                <option value="Đức">Đức</option>
+                                <option value="Pháp">Pháp</option>
+                                <option value="Hà Lan">Hà Lan</option>
+                                <option value="Bỉ">Bỉ</option>
+                                <option value="Thụy Sĩ">Thụy Sĩ</option>
+                                <option value="Áo">Áo</option>
+                                <option value="Luxembourg">Luxembourg</option>
+                                <option value="Liechtenstein">Liechtenstein</option>
+                                <option value="Monaco">Monaco</option>
+                                <option value="Tây Ban Nha">Tây Ban Nha</option>
+                                <option value="Bồ Đào Nha">Bồ Đào Nha</option>
+                                <option value="Andorra">Andorra</option>
+                                <option value="Gibraltar">Gibraltar</option>
+                                <option value="Italy">Italy</option>
+                                <option value="San Marino">San Marino</option>
+                                <option value="Vatican">Vatican</option>
+                                <option value="Malta">Malta</option>
+                                <option value="Slovenia">Slovenia</option>
+                                <option value="Croatia">Croatia</option>
+                                <option value="Bosnia và Herzegovina">Bosnia và Herzegovina</option>
+                                <option value="Montenegro">Montenegro</option>
+                                <option value="Serbia">Serbia</option>
+                                <option value="Kosovo">Kosovo</option>
+                                <option value="Albania">Albania</option>
+                                <option value="Hy Lạp">Hy Lạp</option>
+                                <option value="Cộng hòa Macedonia">Cộng hòa Macedonia</option>
+                                <option value="Nga">Nga</option>
+                                <option value="Ukraine">Ukraine</option>
+                                <option value="Ba Lan">Ba Lan</option>
+                                <option value="Belarus">Belarus</option>
+                                <option value="Moldova">Moldova</option>
+                                <option value="Transnistria">Transnistria</option>
+                                <option value="Cộng hòa Séc">Cộng hòa Séc</option>
+                                <option value="Slovakia">Slovakia</option>
+                                <option value="Hungary">Hungary</option>
+                                <option value="Romania">Romania</option>
+                                <option value="Bulgaria">Bulgaria</option>
+                                <option value="Canada">Canada</option>
+                                <option value="Hoa Kỳ">Hoa Kỳ</option>
+                                <option value="Greenland">Greenland</option>
+                                <option value="Saint Pierre và Miquelon">Saint Pierre và Miquelon</option>
+                                <option value="Bermuda">Bermuda</option>
+                                <option value="Mexico">Mexico</option>
+                                <option value="Belize">Belize</option>
+                                <option value="Guatemala">Guatemala</option>
+                                <option value="El Salvador">El Salvador</option>
+                                <option value="Honduras">Honduras</option>
+                                <option value="Nicaragua">Nicaragua</option>
+                                <option value="Costa Rica">Costa Rica</option>
+                                <option value="Panama">Panama</option>
+                                <option value="Brazil">Brazil</option>
+                                <option value="Argentina">Argentina</option>
+                                <option value="Uruguay">Uruguay</option>
+                                <option value="Paraguay">Paraguay</option>
+                                <option value="Chile">Chile</option>
+                                <option value="Bolivia">Bolivia</option>
+                                <option value="Peru">Peru</option>
+                                <option value="Ecuador">Ecuador</option>
+                                <option value="Colombia">Colombia</option>
+                                <option value="Venezuela">Venezuela</option>
+                                <option value="Suriname">Suriname</option>
+                                <option value="Guyana">Guyana</option>
+                                <option value="French Guiana">French Guiana</option>
+                                <option value="Quần đảo Falkland">Quần đảo Falkland</option>
+                                <option value="Quần đảo Nam Georgia và Nam Sandwich">Quần đảo Nam Georgia và Nam Sandwich</option>
+                                <option value="Cuba">Cuba</option>
+                                <option value="Jamaica">Jamaica</option>
+                                <option value="Haiti">Haiti</option>
+                                <option value="Cộng hòa Dominican">Cộng hòa Dominican</option>
+                                <option value="Quần đảo Cayman">Quần đảo Cayman</option>
+                                <option value="Puerto Rico">Puerto Rico</option>
+                                <option value="Quần đảo Virgin thuộc Mỹ">Quần đảo Virgin thuộc Mỹ</option>
+                                <option value="Quần đảo Virgin thuộc Anh">Quần đảo Virgin thuộc Anh</option>
+                                <option value="The Bahamas">The Bahamas</option>
+                                <option value="Quần đảo Turks và Caicos">Quần đảo Turks và Caicos</option>
+                                <option value="Saint Kitts và Nevis">Saint Kitts và Nevis</option>
+                                <option value="Anguilla">Anguilla</option>
+                                <option value="Saint Barthélemy">Saint Barthélemy</option>
+                                <option value="Montserrat">Montserrat</option>
+                                <option value="Saba">Saba</option>
+                                <option value="Sint Eustatius">Sint Eustatius</option>
+                                <option value="Dominica">Dominica</option>
+                                <option value="Grenada">Grenada</option>
+                                <option value="Barbados">Barbados</option>
+                                <option value="Saint Vincent và Grenadines">Saint Vincent và Grenadines</option>
+                                <option value="Antigua và Barbuda">Antigua và Barbuda</option>
+                                <option value="Saint Lucia">Saint Lucia</option>
+                                <option value="Trinidad và Tobago">Trinidad và Tobago</option>
+                                <option value="Aruba">Aruba</option>
+                                <option value="Bonaire">Bonaire</option>
+                                <option value="Curaçao">Curaçao</option>
+                                <option value="Saint Martin">Saint Martin</option>
+                                <option value="Sint Maarten">Sint Maarten</option>
+                                <option value="Martinique">Martinique</option>
+                                <option value="Guadeloupe">Guadeloupe</option>
+                                <option value="Ai Cập">Ai Cập</option>
+                                <option value="Libya">Libya</option>
+                                <option value="Tunisia">Tunisia</option>
+                                <option value="Algeria">Algeria</option>
+                                <option value="Maroc">Maroc</option>
+                                <option value="Tây Sahara">Tây Sahara</option>
+                                <option value="Sudan">Sudan</option>
+                                <option value="Nam Phi">Nam Phi</option>
+                                <option value="Lesotho">Lesotho</option>
+                                <option value="Swaziland">Swaziland</option>
+                                <option value="Namibia">Namibia</option>
+                                <option value="Botswana">Botswana</option>
+                                <option value="Mauritania">Mauritania</option>
+                                <option value="Mali">Mali</option>
+                                <option value="Niger">Niger</option>
+                                <option value="Nigeria">Nigeria</option>
+                                <option value="Senegal">Senegal</option>
+                                <option value="Gambia">Gambia</option>
+                                <option value="Guinea">Guinea</option>
+                                <option value="Guinea-Bissau">Guinea-Bissau</option>
+                                <option value="Cape Verde">Cape Verde</option>
+                                <option value="Sierra Leone">Sierra Leone</option>
+                                <option value="Liberia">Liberia</option>
+                                <option value="Côte d'Ivoire">Côte d'Ivoire</option>
+                                <option value="Burkina Faso">Burkina Faso</option>
+                                <option value="Ghana">Ghana</option>
+                                <option value="Togo">Togo</option>
+                                <option value="Benin">Benin</option>
+                                <option value="Saint Helena, Ascension và Tristan da Cunha">Saint Helena, Ascension và Tristan da Cunha</option>
+                                <option value="Tchad">Tchad</option>
+                                <option value="Cộng hòa Trung Phi">Cộng hòa Trung Phi</option>
+                                <option value="Cameroon">Cameroon</option>
+                                <option value="Cộng hòa Dân chủ Congo">Cộng hòa Dân chủ Congo</option>
+                                <option value="Cộng hòa Congo">Cộng hòa Congo</option>
+                                <option value="Gabon">Gabon</option>
+                                <option value="Guinea Xích Đạo">Guinea Xích Đạo</option>
+                                <option value="São Tomé và Princípe">São Tomé và Princípe</option>
+                                <option value="Angola">Angola</option>
+                                <option value="Nam Sudan">Nam Sudan</option>
+                                <option value="Ethiopia">Ethiopia</option>
+                                <option value="Eritrea">Eritrea</option>
+                                <option value="Djibouti">Djibouti</option>
+                                <option value="Somalia">Somalia</option>
+                                <option value="Somaliland">Somaliland</option>
+                                <option value="Uganda">Uganda</option>
+                                <option value="Rwanda">Rwanda</option>
+                                <option value="Burundi">Burundi</option>
+                                <option value="Kenya">Kenya</option>
+                                <option value="Tanzania">Tanzania</option>
+                                <option value="Malawi">Malawi</option>
+                                <option value="Mozambique">Mozambique</option>
+                                <option value="Zambia">Zambia</option>
+                                <option value="Zimbabwe">Zimbabwe</option>
+                                <option value="Madagascar">Madagascar</option>
+                                <option value="Comoros">Comoros</option>
+                                <option value="Seychelles">Seychelles</option>
+                                <option value="Mauritius">Mauritius</option>
+                                <option value="Réunion">Réunion</option>
+                                <option value="Mayotte">Mayotte</option>
+                                <option value="Australia">Australia</option>
+                                <option value="New Zealand">New Zealand</option>
+                                <option value="Đảo Norfolk">Đảo Norfolk</option>
+                                <option value="Đảo Christmas">Đảo Christmas</option>
+                                <option value="Quần đảo Cocos (Keeling)">Quần đảo Cocos (Keeling)</option>
+                                <option value="Papua New Guinea">Papua New Guinea</option>
+                                <option value="Palau">Palau</option>
+                                <option value="Quần đảo Solomon">Quần đảo Solomon</option>
+                                <option value="Vanuatu">Vanuatu</option>
+                                <option value="Fiji">Fiji</option>
+                                <option value="New Caledonia">New Caledonia</option>
+                                <option value="Liên bang Micronesia">Liên bang Micronesia</option>
+                                <option value="Kiribati">Kiribati</option>
+                                <option value="Quần đảo Marshall">Quần đảo Marshall</option>
+                                <option value="Nauru">Nauru</option>
+                                <option value="Quần đảo Bắc Mariana">Quần đảo Bắc Mariana</option>
+                                <option value="Guam">Guam</option>
+                                <option value="Tuvalu">Tuvalu</option>
+                                <option value="Tonga">Tonga</option>
+                                <option value="Samoa">Samoa</option>
+                                <option value="Samoa thuộc Mỹ">Samoa thuộc Mỹ</option>
+                                <option value="Polynesia thuộc Pháp">Polynesia thuộc Pháp</option>
+                                <option value="Wallis và Futuna">Wallis và Futuna</option>
+                                <option value="Quần đảo Cook">Quần đảo Cook</option>
+                                <option value="Niue">Niue</option>
+                                <option value="Tokelau">Tokelau</option>
+                                <option value="Quần đảo Pitcairn">Quần đảo Pitcairn</option>
+                        </datalist>
+                    </div>
+                    <div class="col-xs-12 col-sm-6">
+                        <label><%= lib_translate("Province")  %></label> <span class="red">* </span>
+                        <select class="form-select mb-2 selectpicker" id="txt_province_user_add" name="ls_province_user">
+                            <option value="" selected><%= lib_translate("Choose_Province")  %></option>           
+                            </select>
+                    </div>                    
+                </div>            
+                <div class="row">
+                    <div class="col-xs-12 col-sm-6">
+                        <label><%= lib_translate("District")  %></label> <span class="red">* </span>
+                        <select class="form-select mb-2 "  id="txt_district_user_add" name="ls_district_user">
+                            <option value="" selected><%= lib_translate("Choose_District")  %></option>
+                            </select>
+                    </div>
+                    <div class="col-xs-12 col-sm-6">
+                        <label><%= lib_translate("Ward")  %></label> <span class="red">* </span>
+                        <select class="form-select mb-2 " id="txt_ward_user_add" name="ls_ward_user">
+                            <option value="" selected><%= lib_translate("Choose_Ward")  %></option>
+                            </select>
+                    </div>                    
+                </div>            
+                <div class="row">
+                    <div class="col-xs-12 col-sm-6">
+                        <%= f.label lib_translate("Street") %>
+                        <%= f.text_field :street, class: 'form-control' , name: 'address_street', id: 'txt_street_user', placeholder: lib_translate("Choose_Street"), value:  
+                        if !@user.addresses.where(stype: "0", status: "0").order(created_at: :desc).first.nil?
+                            @user.addresses.where(stype: "0", status: "0").order(created_at: :desc).first.street
+                        else
+                        ""
+                        end
+                        %>
+                    </div>
+                    <div class="col-xs-12 col-sm-6">
+                        <%= f.label lib_translate("No_Address") %>
+                        <%= f.text_field :no, class: 'form-control' , name: 'address_no', id: 'txt_no_user', placeholder: lib_translate("Choose_No"), value:  
+                        if !@user.addresses.where(stype: "0", status: "0").order(created_at: :desc).first.nil?
+                        @user.addresses.where(stype: "0", status: "0").order(created_at: :desc).first.no
+                        else
+                        ""
+                        end 
+                        %>
+                    </div>                    
+                </div>   
+            </div>
+        </div>
+    </div>
+    <div class="align-items-center mt-2 d-flex">
+        <label class="btn btn-primary ps-2 pe-2 mb-3 d-flex align-items-center justify-content-center d-none" id="lable_btn_address_information_user"  onclick="loading('address_user')" for="btn_address_information_user" style="width: 100%;">
+            <div class="spinner-border text-success me-2 d-none" id="loading_address_user" role="status" style="width:20px;height:20px">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <span class="m-0"><%= lib_translate("Save_address_information") %></span> 
+        </label>
+    </div>
+    <%= f.submit "" , type:"submit" , id:"btn_address_information_user", class: "nav-link ps-2 pe-2 d-none" %>
+<% end %>   
+</div>
+<%= form_for @social, :url=> user_social_update_path, html: {method: :post , id: "form_add_social_user"} do |f| %>  
+    <hr class="mt-4 mb-3" style="width: 100%; height: 4px; background:  var(--falcon-badge-soft-secondary-background-color);">
+    <div class="row">
+    <div id="txt_social_title" class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 col-xxl-12 tag d-flex align-items-center">
+        <h5 class="m-0 mb-2" style="font-size: 17px;"><%= lib_translate("Social") %></h5> 
+    </div>
+    <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 col-xxl-12 action-right-top d-flex align-items-center justify-content-end">
+        <% if is_access(session["user_id"], request.env["PATH_INFO"] == "/user/details" ? "USER-DETAILS" : request.env["PATH_INFO"] == "/user/profile" ? "USER-PROFILE" : "","ADD") %> 
+            <label class="nav-link pe-2 border-end border-2 cursor-pointer mb-0" data-bs-toggle="collapse" href="#form_add_social" onclick="editSocial()"  id="lable_edit_social" role="button" aria-expanded="false" aria-controls="form_add_social" style="font-size: 13px; color: var(--falcon-orange)">
+                <%=  lib_translate("Edit_social") %>
+            </label>
+        <% end %>
+        <label class="nav-link pe-2 border-end border-2 cursor-pointer mb-0 d-none"  data-bs-toggle="collapse" href="#form_add_social"  role="button" aria-expanded="false" aria-controls="form_add_social" id="lable_cancel_edit_social" onclick="cancelEditSocial()" for="show_feild" style="font-size: 13px; font-weight: 700">
+            <%=  lib_translate("Cancel_edit_social") %> 
+        </label> 
+        <a  onclick="clickCollapseSocialInfo(this)" class="nav-link ms-3 me-2" data-bs-toggle="collapse" href="#open_form_social" role="button" aria-expanded="false" aria-controls="open_form_social">
+            <span id="collapse-social-icon-info" class="fas fa-caret-down"></span>
+        </a>
+    </div>
+    </div>
+    <div class="collapse show row" id="open_form_social">
+        <div class="mt-2 mb-3">
+            <div class="collapse" id="form_add_social"  >
+                <div class="card p-3 capp-form-bg" style="border-radius: 5px;">       
+                        <div class="form-group d-none" > 
+                        <%= f.text_field :id, class: 'form-control', name:"social_add_id", id: "social_add_id" %>
+                        </div>
+                        <div class="form-group d-none" > 
+                        <%= f.text_field :user_id, class: 'form-control', value: @user.id, id: "user_id_social" , name:"user_id"  %>
+                        </div>              
+                        <div class="form-group"> 
+                        <%= f.label lib_translate("Name_social")  %> <span style="color:red;" class="red">* </span>
+                        <%= f.text_field :name, class: 'form-control' ,  name:"social_add_name", id:"social_add_name", required:"" %> 
+                        </div>
+
+                        <div class="row mt-3" style="align-items: flex-end">
+                            <div class="col-xl-6">
+                                <div class="form-group">
+                                <%= f.label lib_translate("Link")  %> <span style="color:red;" class="red">* </span>
+                                <%= f.text_field :slink, class: 'form-control' ,  name:"slink_add", id:"slink_add", required: "" %>
+                                </div>               
+                            </div>
+                            <div class="col-xl-6">
+                                <div class="mt-2" style="display:flex;font-size:14px;">
+                                    <%= f.label lib_translate("Status_1") %>                         
+                                    <div style="border: none;box-shadow: none;font-size:14px;">
+                                        <input checked type="radio" id="social_add_ACTIVE" class="form-check-input ms-3 me-1" value="ACTIVE" name="social_add_status" ></option><label class="form-check-label" for="social_add_ACTIVE" style="cursor: pointer">ACTIVE</label>
+                                        <input  type="radio" id="social_add_INACTIVE" class="form-check-input ms-3 me-1" value="INACTIVE" name="social_add_status" ></option><label class="form-check-label" for="social_add_INACTIVE" style="cursor: pointer">INACTIVE</label>
+                                    </div>
+                                </div> 
+                            </div>
+                        </div> 
+                        <div class="form-group mt-3">
+                            <%= f.label lib_translate("Note") %>
+                            <%= f.text_area :note, class: 'form-control mb-3' ,  name:"note_add_social", id:"note_add_social", style: "min-height: 70px" %>
+                        </div> 
+                        <div class="align-items-center d-flex">
+                            <button type="submit" name="commit" value="Lưu thông tin" id="btn_add_social" class="btn btn-primary ps-2 pe-2 d-flex align-items-center justify-content-center" onclick="loading('social')" style="width: 100%;">
+                                <div class="spinner-border text-success me-2 d-none" id="loading_social" role="status" style="width:20px;height:20px">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <span class="m-0"><%= lib_translate("Save_social") %></span>
+                            </button>
+                        </div>
+                </div>
+            </div>
+        </div>
+        <div class="table-responsive scrollbar">
+            <table class="table" style="border: none; border-color: var(--falcon-bg-navbar-glass);">
+            <thead style="color: var(--falcon-btn-falcon-success-active-color); font-size: 13px;">
+                <tr>
+                <th scope="col"><%= lib_translate("Name_social") %> </th>
+                <th scope="col"><%= lib_translate("Link") %> </th>
+                <th scope="col"><%= lib_translate("Note") %> </th>
+                <th scope="col" style="text-align: center;"><%= lib_translate("Status") %> </th> 
+                <th class="text-end" scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                    <% @socials.each do |social| %>
+                        <tr>
+                            <td style="vertical-align: middle;"> 
+                                <h6 class="m-0" style="font-weight: 600;"><%= social.name %></h6>
+                            </td>
+                            <td style="vertical-align: middle;">
+                                <h6 class="m-0" style="font-weight: 600;"><a href="<%= social.slink %>"  target="_blank"><%= social.slink %></a></h6> 
+                            </td>
+                            <td style="vertical-align: middle;">
+                                <h6 class="m-0" style="font-weight: 500;"><%= social.note %></h6>
+                            </td>
+                            <td style="vertical-align: middle; text-align: center;">
+                                <h6 class="m-0" style="font-weight: 600;"> 
+                                <%= (
+                                if social.status == "ACTIVE"
+                                    lib_translate("ac_icon")
+                                else social.status == "INACTIVE"
+                                    lib_translate("inac_icon")
+                                end
+                                ) %>
+                                </h6> 
+                            </td>
+                            <td>     
+                                <% if is_access(session["user_id"], request.env["PATH_INFO"] == "/user/details" ? "USER-DETAILS" : request.env["PATH_INFO"] == "/user/profile" ? "USER-PROFILE" : "","EDIT") %>                       
+                                <button class="btn btn btn-link p-0 m-0" style="color: var(--falcon-avatar-name-bg); padding: 0px 5px 0px 5px !important" type="button" data-bs-toggle="collapse" href="#form_add_social" role="button" aria-expanded="false" aria-controls="form_add_social" title="Edit" 
+                                    onclick="openFormUpdateSocial(
+                                    `<%= social.id%>`,
+                                    `<%= social.user_id%>`,
+                                    `<%= social.name%>`,
+                                    `<%= social.slink%>`,
+                                    `<%= social.note%>`,
+                                    `<%= social.status%>`,)">
+                                    <span class="fas fa-edit"></span>
+                                </button>
+                                <% end %>
+                                <% if is_access(session["user_id"], request.env["PATH_INFO"] == "/user/details" ? "USER-DETAILS" : request.env["PATH_INFO"] == "/user/profile" ? "USER-PROFILE" : "","DEL")%>                              
+                                <a onclick="clickDeleteSocial(`<%= social.id %>`,`<%= social.name %>`,`<%= @user.id %>` )" data-toggle="modal" data-target="#modal-delete-relative{<%= social.id %>}" style="cursor: pointer" >
+                                    <span class="text-danger fas fa-trash"  style="width: 12px" ></span>
+                                </a>
+                                <% end %>
+                            </td>
+                        </tr>
+                    <% end %>
+            </tbody>
+            </table>
+        </div>
+    </div>
+<% end %>   
+<script>
+    let link_address_json = "<%= image_path('address-data.json') %>";
+    let translate_error_sid_user = "<%= lib_translate("Employee_code_already_exists")  %>";
+    let translate_error_username_user = "<%= lib_translate("Username_already_exists")  %>";
+    let translate_error_Vietnam_mobile_validation = "<%= lib_translate("Vietnam_mobile_validation")  %>";
+    let translate_error_Email_already_exists = "<%= lib_translate("Email_already_exists")  %>";
+    let translate_error_Please_enter_the_correct_email_address= "<%= lib_translate("Please_enter_the_correct_email_address")  %>";
+    let link_user_check_unique_sid_path = "<%= user_check_unique_sid_path %>";
+    let link_user_check_unique_username_path = "<%= user_check_unique_username_path %>";
+    let link_user_check_unique_email_path = "<%= user_check_unique_email_path %>";
+    let id_user_details = '<%= @user.sid %>';
+    let username_user_details = '<%= @user.username %>';
+    let email_user_details = '<%= @user.email %>';
+    let translate_error_Firts_name = "<%= lib_translate("Please_Enter_Firts_name")%>";
+    let translate_error_Employee_code = "<%= lib_translate("Please_Enter_Employee_code")%>";
+    let translate_error_Last_Name = "<%= lib_translate("Please_Enter_Last_name")%>";
+    let translate_error_User_Email = "<%= lib_translate("Please_Enter_User_Email")%>";
+    let translate_error_UserName = "<%= lib_translate("Please_Enter_User_Name")%>";
+    let translate_error_mobile = "<%= lib_translate("Please_enter_your_mobile")%>";
+    let value_province_user = `<%= 
+                            @address_user = @user.addresses.where(stype: "0", status: "0").order(created_at: :desc).first 
+                            if !@address_user.nil?
+                            @address_user.province
+                            else
+                            ""
+                            end
+                            %>`;
+    let value_district_user = `<%= 
+                            @address_user = @user.addresses.where(stype: "0", status: "0").order(created_at: :desc).first 
+                            if !@address_user.nil?
+                            @address_user.district
+                            else
+                            ""
+                            end
+                            %>`;
+    let value_ward_user = `<%= 
+                            @address_user = @user.addresses.where(stype: "0", status: "0").order(created_at: :desc).first 
+                            if !@address_user.nil?
+                            @address_user.ward
+                            else
+                            ""
+                            end
+                            %>`;
+    let value_ethnic_user_details = "<%=@user.ethnic %>";
+    let value_education_user_details = "<%=@user.education %>";
+    let value_academic_rank_user_details = "<%=@user.academic_rank %>";
+    let value_gender_user_details = "<%=@user.gender %>";
+    let value_benefit_type_user_details = "<%=@user.benefit_type %>";
+    let value_marriage_user_details = "<%=@user.marriage %>";
+    let value_status_user_details = "<%=@user.status %>";
+    let value_nationality_user_details = "<%=@user.nationality %>";
+    let value_tbusertype_user_details = "<%=@user.staff_type %>";
+    let value_tbuserstatus_user_details = "<%=@user.staff_status %>";
+    let value_religion_user_details = "<%=@user.religion %>";
+    let value_stype_user = "<%=@user.stype %>";
+    let linkDeleteSocial = "<%= url_for(action: :social_del)%>";
+    let deleteMessageSocial = "<%= lib_translate("Confirm_delete")%>";
+    let Choose_Province = "<%= lib_translate("Choose_Province")%>";
+    let Choose_District = "<%= lib_translate("Choose_District")%>";
+    let Choose_Ward = "<%= lib_translate("Choose_Ward")%>";
+
+    // UPLOAD IMAGE
+    let user_upload_image_path = "<%= user_upload_image_path %>";
+    let currentDocId  = <%= @doc_id || 'null' %>;
+
+</script>
+<% content_for :javascript_profile do %> 
+        <%= javascript_include_tag "/assets/myjs/infomation.js" %>
+<% end %>

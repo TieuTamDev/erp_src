@@ -1,0 +1,29 @@
+<%= form_tag update_stasks_gtask_path(@gtask), method: :patch, remote: true do %>
+  <div class="modal-body">
+    <div class="mb-3">
+      <label class="form-label">Chọn công việc</label>
+      <select id="stask_ids" name="stask_ids[]" class="form-control" multiple="multiple" required="required">
+        <% @unassigned_stasks.each do |stask| %>
+          <option value="<%= stask.id %>" <%= 'selected' if stask.gtask_id == @gtask.id %>>
+            <%= stask.name %>
+          </option>
+        <% end %>
+      </select>
+      <div class="form-text">Chọn các công việc để gán vào nhóm này</div>
+    </div>
+  </div>
+  
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+  </div>
+<% end %>
+
+<script>
+  $('#stask_ids').select2({
+    theme: "bootstrap-5",
+    placeholder: 'Vui lòng chọn công việc',
+    width : 'resolve',
+    closeOnSelect: false
+  });
+</script>

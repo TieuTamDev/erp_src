@@ -1,0 +1,38 @@
+<div class="bmtu_header_dashboard">
+    <h3 class="mt-2 overview_text"><%=lib_translate('Account_history_list')%></h3>
+</div>
+<div class="card mb-3">
+    <div class="card-body pt-0">
+      <div class="tab-content mt-3">
+        <%= render_search_pagination(acchists_index_path()).html_safe %>
+        <table id="table_acamedicrank" class="table table-bordered fs--1 mb-2 table-hover">
+            <thead class="bg-200 text-900">
+                <tr>
+                    <th class="no-sort thead-gservice" style=""><%= lib_translate('User_web')%></th>
+                    <th class="no-sort thead-gservice" style=""><%= lib_translate('Login')%></th>
+                    <th class="no-sort thead-gservice" style=""><%= lib_translate('Logout')%></th>
+                    <th class="no-sort thead-gservice" style=""><%= lib_translate('Address')%></th>
+                    <th class="no-sort thead-gservice" style=""><%= lib_translate('Browser')%></th>
+                    <th class="no-sort thead-gservice" style=""><%= lib_translate('Device')%></th>
+                    <th class="no-sort thead-gservice" style=""><%= lib_translate('Operating_System')%></th>
+                </tr>
+            </thead>
+            <tbody class="list">
+                <% @acchists.each do |acchist| %>
+                    <% user = User.where(id: acchist.user_id).first%>
+                    <tr>
+                        <td><%= !user.nil? ? user.last_name + " " + user.first_name : "" %></td>
+                        <td><%= !acchist.dlogin.nil? ? acchist.dlogin.strftime('%d/%m/%Y - %T') : acchist.dlogin  %></td>
+                        <td><%= !acchist.dlogout.nil? ? acchist.dlogout.strftime('%d/%m/%Y - %T') : acchist.dlogout %></td>
+                        <td><%= acchist.location %></td>
+                        <td><%= acchist.browser %></td>
+                        <td><%= acchist.device %></td>
+                        <td><%= acchist.os %></td>
+                    </tr>
+                <% end %>
+            </tbody>
+        </table>
+        <%= render_pagination_limit_offset(acchists_index_path(lang: session[:lang], per_page: session[:per_page], search: session[:search]), 10, @acchists.count).html_safe %>
+        </div>
+    </div>
+</div>

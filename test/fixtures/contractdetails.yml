@@ -1,0 +1,17 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  contract: one
+  amount: 1
+  stype: MyString
+  name: MyString
+  cdparent: MyString
+  desc: MyText
+
+two:
+  contract: two
+  amount: 1
+  stype: MyString
+  name: MyString
+  cdparent: MyString
+  desc: MyText

@@ -1,0 +1,68 @@
+<div class="row mb-3">
+    <div class="col-12">
+    <label class="form-label text-dark fw-semibold mb-1">Tên tác vụ:</label>
+    <p class="text-primary mb-0"><%= @form_data[:appointment]&.title %></p>
+    </div>
+</div> 
+
+<div class="row">
+    <div class="col-md-4 col-6 mb-3">
+        <label class="form-label text-dark fw-semibold mb-1">Thuộc đơn vị:</label>
+        <p class="mb-0"><%= @form_data[:appointment]&.department&.name %></p>
+    </div>
+    <div class="col-md-4 col-6 mb-3">
+        <label class="form-label text-dark fw-semibold mb-1">Họ và tên cá nhân <%= lib_translate("appointment.#{@form_data[:appointment].stype}").downcase %>:</label>
+        <p class="mb-0">
+            <%= @form_data[:appointment]&.user&.last_name %> 
+            <%= @form_data[:appointment]&.user&.first_name %> 
+            (<span class="text-muted"><%= @form_data[:appointment]&.user&.sid %></span>)
+        </p>
+    </div>
+    <%if @form_data[:status] != "created_preview" && @form_data[:appointment].stype == "BO_NHIEM" %>
+        <div class="col-md-4 col-6 mb-3">
+            <label class="form-label text-dark fw-semibold mb-1">Làm khảo sát:</label>
+            <p class="m-0"><%= @form_data[:appointment].is_survey == "YES" ? 'Có' : 'Không'%></p>
+        </div>
+    <% end%>
+</div>
+
+<div class="row">
+    <div class="col-md-4 mb-3">
+        <label class="form-label text-dark fw-semibold mb-1">Vị trí <%= lib_translate("appointment.#{@form_data[:appointment].stype}").downcase %>:</label>
+        <p class="mb-0"><%= @form_data[:appointment]&.positionjob&.name %></p>
+    </div>
+    <div class="col-md-4 mb-3">
+        <label class="form-label text-dark fw-semibold mb-1">Độ khẩn:</label>
+        <p class="fw-bold mb-0" style="color: <%= @form_data[:appointment]&.color_priority %>">
+            <%= @form_data[:appointment]&.priority_name %>
+        </p>
+    </div>
+    <%if @form_data[:status] == "created_preview" && @form_data[:appointment].stype == "BO_NHIEM" %>
+        <div class="col-md-4 mb-3">
+            <label class="form-label text-dark fw-semibold mb-1">Thời gian dự kiến:</label>
+            <p class="mb-0"><%= @form_data[:appointment]&.expected_appointment_date&.strftime("%d/%m/%Y") || "" %></p>
+        </div>
+    <%else%>
+        <%if @form_data[:appointment].stype == "BO_NHIEM" %>
+            <div class="col-md-4 mb-3">
+                <label class="form-label text-dark fw-semibold mb-1">Thời gian bổ nhiệm:</label>
+                <p class="mb-0"><%= @form_data[:appointment]&.appointment_date&.strftime("%d/%m/%Y") || "" %></p>
+            </div>
+        <%end%>
+    <%end%>
+</div>
+<%if @form_data[:status] != "created_preview" && @form_data[:appointment].is_survey == "YES" && @form_data[:appointment].stype == "BO_NHIEM"  %>
+    <div class="row">
+        <div class="col-12 mb-3">
+            <label class="form-label text-dark fw-semibold mb-1">Thời hạn lấy tín nhiệm:</label>
+            <p class="m-0"><%= @form_data[:appointment]&.trust_collection_period&.strftime("%d/%m/%Y")%></p>
+        </div>
+    </div>
+<%end%>
+        
+<div class="mb-2">
+    <label class="form-label text-dark fw-semibold mb-1">Lí do:</label>
+    <p>
+    <%= @form_data[:appointment]&.note.to_s.gsub(/\r\n|\r|\n/, '<br>').html_safe %>
+    </p>
+</div> 

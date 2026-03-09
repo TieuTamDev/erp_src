@@ -1,0 +1,508 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "select2-bootstrap-5-theme.min" %>
+  <%= stylesheet_link_tag "select2.min" %>
+  <%= javascript_include_tag '/assets/myjs/smallcalendar/small-calendar.js' %>
+<% end %>
+
+<% content_for :bottombody do %>
+  <%= javascript_include_tag 'select2.min.js' %>
+<% end %>
+
+<style>
+  #calendar-workshilf{
+    height: 466px;
+    overflow: scroll;
+    border: 1px solid #d1d1d1;
+  }
+  .calender-table thead th {
+    position: sticky !important;
+    top: -1px;
+    background: #f9f9f9;
+    z-index: 2;    
+    padding: 0px;
+    top: -1px;
+    border-bottom: 1px solid #efefef !important;
+  }
+  .calender-table td{
+    padding: 0px;
+    overflow: unset;
+  }
+  .group-column-day{
+    text-align: center;
+  }
+  .group-column{
+    padding: 0px !important;
+    width: 81px;
+  }
+  .event-item{
+    background-color:white;
+    border: 1px solid #d3cfcf;
+    border-radius: 5px;
+    padding: 2px 5px;
+    z-index: 1;
+    user-select:none;
+    overflow: hidden;
+    box-shadow: 0px 0px 4px 0px #00000040;
+    text-align: start;
+    text-wrap-mode: nowrap;
+  }
+  .event-item-month{
+    background-color: #72A7EE;
+    text-wrap-mode: nowrap;
+    border-radius: 4px;
+    overflow: hidden;
+    color: white;
+    margin-bottom: 3px;
+    width: 100%;
+    text-indent: 4px;
+  }
+
+  [data-cell-date]{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding:0px 3px;
+    user-select: none;
+  }
+
+  tr.row-hightlight td{
+    border-top: 2px solid #0EA5E9;
+    border-bottom: 2px solid #0EA5E9;
+  }
+
+  tr.row-hightlight td:first-child{
+    border-left: 2px solid #0EA5E9;
+  }
+
+  tr.row-hightlight td:last-child{
+    border-right: 2px solid #0EA5E9;
+  }
+
+  [data-switch-button]:checked {
+      background-color: #6750A4;
+      border-color: #6750A4;
+  }
+
+</style>
+<div class="card mb-3">
+  <div class="card-body pt-0">
+    <div class="tab-content">
+      <div class="row">
+        <div class="col">
+          <h5 class="mt-2 mb-3 overview_text"><%= lib_translate("Lịch làm việc của đơn vị") %></h5>
+        </div>
+      </div>
+      <div class="mt-0">
+        <div class="tab-content">
+          <div class="d-flex justify-content-between align-items-end mb-2">
+            <div class="d-flex">
+              <div onclick="onClickStepTime(-1)" class="d-flex justify-content-center align-items-center me-2" style="font-size: 24px;cursor: pointer;width: 30px;">
+                <span class="fas fa-angle-left"></span>
+              </div>
+              <div class="d-flex justify-content-center align-items-center">
+                <span><b class="display-current-time" style="user-select: none;"></b></span>
+              </div>
+              <div onclick="onClickStepTime(1)" class="d-flex justify-content-center align-items-center ms-2" style="font-size: 24px;cursor: pointer;width: 30px;">
+                <span class="fas fa-angle-right"></span>
+              </div>
+            </div>
+            <div>
+              <select class="form-select" name="calender-week-month" onchange="onChangeTimeType(this)">
+                <option value="week">Tuần</option>
+                <option value="month">Tháng</option>
+              </select>
+            </div>
+          </div>
+          <div id="calendar-workshilf" class="mb-2" style="background-color: white;"></div>
+          <div class="d-flex justify-content-between mb-2">
+            <div>
+              <%= form_tag shiftselections_get_workshifts_of_department_path, method: :get, id: "form-get-workshifts",remote:true, authenticity_token: true do %>
+                <div class="d-flex flex-wrap justify-content-end gap-2">
+                  <div class="form-input" style="max-width: 300px;">
+                    <input type="text" onkeydown="onSearchUser(event,this)" name="search" placeholder="Mã/Tên nhân sự" class="form-control me-2 h-38" maxlength="50">
+                  </div>
+                  <input name="page" value="1" class="d-none" hidden/>
+                  <input name="per_page" value="25" class="d-none" hidden/>
+                  <input name="week_num" value="" class="d-none" hidden/>
+                  <input name="year" value="" class="d-none" hidden/>
+                </div>
+              <%end%>
+            </div>
+          </div>
+          <div class="table-responsive scrollbar mb-2">
+            <table id="attend-request" class="table table-bordered fs--1 mb-0 mt-0">
+              <thead class="bg-200 text-900">
+              <tr>
+                <th><%= lib_translate("Mã nhân sự") %></th>
+                <th><%= lib_translate("Tên nhân sự") %></th>
+                <th><%= lib_translate("Ngày gửi") %></th>
+                <th class="text-center"><%= lib_translate("Trạng thái") %></th>
+                <th class="text-center" style="width: 147px;"><%= lib_translate("Xem kế hoạch") %></th>
+              </tr>
+              </thead>
+              <tbody class="workshifts-list"></tbody>
+            </table>
+          </div>
+          <div class="pagin-wrap d-flex justify-content-center"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TODO: model duyệt chấm công -->
+<div class="modal fade" id="imageEvidenceModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="imageEvidenceModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-md">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Hình ảnh minh chứng</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body row">
+        <div class="col-md-12">
+          <div class="info-section">
+            <div class="image-evidence">
+              <img id="image-evidence" src="<%= image_url('no_avatar.jpg') %>" class="img-max-200" alt="Hình ảnh minh chứng">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary btn-approve" id="approve-btn">Duyệt</button>
+        <button type="button" class="btn btn-danger btn-reject" id="approve-btn">Từ chối</button>
+        <button type="button" class="btn btn-secondary btn-custom" data-bs-dismiss="modal">Đóng</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<%= form_tag shiftselections_update_shiflselections_path, method: :post, id: "form-approval-workshifts",remote:true, authenticity_token: true do %>
+ <textarea name="data" class="d-none" hidden> </textarea>
+ <input name="status" class="d-none" hidden/>
+<%end%>
+
+<script>
+  let selectItems = [];
+  var shiftselections = [];
+  let time_type = "week";
+  let currentTime = moment().startOf('isoWeek');
+  let campuses_map = <%=  @campuses_map.to_json.html_safe %>;
+  let colors = [
+                "#0EA5E9",
+                "#FC953B",
+                "#16A34A",
+                "#AF52DE",
+                "#0E37E8",
+                "#510EE8",
+                "#E80EA4",
+                "#A5E80E",
+                "#FCF53B",
+                "#42F915",
+                "#15F9CB",
+                "#DE5180",
+                "#0973A3",
+                "#D66503",
+                "#0F7233",
+                "#8222B2",
+                "#0926A2",
+                "#3809A2",
+                "#A20972",
+                "#73A209",
+                "#D6CE03",
+                "#28B804",
+                "#04B894",
+                "#B22151"
+              ]
+
+  function onSearchUser(e,input) {
+    if (e.key === "Enter" || e.keyCode === 13) {
+      e.preventDefault();
+      searchWorkshifts();
+    }
+
+  }
+
+  function onChangeTimeType(select) {
+    time_type = select.value;
+    $("#calendar-workshilf").smallCalendar("switchView", time_type);
+  }
+
+  function onClickStepTime(step) {
+    gotoWeek(step);
+  }
+
+  function getWeekYear() {
+    return {
+      weekNum: currentTime.isoWeek(),
+      year: currentTime.isoWeekYear()
+    };
+  }
+
+  function gotoWeek(step) {
+    if(step == 1){
+      currentTime.add(1, 'weeks');
+    }else if(step == -1){
+      currentTime.subtract(1, 'weeks');
+    }
+    displayTimeData();
+    submitFormGetWorkshifts(1);
+    $("#calendar-workshilf").smallCalendar("updateDate",currentTime);
+  }
+  function gotoMonth(step) {
+    if(step == 1){
+      currentTime.add(1, 'months');
+    }else if(step == -1){
+      currentTime.subtract(1, 'months');
+    }
+    displayTimeData();
+    submitFormGetWorkshifts(1);
+    $("#calendar-workshilf").smallCalendar("updateDate",currentTime);
+  }
+
+  function displayTimeData() {
+    let weekNum = currentTime.isoWeek();
+    $(".display-current-time").html(`Tuần ${weekNum} năm ${currentTime.isoWeekYear()}`);
+  }
+
+  function initPopups() {
+    $("#popupConfirmForm .modal-content").html(`
+        <div class="modal-header">
+          <h5 class="modal-title m-0">Duyệt kế hoạch</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="p-2">
+          <div class="select-list"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary confirm-btn" type="button">Duyệt</button>
+          <button class="btn btn-secondary close-btn" type="button" data-bs-dismiss="modal">Đóng</button>
+        </div>`);
+    }
+  
+  function searchWorkshifts(page = 1, per_page = 25) {
+    let form = $("#form-get-workshifts");
+    form.find('[name="per_page"]').val(per_page);
+    form.find('[name="page"]').val(page);
+
+    submitFormGetWorkshifts();
+  }
+
+  function onClickButtonPage(page) {
+    let form = $("#form-get-workshifts");
+    form.find('[name="page"]').val(page);
+    submitFormGetWorkshifts();
+  }
+
+  function clickApproval(status) {
+    getSelectData();
+
+    if (selectItems.length == 0) {
+      alert("Vui lòng chọn kế hoạch trước khi xử lý!");  
+      return;
+    }
+
+    let popupID = "popupConfirmForm";
+
+    // load popup list select:
+    loadSelectList(popupID,status);
+
+    let dialog = $("#" + popupID);
+    dialog.find(".confirm-btn").off().on('click',()=>{
+      if(status == "REJECTED" && !ValidApprovalForm()){
+        alert("Vui lòng nhập lý do từ chối!");
+        return;
+      }
+      submitUpdate(popupID,status);
+    });
+    dialog.find(".confirm-btn").html( status == "REJECTED" ? "Từ chối" : "Phê duyệt" );
+    dialog.find(".confirm-btn").toggleClass("btn-danger",false);
+    dialog.find(".confirm-btn").toggleClass("btn-primary",false);
+    dialog.find(".confirm-btn").toggleClass( status == "REJECTED" ? "btn-danger" : "btn-primary" ,true);
+    dialog.modal('show');
+  }
+
+  function ValidApprovalForm() {
+    let valid = true;
+    selectItems.forEach(id=>{
+      let reason = $(`#reason-${id}`).val() || "";
+      if(reason.trim() == ""){
+        valid = false;
+      }
+    });
+    return valid;
+  }
+
+  function submitUpdate(popupID,status) {
+    $(popupID).modal('hide');
+    let form = $("#form-approval-workshifts");
+    
+    let data = [];
+    selectItems.forEach(id=>{
+      let reason = $(`#reason-${id}`).val();
+      data.push({
+        id:id,
+        reason: reason
+      })
+    });
+    form.find('[name="data"]').val(JSON.stringify(data));
+    form.find('[name="status"]').val(status);
+    form.submit();
+    showLoadding(true);
+  }
+
+  function loadSelectList(popupID,status) {
+
+    let listSelect = [];
+
+    let popup = $("#"+popupID);
+    let list = popup.find(".select-list");
+    list.html(``);
+    let list_html = [];
+    selectItems.forEach(id=>{
+      let scheduleweek = scheduleweeks.find(item=>{return item.id == id});
+      let plan = `(${moment(scheduleweek.start_date).format("DD/MM/YYYY")} - ${moment(scheduleweek.end_date).format("DD/MM/YYYY")})`;
+      let user_name = scheduleweek.user_name;
+      let reason_input = status == "APPROVED" ? "" : `
+          <div class="mb-2">
+            <label class="form-label" for="reason-${scheduleweek.id}">Lý do từ chối: </label>
+            <textarea class="form-control" id="reason-${scheduleweek.id}" rows="3"></textarea>
+          <div>`;
+      list_html.push(`
+        <div>
+          <span class="me-2"><b>${user_name}<b></span>-<span class="ms-2" style="color:#447ce5"><b>${plan}</b></span>
+        </div>
+        ${reason_input}
+      `);
+    });
+    list.html(list_html.join(`<hr class="divider">`));
+  
+  }
+
+  function getSelectData() {
+    selectItems = [];
+    let select_ids = [];
+    $('.workshifts-list input[data-check-select][type="checkbox"]:checked').each((index,element)=>{
+      selectItems.push(element.value);
+    });
+  }
+
+  function onCheckWorkshilf(checkbox) {
+    let checked = checkbox.checked;
+    let input_count = $('.workshifts-list input[data-check-select][type="checkbox"]').length;
+    let temp = checked ? ":checked" : ":not(:checked)";
+    let check_count = $(`.workshifts-list input[data-check-select][type="checkbox"]${temp}`).length;
+
+    $(`[name="switch-view-${checkbox.value}"]`).prop("checked",checked);
+
+    if(input_count == check_count){
+      $('input[name="check_all"]').prop("checked",checked);
+    }else{
+      $('input[name="check_all"]').prop("checked",false);
+    }
+    loadEventCalendar();
+  }
+
+  function onCheckViewWorkshilf(checkbox) {
+    loadEventCalendar();
+  }
+
+  function onCheckAllWorkshilf(checkbox) {
+    let checked = checkbox.checked;
+    $('.workshifts-list input[type="checkbox"][data-check-select]').prop("checked",checked);
+    $('.workshifts-list input[type="checkbox"][data-check-select]').each((index,element)=>{
+      $(`[data-switch-view="${element.value}"]`).prop("checked",checked);
+    })
+    loadEventCalendar();
+  }
+
+  function loadEventCalendar() {
+	  let events = []
+    $('.workshifts-list input[type="checkbox"][data-switch-view]:checked').each((index,element)=>{
+      let color = colors[index];
+      let scheduleweek = scheduleweeks.find(item=>{return item.id == element.value});
+      if(scheduleweek){
+        events = events.concat(shiftselections.filter(item=>{return item.scheduleweek_id == element.value}).map(item=>{
+
+          return {
+            id: item.id,
+            user_id:scheduleweek.user_id,
+            date:moment(item.work_date).format("YYYY-MM-DD"),
+            title: `${scheduleweek.user_name}`,
+            start:item.start_time,
+            end:item.end_time,
+            color:color,
+            type: item.is_day_off,
+            location: item.location,
+          }
+        }));
+      }
+    });
+    $("#calendar-workshilf").smallCalendar("loadEvents",events);
+  }
+
+  function onApproval(success) {
+    $(".modal").modal("hide");
+    if(success){
+      submitFormGetWorkshifts();
+      showAlert("Cập nhật thành công","success");
+    }else{
+      showAlert("Lỗi khi cập nhật","danger");
+    }
+  }
+
+  function submitFormGetWorkshifts(page) {
+    let day_range = getWeekYear();
+    let form = $("#form-get-workshifts");
+    form.find('[name="week_num"]').val(day_range.weekNum);
+    form.find('[name="year"]').val(day_range.year);
+    if (page){
+        form.find('[name="page"]').val(page);
+    }
+    form.submit();
+    showLoadding(true);
+  }
+
+  function initCalendar() {
+    $("#calendar-workshilf").smallCalendar({
+      currentTime: currentTime,
+      renderWeekEvent: renderWeekEvent
+    });
+  }
+
+  function renderWeekEvent(event){
+    switch (event.type) {
+        case "ON-LEAVE":
+            is_day_off = "Nghỉ phép"
+            type = true
+            break;
+        case "HOLIDAY":
+            is_day_off = "Nghỉ lễ"
+            type = true
+            break;
+        case "TEACHING-SCHEDULE":
+            is_day_off = "Lịch giảng dạy"
+            type = true
+            break;
+        case "WORK-TRIP":
+            is_day_off = "Công tác"
+            type = true
+            break;
+        default:
+            is_day_off = ""
+            type = false
+    }
+    let detail_content = type ? is_day_off : `${event.start} - ${event.end}`;
+    let location_content = type ? "" : `| ${campuses_map[event.location]}`;
+    return `<div class="event-item text-truncate d-block" style="position: absolute;border-left: 4px solid ${event.color};" data-bs-toggle="tooltip" data-bs-placement="top" title="${event.title} ${detail_content} ${location_content}">
+                <span style="color:${event.color};filter: brightness(85%);font-weight: 600;">${event.title}</span> <span style="color:${event.color}"> ${detail_content} </span> <span style="color:${event.color}"> ${location_content} </span>
+             </div>`;
+  }
+  $(document).ready(function () {
+      initCalendar();
+      initPopups();
+      displayTimeData();
+      searchWorkshifts(1,25);
+  })
+
+</script>

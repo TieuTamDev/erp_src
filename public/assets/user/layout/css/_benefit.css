@@ -1,0 +1,5 @@
+.active .benefit-tab-pagin{
+    background-color: var(--falcon-badge-soft-light-color);
+    color: var(--falcon-badge-soft-light-background-color);
+    pointer-events: none;
+}

@@ -1,0 +1,2 @@
+class Contracttime < ApplicationRecord
+end

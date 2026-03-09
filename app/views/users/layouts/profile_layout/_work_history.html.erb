@@ -1,0 +1,218 @@
+<!-- Author: LNQ.Thai -->
+<% content_for :style_profile do %>
+      <!-- Bỏ style vào đây nhé! thanks -->
+     
+<% end %>
+
+<style>
+  .form_company{
+    border-radius: 5px;
+    background: var(--falcon-badge-soft-primary-background-color);
+    padding: 0px 20px 20px 20px;
+    box-shadow: rgb(100 100 111 / 20%) 0px 7px 29px 0px;
+  }
+  #title_company{
+    color: var(--falcon-orange) !important;
+  }
+  #title_company:hover{
+    color: var(--falcon-btn-falcon-success-color) !important;
+  }
+  #id_cancel_company{
+    color: var(--falcon-orange) !important;
+  }
+</style>
+
+<% content_for :javascript_profile do %> 
+      <!-- Bỏ Javascript vào đây nhé! thanks -->
+<script>
+
+  let err_blank_name_company= "<%= lib_translate('Please_enter_your_name_company')%>";
+  let err_blank_position_com="<%= lib_translate('Please_enter_your_position_company')%>";
+  let err_blank_period ="<%= lib_translate('Please_enter_your_period_company')%>";
+  let err_blank_leader= "<%= lib_translate('Please_enter_your_leader_company')%>";
+  let err_blank_working_part= "<%= lib_translate('Please_enter_your_working_part_company')%>";
+  let add_work_history = "<%= lib_translate('Add_work_history') %>";
+  let update_work_history = "<%= lib_translate('Update_work_history') %>";
+  let href_company = '<%= url_for(action: :work_history_del)%>';
+  let mess_del_company="<%= lib_translate('Are_you_sure_to_delete_this_holiday_of')%>";
+</script>
+<%= javascript_include_tag '/assets/myjs/company.js' %>
+<% end %>
+
+<hr class="mt-4 mb-3" style="width: 100%; height: 4px; background:  var(--falcon-badge-soft-secondary-background-color);">
+<div class="row">
+  <div id="txt_work_history_title" class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 col-xxl-12 tag d-flex align-items-center">
+    <h5 class="m-0 mb-2"  style="font-size: 17px;"><%= lib_translate("Work_history") %></h5> 
+  </div>
+  <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 col-xxl-12 action-right-top d-flex align-items-center justify-content-end">
+          <% if is_access(session["user_id"], request.env["PATH_INFO"] == "/user/details" ? "USER-DETAILS" : request.env["PATH_INFO"] == "/user/profile" ? "USER-PROFILE" : "","ADD")  %>
+          <a class="nav-link ps-2 pe-2 border-end border-2 fw-semi-bold" role="button" style="font-size: 13px;" data-bs-toggle="collapse" href="#open_form_add_up_work_history" role="button" aria-expanded="false" aria-controls="open_form_add_up_work_history" onclick="addWorkHistory()" id="title_company">
+          </a>
+        <% end %>
+   
+    <a id="id_cancel_company" class=" nav-link ps-2 pe-2 border-end border-2 fw-semi-bold"  style="display:none; font-size: 13px;" data-bs-toggle="collapse" href="#open_form_add_up_work_history" role="button" aria-expanded="false" aria-controls="open_form_add_up_work_history">
+      <%= lib_translate("Cancle") %> 
+    </a>  
+    <a class="nav-link ms-3 me-2" role="button" onclick="clickCollapseWorkHistory(this)" data-bs-toggle="collapse" href="#open_form_work_history" role="button" aria-expanded="false" aria-controls="open_form_work_history">
+      <span class="fas fa-caret-down" id="collapse-icon-work-history"></span>
+    </a>
+  </div>
+</div>
+
+<div class="collapse table_vi_tri_cv"  id="open_form_add_up_work_history">
+  <div class="mt-2 mb-3 form_company">
+    <%= form_for @work_history, :url => user_work_history_update_path, html:  {method: :post, id:"form_add_up_company" } do |f| %>
+      <div class="row">
+        <div class="erro_labble mb-2 mt-3" style="height: 40px">
+          <p style=" display: none; color: rgb(197 82 82); border: 1px solid rgb(199 136 136 / 23%); background: rgb(255 54 54 / 16%); border-radius: 5px; padding: 10px; margin-right: 15px;  margin-left: 15px; " 
+          id="erro_company">
+          </p>
+        </div>
+        <div class="id_company d-none">
+          <div class="form_group">
+            <%= f.label lib_translate('id_company')%>
+            <%= f.text_field :id, class:'form-control text_field_id_of_company' , id:'text_field_id_of_company', name:'text_field_id_of_company'%>
+          </div>
+        </div>
+        <div class="Apply_id_company d-none">
+          <div class="form_group">
+            <%= f.label lib_translate('Apply_id')%>
+            <%= f.text_field :apply_id, class:'form-control' , name:'text_field_apply_id_company',id:'text_field_apply_id',  value: @apply.first.id %>
+          </div>
+        </div>
+
+        <div class="col-12 col-lg-12 col-xl-6 col-xxl-6 d-flex flex-column">
+          <div class="Name_of_company">
+            <div class="form_group">
+              <%= f.label lib_translate('Name_of_company')%> <span style="color:red;" class="red">* </span>
+              <%= f.text_field :name, class:'form-control text_field_name' , id:'text_field_name', name:'text_field_name'%>
+            </div>
+          </div>
+          <div class="Position_of_company">
+            <div class="form_group">
+              <%= f.label lib_translate('Position_of_company')%><span style="color:red;" class="red">* </span>
+              <%= f.text_field :position, class:'form-control text_field_position' , id:'text_field_position', name:'text_field_position'%>
+            </div>
+          </div>
+          <div class="Period_in_company">
+            <div class="form_group">
+              <%= f.label lib_translate('Period_in_company')%><span style="color:red;" class="red">* </span>
+              <%= f.text_field :period, class:'form-control text_field_period' , id:'text_field_period', name:'text_field_period'%>
+            </div>
+          </div>
+
+
+        </div>
+
+        <div class="col-12 col-lg-12 col-xl-6 col-xxl-6 d-flex flex-column">
+          <div class="Leader_in_company">
+            <div class="form_group">
+              <%= f.label lib_translate('Leader_in_company')%>
+              <%= f.text_field :leader, class:'form-control text_field_leader' , id:'text_field_leader', name:'text_field_leader'%>
+            </div>
+          </div>
+
+          <div class="Leader_in_company">
+            <div class="form_group">
+              <%= f.label lib_translate('Working_parts')%>
+              <%= f.text_field :department, class:'form-control text_field_working_part' , id:'text_field_working_part', name:'text_field_working_part'%>
+            </div>
+          </div>
+
+          <div class="Status_company mt-4">
+            <div class="form_group d-flex flex-row">
+              <%= f.label lib_translate("Status_1") %>                  
+              <div class="ms-3  d-flex align-item-center"  style="border: none;box-shadow: none;">
+                <input checked type="radio" id="company_status_ACTIVE" class="form-check-input me-1" value="ACTIVE" name="company_status_add" ></option><label class="form-check-label" for="company_status_ACTIVE" style="cursor: pointer">Active</label>
+                <input  type="radio" id="company_status_INACTIVE" class="form-check-input ms-2 me-1" value="INACTIVE" name="company_status_add" ></option><label class="form-check-label" for="company_status_INACTIVE" style="cursor: pointer">Inactive</label>
+              </div>
+            </div>
+          </div> 
+        </div>
+
+        <div class="Comments_in_company">
+          <div class="form_group">
+            <%= f.label lib_translate('Comments_in_company')%>
+            <%= f.text_area :comments, class:'form-control text_field_comments' , id:'text_field_comments', name:'text_field_comments'%>
+          </div>
+        </div>     
+
+        <div class="align-items-center mt-2 d-flex justify-content-end" style="width:100%">
+          <button type="button" style="width:100%;" name="commit" value="Lưu thông tin" id="button_add_up_company" class="btn btn-primary ps-2 pe-2 d-flex align-items-center justify-content-center " onclick="loading('info')" >
+            <div class="spinner-border text-success me-2 d-none" id="spinner-loading" role="status" style="width:20px;height:20px">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <span class="m-0"><%= lib_translate("Save") %></span>
+          </button>
+        </div>
+      </div>
+
+    <%end%>
+  </div>
+  
+</div>
+
+<div class="table-responsive scrollbar collapse show" id="open_form_work_history">
+  <table class="table" style="border: none; border-color: var(--falcon-bg-navbar-glass);">
+    <thead style="color: var(--falcon-btn-falcon-success-active-color); font-size: 13px;">
+      <tr>
+        <th scope="col"><%= lib_translate("Company") %> </th>
+        <th scope="col"><%= lib_translate("Position_of_company") %> </th>
+        <th scope="col"><%= lib_translate("Time") %> </th>
+        <th class="text-end" scope="col"> </th>
+      </tr>
+    </thead>
+    <tbody>
+      <% Company.where(apply_id: @apply.first.id).order("created_at DESC").each do |work| %>
+        <tr>
+          <td style="vertical-align: middle;" >
+            <h6 style="font-weight: 600;"> 
+              <%= work.name%> 
+            </h6> 
+            <h6 class="m-0 p-0" style="color: var(--falcon-badge-soft-secondary-color); font-size: 13px;">
+              <%= work.leader%>
+            </h6>
+          </td>
+             
+          <td style="vertical-align: middle;" >
+          <h6 style="font-weight: 600;">
+              <%= work.position%>
+          </h6>
+          </td>
+              
+          <td style="vertical-align: middle;" >
+            <h6 style="font-weight: 600;"> 
+              <%= work.period%>
+            </h6>
+          </td>
+          <td style="vertical-align: middle; min-width: 70px" class="text-end">
+            <div class="m-0 p-0">
+                <% if is_access(session["user_id"], request.env["PATH_INFO"] == "/user/details" ? "USER-DETAILS" : request.env["PATH_INFO"] == "/user/profile" ? "USER-PROFILE" : "","EDIT")%>
+                        <button class="btn btn btn-link p-0 m-0" style="color: var(--falcon-avatar-name-bg); padding: 0px 5px 0px 5px !important" type="button" data-bs-toggle="collapse" href="#open_form_add_up_work_history" role="button" aria-expanded="false" aria-controls="open_form_add_up_work_history" title="Edit" 
+                          onclick="updateCompanyWorkHistory(
+                            `<%= work.id%>`,
+                            `<%= work.name%>`,
+                            `<%= work.position%>`,
+                            `<%= work.period%>`,
+                            `<%= work.leader%>`,
+                            `<%= work.comments%>`,
+                            `<%= work.status%>`,
+                            `<%= work.department%>`)">
+                            <span class="fas fa-edit"></span>
+                        </button>
+                  <% end %>
+                <% if is_access(session["user_id"], request.env["PATH_INFO"] == "/user/details" ? "USER-DETAILS" : request.env["PATH_INFO"] == "/user/profile" ? "USER-PROFILE" : "","DEL")%>
+                          <a onclick="clickDeleteWorkHistory(`<%= work.id %>`,`<%= work.name %>`,`<%= work.apply.user.id%>`)" style="cursor: pointer" >
+                            <span class="text-danger fas fa-trash"  style="width: 12px" ></span>
+                          </a>
+                 <% end %>
+            </div>
+          </td>
+        </tr> 
+      <% end %>
+    </tbody>
+  </table>
+</div>
+<script>
+  
+</script>

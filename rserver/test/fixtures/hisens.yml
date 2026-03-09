@@ -1,0 +1,31 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  emailnotification: one
+  name: MyString
+  sent_when: MyString
+  slocation: MyString
+  note: MyText
+  email_subject_en: MyString
+  email_content_en: MyText
+  email_subject_ja: MyString
+  status: MyString
+  email_content_ja: MyText
+  mdate: 2022-07-01 11:40:57
+  owner: MyString
+  application: MyString
+
+two:
+  emailnotification: two
+  name: MyString
+  sent_when: MyString
+  slocation: MyString
+  note: MyText
+  email_subject_en: MyString
+  email_content_en: MyText
+  email_subject_ja: MyString
+  status: MyString
+  email_content_ja: MyText
+  mdate: 2022-07-01 11:40:57
+  owner: MyString
+  application: MyString

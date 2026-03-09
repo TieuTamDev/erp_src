@@ -1,0 +1,14 @@
+.progess_loading {
+    position: fixed;
+    top: 0;
+    width: 100% !important;
+    height: 100vh !important;
+    background: hsl(0, 0%, 100%);
+    z-index: 9999;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+    

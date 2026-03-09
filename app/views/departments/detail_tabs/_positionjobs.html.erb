@@ -1,0 +1,449 @@
+<style>
+    .task-option {
+        text-align: center;
+        padding: 2rem 1rem;
+        border-radius: 25px;
+        border: 1px solid #dee2e6;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .task-option:hover {
+        border-color: #0d6efd;
+        box-shadow: 0 0 10px rgba(13, 110, 253, 0.2);
+    }
+
+    .task-option.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        background-color: #f1f1f1;
+    }
+
+    .task-option:hover:not(.disabled) {
+        background-color: #f8f9fa;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .task-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        margin: 0 auto 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .select2-container .select2-selection--multiple .select2-selection__rendered {
+        display: flex;
+    }
+    .select2-container--bootstrap-5 .select2-dropdown .select2-results__options .select2-results__option.select2-results__option--disabled, .select2-container--bootstrap-5 .select2-dropdown .select2-results__options .select2-results__option[aria-disabled=true] {
+        color: #e3e3e3;
+    }
+    .btn.rounded-circle {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0 !important;
+    }
+
+    .btn.rounded-circle i {
+        margin: 0 !important;
+        line-height: 1 !important;
+    }
+</style>
+<div class="page-list-positionjob">
+    <div class="mt-1 d-flex">
+        <div class="me-auto">
+            <%= form_tag departments_department_details_path(tab: @tab_names[:positionjobs], lang: session[:lang], department_id: params[:department_id]), method: :post do %>
+                <div class="input-group">
+                    <%= text_field_tag :search, params[:search], class: "form-control", id: "function_search", placeholder: "Tìm kiếm" %>
+                    <span class="input-group-text bg-white">
+                        <span class="fas fa-search" style="color:#999999"></span>
+                    </span>
+                </div>
+            <% end %>
+        </div>
+        <% if is_access(session["user_id"], "POSITIONJOB-ADD", "ADD") %>
+            <button class="btn btn-primary me-3" data-bs-toggle="modal" data-bs-target="#modal-add-positionjob" onclick="onAddWorks()"><span class="fas fa-plus mr-2" data-fa-transform="shrink-3"></span> Thêm vị trí công việc</button>
+        <% end %>
+    </div>
+
+    <div class="mt-2">
+        <table class="table" style="background:white; margin-top: 15px;">
+            <thead>
+                <tr style="background: #F9FBFC;height: 38px;vertical-align: middle;">
+                    <th scope="col" style="width: 5%; text-align: center;">#</th>
+                    <th scope="col" style="width: 40%;">Tên vị trí công việc</th>
+                    <th scope="col" style="width: 15%;">Số lượng</th>
+                    <th scope="col" style="width: 40%;">Nhân sự</th>
+                    <!-- <th scope="col" style="width: 15%;">Trạng thái duyệt</th> -->
+                    <th scope="col" style="width: 10%; text-align: center;">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% @positionjobs.each_with_index do |p,index|%>
+                    <tr>
+                        <td style="text-align: center;">
+                            <%= (session[:page].to_i - 1) * session[:per_page].to_i + index + 1 %>
+                        </td>
+                        <td><%= p[:name] %></td>
+                        <td><%= p[:amount] %></td>
+                        <td class="" style="white-space: wrap;"><%= p[:users].map { |user| "<span class='mb-2'>#{user[:user_name]}</span>" }.join(", ").html_safe %></td>
+                        <!-- <td></td> -->
+                        <td style="text-align: center;">
+                            <div class="d-flex justify-content-center gap-2">
+                                <% if is_access(session["user_id"], "ERP-CCTC-POSITIONJOB","ADD") %>
+                                    <a class='btn btn-success btn-sm rounded-circle flex-shrink-0' style="width: 35px; height: 35px;" href="<%= departments_assign_stasks_path(positionjob_id: p[:id], department_id: params[:department_id], lang: session[:lang])%>" type='button' data-toggle='tooltip' data-placement='top' title='Phân công công việc'>
+                                        <i class='fas fa-clipboard-list'></i>
+                                    </a>
+                                <% end %>
+
+                                <% if is_access(session["user_id"], "ERP-CCTC-POSITIONJOB","EDIT") %>
+                                    <a type='button' class='btn btn-primary btn-sm rounded-circle flex-shrink-0' style="width: 35px; height: 35px;" 
+                                        onclick='onEditWorks("<%= p[:id] %>", "<%= p[:amount] %>", <%= p[:users].map { |user| user[:id] } %>)' data-toggle='tooltip' data-placement='top' title='Chỉnh sửa' data-bs-toggle='modal' data-bs-target='#modal-add-positionjob'>
+                                        <i class='fas fa-pen'></i>
+                                    </a>
+                                <% end %>
+
+                                <% if is_access(session["user_id"], "ERP-CCTC-POSITIONJOB","DEL") %>
+                                    <a type='button' class='btn btn-danger btn-sm rounded-circle flex-shrink-0' style="width: 35px; height: 35px;" 
+                                        onclick='onDeleteWorks("<%= p[:id] %>", "<%= p[:name] %>")' data-toggle='tooltip' data-placement='top' title='Xóa' data-bs-toggle='modal' data-bs-target='#genericDeleteModal'>
+                                        <i class='fas fa-trash-alt'></i>
+                                    </a>
+                                <% end %>
+                            </div>
+                        </td>
+                    </tr>
+                <%end%>
+            </tbody>
+        </table>
+        <div class='d-flex justify-content-between align-items-center mt-3'>
+            <div style="font-size: 14px; font-weight: 400; color: #4E606E;">
+                <%
+                    current_page = session[:page]&.to_i || 1
+                    per_page = session[:per_page]&.to_i || 10
+                    start_record = (current_page - 1) * per_page + 1
+                    end_record = [current_page * per_page, @total_records].min
+                %>
+
+                <%=lib_translate('Show')%> <%= start_record %>-<%= end_record %> <%=lib_translate('Up_to')%> <%= @total_records %> <%=lib_translate('Record')%>
+            </div>
+            <div>
+                <%= render_pagination_limit_offset(departments_department_details_path(tab: @tab_names[:positionjobs], lang: session[:lang], department_id: params[:department_id], per_page: session[:per_page], search: session[:search]), 10, @positionjobs.count).html_safe %>
+            </div>
+        </div>
+    </div>
+</div>
+<%= form_tag works_update_users_into_work_path, method: :post, class: "", id: "form-update-works", authenticity_token: true do %>
+    <input type="hidden" name="department_id" value="<%= params[:department_id] %>">
+    <input type="hidden" name="positionjob_id_old" value=null>
+    <input type="hidden" name="type" value="add" id="modal-type">
+    <div class="modal fade" id="modal-add-positionjob" tabindex="-1" role="dialog" aria-hidden="true"
+        data-bs-focus="false">
+        <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 500px">
+            <div class="modal-content position-relative">
+                <div class="modal-body p-0">
+                    <div
+                        class="rounded-top-3 py-3 ps-4 pe-3 bg-body-tertiary d-flex align-items-center justify-content-between">
+                        <h4 class="mb-1" id="title-modal">Thêm vị trí công việc </h4>
+                        <button type="button"
+                                class="btn-close btn btn-sm btn-circle d-flex flex-center transition-base"
+                                data-bs-dismiss="modal" aria-label="Close">
+                        </button>
+                    </div>
+                    <div class="p-4 pb-0">
+                        <div class="mb-4 position-relative">
+                            <label class="col-form-label" for="recipient-name">Vị trí công việc</label>
+                            <select class="form-select select2" placeholder="Chọn vị trí công việc" name="positionjob_id" id="positionjob-select">
+                                <!-- Options sẽ được cập nhật bằng js -->
+                            </select>
+                            <div id="positionjob-error" class="invalid-feedback" style="display: none; position: absolute; top: 95%; left: 0;">
+                                Vui lòng chọn vị trí công việc
+                            </div>
+                        </div>
+                        <div class="mb-4 position-relative">
+                            <label class="col-form-label" for="recipient-name">Số lượng nhân sự</label>
+                            <input type="text" class="form-control" name="amount" onkeyup="formatNumber(this)" maxlength="3" placeholder="Nhập số lượng nhân sự" id="amount"/>
+                            <div id="amount-error" class="invalid-feedback" style="display: none; position: absolute; top: 95%; left: 0;">
+                                Vui lòng nhập số lượng nhân sự
+                            </div>
+                        </div>
+                        <div class="mb-4 position-relative">
+                            <label class="col-form-label" for="message-text">Nhân sự</label>
+                            <select class="form-select select2" placeholder="Vui lòng chọn nhân sự" multiple name="users_id[]" id="">
+                                <% @users.each do |user| %>
+                                    <option value="<%= user.id %>"> <%= user.last_name %> <%= user.first_name %> (<%= user.sid %>) </option>
+                                <% end %>
+                            </select>
+                            <!-- <div id="user-error" class="invalid-feedback" style="display: none; position: absolute; top: 95%; left: 0;">
+                                Vui lòng chọn nhân sự.
+                            </div> -->
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Đóng</button>
+                    <button class="btn btn-primary" type="button" onclick="onSubmitPositionjob()">Lưu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+<% end %>
+
+<!-- modal remove -->
+<%= form_tag works_delete_path, method: :delete, id: "form-delete-works", authenticity_token: true do %>
+<div class="modal fade" id="genericDeleteModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="leaveRe questFormLabel" aria-hidden="true" data-bs-focus="false">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="genericDeleteModalLabel">Bạn chắc chắn với hành động này?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" name="positionjob_id">
+                <p class="content-remove text-danger mb-0">Bạn có đồng ý xóa vị trí công việc: <span class="text-danger fw-bold name_positionjob"></span>?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-bs-dismiss="modal" aria-label="Close">Đóng</button>
+                <button type="submit" id="confirmDeleteButton" class="btn btn-danger">Xóa</button>
+            </div>
+        </div>
+    </div>
+</div>
+<% end %>
+
+<div class="modal fade" id="taskSelectionModal" data-bs-keyboard="false" data-bs-backdrop="static" tabindex="-1" aria-labelledby="taskSelectionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="taskSelectionModalLabel">Chọn tác vụ</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <% if is_access(session[:user_id], "APPOINTMENT-CREATE","ADD")%>
+                    <div class="col">
+                        <a data-remote="true" class="handle_btn" href="<%= render_form_appointments_path('created') %>">
+                            <div class="task-option">
+                                <img class="task-icon" src="<%= image_path("/assets/image/bonhiem.svg") %>">
+                                <div>
+                                    Bổ nhiệm
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <%end%>
+
+                    <div class="col">
+                        <div class="task-option disabled">
+                            <img class="task-icon" src="<%= image_path("/assets/image/miennhiem.svg") %>">
+                            <div>Miễn nhiệm</div>
+                        </div>
+                    </div>
+                    <div class="col d-none">
+                        <div class="task-option disabled">
+                            <img class="task-icon" src="<%= image_path("/assets/image/phancong.svg") %>">
+                            <div>Phân công</div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="task-option disabled">
+                            <img class="task-icon" src="<%= image_path("/assets/image/dieuchuyen.svg") %>">
+                            <div>Điều chuyển</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    let positionjobsData = {};
+    try {
+        positionjobsData = {
+            add: <%= raw (@positionjobs_to_add || []).to_json %>,
+            edit: <%= raw (@positionjobs_to_edit || []).to_json %>
+        };
+    } catch (e) {
+        positionjobsData = {
+            add: [],
+            edit: []
+        };
+    }
+
+    function updatePositionjobOptions(type) {
+        const $select = $("select[name='positionjob_id']");
+
+        let positionjobs = [];
+        if (positionjobsData && positionjobsData[type] && Array.isArray(positionjobsData[type])) {
+            positionjobs = positionjobsData[type];
+        } else if (positionjobsData && positionjobsData.add && Array.isArray(positionjobsData.add)) {
+            positionjobs = positionjobsData.add;
+        } else {
+            positionjobs = [];
+        }
+
+        $select.empty();
+
+        $select.append('<option value="">Chọn vị trí công việc</option>');
+
+        if (Array.isArray(positionjobs)) {
+            positionjobs.forEach(function(positionjob) {
+                if (positionjob && positionjob.id && positionjob.name) {
+                    $select.append(`<option value="${positionjob.id}">${positionjob.name}</option>`);
+                }
+            });
+        }
+
+        if ($select.hasClass("select2-hidden-accessible")) {
+            $select.trigger('change.select2');
+        }
+    }
+
+    function toggleSelectDisabled() {
+        const type = $("input[name='type']").val();
+        const $select = $("select[name='positionjob_id']");
+        
+        if (type === 'edit') {
+            // Disable cho edit mode
+            $select.prop('disabled', true);
+            if ($select.hasClass("select2-hidden-accessible")) {
+                $select.select2('destroy');
+                $select.select2({
+                    width: '100%',
+                    theme: "bootstrap-5",
+                    placeholder: $select.attr("placeholder"),
+                    closeOnSelect: true,
+                    disabled: true
+                });
+            }
+        } else {
+            // Enable cho add mode
+            $select.prop('disabled', false);
+            if ($select.hasClass("select2-hidden-accessible")) {
+                $select.select2('destroy');
+                $select.select2({
+                    width: '100%',
+                    theme: "bootstrap-5",
+                    placeholder: $select.attr("placeholder"),
+                    closeOnSelect: true,
+                    disabled: false
+                });
+            }
+        }
+    }
+
+    function onEditWorks(positionjob_id, pj_amount, users_id) {
+        $("input[name='type']").val('edit');
+        updatePositionjobOptions('edit');
+
+        $("select[name='positionjob_id']").val(positionjob_id).trigger('change');
+        $("select[name='users_id[]']").val(users_id).trigger('change');
+
+        $("#title-modal").text("Cập nhật vị trí công việc");
+        $("button[type='submit']").text("Cập nhật");
+
+        $("input[name='positionjob_id_old']").val(positionjob_id);
+        $("input[name='amount']").val(pj_amount);
+
+        toggleSelectDisabled();
+    }
+
+    function onAddWorks() {
+        $("input[name='type']").val('add');
+        updatePositionjobOptions('add');
+
+        $("input[name='positionjob_id_old']").val(null);
+        $("input[name='amount']").val('');
+
+        $("#title-modal").text("Thêm vị trí công việc");
+
+        $("select[name='positionjob_id'], select[name='users_id[]']").val("").trigger("change");
+
+        toggleSelectDisabled();
+    }
+
+    $(document).on('change', "input[name='type']", function() {
+        const type = $(this).val();
+        updatePositionjobOptions(type);
+        toggleSelectDisabled();
+    });
+
+    $(document).ready(function() {
+        const selects = [
+            "select[name='positionjob_id']",
+            "select[name='users_id[]']",
+            "select[name='function_id']"
+        ];
+        
+        selects.forEach(select => {
+            const selectElement = $(select);
+            if (selectElement.length) {
+                if (selectElement.hasClass("select2-hidden-accessible")) {
+                    selectElement.select2('destroy');
+                }
+                selectElement.select2({
+                    width: '100%',
+                    theme: "bootstrap-5",
+                    placeholder: selectElement.attr("placeholder"),
+                    closeOnSelect: true
+                });
+            }
+        });
+
+        const initialType = $("input[name='type']").val() || 'add';
+        updatePositionjobOptions(initialType);
+
+        toggleSelectDisabled();
+    });
+
+    function onDeleteWorks(positionjob_id, name) {
+        $(".name_positionjob").text(name);
+        $("input[name='positionjob_id']").val(positionjob_id)
+    }
+
+    function onSubmitPositionjob() {
+        let positionjob_id = $("select[name='positionjob_id']").val();
+        let users_id = $("select[name='users_id[]']").val();
+        let amount = $("input[name='amount']").val();
+        
+        $('#positionjob-error, #amount-error').hide();
+        $('select[name="user_id"], select[name="positionjob_id"], input[name="amount"]').removeClass('is-invalid');
+        if(positionjob_id == ""){
+            $('#positionjob-error').show();
+            $('select[name="positionjob_id"]').addClass('is-invalid');
+        }else if(amount == ""){
+            $('#amount-error').show();
+            $('input[name="amount"]').addClass('is-invalid');
+        }else{
+            $("#form-update-works").submit();
+        }
+    }
+
+    function renderTask(id, name, type_task) {
+        return `
+            <div class="pt-2 other_task" style="display: flex">
+                <input class="form-check-input mx-4" data-type="${type_task}" type="checkbox" name="stasks[]" id="${id}" value="${id}" checked>
+                <label class="form-check-label me-auto" for="${id}">${name}</label>
+            </div>
+        `
+    }
+    function renderUsers(id, name) {
+        return `
+            <div class="user pt-2" style="display: flex">
+                <input class="form-check-input mx-4" onclick="onSelectedUsers(this)" type="radio" name="user" id="${id}" value="${id}">
+                <label class="form-check-label me-auto" for="${id}">${name}</label>
+            </div>
+        `
+    }
+    function formatNumber(element) {
+        let value = element.value.replace(/[^0-9]/g, '').trim();
+        if (value == "") {
+            value = 0;
+        }else{
+            value = parseInt(isNaN(value) ? 0 : value)
+        }
+        
+        element.value = value;
+    }
+</script>

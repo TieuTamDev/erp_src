@@ -1,0 +1,132 @@
+.textarea-container {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #E5E7EB;
+}
+
+.custom-textarea {
+    border: 1px solid #E5E7EB;
+    padding: 15px;
+    font-size: 16px;
+    line-height: 1.6;
+    resize: vertical;
+    transition: border-color 0.3s ease;
+}
+
+.custom-textarea:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    outline: none;
+}
+
+.invalid-feedback {
+    display: none;
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+.is-invalid {
+    border-color: #dc3545 !important;
+}
+
+.select2-container .select2-selection--single.is-invalid,
+.select2-container .select2-selection--multiple.is-invalid {
+    border-color: #dc3545 !important;
+}
+
+/* pdf view */
+.pdf-container{
+    margin:0 auto;
+    position:relative;
+    width: fit-content;
+}
+.pdf-sign-list{
+    padding: 5px;
+    border: 1px solid #c1c1c1;
+    overflow: hidden;
+    background: #858585;
+}
+.pdf-sign-list .pdf-sign-image{
+    cursor: grab;
+    max-width: 130px;
+    margin-bottom:4px;
+}
+.pdf-sign-list .pdf-sign-image:hover{
+    box-shadow: 0px 0px 6px 0px #6e6d6d;
+    border-radius: 5px;
+}
+.pdf-page-list{
+    display:flex;
+    flex-direction:column;
+    background: #8f8f8f;
+    padding: 12px;
+    max-height: 700px;
+    overflow-y: scroll;
+    border: 1px solid #c1bdbd;
+}
+.pdf-page-wrap{
+    position:relative;
+}
+.pdf-page-space{
+    height:5px;
+}
+.pdf-canvas{
+
+}
+.pdf-page-edit-wrap{
+    position: absolute;
+    top:0;
+    left:0;
+    z-index:1;
+    width:100%;
+    height:100%;
+}
+.pdf-page-edit-area{
+    position:relative;
+    width:100%;
+    height:100%;
+    overflow: hidden;
+}
+.grap-preview{
+    position:absolute;
+    top:0;
+    left:0;
+    z-index: 1;
+    pointer-events: none;
+    box-shadow: 0px 0px 0px 2px #dfa43d;
+}
+.pdf-edit-element{
+    position:absolute;
+    top:0;
+    left:0;
+    cursor:move;
+}
+
+.page-state{
+    display: flex;
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 5px 5px 5px 5px;
+    border-bottom-right-radius: 5px;
+    justify-content: center;
+    align-items: center;
+    background: #28272794;
+    color: white;
+    z-index: 3;
+    pointer-events: none;
+}
+.pdf-edit-element-container{
+    display:flex;
+}
+.pdf-edit-element-wrap{
+    position: relative;
+}
+.element-selected .pdf-edit-element-wrap{
+    box-shadow: 0px 0px 0px 2px #3edf3d;
+}
+.pdf-edit-element-tool-wrap{
+    display:none;
+}

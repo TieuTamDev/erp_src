@@ -1,0 +1,17 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  qsurvey: one
+  answer: 
+  dtanswer: 2025-03-29 13:52:08
+  appointsurvey: one
+  status: MyString
+  note: MyText
+
+two:
+  qsurvey: two
+  answer: 
+  dtanswer: 2025-03-29 13:52:08
+  appointsurvey: two
+  status: MyString
+  note: MyText

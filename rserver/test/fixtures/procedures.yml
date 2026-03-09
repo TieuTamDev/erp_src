@@ -1,0 +1,13 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  stab: MyString
+  content: MyText
+  iorder: 1
+  notify: MyString
+
+two:
+  stab: MyString
+  content: MyText
+  iorder: 1
+  notify: MyString

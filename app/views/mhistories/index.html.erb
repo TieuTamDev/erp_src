@@ -1,0 +1,57 @@
+<style>
+    .dataTables_wrapper {
+      margin-top: 0 !important;
+    }
+</style>
+<div class="list_users">
+  <div class="bmtu_header_dashboard">
+    <h3 class="mt-2 overview_text"><%= lib_translate("List_mhistories")  %></h3>
+  </div>
+  <div class="card mb-3">
+    <div class="card-body pt-0">
+      <div class="tab-content mt-3">
+        <%= render_search_pagination(mhistories_index_path()).html_safe %>
+        <table id="table_mhistories" class="table table-bordered   fs--1 mb-0 table-hover" style="margin-top: 0px !important; margin-bottom: 0px !important">
+          <thead class="bg-200 text-900">
+            <tr>
+              <th class="sort" data-sort="stable" style="text-align: center; cursor: pointer;"><%= lib_translate("Item")  %></th>
+              <th class="sort" data-sort="fvalue" style="text-align: center; cursor: pointer;"><%= lib_translate("Fvalue")  %></th>
+              <th class="sort" data-sort="tvalue" style="text-align: center; cursor: pointer;"><%= lib_translate("Tvalue")  %></th>
+              <th class="sort" data-sort="owner" style="text-align: center; cursor: pointer;text-transform: capitalize;"><%= lib_translate("day")  %></th>
+              <th class="sort" data-sort="owner" style="text-align: center; cursor: pointer;"><%= lib_translate("Owner_history")  %></th>
+
+            </tr>
+          </thead>
+          <tbody class="list">
+              <% @allmhistories.each do |history|%>
+                  <tr>
+                    <td  style="text-alight:center;" class="stable"> <%=  !history.srowid.nil? && history.srowid != "" ? lib_translate(history.srowid) : history.srowid %> (<%=  !history.stable.nil? && history.stable != "" ?  lib_translate(history.stable) : history.stable   %>) </td>
+                    <td style="text-alight:center;" class="fvalue"> 
+                    <%= if history.fvalue.to_s.include?("+0700") == true
+                        history.fvalue.to_date.strftime("%d/%m/%Y ")
+                        else
+                        history.fvalue
+                        end
+                    %> 
+                    
+                    </td>
+                    <td style="text-alight:center; font-weight: 600;color: var(--falcon-orange);" class="tvalue"> 
+                     <%= if history.tvalue.to_s.include?("+0700") == true
+                        history.tvalue.to_date.strftime("%d/%m/%Y")
+                        else
+                        history.tvalue
+                        end
+                    %> 
+                     </td>
+                    <td style="text-alight:center;" class="owner"> <%= history.updated_at.strftime("%d/%m/%Y ") %> <%= history.updated_at.to_s.slice(10, 10)%> </td>
+                    <td style="text-alight:center;" class="owner"> <%= history.owner %> </td>
+                </tr>
+              <%end%>
+          </tbody>
+        </table>
+        <%= render_pagination_limit_offset(mhistories_index_path(lang: session[:lang], per_page: session[:per_page], search: session[:search]), 10, @allmhistories.count).html_safe %>
+      </div>
+    </div>
+  </div>
+</div>
+

@@ -1,0 +1,15 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  sfundction: MyString
+  organization: one
+  stream: one
+  valid_from: 2023-04-06 09:08:22
+  valid_to: 2023-04-06 09:08:22
+
+two:
+  sfundction: MyString
+  organization: two
+  stream: two
+  valid_from: 2023-04-06 09:08:22
+  valid_to: 2023-04-06 09:08:22

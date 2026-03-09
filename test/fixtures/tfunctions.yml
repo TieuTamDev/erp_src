@@ -1,0 +1,17 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: MyText
+  scode: MyString
+  sdesc: MyText
+  sorg: MyString
+  stype: MyString
+  department: one
+
+two:
+  name: MyText
+  scode: MyString
+  sdesc: MyText
+  sorg: MyString
+  stype: MyString
+  department: two

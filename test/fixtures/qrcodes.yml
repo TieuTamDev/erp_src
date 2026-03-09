@@ -1,0 +1,19 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  department: one
+  dtvalidfrom: 2025-06-26 10:35:38
+  dtvalidto: 2025-06-26 10:35:38
+  svalue: MyText
+  name: MyText
+  distance: MyText
+  status: MyString
+
+two:
+  department: two
+  dtvalidfrom: 2025-06-26 10:35:38
+  dtvalidto: 2025-06-26 10:35:38
+  svalue: MyText
+  name: MyText
+  distance: MyText
+  status: MyString

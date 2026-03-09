@@ -1,0 +1,27 @@
+<div style="max-width: 860px; margin: 0 auto; font-family: Arial, sans-serif; color: #333333; line-height: 1.6; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <div style="background: linear-gradient(324deg, #ffad45 0%, #c53239 100%); padding: 20px; border-radius: 8px 8px 0 0; text-align: center;">
+        <h2 style="margin: 0; color: #ffffff; font-size: clamp(18px, 4vw, 24px); text-transform: uppercase; letter-spacing: 1px;">Thông báo thời gian lịch giảng sắp kết thúc</h2>
+        <div style="margin-top: 15px; color: #ffffff; font-size: clamp(14px, 3vw, 16px);">
+            <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 4px; margin-top: 10px;">
+                Học phần: <strong><%= @mmodule_name %></strong>
+            </div>
+            <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 4px; margin-top: 10px;">
+                Thời gian: <strong><%= @time_schedule %></strong>
+            </div>
+            <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 4px; margin-top: 10px;">
+                Phòng học: <strong><%= @room_names %></strong>
+            </div>
+            <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 4px; margin-top: 10px;">
+                Lưu ý: <strong>Thầy/cô vui lòng trở lại để xác nhận kết thúc lịch dạy của mình</strong>
+            </div>
+        </div>
+    </div>
+
+    <div style="padding: 20px; background-color: #f8f9fa; border-radius: 0 0 8px 8px; border-top: 1px solid #e0e0e0;">
+        <p style="margin: 0 0 20px 0; color: #1a73e8; font-weight: bold;">Trân trọng,</p>
+        <div style="background-color: #fff4f4; border-radius: 4px; padding: 15px; border-left: 4px solid #dc3545;">
+            <strong style="color: #dc3545; display: block; margin-bottom: 5px;">Lưu ý:</strong>
+            <span style="color: #666666;">Đây là hộp thư thông báo nội bộ, đề nghị Quý Thầy/Cô không phản hồi vào mail này.</span>
+        </div>
+    </div>
+</div>

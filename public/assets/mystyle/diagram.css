@@ -1,0 +1,267 @@
+/* Author: Đinh Hoàng Vũ */
+/* container */
+.node-main{
+    overflow: hidden;
+    position: relative;
+    background-color: #F2F2F2;
+}
+.node-main svg {
+    pointer-events: none;
+    position: absolute;
+}
+.node-container{
+    background-color: white;
+    position: absolute;
+}
+.node-container::after {
+    content: ' ';
+    pointer-events: none;
+    display: block;
+    position: absolute;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 3000px;
+    height: 2000px;
+    background-color: white;
+}
+.node-main #remove-button{
+    pointer-events: all !important;
+}
+
+/* node */
+.node{
+    position: absolute;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    z-index: 4;
+    box-shadow: 0px 0px 0px 1px rgb(0 0 0 / 60%);
+}
+
+.node-grab{
+    box-shadow: 1px 2px 6px 2px rgba(0,0,0,0.4) !important;
+}
+
+.show-button {
+    z-index: 4 !important;
+}
+.show-button .select-path{
+    pointer-events: none;
+}
+.show-button .button-svg{
+    display: unset;
+    opacity: 1 !important;
+    pointer-events: all !important;
+}
+
+.show-button.node {
+    box-shadow: 0px 0px 0px 1px rgb(0 0 0 / 60%);
+}
+
+.show-button .node-point{
+    display: block;
+    opacity: 1 !important;
+}
+
+.node:hover .node-point{
+    display: block;
+}
+
+.node:hover .button-svg{
+    display: block;
+    opacity: 0.6;
+}
+
+.node p {
+    margin: 0;
+    padding: 0;
+    padding: 10px;
+}
+
+.node-point{
+    transform: translate(-50%,-50%);
+    border-radius: 2px;
+    background-color: rgb(201 120 120);
+    transition: 50ms ease-in-out;
+    position: absolute;
+    display: none;
+    z-index: 10;
+    cursor: pointer;
+}
+
+.vetical{
+    width: 3px;
+    height: 9px;
+}
+
+.horizon{
+    width: 9px;
+    height: 3px;
+}
+
+.node-point.vetical:hover{
+    width: 5px;
+    height: 12px;
+}
+.node-point.horizon:hover{
+    width: 12px;
+    height: 5px;
+}
+
+.node-point:hover{
+    /* background-color: rgb(91 158 255); */
+}
+
+/* point position */
+.point-top{
+    top: 0;
+    left: 50%;
+}
+.point-left{
+    top: 50%;
+    left: 0;
+}
+.point-right{
+    top: 50%;
+    left: 100%;
+}
+.point-bottom{
+    top: 100%;
+    left: 50%;
+}
+
+/* resize */
+.right-resize{
+    width: 4px;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: calc(100% - 2px);
+    z-index: 2;
+    cursor: col-resize;
+}
+.bottom-resize{
+    width: 100%;
+    height: 4px;
+    position: absolute;
+    top: calc(100% - 2px);
+    left: 0;
+    z-index: 2;
+    cursor: row-resize;
+}
+.corner-resize{
+    width: 4px;
+    height: 4px;
+    position: absolute;
+    top: calc(100% - 4px);
+    left: calc(100% - 4px);
+    z-index: 2;
+    cursor: se-resize;
+}
+
+/* level */
+div[data-level="0"]{
+    background-color: #ffffff;
+    color: rgb(46, 46, 46);
+}
+div[data-level="1"]{
+    background-color: #C71014;
+    color: white;
+}
+div[data-level="2"]{
+    background-color: #4473C5;
+    color: white;
+}
+div[data-level="3"]{
+    background-color: #FFB600;
+}
+
+/* Arrow */
+.arrow{
+    position: absolute;
+    z-index: 3;
+    overflow: inherit;
+    border: 1px dashed transparent;
+}
+.arrow path{
+    pointer-events: stroke;
+}
+.arrow-preview{
+    position: absolute;
+    z-index: 40;
+    overflow: inherit;
+    border: 1px dashed transparent;
+    opacity: 0;
+}
+.arrow-preview path{
+    pointer-events: none;
+}
+
+circle[data-move-direct ="x"]{
+    cursor: e-resize;
+}
+circle[data-move-direct ="y"]{
+    cursor: n-resize;
+}
+
+.button-svg{
+    pointer-events: all;
+    cursor: pointer;
+    overflow: unset;
+    display: none;
+    z-index: 5;
+}
+.scale-background{
+    pointer-events: all;
+}
+.scale-background,.scale-path{
+    transition: all 50ms ease-in-out;
+}
+.button-svg:hover .scale-background{
+    scale: 1 !important;
+}
+.button-svg:hover .scale-path{
+    scale: 0.8 !important;
+}
+
+
+.force-hidden{
+    display: none !important;
+}
+
+.hover-show .button-label{
+    display: unset;
+    pointer-events: none;
+}
+.hover-show{
+    z-index: 9999;
+}
+
+.grid-line::before {
+    content: ' ';
+    pointer-events: none;
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 3000px;
+    height: 2000px;
+    z-index: 2;
+    background-image: url('/mywork/assets/mystyle/grid-background.png');
+    background-repeat: repeat;
+}
+
+.flow-anim {
+    stroke-dasharray: 8px;
+    animation: flow-anim 0.5s linear;
+    animation-iteration-count: infinite;
+}
+
+@keyframes flow-anim {
+    to {
+        stroke-dashoffset: -16;
+    }
+}

@@ -1,0 +1,648 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "select2-bootstrap-5-theme.min" %>
+  <%= stylesheet_link_tag "select2.min" %>
+  <%= javascript_include_tag '/assets/myjs/daterangepicker.js' %>
+  <%= stylesheet_link_tag '/assets/mystyle/daterangepicker.css' %>
+<% end %>
+
+<% content_for :bottombody do %>
+  <%= javascript_include_tag 'select2.full.min' %>
+  <%= javascript_include_tag 'select2.min.js' %>
+  <%= javascript_include_tag '/assets/myjs/attend_management.js' %>
+<% end %>
+
+<style>
+    .modal-content {
+        border: 1px solid #E0E0E0;
+        border-radius: 8px;
+    }
+
+    .modal-header {
+        border-bottom: 1px solid #E0E0E0;
+    }
+
+    .modal-title {
+        font-size: 18px;
+        font-weight: bold;
+        color: #005FBE;
+    }
+
+    .modal-body {
+        padding: 20px;
+    }
+
+    .modal-custom {
+        max-width: 25% !important;
+        margin-top: 5vh;
+        margin-bottom: auto;
+    }
+
+    .modal-content .form-check-label {
+        font-size: 14px;
+    }
+
+    .info-section {
+        margin-bottom: 16px;
+    }
+
+    .info-label {
+        font-size: 14px;
+        margin-bottom: 8px;
+        color: #333;
+    }
+
+    .info-label span {
+        font-size: 14px;
+        color: #333;
+        font-weight: normal;
+    }
+
+    .info-label::before {
+        content: attr(data-label);
+        font-weight: bold;
+        margin-right: 4px;
+    }
+
+    .stimeline-title {
+        font-size: 14px;
+        font-weight: bold;
+        color: #333;
+        border-bottom: 1px solid #E0E0E0;
+        padding-bottom: 8px;
+        margin-bottom: 16px;
+    }
+
+    .stimeline {
+        list-style: none;
+        padding-left: 0;
+        position: relative;
+        margin: 0;
+    }
+
+    .stimeline li {
+        position: relative;
+        padding-left: 80px;
+        margin-bottom: 16px;
+        min-height: 40px;
+    }
+
+    .stimeline li::before {
+        content: '';
+        position: absolute;
+        left: 74px;
+        top: 23%;
+        transform: translateY(-50%);
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background-color: #6C757D;
+        z-index: 1;
+    }
+
+    .stimeline li.DONE::before,
+    .stimeline li.REFUSE::before {
+        background-color: rgb(14 165 233);
+    }
+
+    .stimeline li.PENDING::before {
+        background-color: #6C757D;
+    }
+
+    .stimeline li:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        left: 81px;
+        top: 33%;
+        transform: translateY(0);
+        width: 2px;
+        height: 100%;
+        background-color: #E0E0E0;
+        z-index: 0;
+    }
+
+    .stimeline li.DONE:not(:last-child)::after,
+    .stimeline li.REFUSE:not(:last-child)::after {
+        background-color: rgb(14 165 233);
+    }
+
+    .stimeline .stimeline__date {
+        position: absolute;
+        left: 0;
+        top: 32%;
+        transform: translateY(-50%);
+        width: 62px;
+        font-size: 12px;
+        color: #6C757D;
+        line-height: 1.2;
+        text-align: right;
+    }
+
+    .stimeline .stimeline__content {
+        background: #fff;
+        padding: 8px 12px;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        position: relative;
+        margin-left: 20px;
+    }
+
+    .stimeline .stimeline__content .stimeline__title {
+        font-size: 14px;
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 4px;
+    }
+
+    .stimeline .stimeline__content .stimeline__title i {
+        margin-left: 5px;
+    }
+
+    .stimeline .stimeline__content .stimeline__description {
+        font-size: 14px;
+        color: #333;
+    }
+
+    .stimeline .stimeline__content .stimeline__description .name {
+        color: #005FBE;
+        font-weight: bold;
+    }
+
+
+
+    .modal-footer {
+        border-top: 1px solid #E0E0E0;
+        padding: 16px;
+    }
+
+    .btn-custom {
+        font-size: 14px;
+        font-weight: bold;
+        border-radius: 4px;
+        padding: 8px 16px;
+    }
+
+    .btn-primary.btn-custom {
+        background-color: #005FBE;
+        border-color: #005FBE;
+    }
+
+    .btn-primary.btn-custom:hover {
+        background-color: #004A9F;
+        border-color: #004A9F;
+    }
+
+    .btn-secondary.btn-custom {
+        background-color: #6C757D;
+        border-color: #6C757D;
+    }
+
+    .btn-secondary.btn-custom:hover {
+        background-color: #5A6268;
+        border-color: #5A6268;
+    }
+
+    .sholtype-tag {
+        display: inline-block;
+        padding: 5px 12px;
+        background-color: #F0F1F2;
+        border-radius: 5px;
+        font-size: 14px;
+        color: #333;
+        font-weight: 500;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        white-space: nowrap;
+    }
+
+    .rotate-90 {
+        transform: rotate(90deg);
+    }
+
+    .h-38 {
+        height: 38px !important;
+    }
+
+        .img-max-200 {
+        max-height: 200px;
+    }
+
+    img#userImage {
+        width: 200px;
+        height: 200px;
+        object-fit: cover;
+    }
+    .edit-time {
+        cursor: pointer;
+    }
+    .badges-pending {
+        background-color: #FEE9D7;
+        color: #FC953B;
+    }
+
+    .badges-reject {
+        background-color: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .badges-approve {
+        color: #14AE5C;
+        background-color: #C8F9DF;
+    }
+
+    .badges {
+        display: inline-block;
+        padding: 2px 7px;
+        font-size: 12px;
+        font-weight: 600;
+        border-radius: 9999px;
+    }
+
+</style>
+<script>
+    let workshifts_get_shiftselection_detail_path = "<%= workshifts_get_shiftselection_detail_path %>";
+    let workshifts_update_attend_path = "<%= workshifts_update_attend_path %>";
+    let image_url_no_avatar_path = "<%= image_url('no_avatar.jpg') %>";
+    let base_url_path = "<%= root_path %>";
+    let permission_edit_attend = "<%= is_access(session["user_id"], "ATTEND-MANAGEMENT","EDIT") %>";
+    let permission_add_attend = "<%= is_access(session["user_id"], "ATTEND-MANAGEMENT","ADD") %>";
+    let permission_adm_attend = "<%= is_access(session["user_id"], "ATTEND-MANAGEMENT","ADM") %>";
+    let session_department_id = "<%= session["department_id"] %>";
+    let user_department_id_for_export = "<%= @user_department_id_for_export %>";
+    
+    // @author: trong.lq
+    // @date: 24/01/2026
+    // Debug: Kiểm tra giá trị user_department_id_for_export trong console (F12)
+    console.log('=== DEBUG: user_department_id_for_export ===');
+    console.log('user_department_id_for_export:', user_department_id_for_export);
+    console.log('session_department_id:', session_department_id);
+    console.log('permission_edit_attend:', permission_edit_attend);
+    console.log('permission_add_attend:', permission_add_attend);
+    console.log('permission_adm_attend:', permission_adm_attend);
+    console.log('user_id:', "<%= session[:user_id] %>");
+    console.log('==========================================');
+</script>
+<!-- @author: trong.lq -->
+<!-- @date: 24/01/2026 -->
+<!-- Debug: Hiển thị giá trị user_department_id_for_export để kiểm tra -->
+<div id="debug-user-department-id" style="display: none; padding: 10px; background: #f0f0f0; margin: 10px 0; border: 1px solid #ccc;">
+  <strong>DEBUG INFO:</strong><br>
+  user_department_id_for_export: <span id="debug-dept-id"><%= @user_department_id_for_export %></span><br>
+  session_department_id: <span id="debug-session-dept-id"><%= session["department_id"] %></span><br>
+  permission_edit: <span id="debug-perm-edit"><%= is_access(session["user_id"], "ATTEND-MANAGEMENT","EDIT") %></span><br>
+  permission_add: <span id="debug-perm-add"><%= is_access(session["user_id"], "ATTEND-MANAGEMENT","ADD") %></span><br>
+  permission_adm: <span id="debug-perm-adm"><%= is_access(session["user_id"], "ATTEND-MANAGEMENT","ADM") %></span><br>
+  user_id: <span id="debug-user-id"><%= session[:user_id] %></span>
+</div>
+<script>
+  // @author: trong.lq
+  // @date: 24/01/2026
+  // Hiển thị/ẩn debug info (có thể bật bằng cách sửa display: none thành display: block)
+  // Hoặc mở F12 Console để xem log
+</script>
+<div class="attend-container">
+  <div class="card mb-3">
+    <div class="card-body pt-0">
+      <div class="tab-content">
+        <div class="row">
+          <div class="col">
+            <h3 class="mt-3 overview_text"><%= lib_translate("Thống kê chấm công") %></h3>
+          </div>
+          <% if (is_access(session["user_id"], "ATTEND-MANAGEMENT", "ADD") || is_access(session["user_id"], "ATTEND-MANAGEMENT","EDIT")) %>
+            <div class="d-flex mt-2 align-items-end">
+              <div class="me-1">
+                <button type="button" class="btn btn-outline-info" id="export-excel">Xuất báo cáo</button>
+              </div>
+            </div>
+          <% end %>
+        </div>
+        <div class="mt-0">
+          <div class="tab-content">
+            <form action='<%= management_attends_path() %>' accept-charset='UTF-8' method='get' class="mb-3">
+              <div id='attend_table_filter' class='attend-table-container col-12'>
+                <input name='utf8' type='hidden' value='✓'>
+                <input class='d-none' name='lang' value='vi'>
+                <% if !params[:per_page].nil? %>
+                  <input class='d-none' name='per_page' value='<%= params[:per_page] %>'>
+                <% end %>
+                <input type='submit' hidden>
+                <div class="d-flex flex-wrap justify-content-end gap-2">
+                  <div class="form-input" style="max-width: 300px;">
+                    <label class="mb-1"><%= lib_translate("Nhân viên") %></label>
+                    <input type="text" name="search" id="search_input" value="<%= params[:search] %>" placeholder="Nhập mã nhân sự hoặc tên" class="form-control me-2 h-38" maxlength="100">
+                  </div>
+                  <% if (is_access(session["user_id"], "ATTEND-MANAGEMENT", "ADD")) %>
+                    <div class="form-input" style="max-width: 300px;">
+                      <label class="mb-1"><%= lib_translate("Phòng ban") %></label>
+                      <select class="select-form selectpicker" name="department_id" id="attend_department_select">
+                        <option value="">Tất cả phòng ban</option>
+                        <% @departments&.each do |department| %>
+                          <option value="<%= department&.id %>" <%= params[:department_id] == department&.id.to_s ? 'selected' : '' %>>
+                            <%= department&.name %>
+                          </option>
+                        <% end %>
+                      </select>
+                    </div>
+                  <% end %>
+                  <div class="form-input" style="max-width: 300px;">
+                    <label class="mb-1"><%= lib_translate("Trạng thái") %></label>
+                    <select class="select-form selectpicker" name="attendance_type" id="attendance_type_select">
+                      <option value="" <%= 'selected' if params[:attendance_type].blank? %>>Tất cả</option>
+                      <option value="no-check-in-out" <%= 'selected' if params[:attendance_type] == 'no-check-in-out' %>>Không chấm công</option>
+                      <option value="late-check-in" <%= 'selected' if params[:attendance_type] == 'late-check-in' %>>Đi trễ</option>
+                      <option value="early-checkout-out" <%= 'selected' if params[:attendance_type] == 'early-checkout-out' %>>Về sớm</option>
+                      <option value="work-trip" <%= 'selected' if params[:attendance_type] == 'work-trip' %>>Đi công tác</option>
+                    </select>
+                  </div>
+                  <div class="form-input" style="max-width: 350px;">
+                    <label class="mb-1"><%= lib_translate("Thời gian") %></label>
+                    <div class="form-control d-flex align-items-center">
+                      <span class="far fa-calendar-alt fs-2"></span>
+                      <input class="ms-2 border-0" name="date" data-range="date" id="attendance_select_date" value="<%= params[:date] %>" style="outline: none;"/>
+                    </div>
+                  </div>
+                  <div class="ms-3 d-flex align-items-end" style="max-width: 300px;">
+                    <button id="btn-fillter-all" type="submit" class="btn btn-primary h-38"><%= lib_translate("Tìm kiếm") %></button>
+                  </div>
+                </div>
+              </div>
+            </form>
+            <div class="table-responsive scrollbar">
+              <table id="attend-request" class="table table-bordered fs--1 mb-0 mt-0 text-dark">
+                <thead class="bg-200 text-900">
+                <tr>
+                  <th style="width: 5%;" class="sort text-center"><%= lib_translate("STT") %></th>
+                  <th style="width: 10%;" class="sort text-center"><%= lib_translate("Mã nhân viên") %></th>
+                  <th style="width: 11%;" class="sort text-center"><%= lib_translate("Tên nhân viên") %></th>
+                  <th style="width: 15%;" class="sort text-center"><%= lib_translate("Đơn vị") %></th>
+                  <th style="width: 10%;" class="sort text-center"><%= lib_translate("Ngày") %></th>
+                  <th style="width: 22%;" class="sort text-center"><%= lib_translate("Ca sáng") %></th>
+                  <th style="width: 22%;" class="sort text-center"><%= lib_translate("Ca chiều") %></th>
+                  <th style="width: 10%;" class="no-sort text-center"></th>
+                </tr>
+                </thead>
+                <tbody class="attend-request-tbody">
+                <% @results.each_with_index do |item, idx| %>
+                  <tr>
+                    <td class="text-center align-middle"><%= (idx + 1) + (@page - 1) * @per_page %></td>
+                    <td class="align-middle"><%= item[:user_id] %></td>
+                    <td class="align-middle"><%= item[:user_name] %></td>
+                    <td class="text-center align-middle"><%= item[:department] %></td>
+                    <td class="text-center align-middle"><%= item[:work_date] %></td>
+                    <%
+                      parse_time = ->(s) { s.present? ? (Time.parse(s) rescue nil) : nil }
+                      shiftselection  = (item[:shiftselection] || {})
+                      split_noon = Time.parse('12:30')
+                      ordered = shiftselection.sort_by { |_, v| parse_time.call(v[:start_time]) || Time.at(1<<62) }
+
+                      morning   = nil
+                      afternoon = nil
+
+                      ordered.each do |ws_id, plan|
+                        off_type = plan[:is_day_off].to_s.upcase
+                        parse_time_start_time       = parse_time.call(plan[:start_time])
+                        slot =
+                          if parse_time_start_time
+                            (parse_time_start_time < split_noon) ? :morning : :afternoon
+                          elsif off_type.present?
+                            morning.nil? ? :morning : :afternoon
+                          else
+                            nil
+                          end
+
+                        case slot
+                        when :morning   then morning   ||= [ws_id, plan]
+                        when :afternoon then afternoon ||= [ws_id, plan]
+                        end
+                      end
+
+                      pairs = [morning, afternoon]
+                    %>
+
+                    <% pairs.each do |pair| %>
+                      <% if pair.present? %>
+                        <% ws_id, plan = pair
+                           att = (item[:attend][ws_id] || {})
+                           checkin  = att[:checkin]
+                           checkout = att[:checkout]
+                           off_type = plan[:is_day_off].to_s.upcase
+                        %>
+                        <% if off_type.blank? %>
+                          <td class="text-center align-middle">
+                            <div class="fw-bold mb-1"><%= plan[:start_time] %> – <%= plan[:end_time] %></div>
+                            <div class="mb-1"><%= plan[:location] %></div>
+                            <div>
+                              Giờ vào:
+                              <span class="fw-medium <%= 'text-danger' if checkin.present? && plan[:start_time].present? && Time.parse(checkin) > Time.parse(plan[:start_time]) + 15.minutes %>">
+                                <%= checkin || '-' %>
+                              </span>
+                            </div>
+                            <div>
+                              Giờ ra:
+                              <span class="fw-medium <%= 'text-danger' if checkout.present? && plan[:end_time].present? && Time.parse(checkout) < Time.parse(plan[:end_time]) - 15.minutes %>">
+                                <%= checkout || '-' %>
+                              </span>
+                            </div>
+                          </td>
+                        <% else %>
+                          <% label =
+                               case off_type
+                                 when 'OFF'       then 'Nghỉ'
+                                 when 'HOLIDAY'   then 'Nghỉ lễ'
+                                 when 'ON-LEAVE'  then 'Nghỉ phép'
+                                 when 'TEACHING-SCHEDULE'  then 'Lịch giảng dạy'
+                                 when 'WORK-TRIP' then 'Đi công tác'
+                                 else 'Nghỉ'
+                               end %>
+                          <td class="text-center align-middle">
+                            <div class="fw-bold text-success mb-1"><%= label %></div>
+                            <% if off_type == 'WORK-TRIP' %>
+                              <div>
+                                Giờ vào:
+                                <span class="fw-medium <%= 'text-danger' if checkin.present? && plan[:start_time].present? && Time.parse(checkin) > Time.parse(plan[:start_time]) + 15.minutes %>">
+                                  <%= checkin || '-' %>
+                                </span>
+                              </div>
+                              <div>
+                                Giờ ra:
+                                <span class="fw-medium <%= 'text-danger' if checkout.present? && plan[:end_time].present? && Time.parse(checkout) < Time.parse(plan[:end_time]) - 15.minutes %>">
+                                  <%= checkout || '-' %>
+                                </span>
+                              </div>
+                            <% end %>
+                          </td>
+                        <% end %>
+                      <% else %>
+                        <td class="text-center align-middle"></td>
+                      <% end %>
+                    <% end %>
+
+                    <td class="text-center align-middle">
+                      <button class="btn btn-sm btn-outline-primary attend-detail-btn"
+                              data-shiftselection-ids="<%= item[:id] %>"
+                              data-workdate="<%= item[:work_date] %>">
+                        Chi tiết
+                      </button>
+                    </td>
+                  </tr>
+                <% end %>
+                </tbody>
+              </table>
+              <% if @results_total > 0 %>
+                <div class="d-flex justify-content-center mt-3">
+                  <div class="col-auto">
+                    <nav aria-label="Page navigation">
+                      <ul class="pagination mb-0">
+                        <li class="page-item <%= @page == 1 ? 'disabled' : '' %>">
+                          <%= link_to "«", management_attends_path(page: @page - 1, per_page: @per_page, lang: session[:lang], search: params[:search], department_id: params[:department_id], attendance_type: params[:attendance_type], date: params[:date]), class: "page-link" %>
+                        </li>
+                        <% (1..@total_pages).each do |i| %>
+                          <li class="page-item <%= @page == i ? 'active' : '' %>">
+                            <%= link_to i.to_s, management_attends_path(page: i, per_page: @per_page, lang: session[:lang], search: params[:search], department_id: params[:department_id], attendance_type: params[:attendance_type], date: params[:date]), class: "page-link" %>
+                          </li>
+                        <% end %>
+                        <li class="page-item <%= @page == @total_pages ? 'disabled' : '' %>">
+                          <%= link_to "»", management_attends_path(page: @page + 1, per_page: @per_page, lang: session[:lang], search: params[:search], department_id: params[:department_id], attendance_type: params[:attendance_type], date: params[:date]), class: "page-link" %>
+                        </li>
+                      </ul>
+                    </nav>
+                  </div>
+                  <div class="col-auto ms-2">
+                    <form action="<%= management_attends_path %>" accept-charset="UTF-8" method="get">
+                      <select class="form-select" name="per_page" id="per_page_select" onchange="this.form.submit()">
+                        <option value="25" <%= @per_page == 25 ? 'selected' : '' %>>25</option>
+                        <option value="50" <%= @per_page == 50 ? 'selected' : '' %>>50</option>
+                        <option value="100" <%= @per_page == 100 ? 'selected' : '' %>>100</option>
+                        <option value="200" <%= @per_page == 200 ? 'selected' : '' %>>200</option>
+                      </select>
+                      <input class="d-none" name="lang" value="<%= session[:lang] %>">
+                      <input class="d-none" name="search" value="<%= params[:search] %>">
+                      <input class="d-none" name="page" value="1">
+                      <input class="d-none" name="department_id" value="<%= params[:department_id] %>">
+                      <input class="d-none" name="attendance_type" value="<%= params[:attendance_type] %>">
+                      <input class="d-none" name="date" value="<%= params[:date] %>">
+                    </form>
+                  </div>
+                </div>
+              <% else %>
+                <p class="text-center mt-3">Không có dữ liệu để hiển thị.</p>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal chi tiết chấm công -->
+<div class="modal fade" id="attendDetailsModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="attendDetailsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="attendDetailsModalLabel"></h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body row">
+        <div class="col-lg-6 pe-lg-2" id="detailLeft">
+          <div class="d-flex mb-3">
+            <img id="userImage" src="<%= image_url('no_avatar.jpg') %>"
+                 class="rounded-circle border me-3">
+            <div class="d-flex flex-column justify-content-center">
+              <h5 id="fullName" class="mb-1 fw-bold">---</h5>
+              <div id="departmentName" class="text-dark">---</div>
+              <div id="positionJobName" class="text-dark">---</div>
+            </div>
+          </div>
+          <div id="detailAttends"></div>
+        </div>
+        <div class="col-lg-6 ps-lg-2">
+          <h5 class="fw-bold mb-3">Danh sách yêu cầu trong ngày</h5>
+          <div id="detailShiftIssues"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-custom" data-bs-dismiss="modal">Đóng</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- End modal chi tiết chấm công -->
+<!-- Modal xuất báo cáo -->
+<div class="modal fade" id="exportModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="exportModal" aria-hidden="true">
+  <div class="modal-dialog modal-custom modal-md">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Xuất thống kê</h4>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body row">
+        <div class="mb-3">
+          <div class="form-check">
+            <input class="form-check-input export-type-radio" type="radio" name="export_type" id="export_detail_attends" value="detail_attends">
+            <label class="form-check-label fw-bold" for="export_detail_attends">Bảng tổng hợp chấm công</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input export-type-radio" type="radio" name="export_type" id="export_attends" value="attends">
+            <label class="form-check-label fw-bold" for="export_attends">Bảng chấm công chi tiết</label>
+          </div>
+          <div class="form-check mt-2">
+            <input class="form-check-input export-type-radio" type="radio" name="export_type" id="export_by_summary" value="summary">
+            <label class="form-check-label fw-bold" for="export_by_summary">Tổng hợp đi trễ, về sớm</label>
+          </div>
+          <div class="form-check mt-2">
+            <input class="form-check-input export-type-radio" type="radio" name="export_type" id="export_by_list" value="list">
+            <label class="form-check-label fw-bold" for="export_by_list">Danh sách đi trễ, về sớm</label>
+          </div>
+        </div>
+        <div id="export-form-section" class="d-none">
+          <div class="row mb-3">
+            <div class="col-6">
+              <label class="form-label mb-1">Năm</label>
+              <select class="form-select" id="year_export_month_select">
+                <% current_year = Date.today.year %>
+                <% year_range = (current_year - 2..current_year + 2).to_a %>
+                <%= options_for_select(year_range.map { |y| [y, y] }, selected: current_year) %>
+              </select>
+            </div>
+            <div class="col-6">
+              <label class="form-label mb-1">Tháng</label>
+              <select class="form-select" id="month_export_month_select">
+                <%= options_for_select((1..12).map { |m| [m, m] }, selected: Date.today.month) %>
+              </select>
+            </div>
+          </div>
+          <% if (is_access(session["user_id"], "ATTEND-MANAGEMENT", "ADD")) %>
+            <div class="mb-3 d-none" id="export-filters-wrapper">
+              <label class="form-label mb-1">Phòng ban</label>
+              <select class="select-form" name="department_id" id="department_select">
+                <option value="">Tất cả phòng ban</option>
+                <% @departments&.each do |department| %>
+                  <option value="<%= department&.id %>"><%= department&.name %></option>
+                <% end %>
+              </select>
+              <div class="mt-3">
+                <label class="form-label mb-1">Nhân viên</label>
+                <select class="form-select" id="user_export_select" name="user_id">
+                  <option value="">Tất cả nhân viên</option>
+                </select>
+              </div>
+            </div>
+          <% end %>
+          <% if (is_access(session["user_id"], "ATTEND-MANAGEMENT", "EDIT")) %>
+            <div class="mb-3 d-none" id="export-filters-wrapper">
+              <div class="mt-3">
+                <label class="form-label mb-1">Nhân viên</label>
+                <select class="form-select" id="user_export_select" name="user_id">
+                  <option value="">Tất cả nhân viên</option>
+                </select>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary btn-custom" id="export-btn">Xác nhận</button>
+        <button type="button" class="btn btn-secondary btn-custom" data-bs-dismiss="modal">Đóng</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- End modal xuất báo cáo -->

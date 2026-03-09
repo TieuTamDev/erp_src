@@ -1,0 +1,19 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: MyString
+  mediafile: one
+  user: one
+  dtcreated: 2024-05-06 18:40:39
+  isdefault: false
+  status: MyString
+  note: MyText
+
+two:
+  name: MyString
+  mediafile: two
+  user: two
+  dtcreated: 2024-05-06 18:40:39
+  isdefault: false
+  status: MyString
+  note: MyText

@@ -1,0 +1,13 @@
+$('#popupMediumModal .modal-content').html("<%= j(render 'form') %>");
+$('#popupMediumModal .modal-content').prepend("<%= j(render 'shared/new_modal_title', title: 'Thêm mới cấu hình') %>");
+$('#popupMediumModal').attr('data-bs-focus', false);
+$('#popupMediumModal').modal('show');
+
+flatpickr(".js-date", {
+    locale: "vn",
+    dateFormat: "d/m/Y",
+    monthSelectorType: "dropdown",
+    showMonths: 1,
+});
+
+showLoadding(false);

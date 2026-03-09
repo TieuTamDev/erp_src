@@ -1,0 +1,9 @@
+if (<%=@Duplicate%> == true) {
+    $("#erro_labble_content").css("display","block");
+}
+else {
+    $("#erro_labble_content").css("display","none"); 
+    $("#btn_add_new_mandocfrom_buttton").css("display","none"); 
+    $("#loading_button_mandocfrom").css("display","block");
+    $("#form_add_mandocfrom").submit();    
+}

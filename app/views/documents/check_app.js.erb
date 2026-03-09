@@ -1,0 +1,15 @@
+<% if @exists %>
+    $("#app").css('box-shadow', '0 0 5px red');
+    $("#valid_scode").show();
+    $("#valid_scode").html("Dữ liệu đã tồn tại trong hệ thống");
+    $("#btn_save").prop('disabled', true);
+    $("#form_add_documents").on('submit', function(e) {
+        e.preventDefault();
+    });
+<% else %>
+    $("#app").css('box-shadow', 'none');
+    $("#valid_scode").hide();
+    $("#btn_save").prop('disabled', false);
+    $("#form_add_documents").off('submit');
+<% end %>
+

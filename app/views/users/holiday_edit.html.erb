@@ -1,0 +1,494 @@
+<style>
+  .align-middle {
+    color: #b8b8bd;
+  }
+
+  .form-add-holiday {
+    justify-content: center;
+    display: flex;
+    background-color: white;
+    border-radius: 10px;
+  }
+
+  #form-add-holiday-container {
+    background: rgba(0, 0, 0, 0.84);
+    overflow-y: scroll;
+  }
+
+  #form-update-holiday-container {
+    background: rgba(0, 0, 0, 0.84);
+    overflow-y: scroll;
+  }
+
+  #form_add_holiday {
+    width: 80%;
+  }
+
+  #cls_bmtu_form_add_title {
+    font-size: 25px;
+    font-weight: bold;
+    text-align: center;
+  }
+
+  .cls_bmtu_close_btn {
+    width: 100%;
+  }
+
+  .btn-close {
+    text-align: right;
+    color: red;
+  }
+
+  .close_form_add {
+    color: red;
+    font-size: 20px;
+    font-weight: bold;
+  }
+
+  .edit_holiday {
+    cursor: pointer;
+    text-decoration: none;
+  }
+</style>
+
+<div class="list_holiday">
+  <div class="bmtu_header_dashboard">
+    <h3 class="mt-2 overview_text">List Holiday</h3>
+  </div>
+  <div class="card mb-3">
+    <div class="card-body pt-0">
+      <div class="tab-content">
+        <div
+          class="tab-pane preview-tab-pane active"
+          role="tabpanel"
+          aria-labelledby="tab-dom-5a3c857c-8deb-4307-af64-a62f27089443"
+          id="dom-5a3c857c-8deb-4307-af64-a62f27089443"
+        >
+          <div
+            id="table_holidate"
+            data-list='{"valueNames":["id","status"],"page":5,"pagination":true}'
+          >
+            <div
+              class="row g-0 mb-2"
+              style="justify-content: space-between; align-items: center"
+            >
+              <div class="col-auto col-sm-5 mb-1">
+                <button
+                  onclick="openFormAddHoliday()"
+                  class="btn btn-primary btn-add-holiday mt-3"
+                  id="btn-add-holiday"
+                >
+                  Add
+                </button>
+              </div>
+              <div class="col-auto col-sm-5 mb-1">
+                <form>
+                  <div class="input-group mt-3">
+                    <input
+                      class="form-control form-control-sm shadow-none search"
+                      type="search"
+                      placeholder="Search..."
+                      aria-label="search"
+                    />
+                    <div class="input-group-text bg-transparent">
+                      <svg
+                        class="svg-inline--fa fa-search fa-w-16 fs--1 text-600"
+                        aria-hidden="true"
+                        focusable="false"
+                        data-prefix="fa"
+                        data-icon="search"
+                        role="img"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 512 512"
+                        data-fa-i2svg=""
+                      >
+                        <path
+                          fill="currentColor"
+                          d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z"
+                        ></path>
+                      </svg>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+            <div class="table-responsive scrollbar">
+              <table
+                class="table table-bordered table-striped fs--1 mb-0 table-hover"
+              >
+                <thead class="bg-200 text-900">
+                  <tr>
+                    <th data-sort="id" >ID</th>
+                    <th class="sort" data-sort="user_id" style="display: none;">Username</th>
+                    <th class="sort" data-sort="name">Name</th>
+                    <th class="sort" data-sort="issued_place">Issued_place</th>
+                    <th class="sort" data-sort="stype">Stype</th>
+                    <th class="sort">Mediafile</th>
+                    <th class="sort" data-sort="issue_date">Issue_date</th>
+                    <th class="sort" data-sort="status">Status</th>
+                    <th class="sort" data-sort="note">Note</th>
+                    <th style="text-align: center">Action</th>
+                  </tr>
+                </thead>
+                <tbody class="list">
+                  <tr>
+                    <td>1</td>
+                    <td>Nghỉ việc gia đình</td>
+                    <td>Phòng TCHC - BMTU</td>
+                    <td>Nghỉ phép không lương</td>
+                    <td><a href="1">1</a></td>
+                    <td>11/22/2022</td>
+                    <td>ACTIVE</td>
+                    <td></td>
+                    <td>
+                      <a class="edit_holiday" style="text-decoration: none">
+                        <span
+                          class="text-primary fas fa-holiday-edit me-3"
+                          style="width: 15px"
+                        ></span>
+                      </a>
+                      <a style="cursor: pointer">
+                        <span
+                          class="text-danger fas fa-trash"
+                          style="width: 12px"
+                        ></span>
+                      </a>
+                    </td>
+                  </tr>
+                  <!-- <% @holidays.each do |h| %>
+                  <tr>
+                    <td><%= h.id %></td>
+                    <td
+                      class="user_id"
+                      onclick="window.location='<%= user_holiday_path(id: h.id) %>';"
+                      style="cursor: pointer"
+                    >
+                      <%= h.user_id %>
+                    </td>
+                    <td
+                      class="user_name"
+                      onclick="window.location='<%= user_holiday_path(id: h.id) %>';"
+                      style="cursor: pointer"
+                    >
+                      <%= h.name %>
+                    </td>
+                    <td
+                      class="issued_place"
+                      onclick="window.location='<%= user_holiday_path(id: h.id) %>';"
+                      style="cursor: pointer"
+                    >
+                      <%= h.issued_place %>
+                    </td>
+                    <td
+                      class="stype"
+                      onclick="window.location='<%= user_holiday_path(id: h.id) %>';"
+                      style="cursor: pointer"
+                    >
+                      <%= h.stype %>
+                    </td>
+                    <td
+                      class="mediafile_id"
+                      onclick="window.location='<%= user_holiday_path(id: h.id) %>';"
+                      style="cursor: pointer"
+                    >
+                      <%= h.mediafile_id %>
+                    </td>
+                    <td
+                      class="issue_date"
+                      onclick="window.location='<%= user_holiday_path(id: h.id) %>';"
+                      style="cursor: pointer"
+                    >
+                      <%= h.issue_date %>
+                    </td>
+                    <td
+                      class="status"
+                      onclick="window.location='<%= user_holiday_path(id: h.id) %>';"
+                      style="cursor: pointer"
+                    >
+                      <%= h.status %>
+                    </td>
+                    <td
+                      class="note"
+                      onclick="window.location='<%= user_holiday_path(id: h.id) %>';"
+                      style="cursor: pointer"
+                    >
+                      <%= h.note %>
+                    </td>
+                    <td style="min-width: 100px; text-align: center">
+                      <a
+                        class="edit_holiday"
+                        style="text-decoration: none"
+                        onclick="openFormUpdateHoliday('<%= h.id %>', '<%= h.user_id %>','<%= h.name %>',
+                                                    '<%= h.issued_place %>', '<%= h.stype %>', '<%= h.mediafile_id %>', '<%= h.issue_date %>', '<%= h.status %>', '<%= h.note %>')"
+                      >
+                        <span
+                          class="text-primary fas fa-holiday-edit me-3"
+                          style="width: 15px"
+                        ></span>
+                      </a>
+                      <a
+                        data-toggle="modal"
+                        data-target="#exampleModal-#{<%= h.id %>}"
+                        style="cursor: pointer"
+                      >
+                        <span
+                          class="text-danger fas fa-trash"
+                          style="width: 12px"
+                        ></span>
+                      </a>
+
+                      <div
+                        class="modal fade"
+                        id="exampleModal-#{<%= h.id %>}"
+                        tabindex="-1"
+                        role="dialog"
+                        aria-labelledby="exampleModalLabel"
+                        aria-hidden="true"
+                      >
+                        <div class="modal-dialog" role="document">
+                          <div class="modal-content">
+                            <div class="modal-header">
+                              <h5 class="modal-title" id="exampleModalLabel">
+                                Are you sure?
+                              </h5>
+                              <button
+                                type="button"
+                                class="close"
+                                data-dismiss="modal"
+                                aria-label="Close"
+                                style="border: none; background: none"
+                              >
+                                <span aria-hidden="true" style="font-size: 20px"
+                                  >&times;</span
+                                >
+                              </button>
+                            </div>
+                            <div class="modal-body">
+                              Are you sure to delete this holiday of
+                              <span style="font-weight: bold; color: red">
+                                <%= h.user_id %> </span
+                              >?
+                            </div>
+                            <div class="modal-footer">
+                              <button
+                                type="button"
+                                class="btn btn-secondary"
+                                data-dismiss="modal"
+                              >
+                                Close
+                              </button>
+                              <%= link_to 'Delete' , url_for(action: :del, id:
+                              h.id), method: :delete, class: "btn btn-danger" %>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                  <% end %> -->
+                </tbody>
+              </table>
+            </div>
+            <div class="d-flex justify-content-center mt-3">
+              <button
+                class="btn btn-sm btn-falcon-default me-1"
+                type="button"
+                title="Previous"
+                data-list-pagination="prev"
+              >
+                <span class="fas fa-chevron-left"></span>
+              </button>
+              <ul class="pagination mb-0"></ul>
+              <button
+                class="btn btn-sm btn-falcon-default ms-1"
+                type="button"
+                title="Next"
+                data-list-pagination="next"
+              >
+                <span class="fas fa-chevron-right"> </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORM ADD HOLIDAY -->
+  <div id="form-add-holiday-container" class="modal">
+    <div class="modal-dialog" style="max-width: 500px">
+      <div class="modal-content">
+        <div style="text-align: right" class="cls_bmtu_close_btn">
+          <button
+            onclick="closeFormAdd()"
+            type="button"
+            class="close_form_add btn"
+          >
+            X
+          </button>
+        </div>
+        <div class="form-add-holiday">
+          <%= form_for @holiday, :url=> "/mywork/user/holiday/edit", html:
+          {method: :post, id:"form_add_holiday" } do |f| %>
+          <p id="cls_bmtu_form_add_title">CREATE HOLIDAY</p>
+          <div class="erro_labble mb-2" style="height: 40px">
+            <p
+              style="
+                display: none;
+                color: rgb(197 82 82);
+                border: 1px solid rgb(199 136 136 / 23%);
+                background: rgb(255 54 54 / 16%);
+                border-radius: 5px;
+                padding: 10px;
+                margin-right: 15px;
+                margin-left: 15px;
+              "
+              id="erro_labble_content"
+            ></p>
+          </div>
+          <div class="form-group" style="display: none" class="txt_update_id">
+            <%= f.label :id %> <span style="color: red" class="red">* </span>
+            <%= f.text_field :id, class: 'form-control' , name: 'holiday_id_add'
+            %>
+          </div>
+          <div class="row" style="margin: 0 auto">
+            <div class="form-group" id="id_add_sid">
+              <%= f.label :user_id %>
+              <span style="color: red" class="red">* </span>
+              <%= f.text_field :user_id, class: 'form-control' ,
+              name:'holiday_user_id_add' %>
+            </div>
+
+            <div class="form-group">
+              <%= f.label :name %> <%= f.text_field :name, class: 'form-control'
+              , name: 'holiday_name_add' %>
+            </div>
+
+            <div class="form-group">
+              <%= f.label :issued_place %> <%= f.text_field :issued_place ,
+              class: 'form-control' , name: 'holiday_issued_place_add' %>
+            </div>
+
+            <div class="form-group">
+              <%= f.label :stype %> <%= f.select :stype, [["Nghỉ phép","Nghỉ
+              phép"] , ["Nghỉ không lương","Nghỉ không lương"], ["Nghỉ thai
+              sản","Nghỉ thai sản"],["Nghỉ tang gia","Nghỉ tang gia"], ["Nghỉ
+              cưới hỏi","Nghỉ cưới hỏi"]], {}, :class=> "form-control", name:
+              'holiday_stype_add'%>
+            </div>
+
+            <div class="form-group">
+              <%= f.label :mediafile_id %> <%= f.file_field :mediafile_id,
+              class: 'form-control' , name: 'holiday_mediafile_id_add' , :id=>
+              "holiday_mediafile_id_add"
+              ,:accept=>"image/x-png,image/gif,image/jpeg" %>
+            </div>
+
+            <div class="form-group">
+              <%= f.label :issue_date %> <%= f.date_field :issue_date , class:
+              'form-control' , :value => Time.now.strftime('%Y-%m-%d'), name:
+              'holiday_issue_date_add' %>
+            </div>
+
+            <div class="form-group">
+              <%= f.label :status %> <%= f.select :status, [["ACTIVE","ACTIVE"]
+              , ["INACTIVE","INACTIVE"]], {}, :class=> "form-control", name:
+              'holiday_status_add'%>
+            </div>
+
+            <div class="form-group">
+              <%= f.label :note %> <%= f.text_area :note , class: 'form-control'
+              , name: 'holiday_note_add' %>
+            </div>
+          </div>
+          <div class="form-group" style="margin-left: 15px; margin-right: 15px">
+            <%= f.submit "CREATE HOLIDAY" , type:"button" ,
+            id:"btn_add_new_holiday", class: "btn btn-primary mt-3 mb-5
+            border-red border-pink-600 cls-bmtu-text-red
+            md:group-hover:bg-pink-50 btn-block btn-block text-uppercase ",
+            style: "width: 100%;" %>
+          </div>
+
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+  <%= javascript_include_tag 'prism' %>
+  <script>
+    function openFormAddHoliday() {
+      document.getElementById("form-add-holiday-container").style.display =
+        "block";
+      document.getElementById("cls_bmtu_form_add_title").innerHTML =
+        "CREATE HOLIDAY";
+      document.getElementById("btn_add_new_holiday").value = "CREATE HOLIDAY";
+    }
+
+    function closeFormAdd() {
+      document.getElementById("form-add-holiday-container").style.display =
+        "none";
+      document.getElementById("holiday_id").value = "";
+    }
+
+    function openFormUpdateHoliday(
+      id,
+      user_id,
+      name,
+      issued_place,
+      stype,
+      mediafile_id,
+      issue_date,
+      status,
+      note
+    ) {
+      document.getElementById("form-add-holiday-container").style.display =
+        "block";
+      document.getElementById("cls_bmtu_form_add_title").innerHTML =
+        "UPDATE HOLIDAY";
+      document.getElementById("btn_add_new_holiday").value = "UPDATE HOLIDAY";
+    }
+    document.getElementById("btn_add_new_holiday").onclick = function () {
+      var error_label = document.getElementById("erro_labble_content");
+
+      var holiday_user_id = document.getElementById("holiday_user_id").value;
+      var holiday_user_erro = document.getElementById("holiday_user_id");
+
+      var holiday_name = document.getElementById("holiday_name").value;
+      var holiday_name_erro = document.getElementById("holiday_name");
+
+      var email = document.getElementById("user_email").value;
+      var email_erro = document.getElementById("user_email");
+
+      var pwd = document.getElementById("user_password_add").value;
+      var pwd_erro = document.getElementById("user_password_add");
+
+      var rePwd = document.getElementById("user_re_password_digest_add").value;
+      var rePwd_erro = document.getElementById("user_re_password_digest_add");
+
+      if (holiday_user == "") {
+        error_label.innerHTML = "Please Enter User ";
+        error_label.style.display = "block";
+        sid_erro.style.border = "1px solid red";
+        return;
+      } else if (holiday_name == "") {
+        error_label.innerHTML = "Please Enter Name";
+        error_label.style.display = "block";
+        userName_erro.style.border = "1px solid red";
+        sid_erro.style.border = "1px solid #ced4da";
+        return;
+      } else {
+        pwd_erro.style.border = "1px solid #ced4da";
+        error_label.style.display = "none";
+        document.getElementById("btn_add_new_holiday").type = "submit";
+      }
+    };
+
+    $("#myModal").on("shown.bs.modal", function () {
+      $("#myInput").trigger("focus");
+    });
+  </script>
+  <%= javascript_include_tag '/assets/lib_hrm/jquery-3.2.1.slim.min.js', integrity: 'sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN', crossorigin: 'anonymous' %> 
+  <%= javascript_include_tag '/assets/lib_hrm/popper.min.js', integrity: 'sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q', crossorigin: 'anonymous' %>
+  <%= javascript_include_tag '/assets/lib_hrm/bootstrap.min.js', integrity: 'sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl', crossorigin: 'anonymous'%>
+

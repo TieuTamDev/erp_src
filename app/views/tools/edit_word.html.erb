@@ -1,0 +1,94 @@
+<%= stylesheet_link_tag '/assets/lib_ej2/ej2_base_styles_bootstrap5.css' %>
+<%= stylesheet_link_tag '/assets/lib_ej2/ej2_buttons_styles_bootstrap5.css' %>
+<%= stylesheet_link_tag '/assets/lib_ej2/ej2_inputs_styles_bootstrap5.css' %>
+<%= stylesheet_link_tag '/assets/lib_ej2/ej2_popups_styles_bootstrap5.css' %>
+<%= stylesheet_link_tag '/assets/lib_ej2/ej2_lists_styles_bootstrap5.css' %>
+<%= stylesheet_link_tag '/assets/lib_ej2/ej2_navigations_styles_bootstrap5.css' %>
+<%= stylesheet_link_tag '/assets/lib_ej2/ej2_splitbuttons_styles_bootstrap5.css' %>
+<%= stylesheet_link_tag '/assets/lib_ej2/ej2_dropdowns_styles_bootstrap5.css' %>
+<%= stylesheet_link_tag '/assets/lib_ej2/ej2_documenteditor_styles_bootstrap5.css' %>
+<%= javascript_include_tag '/assets/lib_ej2/ej2-base.min.js' %>
+<%= javascript_include_tag '/assets/lib_ej2/ej2-data.min.js' %>
+<%= javascript_include_tag '/assets/lib_ej2/ej2-svg-base.min.js' %>
+<%= javascript_include_tag '/assets/lib_ej2/ej2-file-utils.min.js' %>
+<%= javascript_include_tag '/assets/lib_ej2/ej2-compression.min.js' %>
+<%= javascript_include_tag '/assets/lib_ej2/ej2-pdf-export.min.js' %>
+<%= javascript_include_tag '/assets/lib_ej2/ej2-buttons.min.js' %>
+<%= javascript_include_tag '/assets/lib_ej2/ej2-popups.min.js' %>
+<%= javascript_include_tag '/assets/lib_ej2/ej2-splitbuttons.min.js' %>
+<%= javascript_include_tag '/assets/lib_ej2/ej2-inputs.min.js' %>
+<%= javascript_include_tag '/assets/lib_ej2/ej2-lists.min.js' %>
+<%= javascript_include_tag '/assets/lib_ej2/ej2-navigations.min.js' %>
+<%= javascript_include_tag '/assets/lib_ej2/ej2-dropdowns.min.js' %>
+<%= javascript_include_tag '/assets/lib_ej2/ej2-calendars.min.js' %>
+<%= javascript_include_tag '/assets/lib_ej2/ej2-charts.min.js' %>
+<%= javascript_include_tag '/assets/lib_ej2/ej2-office-chart.min.js' %>
+<%= javascript_include_tag '/assets/lib_ej2/ej2-documenteditor.min.js' %>
+<%= javascript_include_tag '/assets/lib_ej2/ej2_syncfusion_helper.js' %>
+
+<h3><%= lib_translate('Trình soạn thảo') %></h3>
+<div id='DocumentEditor'></div>
+
+
+<script>
+	let toolItem = {
+		prefixIcon: "e-save",
+		tooltipText: "Save",
+		text: "Save",
+		id: "SaveFile"
+	};
+	var documenteditorContainer = new ej.documenteditor.DocumentEditorContainer({
+		enableToolbar: true,
+		height: '730px',
+		enableWordExport: true,
+		toolbarItems: [
+			toolItem,
+			'New',
+			'Open',
+			'Separator',
+			'Undo',
+			'Redo',
+			'Separator',
+			'Image',
+			'Table',
+			'Hyperlink',
+			'Bookmark',
+			'TableOfContents',
+			'Separator',
+			'Header',
+			'Footer',
+			'PageSetup',
+			'PageNumber',
+			'Break',
+			'InsertFootnote',
+			'InsertEndnote',
+			'Separator',
+			'Find',
+			'Separator',
+			'Comments',
+			'TrackChanges',
+			'Separator',
+			'RestrictEditing',
+			'Separator',
+			'FormFields'
+		]
+	});
+	ej.documenteditor.DocumentEditorContainer.Inject(ej.documenteditor.Toolbar, ej.documenteditor.WordExport);
+	documenteditorContainer.serviceUrl = 'https://ej2services.syncfusion.com/production/web-services/api/documenteditor/';
+	documenteditorContainer.appendTo('#DocumentEditor');
+	documenteditorContainer.toolbarClick = function (args) {
+		switch (args.item.id) {
+			case 'SaveFile':
+				var fileName = "Sample";
+				if (documenteditorContainer.documentEditor.documentName === '') {
+					fileName = "Sample";
+				}
+				else {
+					fileName = documenteditorContainer.documentEditor.documentName;
+				}
+				documenteditorContainer.documentEditor.save(fileName, 'Docx');
+				break;
+		}
+	};
+
+</script>

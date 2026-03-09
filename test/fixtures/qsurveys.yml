@@ -1,0 +1,21 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  survey: one
+  gsurvey: one
+  iorder: 1
+  content: 
+  stype: MyString
+  note: MyText
+  status: MyString
+  author: MyText
+
+two:
+  survey: two
+  gsurvey: two
+  iorder: 1
+  content: 
+  stype: MyString
+  note: MyText
+  status: MyString
+  author: MyText

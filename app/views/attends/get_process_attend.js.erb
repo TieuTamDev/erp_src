@@ -1,0 +1,136 @@
+<%
+  rows = []
+  color_status = {
+      "PENDING" => "#df9a4bff",
+      "APPROVED" => "#58c97c",
+      "REJECTED" => "#f36868",
+  }
+  stypes = {
+      "EARLY-CHECK-OUT" => "Về sớm",
+      "LATE-CHECK-IN" => "Đi trễ",
+      "SHIFT-CHANGE" => "Đổi ca",
+      "ADDITIONAL-CHECK-IN" => "Chấm công vào làm bù",
+      "ADDITIONAL-CHECK-OUT" => "Chấm công tan làm bù",
+      "UPDATE-SHIFT" => "Cập nhật Ca",
+      "WORK-TRIP" => "Đi công tác",
+      # @author: trong.lq
+      # @date: 23/10/2025
+      # Mapping tên hiển thị cho đề xuất chỉnh sửa kế hoạch làm việc
+      "EDIT-PLAN" => "Chỉnh sửa kế hoạch làm việc"
+  }
+
+  @shiftissue_pagin.each do |attend|
+    if attend.respond_to?(:grouped_work_trips)
+      attends = attend.grouped_work_trips
+      first = attends.min_by(&:work_date)
+      last  = attends.max_by(&:work_date)
+      note = first.note.present? ? first.note : "Không có"
+
+      checkbox = first.status == "PENDING" ? "<input data-check-select name='check-box-#{first.id}' onchange='onChecShilfIssue(this)' class='form-check-input' type='checkbox' value='#{first.id}'/>" : ""
+      approval_btn = first.status == "PENDING" ? "<td class='text-center'><button class='btn btn-primary me-2' onclick='clickApprovalOne(#{first.id})'>Duyệt</button></td>" : ""
+
+      rows << " <tr data-row-id='#{first.id}' style='vertical-align: middle;'>
+                  <td class='text-center'>#{checkbox}</td>
+                  <td><b>#{first.sid}</b></td>
+                  <td><b>#{first.user_name}</b></td>
+                  <td>#{stypes[first.stype]}</td>
+                  <td>#{(first.work_date + 1.day).strftime("%d/%m/%Y")} - #{(last.work_date + 1.day).strftime("%d/%m/%Y")}</td>
+                  <td><span style='color: #738ffb;'><b>Đi công tác</b></span></td>
+                  <td>#{first.updated_at.strftime("%d/%m/%Y")}</td>
+                  <td><b>#{note}</b></td>
+                  <td class='text-center' style='color:#{color_status[first.status]};vertical-align: middle;'><b>#{lib_translate("attendance.#{first.status}")}<b></td>
+                  #{approval_btn}
+                </tr>"
+    elsif attend.stype != "WORK-TRIP"
+      checkbox = attend.status == "PENDING" ? "<input data-check-select name='check-box-#{attend.id}' onchange='onChecShilfIssue(this)' class='form-check-input' type='checkbox' value='#{attend.id}'/>" : ""
+      approval_btn = attend.status == "PENDING" ? "<td class='text-center'><button class='btn btn-primary me-2' onclick='clickApprovalOne(#{attend.id})'>Duyệt</button></td>" : ""
+      # Code cũ - @author: trong.lq @date: 23/10/2025
+      # shift_name = attend.start_time <= "12:00" ? "Ca sáng" : "Ca chiều"
+      
+      # Code mới - @author: trong.lq @date: 23/10/2025
+      # Xử lý trường hợp start_time có thể nil
+      shift_name = attend.start_time.present? && attend.start_time <= "12:00" ? "Ca sáng" : "Ca chiều"
+
+      detail_content = case attend.stype
+        when "EARLY-CHECK-OUT"
+          "<span>Giờ ra: </span><span style='color: #738ffb;'><b>#{attend.us_end}</b></span>"
+        when "LATE-CHECK-IN"
+          "<span>Giờ vào: </span><span style='color: #738ffb;'><b>#{attend.us_start}</b></span>"
+        when "SHIFT-CHANGE"
+          "<div style='display: flex; align-items: center; font-size: 12px;'>
+            <div style='text-align: center;'>
+              <div><b>#{attend.user_name}</b></div>
+              <div style='color: #738ffb;'><b>#{attend.start_time} - #{attend.end_time}</b></div>
+            </div>
+            <div style='margin: 0 8px; font-size: 16px; color: #f3b668;'>
+              <i class='fas fa-arrows-alt-h'></i>
+            </div>
+            <div style='text-align: center;'>
+              <div><b>#{attend.change_user_name}</b></div>
+              <div style='color: #738ffb;'><b>#{attend.c_start_time} - #{attend.c_end_time}</b></div>
+            </div>
+          </div>"
+        when "UPDATE-SHIFT"
+          "<span>Giờ vào: </span><span style='color: #738ffb;'><b>#{attend.us_start}</b></span> - <span>Giờ ra: </span><span style='color: #738ffb;'><b>#{attend.us_end}</b></span>"
+        when "ADDITIONAL-CHECK-IN"
+          "<span>Giờ vào: </span><span style='color: #738ffb;'><b>#{attend.us_start}</b></span>"
+        when "ADDITIONAL-CHECK-OUT"
+          "<span>Giờ ra: </span><span style='color: #738ffb;'><b>#{attend.us_end}</b></span>"
+        when "EDIT-PLAN"
+          # @author: trong.lq
+          # @date: 23/10/2025
+          # Hiển thị thông tin chỉnh sửa kế hoạch làm việc trong danh sách duyệt
+          # Sử dụng thời gian mặc định 8h00 cho EDIT-PLAN
+          "<span>Giờ vào: </span><span style='color: #738ffb;'><b>08:00</b></span>"
+        else
+          ""
+      end
+
+      rows << " <tr data-row-id='#{attend.id}' style='vertical-align: middle;'>
+                  <td class='text-center'>#{checkbox}</td>
+                  <td><b>#{attend.sid}</b></td>
+                  <td><b>#{attend.user_name}</b></td>
+                  <td>#{stypes[attend.stype]}</td>
+                  <td>#{(attend.work_date + 1.day).strftime("%d/%m/%Y")} #{shift_name}: #{attend.start_time} - #{attend.end_time}</td>
+                  <td>#{detail_content}</td>
+                  <td>#{attend.updated_at.strftime("%d/%m/%Y")}</td>
+                  <td><b>#{attend.note}</b></td>
+                  <td class='text-center' style='color:#{color_status[attend.status]};vertical-align: middle;'><b>#{lib_translate("attendance.#{attend.status}")}<b></td>
+                  #{approval_btn}
+                </tr>"
+    end
+  end
+%>
+
+showLoadding(false);
+$(".attend-request-tbody").html(`<%= rows.join("").html_safe%>`);
+var pagin_render = `<%= render_pagination_style_1("onClickButtonPage",session[:page] || 1, session[:total_pages],session[:per_page] || 10).html_safe %>`;
+$(".pagin-wrap").html(pagin_render);
+$('[name="check_all"]').prop("checked",false);
+
+<%
+  shiftissues_array = []
+  @shiftissue_pagin.each do |item|
+    if item.respond_to?(:grouped_work_trips)
+      first = item.grouped_work_trips.min_by(&:work_date)
+      last  = item.grouped_work_trips.max_by(&:work_date)
+      shiftissues_array << item.as_json.merge(
+        "stype_text" => stypes[item.stype],
+        "start_date" => first.work_date,
+        "end_date"   => last.work_date,
+        "grouped_work_trips" => item.grouped_work_trips.map { |trip|
+          {
+            "work_date" => trip.work_date,
+            "start_time" => trip.start_time,
+            "end_time" => trip.end_time,
+            "note" => trip.note
+          }
+        }
+      )
+    elsif item.stype != "WORK-TRIP"
+      shiftissues_array << item.as_json.merge("stype_text" => stypes[item.stype])
+    end
+  end
+%>
+
+var shiftissues = <%= shiftissues_array.to_json.html_safe %>;

@@ -1,0 +1,156 @@
+<%
+def tinh_moc_theo_doi(diff_years)
+  case diff_years
+  when 0...5 then 0
+  when 5...10 then 1
+  when 10...15 then 2
+  when 15...20 then 3
+  when 20...25 then 4
+  when 25...30 then 5
+  when 30...35 then 6
+  when 35...40 then 7
+  when 40...45 then 8
+  when 45...50 then 9
+  when 50...55 then 10
+  when 55...60 then 11
+  else
+    diff_years >= 60 ? 12 : 0
+  end
+end
+def get_leave_data_by_user_id(user_id, index = nil,current_year)
+  user = User.find_by(id: user_id)
+  return nil unless user
+
+  contracts = Contract.where(user_id: user_id)
+  valid_contracts = contracts.reject { |c| c.name.to_s.downcase.include?("tập nghề") || c.name.to_s.downcase.include?("thử việc") }
+  earliest_contract = valid_contracts.min_by { |c| c.dtfrom || Time.now }
+
+  return nil unless earliest_contract&.dtfrom
+
+  start_year = earliest_contract.dtfrom.year
+  
+  diff_years = current_year - start_year
+
+  bien_tham_nien = tinh_moc_theo_doi(diff_years)
+
+  position = Work.where(user_id: user_id).where.not(positionjob_id: nil).first&.positionjob
+  return nil unless position
+  bien_cong_viec = position&.holno.to_i || 0.0
+
+  holiday = Holiday.find_by(user_id: user_id, year: current_year - 1)
+  total_phep = 0.0
+
+  if holiday
+    total_phep = Holpro.where(holiday_id: holiday.id, sholtype: "PHEP").pluck(:dttotal).compact.map(&:to_f).sum
+  end
+
+  raw_phep_ton = [bien_cong_viec - total_phep, 0].max
+  bien_phep_ton = begin
+    raw = [bien_cong_viec - total_phep, 0].max
+    raw % 1 == 0 ? raw.to_i : raw
+  end
+
+  han_su_dung = "31/03/#{current_year}"
+  han_su_dung_date = Date.strptime(han_su_dung, "%d/%m/%Y")
+  today = Date.today
+
+  phep_ton_duoc_tinh = today <= han_su_dung_date ? bien_phep_ton.to_f : 0
+
+  raw_tong_phep = bien_cong_viec + bien_tham_nien + phep_ton_duoc_tinh
+  tong_phep = raw_tong_phep % 1 == 0 ? raw_tong_phep.to_i : raw_tong_phep
+
+  {
+    stt: index,
+    code: user.sid,
+    full_name: "#{user.last_name} #{user.first_name}",
+    dob: user.birthday&.strftime("%d/%m/%Y") || "",
+    cong_viec: bien_cong_viec,
+    tham_nien: bien_tham_nien,
+    phep_ton: bien_phep_ton,
+    han_su_dung: han_su_dung,
+    tong_phep: tong_phep
+  }
+end
+
+list_user = Uorg.where(organization_id: Organization.find_by(scode: "BUH")&.id).where.not(user_id: nil).pluck(:user_id)
+@leave_data = []
+running_index = 1
+current_year = Time.now.year
+list_user.each do |user_id|
+  data = get_leave_data_by_user_id(user_id, running_index, current_year)
+  if data.present?
+    @leave_data << data
+    running_index += 1
+  end
+end
+%>
+<style>
+[contenteditable="true"] {
+  border: 1px solid #ced4da;
+  padding: 6px 12px;
+  border-radius: 4px;
+  min-width: 120px;
+}
+
+</style>
+
+<h4>Quản lý ngày nghỉ theo nhân sự</h4>
+<div class="card">
+    <div class="row gx-0 border rounded-2 p-3">
+        <div class="ps-3">
+            <div class="table-responsive scrollbar">
+                <table id="table_list_position_leave" class="table table-bordered fs--1 mb-0 table-hover">
+                    <thead class="bg-700 text-light">
+                        <tr>
+                            <th class="text-center" style="width: 5%;">STT</th>
+                            <th class="">Mã nhân sự</th>
+                            <th class="">Nhân sự</th>
+                            <th class="">Ngày sinh</th>
+                            <th class="text-center">Phép theo vị trí công việc</th>
+                            <th class="text-center">Phép theo thâm niên</th>
+                            <th class="text-center">Phép tồn</th>
+                            <th class="text-center">Tổng phép được sử dụng</th>
+                            <th class=""></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <% @leave_data.each do |data| %>
+                        <tr>
+                        <td class="text-center"><%= data[:stt] %></td>
+                        <td><%= data[:code] %></td>
+                        <td><%= data[:full_name] %></td>
+                        <td><%= data[:dob] %></td>
+                        <td class="text-center"><%= data[:cong_viec] %></td>
+                        <td class="text-center"><%= data[:tham_nien] %></td>
+                        <td class="text-center">
+                            <%= data[:phep_ton] %> (đến <span class="text-primary editable-date"><%= data[:han_su_dung] %></span>)
+                        </td>
+                        <td class="text-center"><%= data[:tong_phep] %></td>
+                        <td></td>
+                        </tr>
+                    <% end %>
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+$(document).ready(function () {
+  $(".editable-date").each(function () {
+    const span = $(this);
+    const original = span.text();
+    span.attr("contenteditable", true);
+
+    span.on("blur", function () {
+      const newVal = $(this).text().trim();
+      if (!/\d{2}\/\d{2}\/\d{4}/.test(newVal)) {
+        alert("Ngày không hợp lệ, khôi phục lại");
+        $(this).text(original);
+      }
+    });
+  });
+});
+</script>
+    

@@ -1,0 +1,8 @@
+<svg width="400" height="40" viewBox="0 0 400 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+<mask id="mask0_3531_92" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="400" height="40">
+<rect x="0.5" y="-0.5" width="399" height="39" rx="13.5" transform="matrix(1 0 0 -1 0 39)" stroke="white"/>
+</mask>
+<g mask="url(#mask0_3531_92)">
+<rect width="400" height="40" transform="matrix(1 0 0 -1 0 40)" fill="#E8E9EB"/>
+</g>
+</svg>

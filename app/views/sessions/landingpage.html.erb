@@ -1,0 +1,241 @@
+<%# author: Truongg Phu Dong 
+update: 7/6/2023 %>
+<style>
+  .card-link_button {
+    padding: 5px 0px 30px 0px;
+    text-decoration: none;
+    color: white;
+  }
+
+  .img_logo_bmtu{
+    width: 35%;
+  }
+  .img_logo_buh{
+    width: 35%;
+  }
+  
+  .text_welcome_bmtu_buh {
+    text-align: center;
+    font-weight: bold;
+    font-size: 20px;
+  }
+
+  .text_reponsive_landingpage{
+    padding: 0px 77px;
+  }
+
+  .card_button {
+    position: relative;
+    width: 100%;
+    height: 100%%;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s;
+  }
+  .text_button_landingpage{
+    color: white;
+    padding: 105px 70px;
+  }
+
+  .teacher_hover{
+    text-decoration:none !important;
+  }
+
+  .student_hover{
+    text-decoration:none !important;
+  }
+
+  .card-image_button {
+    width: 100%;
+    height: 100%;
+    background-color: #f2f2f2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    background: #30aae1;
+  }
+  .student_hover:hover{
+    background: #c33137 !important;
+    text-decoration:none !important;
+  }
+  .teacher_hover:hover{
+    background: #367693 !important;
+    text-decoration:none !important;
+  }
+   @media screen and (max-width: 1539px) {
+    .card_button{
+        width: 100%;
+        height: 100%;
+    }
+    .text_button_landingpage{
+      padding: 141px 105px;
+      font-size: 32px;
+    }
+    .text_reponsive_landingpage{
+      padding: 0px 36px;
+    }
+  }
+
+  @media screen and (max-width: 1539px) {
+    .card_button{
+        width: 100%;
+        height: 100%;
+    }
+    .text_button_landingpage{
+      padding: 125px 97px;
+      font-size: 29px;
+    }
+    .text_reponsive_landingpage{
+      padding: 0px 36px;
+    }
+  }
+
+
+  @media screen and (max-width: 1304px) {
+    .card_button{
+        width: 100%;
+        height: 100%;
+    }
+    .text_button_landingpage{
+      padding: 96px 59px;
+      font-size: 29px;
+    }
+    .text_reponsive_landingpage{
+      padding: 0px 36px;
+    }
+  }
+
+  @media screen and (max-width: 990px) {
+    .card_button{
+        width: 100%;
+        height: 100%;
+    }
+    .text_button_landingpage{
+      font-size: 30px;
+      padding: 114px 80px;
+    }
+    .text_reponsive_landingpage{
+      padding: 0px 36px;
+    }
+  }
+
+  @media screen and (max-width: 800px) {
+    .card_button{
+        width: 100%;
+        height: 100%;
+    }
+    .text_button_landingpage{
+      font-size: 30px;
+      padding: 100px 65px;
+    }
+    .text_reponsive_landingpage{
+      padding: 0px 36px;
+    }
+  }
+
+  @media screen and (max-width: 670px) {
+    .card_button{
+      width: 100%;
+      height: 100%;
+    }
+    .text_button_landingpage{
+      font-size: 19px;
+      padding: 73px 45px;
+    }
+  }
+  @media screen and (max-width: 470px) {
+    .card_button{
+        width: 150px;
+        height: 125px;
+    }
+    .text_welcome_bmtu_buh{
+      font-size: 17px;
+    }
+    .text_button_landingpage{
+      font-size: 15px;
+      padding: 12px;
+    }
+    .text_reponsive_landingpage{
+      padding: 0px 4px;
+      font-size: 14px;
+      color: white;
+    }
+    .img_logo_bmtu{
+      width: 40%;
+    }
+    .img_logo_buh{
+      width: 40%;
+    }
+    .card-link_button{
+      padding: 5px 0px 20px 0px;
+    }
+  }
+    @media screen and (max-width: 360px) {
+    .card_button{
+      width: 100%;
+      height: 100%;
+    }
+    .text_button_landingpage{
+      font-size: 14px;
+      padding: 35px 16px;
+    }
+     .text_welcome_bmtu_buh{
+      font-size: 12px;
+    }
+    .text_reponsive_landingpage{
+      padding: 0px 4px;
+      font-size: 10px;
+    }
+  }
+</style>
+  <%= javascript_include_tag 'jquery.min' %> 
+  <main class="main bg-style-bmtu" id="top">
+    <div class="container-fluid">
+      <div class="row min-vh-100 flex-center g-0">
+        <div class="col-lg-10 col-xxl-7 py-3  position-relative">
+          <img class="bg-auth-circle-shape top-0" style="right: -8.75rem; left: auto;" src="<%= image_path("bg-shape.png") %>" width="250">
+          <img class="bg-auth-circle-shape-2" src="<%= image_path("shape-1.png") %>" width="150"> 
+            <a class="d-flex flex-center">
+              <img class="me-5 img_logo_bmtu" src="<%= image_path("/assets/image/logo.svg")  %>" />
+              <img  class="img_logo_buh" src="<%= image_path("buhlogo.png") %>"  />
+            </a>
+          <div class="card overflow-hidden" >
+            <div style="text-align: center;" class="pt-2">
+              <span class="text_welcome_bmtu_buh"> <%= lib_translate("Welcome_to_BMTU_BUH") %> </span>
+            </div>
+            <p class="text-danger fst-italic text_reponsive_landingpage"> <%= lib_translate("if_BMTU_BUH") %> </p>
+            <div class="card-body p-0 ">
+              <div class="d-flex justify-content-around ">
+                  <a href='<%=@PMDT_PATH %>login?lang=vi' class="card-link_button" style="text-decoration: none;">
+                    <div class="card_button button_text_hover_sv ">
+                      <div class="card-image_button student_hover">
+                        <h3 class="text_button_landingpage" ><span class="fas fa-graduation-cap"> </span> <%= lib_translate("Students") %></h3>
+                      </div>
+                    </div>
+                  </a>
+                  <a href='<%=@ERP_PATH%>login?lang=vi' class="card-link_button" style="text-decoration: none;">
+                    <div class="card_button button_text_hover">
+                      <div class="card-image_button teacher_hover">
+                        <h3 class="text_button_landingpage"><span class="fas fa-toolbox"> </span> <%= lib_translate("Staff") %> </h3>
+                      </div>
+                    </div>
+                  </a>
+                  <a href="https://capp.bmtu.edu.vn/sftraining/login_parent?lang=vi" class="card-link_button" style="text-decoration: none;">
+                    <div class="card_button button_text_hover_sv ">
+                      <div class="card-image_button student_hover">
+                        <h3 class="text_button_landingpage" ><span class="fas fa-user-friends"> </span> <%= lib_translate("Parents") %></h3>
+                      </div>
+                    </div>
+                  </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  <%# end Dong %>
+
+

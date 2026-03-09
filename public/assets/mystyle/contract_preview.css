@@ -1,0 +1,15 @@
+#scontent p{
+    margin: 0;
+}
+.token-display{
+    background-color: #ebebeb;
+    color: #000000;
+    cursor: pointer;
+    border: 1px solid #dadada;
+    border-radius: 3px;
+    padding: 0px 2px;
+}
+.empty-token{
+    background-color: yellow;
+    color: #ff0000;
+}

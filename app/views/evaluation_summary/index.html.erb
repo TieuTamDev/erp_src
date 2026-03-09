@@ -1,0 +1,85 @@
+<% content_for :head do %>
+    <%= javascript_include_tag '/assets/myjs/chart.js' %>
+<% end %>
+<% content_for :bottombody do %>
+    <%= javascript_include_tag '/assets/myjs/evaluation_summary.js' %>
+<% end %>
+
+<%   
+    is_dismiss =  @appointment.stype == "MIEN_NHIEM"
+    stype_text = lib_translate("appointment.#{@appointment.stype}")
+%>
+
+<%= breadcrumbs([
+  { title: 'Trang chủ', path: root_path },
+  { title: stype_text.upcase_first, path: appointment_path(@appointment) },
+  { title: @appointment.title, path: appointment_path(@appointment) },
+  { title: "Phiếu khảo sát ý kiến tín nhiệm", current: true }
+]) %>
+ 
+<style>
+    .row.d-flex {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    
+    .col-12.col-lg-6.d-flex {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .card.h-100.w-100 {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .card-body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    #bar-chart-size {
+        flex: 1;
+        width: 100%;
+    }
+    .btn-outline-primary:hover svg {
+        color: white !important;
+    }
+    .scrollable-content {
+        height: 300px;
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: #e7e7e7 #ffffff;
+    }
+</style>
+
+<div class="card mb-3">
+    <div class="card-header bg-body-tertiary">
+        <div class="d-flex justify-content-between">
+            <h5 class="mb-2" data-anchor="data-anchor">Phiếu khảo sát ý kiến tín nhiệm vị trí <%= @appointment.positionjob.name%> <%= @appointment.department.name%></h5>
+        </div>
+        <p class="mb-1">(Ứng viên <%= @appointment.user.last_name%> <%= @appointment.user.first_name%>)</p>
+    </div>
+
+    <div class="card-body p-3 pt-0">
+        <ul class="nav nav-tabs" id="myTab" role="tablist" style="border-bottom: 0px">
+            <% @tabs.each do |key, name| %>
+                <li class="nav-item">
+                    <a class="nav-link <%= @current_tab == name.to_s ? 'active' : ''%>" id="<%= name %>_tab"
+                        href="<%= appointment_evaluation_summary_index_path(@appointment, tab: name, mandocuhandle_id: params[:mandocuhandle_id], lang: session[:lang]) %>">
+                        <%= lib_translate(name) %>
+                    </a>
+                </li>
+            <% end %>
+        </ul>
+        <div class="tab-content border border-top-0 p-3" id="myTabContent" style="border: none !important;">
+            <%= render partial: 'evaluation_summary/summary_of_price_reviews' if @current_tab == @tabs[:summary_of_price_reviews] %>
+            <%= render partial: 'evaluation_summary/review_details' if @current_tab == @tabs[:review_details] %>
+        </div>
+    </div> 
+</div>
+
+
+

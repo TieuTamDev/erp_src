@@ -1,0 +1,4 @@
+<script defer>
+    $("#loading").css("display", "flex");
+    window.location.href = "<%= appointment_evaluation_summary_index_path(appointment_id: @form_data[:appointment_id], mandocuhandle_id: @form_data[:mandocuhandle_id], lang: session[:lang]).html_safe %>";
+</script>

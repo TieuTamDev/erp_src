@@ -1,0 +1,2 @@
+module TbhospitalsHelper
+end

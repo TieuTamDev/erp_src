@@ -1,0 +1,347 @@
+<style>
+    .is-invalid .tox-tinymce {
+      border-color: #dc3545;
+    }
+    
+    .invalid-feedback {
+      display: block;
+      color: #dc3545;
+      margin-top: 0.25rem;
+    }
+
+    .select2-container.is-invalid .select2-selection {
+      border-color: #dc3545 !important;
+    }
+  
+    .select2-container + .invalid-feedback {
+      margin-top: 0.25rem;
+    }
+
+    select.is-invalid + .select2-container .select2-selection {
+      border-color: #dc3545 !important;
+    }
+</style>
+
+<%= form_for @subdepartment, url: (@subdepartment.new_record? ? subdepartments_path : subdepartment_path(@subdepartment)),
+                             method: (@subdepartment.new_record? ? :post : :patch),
+                             remote: true do |form| %>
+    <div class="modal-body">
+      <div class="row">
+        <!-- Hidden field for department_id -->
+        <%= hidden_field_tag :department_id, params[:department_id], id: 'department_id' %>
+
+        <div class="col-12 mb-3">
+          <div class="form-group">
+            <%= form.label :name, 'Tên nhóm bằng tiếng Việt', class: 'form-label' %>
+            <%= form.text_field :name, class: "form-control #{@subdepartment.errors[:name].any? ? 'is-invalid' : ''}", id: 'subdepartment_name', placeholder: 'Nhập tên nhóm tiếng Việt' %>
+            <% if @subdepartment.errors[:name].any? %>
+              <div class="invalid-feedback">
+                <%= @subdepartment.errors[:name].join(", ") %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+
+        <div class="col-12 mb-3">
+          <div class="form-group">
+            <%= form.label :name_en, 'Tên nhóm bằng tiếng Anh', class: 'form-label' %>
+            <%= form.text_field :name_en, class: "form-control #{@subdepartment.errors[:name_en].any? ? 'is-invalid' : ''}", id: 'subdepartment_name_en', placeholder: 'Nhập tên nhóm tiếng Anh' %>
+            <% if @subdepartment.errors[:name_en].any? %>
+              <div class="invalid-feedback">
+                <%= @subdepartment.errors[:name_en].join(", ") %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+
+        <div class="col-12 mb-3 d-none">
+          <div class="form-group">
+            <%= form.label :scode, 'Mã nhóm', class: 'form-label' %>
+            <%= form.text_field :scode, class: "form-control #{@subdepartment.errors[:scode].any? ? 'is-invalid' : ''}", id: 'subdepartment_scode', placeholder: 'Nhập mã nhóm' %>
+            <% if @subdepartment.errors[:scode].any? %>
+              <div class="invalid-feedback">
+                <%= @subdepartment.errors[:scode].join(", ") %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+        
+        <div class="col-12 mb-3">
+          <div class="form-group">
+            <%= form.label :amount, 'Số lượng', class: 'form-label' %>
+            <%= form.text_field :amount, class: "form-control #{@subdepartment.errors[:amount].any? ? 'is-invalid' : ''}", 
+                                        id: 'subdepartment_amount', 
+                                        placeholder: 'Nhập số lượng',
+                                        maxlength: 3,
+                                        pattern: "[0-9]{1,3}",
+                                        oninput: "this.value = this.value.replace(/[^0-9]/g, '').slice(0, 3)" %>
+            <% if @subdepartment.errors[:amount].any? %>
+              <div class="invalid-feedback">
+                <%= @subdepartment.errors[:amount].join(", ") %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+
+        <!-- <div class="col-md-12 mb-3">
+          <div class="row">
+            <div class="col-md-6">
+              <label for="leader" class="form-label">Trưởng nhóm</label>
+              <select class="form-select <%= @subdepartment.errors[:leader].any? ? 'is-invalid' : '' %>" id="leader" name="leader"></select>
+              <% if @subdepartment.errors[:leader].any? %>
+                <div class="invalid-feedback">
+                  <%= @subdepartment.errors[:leader].join(", ") %>
+                </div>
+              <% end %>
+            </div>
+            <div class="col-md-6">
+              <label for="deputy" class="form-label">Phó nhóm</label>
+              <select class="form-select <%= @subdepartment.errors[:deputy].any? ? 'is-invalid' : '' %>" id="deputy" name="deputy"></select>
+              <% if @subdepartment.errors[:deputy].any? %>
+                <div class="invalid-feedback">
+                  <%= @subdepartment.errors[:deputy].join(", ") %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div> -->
+
+        <div class="col-12 mb-3">
+          <div class="form-group">
+            <%= form.label :note, 'Ghi chú', class: 'form-label' %>
+            <%= form.text_area :note, rows: 3, class: "form-control #{@subdepartment.errors[:note].any? ? 'is-invalid' : ''}", placeholder: 'Nhập ghi chú' %>
+            <% if @subdepartment.errors[:note].any? %>
+              <div class="invalid-feedback">
+                <%= @subdepartment.errors[:note].join(", ") %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer border-top-0">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+        <%= form.submit 'Lưu', class: 'btn btn-primary' %>
+    </div>
+<% end %>
+
+<script>
+  var root_path = '<%= @ERP_PATH %>';
+  var editLeaderEmail = `<%= @selected_leader || 'null' %>`;
+  var editDeputyEmail = `<%= @selected_deputy || 'null' %>`;
+
+  function getTextToASCII() {
+    var value_name = document.getElementById("subdepartment_name").value;
+    var value_scode = document.getElementById("subdepartment_scode");
+    if (value_name) {
+    var content = removeVietnameseTones(value_name).replace(/ /g, '-');
+        if (value_scode) {
+                    value_scode.value = content.toUpperCase()
+                }
+    }
+  }
+
+  function removeVietnameseTones(str) {
+      str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g,"a"); 
+      str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g,"e"); 
+      str = str.replace(/ì|í|ị|ỉ|ĩ/g,"i"); 
+      str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g,"o"); 
+      str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g,"u"); 
+      str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g,"y"); 
+      str = str.replace(/đ/g,"d");
+      str = str.replace(/À|Á|Ạ|Ả|Ã|Â|Ầ|Ấ|Ậ|Ẩ|Ẫ|Ă|Ằ|Ắ|Ặ|Ẳ|Ẵ/g, "A");
+      str = str.replace(/È|É|Ẹ|Ẻ|Ẽ|Ê|Ề|Ế|Ệ|Ể|Ễ/g, "E");
+      str = str.replace(/Ì|Í|Ị|Ỉ|Ĩ/g, "I");
+      str = str.replace(/Ò|Ó|Ọ|Ỏ|Õ|Ô|Ồ|Ố|Ộ|Ổ|Ỗ|Ơ|Ờ|Ớ|Ợ|Ở|Ỡ/g, "O");
+      str = str.replace(/Ù|Ú|Ụ|Ủ|Ũ|Ư|Ừ|Ứ|Ự|Ử|Ữ/g, "U");
+      str = str.replace(/Ỳ|Ý|Ỵ|Ỷ|Ỹ/g, "Y");
+      str = str.replace(/Đ/g, "D");
+      // Some system encode vietnamese combining accent as individual utf-8 characters
+      // Một vài bộ encode coi các dấu mũ, dấu chữ như một kí tự riêng biệt nên thêm hai dòng này
+      str = str.replace(/\u0300|\u0301|\u0303|\u0309|\u0323/g, ""); // ̀ ́ ̃ ̉ ̣  huyền, sắc, ngã, hỏi, nặng
+      str = str.replace(/\u02C6|\u0306|\u031B/g, ""); // ˆ ̆ ̛  Â, Ê, Ă, Ơ, Ư
+      // Remove extra spaces
+      // Bỏ các khoảng trắng liền nhau
+      str = str.replace(/ + /g," ");
+      str = str.trim();
+      // Remove punctuations
+      // Bỏ dấu câu, kí tự đặc biệt
+      str = str.replace(/!|@|%|\^|\*|\(|\)|\+|\=|\<|\>|\?|\/|,|\.|\:|\;|\'|\"|\&|\#|\[|\]|~|\$|_|`|-|{|}|\||\\/g," ");
+      return str;
+  }
+
+  document.getElementById("subdepartment_name").addEventListener("keyup", function() {getTextToASCII()} );
+
+  $(document).ready(function () {
+    $('#leader, #deputy').select2({
+      width: '100%',
+      placeholder: "Vui lòng chọn...",
+      allowClear: true
+    });
+
+    // Lấy danh sách nhân sự trong đơn vị - trưởng
+    $('#leader').select2({
+      theme: 'bootstrap-5',
+      language: {
+        searching: function () {
+          return 'Đang tìm kiếm...';
+        },
+        loadingMore: function () {
+          return 'Đang tải...';
+        }
+      },
+      placeholder: `Chọn trưởng phòng`,
+      ajax: {
+        delay: 1000,
+        url: `${root_path}/subdepartments/get_users`,
+        data: function (params) {
+          return {
+            search: params.term,
+            department_id: $("#department_id").val()
+          };
+        },
+        processResults: function (data) {
+          let results = data.items.map(function (item) {
+            let option = { id: item.email, text: `${item.last_name} ${item.first_name} (${item.sid})` };
+            if (editLeaderEmail && item.email == editLeaderEmail) {
+              option.selected = true;
+            }
+            return option;
+          });
+
+          return {
+            results: results
+          };
+        }
+      }
+    });
+
+    // Lấy danh sách nhân sự trong đơn vị - phó
+    $('#deputy').select2({
+      theme: 'bootstrap-5',
+      language: {
+        searching: function () {
+          return 'Đang tìm kiếm...';
+        },
+        loadingMore: function () {
+          return 'Đang tải...';
+        }
+      },
+      placeholder: `Chọn phó phòng`,
+      ajax: {
+        delay: 1000,
+        url: `${root_path}/subdepartments/get_users`,
+        data: function (params) {
+          return {
+            search: params.term,
+            department_id: $("#department_id").val()
+          };
+        },
+        processResults: function (data) {
+          let results = data.items.map(function (item) {
+            let option = { id: item.email, text: `${item.last_name} ${item.first_name} (${item.sid})` };
+            if (editDeputyEmail && item.email == editDeputyEmail) {
+              option.selected = true;
+            }
+            return option;
+          });
+
+          return {
+            results: results
+          };
+        }
+      }
+    });
+
+    // Function to load selected user data and add to select
+    function loadAndSetUser(selectId, userEmail, isLeader = true) {
+      if (userEmail && userEmail !== 'null') {
+        $.ajax({
+          url: `${root_path}/subdepartments/get_users`,
+          data: { 
+            department_id: $("#department_id").val(),
+            user_email: userEmail
+          },
+          success: function(data) {
+            if (data && data.items && data.items.length > 0) {
+              // Find the user in the response
+              let user = data.items.find(item => item.email == userEmail);
+              if (user) {
+                // Create and add option
+                let option = new Option(
+                  `${user.last_name} ${user.first_name} (${user.sid})`,
+                  user.email,
+                  true,
+                  true
+                );
+                $(selectId).append(option).trigger('change');
+              }
+            }
+          }
+        });
+      }
+    }
+
+    // Load selected users after Select2 initialization
+    loadAndSetUser('#leader', editLeaderEmail, true);
+    loadAndSetUser('#deputy', editDeputyEmail, false);
+
+    // Giữ lại giá trị đã chọn khi có validation error
+    <% if @subdepartment.leader.present? || params[:leader].present? %>
+      setTimeout(function() {
+        var leaderEmail = '<%= @subdepartment.leader || params[:leader] %>';
+        if (leaderEmail) {
+          // Tạo option tạm và select
+          var leaderOption = new Option('Đang tải...', leaderEmail, true, true);
+          $('#leader').append(leaderOption).trigger('change');
+          
+          // Load thông tin user để hiển thị tên đúng
+          $.ajax({
+            url: `${root_path}/subdepartments/get_users`,
+            data: { department_id: $("#department_id").val() },
+            success: function(data) {
+              var selectedUser = data.items.find(function(item) {
+                return item.email == leaderEmail;
+              });
+              if (selectedUser) {
+                // Xóa option cũ và thêm option mới với tên đúng
+                $('#leader').empty();
+                var newOption = new Option(`${selectedUser.last_name} ${selectedUser.first_name} (${selectedUser.sid})`, leaderEmail, true, true);
+                $('#leader').append(newOption).trigger('change');
+              }
+            }
+          });
+        }
+      }, 500);
+    <% end %>
+
+    <% if @subdepartment.deputy.present? || params[:deputy].present? %>
+      setTimeout(function() {
+        var deputyEmail = '<%= @subdepartment.deputy || params[:deputy] %>';
+        if (deputyEmail) {
+          // Tạo option tạm và select
+          var deputyOption = new Option('Đang tải...', deputyEmail, true, true);
+          $('#deputy').append(deputyOption).trigger('change');
+          
+          // Load thông tin user để hiển thị tên đúng
+          $.ajax({
+            url: `${root_path}/subdepartments/get_users`,
+            data: { department_id: $("#department_id").val() },
+            success: function(data) {
+              var selectedUser = data.items.find(function(item) {
+                return item.email == deputyEmail;
+              });
+              if (selectedUser) {
+                // Xóa option cũ và thêm option mới với tên đúng
+                $('#deputy').empty();
+                var newOption = new Option(`${selectedUser.last_name} ${selectedUser.first_name} (${selectedUser.sid})`, deputyEmail, true, true);
+                $('#deputy').append(newOption).trigger('change');
+              }
+            }
+          });
+        }
+      }, 500);
+    <% end %>
+  });
+</script>

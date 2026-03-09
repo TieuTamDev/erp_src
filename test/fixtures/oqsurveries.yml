@@ -1,0 +1,15 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  qsurvey: one
+  note: MyText
+  status: MyString
+  iorder: 1
+  optvalue: 
+
+two:
+  qsurvey: two
+  note: MyText
+  status: MyString
+  iorder: 1
+  optvalue: 

@@ -1,0 +1,6 @@
+$("#department_parent").empty();
+$("#department_parent").append('<option value="">Chọn đơn vị cha</option>');
+
+<% @departments.each do |dep| %>
+  $("#department_parent").append('<option value="<%= dep.id %>"><%= j dep.name %></option>');
+<% end %>

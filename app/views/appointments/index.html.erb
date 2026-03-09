@@ -1,0 +1,274 @@
+<% content_for :head do %>
+  <%= stylesheet_link_tag "select2-bootstrap-5-theme.min" %>
+  <%= stylesheet_link_tag "select2.min" %>
+<% end %>
+
+<% content_for :bottombody do %>
+  <%= javascript_include_tag 'select2.min.js'%>
+  <%= javascript_include_tag '/assets/myjs/appointment.js'%>
+<% end %>
+<style>
+    .task-option {
+        text-align: center;
+        width: fit-content;
+        cursor: pointer;
+    }
+    .task-icon{
+        width: 30px;
+        height: 30px;
+    }
+    
+    .task-option:hover {
+        border-color: #0d6efd;
+        box-shadow: 0 0 10px rgba(13, 110, 253, 0.2);
+    }
+
+    .task-option.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        background-color: #f1f1f1;
+    }
+
+    .task-option:hover:not(.disabled) {
+        background-color: #f8f9fa;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .modal-content {
+        border-radius: 16px;
+    }
+    
+    .modal-header {
+        border-bottom: none;
+        padding: 1.5rem 1.5rem 0.5rem;
+    }
+    
+    .modal-title {
+        width: 100%;
+        text-align: left;
+        font-size: 1.5rem;
+        font-weight: 500;
+    }
+    
+    .modal-body {
+        padding: 1rem 1.5rem 2rem;
+    }
+    
+    .modal-footer {
+        border-top: none;
+    }
+
+    .tab-counter {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 22px;
+        height: 22px;
+        padding: 0 6px;
+        margin-left: 8px;
+        font-size: 12px;
+        font-weight: 500;
+        line-height: 1;
+        color: #fff;
+        text-align: center;
+        background-color: #0d6efd;
+        border-radius: 20px;
+    }
+    
+    .tab-counter-danger {
+        background-color: #dc3545;
+    }
+    
+    .tab-counter-success {
+        background-color: #198754;
+    }
+    
+    .tab-counter-warning {
+        background-color: #FC953B;
+    }
+    
+    .nav-tabs .nav-link {
+        position: relative;
+    }
+
+    .nav-tabs .nav-link:hover .tab-counter {
+        transform: scale(1.05);
+        transition: transform 0.2s ease;
+    }
+
+    .nav-tabs .nav-link.active .tab-counter {
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    #appointment_table tbody tr {
+        cursor: pointer;
+    }
+    #appointment_table tbody tr:hover {
+        background-color: #f1f1f1; 
+        transition: background-color 0.2s ease;  
+    }
+    .badges {
+        display: inline-block;
+        padding: 2px 20px;
+        font-size: 12px;
+        font-weight: 600;
+        border-radius: 9999px; 
+    }
+    .badges-pending {
+        background-color: #DEE0E2;
+        color: #61666F;
+    }
+    .badges-primary {
+        background-color: rgba(0, 123, 255, 0.2); 
+        color: #007bff; 
+    }
+    .badges-primary {
+        background-color: rgba(0, 123, 255, 0.2); 
+        color: #007bff; 
+    }
+ 
+    .badges-info {
+        background-color: rgba(23, 162, 184, 0.2); 
+        color: #17a2b8; 
+    } 
+    
+    .badges-warning {
+        background-color: rgba(255, 139, 7, 0.2); 
+        color: #ff6a07; 
+    } 
+    .badges-success {
+        background-color: rgba(40, 167, 69, 0.2); 
+        color: #28a745; 
+    } 
+    .badges-danger {
+        background-color: rgba(220, 53, 69, 0.2); 
+        color: #dc3545; 
+    }
+    table tr td {
+        vertical-align: middle !important;
+    }
+    #appointment_table_wrapper .top {
+        display: none !important;
+    }
+</style>
+<%= breadcrumbs([
+  { title: 'Trang chủ', path: root_path },
+  { title: "Tác vụ nhận sự", current: true }
+]) %>
+<div class="row g-0">
+    <div class="container bg-light p-4">
+        <h2>Tác vụ nhân sự</h2> 
+        <ul class="nav nav-tabs" id="myTab" role="tablist" style="border-bottom: 0px">
+            <% @tabs.each do |key, name| %>
+                <li class="nav-item">
+                    <a class="nav-link <%= @current_tab == name.to_s ? 'active' : '' %> d-flex align-items-center" id="<%= name %>_tab"
+                        href="<%= appointments_path(tab: name, lang: session[:lang]) %>">
+                        <%= lib_translate(name) %>
+                        <span class="tab-counter <%= name == 'task_list' ? 'tab-counter-danger' : 'tab-counter-warning' %> <%= @counts[name] <= 0 ? 'd-none' : '' %>"><%= @counts[name] %></span>
+                    </a>
+                </li>
+          <% end %>
+        </ul>
+        <div class="tab-content border border-top-0 p-3" id="myTabContent" style="border: none !important;">
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="appointment_table_search" placeholder="Tìm kiếm">
+                        <span class="input-group-text bg-white">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                            </svg>
+                        </span>
+                    </div>
+                </div>
+                <div class="col-md-6 d-flex" style="justify-content: end;">
+                    <%# <button class="btn btn-primary mr-1 mb-1" type="button" data-bs-toggle="modal" data-bs-target="#taskSelectionModal">
+                        <span class="fas fa-plus mr-2" data-fa-transform="shrink-3"></span> Tác vụ
+                    </button> %>
+                    <% if is_access(session[:user_id], "APPOINTMENT-CREATE", "ADD") %>
+                        <a data-remote="true" class="handle_btn btn btn-falcon-primary me-2" style="display: flex;width: fit-content;align-items: center;" href="<%= render_form_appointments_path('created', form: 'created',stype:"BO_NHIEM") %>">
+                            <img class="task-icon" src="<%= image_path("/assets/image/bonhiem.svg") %>">
+                            <span>Bổ nhiệm</span>
+                        </a>
+                        <a data-remote="true" class="handle_btn btn btn-falcon-primary" style="display: flex;width: fit-content;align-items: center;" href="<%= render_form_appointments_path('created', form: 'created',stype:"MIEN_NHIEM") %>">
+                            <img class="task-icon" src="<%= image_path("/assets/image/miennhiem.svg") %>">
+                            <span>Miễn nhiệm</span>
+                        </a>
+                    <%end%>
+                    <a data-remote="true" class="handle_btn d-none">
+                        <img class="task-icon" src="<%= image_path("/assets/image/phancong.svg") %>">
+                        <span>Phân công</span>
+                    </a>
+                    <a data-remote="true" class="handle_btn d-none">
+                        <img class="task-icon" src="<%= image_path("/assets/image/dieuchuyen.svg") %>">
+                        <span>Điều chuyển</span>
+                    </a>
+                </div>
+            </div>
+
+            <table id="appointment_table" class="table table-bordered fs--1 mb-0" style="width: 100%; table-layout: fixed;">
+                <thead class="bg-200 text-900">
+                    <tr>
+                        <th class="no-sort">STT</th>
+                        <th>Tên tác vụ</th>
+                        <th>Độ khẩn</th>
+                        <th>Đang xử lý</th>
+                        <th>Tình trạng</th>
+                    </tr>
+                </thead>
+                <tbody> 
+                </tbody>
+            </table>  
+        </div>
+
+        <!-- Modal -->
+        <div class="modal fade" id="taskSelectionModal" data-bs-keyboard="false" data-bs-backdrop="static" tabindex="-1" aria-labelledby="taskSelectionModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="taskSelectionModalLabel">Chọn tác vụ</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <% if is_access(session[:user_id], "APPOINTMENT-CREATE","ADD")%>
+                                <div class="col">
+                                    <a data-remote="true" class="handle_btn" href="<%= render_form_appointments_path('created', form: 'created',stype:"BO_NHIEM") %>">
+                                        <div class="task-option">
+                                            <img class="task-icon" src="<%= image_path("/assets/image/bonhiem.svg") %>">
+                                            <div>Bổ nhiệm</div>
+                                        </div>
+                                    </a>
+                                </div>
+                            <%end%>
+                            <% if is_access(session[:user_id], "APPOINTMENT-CREATE","ADD")%>
+                            <div class="col">
+                                <a data-remote="true" class="handle_btn" href="<%= render_form_appointments_path('created', form: 'created',stype:"MIEN_NHIEM") %>">
+                                    <div class="task-option">
+                                        <img class="task-icon" src="<%= image_path("/assets/image/miennhiem.svg") %>">
+                                        <div>Miễn nhiệm</div>
+                                    </div>
+                                </a>
+                            </div>
+                            <% end %>
+                            <div class="col">
+                                <div class="task-option disabled">
+                                    <img class="task-icon" src="<%= image_path("/assets/image/phancong.svg") %>">
+                                    <div>Phân công</div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="task-option disabled">
+                                    <img class="task-icon" src="<%= image_path("/assets/image/dieuchuyen.svg") %>">
+                                    <div>Điều chuyển</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    
+</script>

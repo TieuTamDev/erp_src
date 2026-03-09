@@ -1,0 +1,475 @@
+<h4>Nghiệm thu BHXH</h4>
+<div class="card">
+<div class="row gx-0 border rounded-2 p-3">
+<div class="ps-3">
+<div class="table-responsive scrollbar">
+<div class="mb-2 mt-1 d-flex justify-content-end align-items-end flex-wrap gap-2">
+  <%= form_tag manager_leave_insurance_handover_path, method: :get, class: "d-flex align-items-end gap-3" do %>
+    <%= hidden_field_tag :lang, session[:lang] %>
+    <%= hidden_field_tag :per_page, @per_page %>
+    <%= hidden_field_tag :page, 1 %>
+
+    <div>
+      <label class="form-label mb-0 me-2">Phòng ban:</label>
+      <%= select_tag :department_id,
+            options_from_collection_for_select(@departments, :id, :name, params[:department_id]),
+            include_blank: "-- Tất cả --",
+            class: "form-select form-select-sm w-auto" %>
+    </div>
+
+    <div>
+      <label class="form-label mb-0 me-2">Mã/Tên nhân sự:</label>
+      <%= text_field_tag :keyword, params[:keyword], class: "form-control form-control-sm", placeholder: "Nhập mã hoặc tên", maxlength: 255 %>
+    </div>
+
+    <%= submit_tag "Lọc", class: "btn btn-sm btn-success" %>
+  <% end %>
+</div>
+
+<table id="table_dashboard_management_view" class="table table-bordered table-sm fs--1 mb-0" style="table-layout: unset !important;">
+    <thead class="bg-200 text-900">
+        <tr>
+        <th class="align-middle text-center p-0">STT</th>
+        <th>Mã nhân sự</th>
+        <th>Tên nhân sự</th>
+        <th>Vị trí CV</th>
+        <th>Khoa/phòng</th>
+        <th>Thời gian</th>
+        <th>Trạng thái</th>
+        <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        <% @data&.each_with_index do |item, index| %>
+        <tr>
+            <td class="text-center align-middle p-0"><%= index + 1 %></td>
+            <td class="align-middle"><%= item.sid %></td>
+            <td class="align-middle"><%= item.full_name %></td>
+            <td class="align-middle"><%= item.position_name %></td>
+            <td class="align-middle"><%= item.department_name %></td>
+            <td class="align-middle">
+                <%= raw item.detail_details %>
+            </td>
+            <td class="align-middle"><%= item.holpro_status %></td>
+            <td class="align-middle text-center">
+                <button
+                    class="btn btn-sm btn-primary btn-show-leave-detail"
+                    data-bs-toggle="modal"
+                    data-bs-target="#leaveDetailModal"
+                    data-id="<%= item.holpro_id %>"
+                    data-iddetail="<%= item.detail_id %>"
+                    data-sid="<%= item.sid %>"
+                    data-name="<%= item.full_name %>"
+                    data-department="<%= item.department_name %>"
+                    data-position="<%= item.position_name %>"
+                    data-details='<%= item.detail_details_json.to_json %>'>
+                    Chi tiết
+                </button>
+                <% if item.his_button == true %>
+                    <button
+                        class="btn btn-sm btn-warning btn-show-change-log"
+                        data-bs-toggle="modal"
+                        data-bs-target="#changeLogModal"
+                        data-id="<%= item.holpro_id %>"
+                        data-iddetail="<%= item.detail_id %>"
+                        data-name="<%= item.full_name %>"
+                        data-department="<%= item.department_name %>"
+                        data-position="<%= item.position_name %>"
+                        data-mode="view-only"
+                        data-logs='<%= item.change_all.to_json %>'>
+                        Lịch sử thay đổi
+                    </button>
+                <% end %>
+            </td>
+        </tr>
+        <% end %>
+    </tbody>
+</table>
+<div class="d-flex justify-content-center align-items-center mt-3 flex-wrap gap-3">
+  <div class="d-flex align-items-center gap-3">
+    <nav>
+      <ul class="pagination mb-0">
+        <% if @page > 1 %>
+          <li class="page-item">
+            <%= link_to '« Trước',
+                  manager_leave_insurance_handover_path(params.permit!.to_h.merge(per_page: @per_page, page: @page - 1)),
+                  class: "page-link" %>
+          </li>
+        <% end %>
+
+        <% (1..@total_pages).each do |p| %>
+          <li class="page-item <%= 'active' if p == @page %>">
+            <%= link_to p,
+                  manager_leave_insurance_handover_path(params.permit!.to_h.merge(per_page: @per_page, page: p)),
+                  class: "page-link" %>
+          </li>
+        <% end %>
+
+        <% if @page < @total_pages %>
+          <li class="page-item">
+            <%= link_to 'Sau »',
+                  manager_leave_insurance_handover_path(params.permit!.to_h.merge(per_page: @per_page, page: @page + 1)),
+                  class: "page-link" %>
+          </li>
+        <% end %>
+      </ul>
+    </nav>
+
+    <%= form_tag manager_leave_insurance_handover_path, method: :get, class: "d-inline-flex align-items-center" do %>
+      <%# Preserve all params except page %>
+      <% params.permit!.to_h.except("page").each do |k, v| %>
+        <%= hidden_field_tag k, v %>
+      <% end %>
+
+      <label class="me-2 mb-0">Hiển thị:</label>
+      <%= hidden_field_tag :page, 1 %>
+      <%= select_tag :per_page,
+          options_for_select([10, 20, 50, 100], @per_page.to_i),
+          class: "form-select form-select-sm w-auto",
+          onchange: "this.form.submit();" %>
+    <% end %>
+  </div>
+</div>
+
+
+</div>
+</div>
+</div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="leaveDetailModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="leaveDetailModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable modal-dialog-centered">
+    <div class="modal-content rounded-3 shadow">
+      <div class="modal-header">
+        <h5 class="modal-title mb-0">Chi tiết nghỉ</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row text-center mb-3">
+            <div class="col-md-4">
+                <div class="fw-semibold text-muted">Nhân sự</div>
+                <div id="modalLeaveName" class="fw-bold"></div>
+            </div>
+            <div class="col-md-4">
+                <div class="fw-semibold text-muted">Phòng ban</div>
+                <div id="modalLeaveDept" class="fw-bold"></div>
+            </div>
+            <div class="col-md-4">
+                <div class="fw-semibold text-muted">Vị trí công việc</div>
+                <div id="modalLeavePost" class="fw-bold"></div>
+            </div>
+        </div>
+
+
+        <div class="table-responsive">
+          <table id="leaveDetailTable" class="table table-bordered table-sm table-striped align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th class="text-start">Ngày nghỉ</th>
+                <th class="text-start">Thời gian</th>
+                <th class="text-start">Loại phép</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <% if is_access(session["user_id"], "LEAVE-INSURANCE","ADD") %>
+          <button type="button" class="btn btn-primary">Tiếp tục</button>
+        <%end%>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="submitLeaveModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content rounded-3 shadow">
+      <div class="modal-header">
+        <h5 class="modal-title mb-0">Xác nhận điều chỉnh</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+      </div>
+      <div class="modal-body">
+        <div id="changedRowsSummary" class="mb-3"></div>
+
+        <div class="mb-3">
+          <input class="form-control d-none" id="holpro_id">
+          <input class="form-control d-none" id="holdetail_id">
+          <label for="submitReason" class="form-label fw-semibold">Lý do chỉnh sửa:</label>
+          <input class="form-control" id="submitReason" maxlength="255" placeholder="Nhập lý do...">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+        <% if is_access(session["user_id"], "LEAVE-INSURANCE","ADD") %>
+          <button type="button" class="btn btn-success" id="btnConfirmSubmit">Xác nhận thay đổi</button>
+        <%end%>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="changeLogModal" tabindex="-1" aria-labelledby="changeLogModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="changeLogModalLabel">Lịch sử thay đổi</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row text-center mb-3">
+            <div class="col-md-4">
+                <div class="fw-semibold text-muted">Nhân sự</div>
+                <div id="changeLogUserName" class="fw-bold"></div>
+            </div>
+            <div class="col-md-4">
+                <div class="fw-semibold text-muted">Phòng ban</div>
+                <div id="changeLogDepartment" class="fw-bold"></div>
+            </div>
+            <div class="col-md-4">
+                <div class="fw-semibold text-muted">Vị trí công việc</div>
+                <div id="changeLogPosition" class="fw-bold"></div>
+            </div>
+        </div>
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Ngày</th>
+              <th>Thời gian nghỉ</th>
+              <th>Giá trị cũ</th>
+              <th>Giá trị mới</th>
+              <th>Người chỉnh sửa</th>
+              <th>Thời gian sửa</th>
+            </tr>
+          </thead>
+          <tbody id="changeLogTableBody"></tbody>
+        </table>
+        <div class="modal-footer">
+            
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+let leaveTable;
+let leaveDisplayChanges = []; // phục vụ hiển thị
+let leaveSubmitChanges = [];  // phục vụ gửi backend
+let change_path = "<%=manager_leave_change_path%>"; 
+const leaveTypeMapping = {
+  "NGHI-CHE-DO-BAO-HIEM-XA-HOI": "Nghỉ chế độ BHXH",
+  "NGHI-PHEP": "Nghỉ phép",
+  "NGHI-KHONG-LUONG": "Nghỉ không lương"
+};
+
+// Mở modal chi tiết
+$(".btn-show-leave-detail").on("click", function () {
+  const sid = $(this).data("sid");
+  const name = $(this).data("name");
+  const department = $(this).data("department");
+  const position = $(this).data("position");
+  const details = $(this).data("details");
+  const id = $(this).data("id");
+
+  $("#modalLeaveName").text(`${name} (${sid})`);
+  $("#modalLeaveDept").text(department);
+  $("#modalLeavePost").text(position);
+  $("#holpro_id").val(id);
+
+  const contentDiv = $("#modalLeaveContent");
+  contentDiv.empty();
+
+  if (leaveTable) {
+    leaveTable.destroy();
+    $("#leaveDetailTable tbody").empty();
+  }
+
+  const sortedDetails = details.sort((a, b) => {
+    const [da, ma, ya] = a.date.split("/").map(Number);
+    const [db, mb, yb] = b.date.split("/").map(Number);
+    return new Date(ya, ma - 1, da) - new Date(yb, mb - 1, db);
+  });
+
+  sortedDetails.forEach(d => {
+    const shiftText = d.shift === "ALL" ? "Cả ngày" : d.shift === "AM" ? "Buổi sáng" : "Buổi chiều";
+    const row = `
+      <tr data-iddetail="${d.detail_id}">
+        <td>${d.date}</td>
+        <td>${shiftText}</td>
+        <td>
+          <select class="form-select form-select-sm w-auto leave-type-select">
+            <option value="NGHI-CHE-DO-BAO-HIEM-XA-HOI"${d.type === "NGHI-CHE-DO-BAO-HIEM-XA-HOI" ? " selected" : ""}>Nghỉ BHXH</option>
+            <option value="NGHI-PHEP"${d.type === "NGHI-PHEP" ? " selected" : ""}>Nghỉ phép</option>
+            <option value="NGHI-KHONG-LUONG"${d.type === "NGHI-KHONG-LUONG" ? " selected" : ""}>Nghỉ không lương</option>
+          </select>
+          <input type="hidden" class="original-leave-type" value="${d.type || "NGHI-CHE-DO-BAO-HIEM-XA-HOI"}" />
+        </td>
+      </tr>
+    `;
+    $("#leaveDetailTable tbody").append(row);
+  });
+
+  leaveTable = $("#leaveDetailTable").DataTable({
+    pageLength: 10,
+    lengthChange: false,
+    searching: true,
+    ordering: false,
+    info: false,
+    language: {
+      search: "Tìm ngày:",
+      paginate: { previous: "Trước", next: "Sau" },
+      emptyTable: "Không có dữ liệu"
+        }
+    });
+});
+
+// Xử lý khi nhấn "Xác nhận chỉnh sửa"
+$("#leaveDetailModal .btn.btn-primary").on("click", function () {
+  leaveDisplayChanges = [];
+  leaveSubmitChanges = [];
+
+  const groupedChanges = {};
+
+  leaveTable.rows().every(function () {
+    const $row = $(this.node());
+    const detailId = $row.data("iddetail");
+    const date = $row.find("td").eq(0).text().trim();
+    const shiftText = $row.find("td").eq(1).text().trim();
+    const newType = $row.find("select.leave-type-select").val();
+    const oldType = $row.find("input.original-leave-type").val();
+
+    if (newType !== oldType) {
+      // Lưu để hiển thị
+      leaveDisplayChanges.push({
+        date: date,
+        shift: shiftText,
+        old_type: oldType,
+        new_type: newType
+      });
+
+      // Lưu để gửi backend
+      const shift = shiftText === "Cả ngày" ? "ALL" : shiftText === "Buổi sáng" ? "AM" : "PM";
+      const dateShift = `${date}-${shift}`;
+      if (!groupedChanges[detailId]) {
+        groupedChanges[detailId] = { change_date: [], type_change: [] };
+      }
+      groupedChanges[detailId].change_date.push(dateShift);
+      groupedChanges[detailId].type_change.push(newType);
+    }
+  });
+
+  // Nếu không có gì thay đổi
+  if (leaveDisplayChanges.length === 0) {
+    alert("Không có thay đổi nào.");
+    return;
+  }
+
+  // Gán vào mảng cuối để gửi sau
+  leaveSubmitChanges = Object.keys(groupedChanges).map(detailId => ({
+    detail_id: detailId,
+    change_date: groupedChanges[detailId].change_date.join("$$$"),
+    type_change: groupedChanges[detailId].type_change.join("$$$")
+  }));
+
+  // Render nội dung ra modal xác nhận
+  let summaryHtml = `<ul class='list-group' style='max-height: 300px; overflow-y: auto;'>`;
+  leaveDisplayChanges.forEach(row => {
+    const oldTypeVN = leaveTypeMapping[row.old_type] || row.old_type;
+    const newTypeVN = leaveTypeMapping[row.new_type] || row.new_type;
+    summaryHtml += `
+      <li class="list-group-item">
+        <strong>${row.date}</strong> (${row.shift}): 
+        <span class="text-danger">${oldTypeVN}</span> → 
+        <span class="text-success">${newTypeVN}</span>
+      </li>`;
+  });
+  summaryHtml += "</ul>";
+  $("#changedRowsSummary").html(summaryHtml);
+  bootstrap.Modal.getInstance(document.getElementById("leaveDetailModal")).hide();
+  new bootstrap.Modal(document.getElementById("submitLeaveModal")).show();
+  console.log(leaveSubmitChanges);
+  
+});
+$("#submitLeaveModal .btn.btn-secondary").on("click", function () {
+  bootstrap.Modal.getInstance(document.getElementById("submitLeaveModal")).hide();
+  new bootstrap.Modal(document.getElementById("leaveDetailModal")).show();
+});
+// Gửi thay đổi lên server
+$("#btnConfirmSubmit").on("click", function () {
+  const reason = $("#submitReason").val().trim();
+  const hol_id = $("#holpro_id").val();
+  const holdetail_id = $("#holdetail_id").val();
+
+  if (!reason) {
+    alert("Vui lòng nhập lý do.");
+    return;
+  }
+  $("#submitModal").modal("hide");
+
+  fetch(change_path, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRF-Token": $("meta[name='csrf-token']").attr("content")
+    },
+    body: JSON.stringify({
+      hol_id: hol_id,
+      holdetail_id: holdetail_id,
+      reason: reason,
+      changes: leaveSubmitChanges
+    })
+  })
+    .then(async response => {
+      const data = await response.json();
+      if (!response.ok) throw data;
+      return data;
+    })
+    .then(data => {
+      alert("Thay đổi thành công!");
+      window.location.reload();
+    })
+    .catch(errorData => {
+      console.error("Lỗi khi submit:", errorData);
+      alert(`Lỗi: ${errorData.message || "Không rõ lỗi xảy ra."}`);
+    });
+});
+
+function renderChangeLogs(changeLogs) {
+  const tbody = document.getElementById("changeLogTableBody");
+  tbody.innerHTML = ""; // Clear trước
+
+  changeLogs.forEach(log => {
+    const [date, shift] = log.key.split("-");
+    const shiftText = shift === "ALL" ? "Cả ngày" : (shift === "AM" ? "Buổi sáng" : "Buổi chiều");
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${date}</td>
+      <td>${shiftText}</td>
+      <td>${leaveTypeMapping[log.from] || log.from}</td>
+      <td>${leaveTypeMapping[log.to] || log.to}</td>
+      <td>${log.by}</td>
+      <td>${log.cre}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+$(document).ready(function () {
+    $(".btn-show-change-log").on("click", function () {
+        const name = $(this).data("name");
+        const department = $(this).data("department");
+        const position = $(this).data("position");
+        const holdetailId = $(this).data("iddetail");
+        const logs = $(this).data("logs") || [];
+        $("#changeLogModal").data("holdetail-id", $(this).data("iddetail"));
+        $("#changeLogUserName").text(name);
+        $("#changeLogDepartment").text(department);
+        $("#changeLogPosition").text(position);
+        $("#action-form input[name='holdetail_id']").val(holdetailId);
+
+        const mode = $(this).data("mode");
+        renderChangeLogs(logs);
+    });
+});
+
+</script>
+

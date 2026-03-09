@@ -1,0 +1,318 @@
+#loading_positionjob {
+    position: fixed;
+    z-index: 9999;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%; 
+    background: rgb(0 0 0 / 51%);
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+.control-header-title-button {
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-end;
+        align-items: center;
+        margin-bottom: 5px;
+    }
+
+
+    .input-control-position-job {
+        width: 100%;
+    }
+
+    .container-modal-form-position-job {
+        width: 100%;
+        height: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        background-color: #1b10107d;
+        display: none;
+        z-index: 10000;
+    }
+
+    .form-create-position-jobs {
+        background-color: white;
+        width: 100%;
+        height: 100vh;
+        margin: 0px auto;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #modal-form-create-position-job {
+        background: rgba(0, 0, 0, 0.84);
+        overflow-y: scroll;
+    }
+
+    .control-form-tag-create-position-job {
+        padding: 10px;
+    }
+
+    .control-all-input-create-position-job {
+        padding: 10px 0px;
+    }
+
+    .table .list tr td,
+    td,
+    th {
+        color: var(--falcon-heading-color);
+    }
+
+    .main-control-col {
+        margin-top: 20px;
+        height: auto;
+        border-radius: 10px;
+    }
+    .button-move-tasks{
+       padding: 15px 0px;
+        width: 54px;
+        margin: 0 auto;
+        text-align: center;
+        background: #fff; 
+        margin-bottom: 10px;
+        cursor: pointer;
+    }
+    .item-tasks{
+        display:flex;
+    }
+    .span-trash-item{
+        cursor: pointer;
+        color: #d72222;
+    }
+    .choose_postion_job{
+        display: flex;
+        justify-content: space-between;
+    }
+    #list_all_task li ,#list_select_task li{
+        position: relative;
+        cursor: pointer;
+    }
+    #list_all_task li label ,#list_select_task li label{
+        padding-left:10px;
+        cursor:pointer;
+        width:100%;
+        color:var(--falcon-heading-color);
+    }
+    #list_all_task li input , #list_select_task li input{
+        position: absolute; 
+        top: 18.5px; 
+        left: 10px;
+    }
+    #list_select_task li .item-trash{
+        position: absolute; 
+        top: 18.5px; 
+        right: 10px;
+    }
+    nav ul li label{
+        color:var(--falcon-heading-color);
+    }
+
+    #list_all_task li label:hover ,#list_select_task li label:hover{
+        background:rgba(var(--falcon-light-rgb), var(--falcon-text-opacity)) !important;
+    }
+    .label_status{
+        width: 274px;
+    }
+    .scroll_item{
+        height:250px;
+        overflow-y:scroll;
+    }
+    .scroll_item::-webkit-scrollbar{
+        width:5px;
+    }
+    /* .scroll_item::-webkit-scrollbar-track{
+        border-radius: 10px;
+        background: #ffffff;
+    } */
+    .scroll_item::-webkit-scrollbar-thumb {
+        background-color: rgba(var(--falcon-gray-500-rgb), var(--falcon-bg-opacity)) !important;
+        border-radius: 10px;
+        /* border: 3px solid rgba(var(--falcon-light-rgb), var(--falcon-bg-opacity)) !important; */
+    }
+    /* form update header */
+    .row-update-positionjob{
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        padding: 15px 0px;
+    }
+    .label-input-update-positionjob{
+        display: flex;
+        width: 48%;
+        align-items: center;
+        
+    }
+    .label-control-update-position-job{
+        width:40%;
+    }
+    .button-update-positionjob{
+        display: flex;
+        justify-content: flex-end;
+    }
+    .sel1{
+        width: 60%;
+        margin-right: 10px;
+    }
+    #sel1{
+        overflow-y:auto !important;
+    }
+    #sel1 option{
+        overflow-y: scroll !important;
+    }
+
+    /* end update header */
+
+     @media screen and (max-width: 1540px){
+       .sel1{
+        width: 40%;
+        }
+        .row-update-positionjob {
+            padding: 5px 0px;
+        } 
+        .label-input-update-positionjob {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+        .label-control-update-position-job{
+            width:100%
+        }
+    }
+    @media screen and (max-width: 992px){
+        .choose_postion_job{
+            display:flex;
+            flex-direction: column;
+        }
+        .sel1{
+            width: 100%;
+            margin:5px
+        }
+        .btn_add_new{
+            margin:5px;
+        }
+          #assignment_job{
+        display:flex;
+        flex-direction: column;
+       }
+       .col_assignment_job{
+        width:100%;
+       }
+       .col_button {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+        }
+        .button-move-tasks{
+            margin-left:10px;
+            margin-right:10px;
+        }
+        .label_status{
+            width: 100px;
+        }
+          .input-control-position-job {
+            width: 100%;
+        }
+
+        .control-form-tag-create-position-job {
+            padding: 30px;
+        }
+        #btn-save-task-rp{
+            margin-bottom:15px
+        }
+        .choose_postion_job label{
+            width:100%;
+            text-align: center;
+        }
+    }
+    @media screen and (max-width: 768px){
+     
+    }
+    @media screen and (max-width: 510px) {
+      
+        
+
+    }
+
+    /* tab */
+    .pc-tab > input,
+  .pc-tab section > div {
+    display: none;
+  }
+  #tab1:checked ~ section .tab1,
+  #tab2:checked ~ section .tab2
+  {  
+    display: block;
+  }
+
+  #tab1:checked ~ nav .tab1,
+  #tab2:checked ~ nav .tab2
+
+   {
+    color: red;
+  }
+  .pc-tab {
+    width: 100%;
+    margin: 0 auto;
+  }
+  .pc-tab ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .pc-tab ul li label {
+    float: left;
+    padding: 5px 5px;
+    color: #444;
+  }
+  .pc-tab ul li label:hover {
+    background: #dddddd;
+  }
+  .pc-tab ul li label:active {
+    background: #ffffff;
+  }
+  .pc-tab ul li:not(:last-child) label {
+    border-right-width: 0;
+  }
+  .pc-tab section {
+    clear: both;
+  }
+  .pc-tab section div {
+    line-height: 1.5em;
+    letter-spacing: 0.3px;
+  }
+  .pc-tab section div h2 {
+    margin: 0;
+    letter-spacing: 1px;
+  }
+
+  #tab1:checked ~ nav .tab1 label,
+  #tab2:checked ~ nav .tab2 label
+
+    {
+    background: white;
+    color: #111;
+    position: relative;
+  }
+  #tab1:checked ~ nav .tab1 label:after,
+  #tab2:checked ~ nav .tab2 label:after
+   {
+    content: "";
+    display: block;
+    position: absolute;
+    height: 2px;
+    width: 100%;
+    left: 0;
+    bottom: -1px;
+  }
+  .pc-tab nav ul li label {
+    margin-bottom: 0 !important;
+    cursor: pointer !important;
+    border-radius: 10px;
+    margin-left: 10px;
+  }
+    /* end tab */

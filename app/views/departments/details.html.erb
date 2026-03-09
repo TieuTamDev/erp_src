@@ -1,0 +1,605 @@
+<!-- style -->
+<% content_for :head do %>
+  <%= stylesheet_link_tag '/assets/mystyle/department_detail.css' %>
+  <%= javascript_include_tag '/assets/myjs/department_detail.js' %>
+  <%= javascript_include_tag '/assets/lib_hrm/formmedia_old.js' %>
+  <%= stylesheet_link_tag '/assets/lib_hrm/formmedia.css' %>
+  <%= stylesheet_link_tag "select2-bootstrap-5-theme.min" %>
+  <%= stylesheet_link_tag "select2.min" %>
+  <%# style of department  %>
+<% end %>
+<!-- style -->
+
+<%= javascript_include_tag 'jquery-ui.js'%>
+<% content_for :bottombody do %>
+    <%# <script>
+      //datepicker
+        $(function () {
+            $( ".datepicker" ).datetimepicker({
+              format: 'DD/MM/YYYY'
+            });
+      });
+    </script> %>
+
+    <%= javascript_include_tag 'select2.full.min'%>
+    <%= javascript_include_tag '/assets/lib_hrm/popper.min.js', integrity: 'sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q', crossorigin: 'anonymous' %>
+    <%= javascript_include_tag '/assets/lib_hrm/bootstrap.min.js', integrity: 'sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl', crossorigin: 'anonymous'%>
+    <%= javascript_include_tag '/assets/lib_hrm/moment-with-locales.js' %>
+    <%= javascript_include_tag '/assets/lib_hrm/bootstrap-datetimepicker.min.js' %>
+<% end %>
+<nav
+  class="mb-3"
+  style="
+    --falcon-breadcrumb-divider: url(
+      &#34;data:image/svg + xml,
+      %3Csvgxmlns='http://www.w3.org/2000/svg'width='8'height='8'%3E%3Cpathd='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z'fill='%23748194'/%3E%3C/svg%3E&#34;
+    );
+  "
+  aria-p="breadcrumb"
+>
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item">
+      <a
+        href="<%= departments_index_path(lang: session[:lang])  %>"
+        style="color: rgb(0, 153, 255) !important"
+        ><%= lib_translate("Department_manager") %></a
+      >
+    </li>
+    <li class="breadcrumb-item active" aria-current="page">
+      <%= lib_translate("Department_details") %><span style="font-weight: bold">
+        <%# <%= @department.name %>
+      </span>
+    </li>
+  </ol>
+</nav>
+<div class="px-4 mt-4">
+  <div class="pc-tab">
+    <input id="tab1" type="radio" name="pct" />
+    <input id="tab2" type="radio" name="pct" />
+     <nav>
+      <ul style="display: flex;">
+        <li class="tab1">
+          <label for="tab1"><%= lib_translate("Department_infomations")%></label>
+        </li>
+        <li class="tab2">
+          <label for="tab2"><%= lib_translate("List_of_personnel")%></label>
+        </li>
+      </ul>
+    </nav>
+    <section style="padding-top: 10px !important">
+       <div class="tab1">
+       <div class="card mb-3">
+          <div class="card-body pt-0">
+            <div class="tab-content">
+              <div class="tab-pane preview-tab-pane active" role="tabpanel" aria-labelledby="tab-dom-5a3c857c-8deb-4307-af64-a62f27089443" id="dom-5a3c857c-8deb-4307-af64-a62f27089443" >
+                <div class="form-department-details">
+                  <%= form_for @department, :url=> department_update_path, html: {method: :post, id:"form_add_department" } do |f| %>
+                    <div class="row">
+                      <div class="col col_details_department_2">
+                        <div class="erro_labble mb-2" style="height: 40px">
+                          <p style=" display: none; color: rgb(197 82 82); border: 1px solid rgb(199 136 136 / 23%); background: rgb(255 54 54 / 16%); border-radius: 5px; padding: 10px; margin-right: 15px; margin-left: 15px; " id="erro_labble_content" ></p>
+                        </div>
+                        <div class="form-group" style="display: none" class="txt_update_id">
+                          <%= f.label :id %>
+                          <%= f.text_field :id, class: 'form-control', name: 'department_id', id:"department_id" %>
+                        </div>
+                          <div class="form-group" style="display:none;">
+                             <input value="2" type="text" id="type_upadte" name="type_upadte"><br>
+                          </div>
+                        <div class="row">
+                          <div class="col-xl-6">
+                            <div class=" form-group ">
+                              <label> <%= lib_translate("Manager_department")%> </label>
+                              <select class="form-select selectpicker" name="txt_leader_department" id="txt_leader_department">
+                              <option value=""><%= lib_translate("Choose_people")%></option>
+                                  <% @user.each do |user| %>
+                                        <option value="<%=user.email%>" 
+                                        <%= @department.leader == user.email ? "selected" : ""%>>
+                                        
+                                        <%= user.last_name + " " + user.first_name %>
+                                            (<%= user.email%>)</option>
+                                  <%end%>
+                                </select>
+                            </div>
+                            <div class="form-group  mb-2">
+                              <label  class=" lbl_bmtu_namelbl_profile"> <%= lib_translate("Department_name")  %>  <span style="color:red;" class="red">* </span></label>
+                              <%= f.text_field :name, class: 'form-control' , name: 'txt_name_department', id:"txt_name_department" %>
+                            </div>
+                            <div class="form-group" id="name_en_department" style="padding-bottom: 4px;">
+                              <label  > <%= lib_translate("Department_name_en")  %>  </label>
+                              <%= f.text_field :name_en, class: 'form-control', name: 'txt_name_en_department',id:"txt_name_en_department" %>
+                            </div>
+                            <div class="form-group  mb-2">
+                              <label  class=" lbl_bmtu_namelbl_profile"> <%= lib_translate("Department_scode")  %>  </label>
+                              <%= f.text_field :scode , class: 'form-control' , name: 'txt_scode_department', id: " txt_scode_department" %>
+                            </div>
+                            <%# Dong 22/05/2023 update email %>
+                            <div class="form-group  mb-2">
+                              <label  class=" lbl_bmtu_namelbl_profile"> <%= lib_translate("Email")  %>  </label>
+                              <%= f.text_field :email , class: 'form-control' , name: 'txt_email_department', id: " txt_email_department" %>
+                            </div>
+                            <div class="form-group mb-2">
+                              <label  > <%= lib_translate("Đơn vị cha")  %>  </label>
+                              <select class="form-select selectpicker" name="department_parent" id="department_parent">
+                                <option value="">Chọn đơn vị cha</option>
+                                <% @list_department&.each do |dep| %>
+                                        <option value="<%=dep.id%>" 
+                                        <%= @department.parents&.to_i == dep.id ? "selected" : ""%>>
+                                        <%= dep.name%></option>
+                                  <%end%>
+                              </select>
+                            </div>
+                            <div class="form-group mt-3 mb-2 ">
+                              <label class = "lable_status_department_details"> <%= lib_translate("Status")  %>  <span style="color:red;" class="red"></span></label>
+                              <input checked type="radio" id="sel_department_status_active" class="form-check-input ms-2 me-1" value="0" name="sel_status_dep" />
+                              <label class="form-check-label" style="cursor:pointer" for="sel_department_status_active">ACTIVE</label>
+                              <input  type="radio" id="sel_department_status_inactive" class="form-check-input ms-1 me-1" value="1" name="sel_status_dep" />
+                              <label class="form-check-label " style="cursor:pointer" for="sel_department_status_inactive">INACTIVE</label>
+                            </div>
+                          </div>
+                          <div class="col-xl-6">
+                            <div class="form-group m-auto">
+                              <label> <%= lib_translate("Host_unit")%> <a class="ms-2" href="<%= organization_index_path() %>"><span style="width:10px; color:#98a7b9" class="fas fa-database"></span></a></label>
+                              <select class="form-select" name="organization_id" id="organization_id">
+                              <option value="">Chọn đơn vị chủ quản</option>
+                                <% @organizations.each do |ori| %>
+                                      <option value="<%=ori.id%>" 
+                                      <%= @department.organization_id == ori.id ? "selected" : ""%>>
+                                      <%= ori.name%></option>
+                                <%end%>
+                              </select>
+                            </div>
+                            <div class="form-group  mb-2">
+                             <label class=" lbl_bmtu_namelbl_profile"> <%= lib_translate("Department_issued_date")%> </label>
+                              <div id="datepicker-container" class="datepicker-container">
+                                <span style="position: relative;" class="outline-element-container"> 
+                                  <input id="dt_issued_date_dep_details" type="text" name="dt_issued_date_dep"  value="<%= @department.issued_date&.strftime('%d/%m/%Y')%>" class="form-control datepicker openemr-datepicker input-textbox outline-element incorrect" objtype="7" name="action_element"   aria-label="Select Date"> 
+                                  <span class="correct-incorrect-icon"></span>
+                                </span>
+                                <div id="datepicker"></div>
+                              </div>
+                            </div>
+                            <div class="form-group " id="scode_department">
+                              <label> <%= lib_translate("Decide_to_establish")  %>  </label>
+                              <%= f.text_field :issue_id, class: 'form-control', name: 'txt_issue_id_department', id:"txt_issue_id_department" %>
+                            </div>
+                              <div class="form-group mb-2" id="name_en_department">
+                                <label  > <%= lib_translate("Issued_by_department")  %>  </label>
+                                  <select class="form-select selectpicker" name="txt_issued_by" id="txt_issued_by">
+                                  <option value=""><%= lib_translate("Choose_people")%></option>
+                                  <% @user.each do |user| %>
+                                        <option value="<%=user.email%>" 
+                                        <%= @department.issued_by == user.email ? "selected" : ""%>>
+                                        <%= user.last_name + " " + user.first_name %>                                        
+                                            (<%= user.email%>)</option>
+                                  <%end%>
+                                </select>
+                              </div>
+                              <div class="form-group pb-2 mt-1">
+                                    <label> <%= lib_translate("Department_type")%> <span class="red"><a class="ms-2" href="<%= tbdepartmenttypes_index_path() %>"><span style="width:10px; color:#98a7b9" class="fas fa-database"></span></a> </span></label>
+                                      <select class="form-select" name="sel_department_type" id="sel_department_type">
+                                        <% Tbdepartmenttype.all.each do |type| %>
+                                             <option value="<%=type.id%>">
+                                             <%= type.name%>
+                                             </option>
+                                        <%end%>
+                                      </select>
+                              </div>
+                              <div class="form-group  mb-2">
+                                <label  class="lbl_bmtu_namelbl_profile"> <%= lib_translate("Sid_department")  %>  </label>
+                                <%= f.text_field :faculty , class: 'form-control' , name: 'txt_faculty', id: " txt_faculty" %>
+                              </div>
+                              <div class="form-group" id="name_en_department">
+                                <label for="is_virtual"> <%= lib_translate("Đơn vị ảo")  %>  </label>
+                                <input type="checkbox" name="is_virtual" id="is_virtual" value="YES" <%= @department.is_virtual == "YES" ? "checked" : "" %>>
+                              </div>
+                          </div>
+                            <div class="form-group  mb-2">
+                              <label  class=" lbl_bmtu_namelbl_profile"> <%= lib_translate("Department_note")  %>  <span style="color:red;" class="red"></span></label>
+                              <%= f.text_area :note, :class=> "form-control", name: 'department_note', id:"department_note"%>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-left: 15px; margin-right: 15px">
+                          <%= f.submit lib_translate("Save") , type:"button" , id:"btn_add_new_department", class: "btn btn-primary mt-3 mb-5 border-red border-pink-600 cls-bmtu-text-red md:group-hover:bg-pink-50 btn-block btn-block text-uppercase ", style: "width: 100%;" %>
+                            <div id="loading_button_department" class= "btn btn-primary mt-3 mb-5 border-red border-pink-600 cls-bmtu-text-red md:group-hover:bg-pink-50 btn-block btn-block text-uppercase" style="opacity: 0.8;width: 100%; display:none;" >
+                                <i class ="fa fa-spinner fa-spin"> </i>  <%=lib_translate("Save")%>
+                            </div>
+                         </div>
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          </div>
+      <hr style="width:100%;text-align:left;margin-left:0">
+      <div class="card">
+        <h2 class="p-2">  <%=lib_translate("List_document_file_department")%></h2>
+            <a id ="table_document_department_details"data-bs-toggle="collapse" class="btn btn-primary d-none" style="width: 200px; " onclick="clickEditMediaInTable(<%= @department.id%>)" href="#collapse_file_document-<%= @department.id  %>" role="button" data-target="collapse_file_document-<%= @department.id  %>" aria-expanded="false" >
+              <%=lib_translate("Add_document")%>
+            </a>
+          <div id="department-table-media-<%= @department.id %>" style="margin: 10px;padding: 10px; border-radius: 10px;" class="capp-form-bg"></div>  
+      </div>
+        </div>
+      </div>
+        <div class="modal fade" id="contract-confirm" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <%= lib_translate("Message") %>
+                        </h5>
+                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close" style="border: none; background: none">
+                            <span aria-hidden="true" style="font-size: 20px">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <%= lib_translate("confirm_delete_message") %>
+                        <span id="modal-mesasge-delete-name" style="font-weight: bold; color: red"></span>?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="button_close_delete"> <%= lib_translate("Close") %> </button>
+                        <a class="btn btn-danger" id="button_delete" rel="nofollow" data-method="delete" href="#"><%=lib_translate("Delete")%></a>
+                        <div id="loading_button_delete_contract" class= "btn btn-danger" style="opacity: 0.8; width: 100%; display:none;" >
+                            <i class ="fa fa-spinner fa-spin"> </i>  <%=lib_translate("Deleting")%>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+  <div class="tab2">
+        <div class="list_holiday">
+           <div class="card mb-3">
+          <div class="card-body pt-0">
+            <div class="tab-content">
+             <table id="table_list_user_of_department" class="table table-bordered fs--1 mb-0 table-hover">
+                <thead class="bg-200 text-900">
+                  <tr>
+                    <th class="sort" style="text-align: center;" data-sort="lastname"><%= lib_translate("Name") %></th>
+                    <th class="sort"  style="text-align: center;" data-sort="username"><%= lib_translate("employee_code") %></th>
+                    <th class="sort" style="text-align: center;" data-sort="seniority"><%= lib_translate("Seniority") %></th>
+                    <th class="sort" style="text-align: center;" data-sort="title"><%= lib_translate("Title") %></th>
+                    <th class="sort" style="text-align: center;" data-sort="academicrank"><%= lib_translate("Academicrank") %></th>
+                    <th class="sort" style="text-align: center;" data-sort="phone"><%= lib_translate("phone") %></th>
+                    <th class="sort" style="text-align: center;" data-sort="email"><%= lib_translate("Email") %></th>
+                  </tr>
+                </thead>
+                <tbody class="list">
+                  <% @users.each do |user| 
+                        name = ""
+                        job_name = ""
+                          works = user.works
+                          works.each do |work|
+                              if !work.positionjob.nil? && !work.positionjob.department.nil?
+                                name = work.positionjob.department.name
+                                job_name = work.positionjob.name
+                              end
+                          end
+                    %>
+                                      
+                    <% if user.email != 'admin@gmail.com' %>
+                      <tr>
+                        <td class="lastname" onclick='window.location="<%= user_details_path(id: user.id, lang: session[:lang]) %>";clearCurrentTab()' style="cursor: pointer;">
+                            <%= user.last_name.capitalize.titleize %>
+                            <%= user.first_name.capitalize.titleize %>
+                        </td>
+                         <td class="username"  style="text-align: start;cursor: pointer;" onclick='window.location="<%= user_details_path(id: user.id, lang: session[:lang]) %>";clearCurrentTab()'>
+                            <%= user.sid  %>
+                        </td>
+                        <td style="white-space: nowrap; width:auto;" id="time_work_user_<%= user.id %>">
+                          <script>
+                                var day1 = '<%= oContract = user.contracts.where(status: "ACTIVE").order(created_at: :asc).first
+                                (oContract && oContract.dtfrom.to_date > Date.today) ? Time.now.strftime("%Y/%m/%d") : oContract ? oContract.dtfrom.strftime("%Y/%m/%d") : Time.now.strftime("%Y/%m/%d") %>';
+                                var day2 = '<%= Time.now.strftime("%Y/%m/%d") %>';
+                                var [yearfrom, monthfrom, dayfrom] = day1.split('/').map(Number);
+                                var [yearto, monthto, dayto] = day2.split('/').map(Number);
+                                var start_date = [yearfrom, monthfrom - 1, dayfrom];
+                                var end_date = moment({years: yearto,months: monthto - 1,days: dayto});
+                                $('#time_work_user_<%= user.id %>').text(getTimeWork(moment(start_date), moment(end_date)));
+                          </script>
+                        </td>
+                        <td class="username"  style="text-align: start;cursor: pointer;" onclick='window.location="<%= user_details_path(id: user.id, lang: session[:lang]) %>";clearCurrentTab()'>
+                            <%= job_name%>
+                        </td>
+                        <td class="username"  style="text-align: start;cursor: pointer;" onclick='window.location="<%= user_details_path(id: user.id, lang: session[:lang]) %>";clearCurrentTab()'>
+                               <%= user.academic_rank %>
+                        </td>
+                        <td class="username"  style="text-align: start;cursor: pointer;" onclick='window.location="<%= user_details_path(id: user.id, lang: session[:lang]) %>";clearCurrentTab()'>
+                               <%= user.mobile %>
+                        </td>
+                        <td class="email"  style="text-align: start;cursor: pointer;" onclick='window.location="<%= user_details_path(id: user.id, lang: session[:lang]) %>";clearCurrentTab()'>
+                               <%= user.email %>
+                        </td>
+                      </tr>
+                    <% end %>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+<script>
+   var media_trans = {
+    upload_guide_1:'<%= lib_translate("upload_guide_1") %>',
+    upload_guide_2:'<%= lib_translate("upload_guide_2") %>',
+    upload_guide_3:'<%= lib_translate("upload_guide_3") %>',
+    confirm_delete:'<%= lib_translate("confirm_delete") %>',
+    confirm_delete_all:'<%= lib_translate("confirm_delete_all") %>',
+    select_files:'<%= lib_translate("select_files") %>',
+    cancel:'<%= lib_translate("Cancel") %>',
+    confirm:'<%= lib_translate("Confirm") %>',
+    message:'<%= lib_translate("Message") %>',
+    remove:'<%= lib_translate("Remove") %>',
+    upload:'<%= lib_translate("Upload") %>',
+    error:'<%= lib_translate("error") %>',
+    try_again:'<%= lib_translate("try_again") %>',
+    file_name:'<%= lib_translate("File_name") %>',
+    create_date:'<%= lib_translate("Create_date") %>',
+    created_by:'<%= lib_translate("Created_by") %>'
+  }
+  $(document).on('change', '#organization_id', function () {
+    const orgId = $(this).val();
+
+    if (orgId === "") {
+      $('#department_parent').empty();
+      $('#department_parent').append('<option value="">Chọn đơn vị cha</option>');
+      return;
+    }
+
+    $.ajax({
+      url: '<%= departments_fetch_by_organization_path%>',
+      method: "GET",
+      data: { organization_id: orgId },
+      dataType: "script"
+    });
+  });
+
+  let value_status_department_details = "<%=@department.status %>";
+
+    if (value_status_department_details == 0) {
+        document.getElementById("sel_department_status_active").checked = true;
+    } else {
+        document.getElementById("sel_department_status_inactive").checked = true;
+    }
+ document.getElementById("sel_department_type").value= "<%=@department.stype%>"
+ document.getElementById('btn_add_new_department').onclick = function(){
+      var error_label = document.getElementById("erro_labble_content");
+      var name = document.getElementById('txt_name_department').value;
+      var name_erro = document.getElementById('txt_name_department');
+      var issued_date = document.getElementById('dt_issued_date_dep_details').value;
+      var issued_date_erro = document.getElementById('dt_issued_date_dep_details');
+      var note = document.getElementById('department_note').value;
+      var note_erro = document.getElementById('department_note');
+      if(name == "") {
+          error_label.innerHTML = Please_enter_department_name;
+          error_label.style.display="block";
+          name_erro.style.border= "1px solid red";
+        return;
+        }
+
+        else{
+        document.getElementById('btn_add_new_department').type="submit";
+        document.getElementById("btn_add_new_department").style.display = "none";
+        document.getElementById("loading_button_department").style.display = "block";
+        }
+    
+  }
+  
+
+
+  var table_doc = document.getElementById("table_document_department_details");
+  if (table_doc) {
+    table_doc.click();
+  }
+  
+    function clickEditMediaInTable(department_id){
+      if($(`#department-table-media-${department_id}`).html().length == 0){
+        let action_upload = '<%= url_for(action: :departments_upload_mediafile)%>';
+        var formmedia_edit_doc = new FormMedia("department-table-media-" + department_id);
+        formmedia_edit_doc.setAction(action_upload + "?department_id="+ department_id);
+        formmedia_edit_doc.setIconPath('<%= root_path%>assets/image/');
+        formmedia_edit_doc.setTranslate(media_trans);
+        formmedia_edit_doc.init();
+        formmedia_edit_doc.addEventListener("confirmdel",(data)=>{
+          deleteDoc(data.id,data.relative_id);
+        });
+
+        $.ajax({
+            type: "POST",
+            url: "<%= department_update_path%>",
+            data: { idDepartment: department_id },
+            dataType: "JSON",
+            success: function (response) {
+              let docs = response.listDe;
+              formmedia_edit_doc.tableAddItems(docs);
+            }
+        });
+      }else{
+
+      }
+
+  }
+  function deleteDoc(doc_id,id){
+    let action = `<%= department_del_path%>?id=${id}&did=${doc_id}&ck_action=document&currentpage=details` ;
+    doClick(action,'delete');
+  }
+
+  
+  const formMedia = new FormMedia("upload_file_department");
+  formMedia.setIconPath('<%= root_path%>assets/image/');
+  formMedia.setAction('<%= url_for(action: :departments_upload_mediafile, department_id: @department.id)%>');
+  formMedia.setTranslate({
+    upload_guide_1:'<%= lib_translate("upload_guide_1") %>',
+    upload_guide_2:'<%= lib_translate("upload_guide_2") %>',
+    upload_guide_3:'<%= lib_translate("upload_guide_3") %>',
+    confirm_delete:'<%= lib_translate("confirm_delete") %>',
+    confirm_delete_all:'<%= lib_translate("confirm_delete_all") %>',
+       select_files:'<%= lib_translate("select_files") %>',
+    cancel:'<%= lib_translate("Cancel") %>',
+    confirm:'<%= lib_translate("Confirm") %>',
+    message:'<%= lib_translate("Message") %>',
+    remove:'<%= lib_translate("Remove") %>',
+    upload:'<%= lib_translate("Upload") %>'
+  });
+  
+
+      function showModalDelete(element) {
+        let href = element.getAttribute("data-action");
+        let name = element.getAttribute("data-name");
+        $("#contract-confirm").find('#button_delete').attr('href',href);
+        $("#contract-confirm").find('#modal-mesasge-delete-name').text(name);
+        // show modal
+        $("#contract-confirm").modal('show');
+
+      }
+
+    let Please_enter_department_name ="<%= lib_translate("Please_enter_department_name")  %>"
+
+  let Choose_date = "<%= lib_translate("Choose_date") %>";
+  let closeText = "<%= lib_translate("closeText") %>";
+  let prevText = "<%= lib_translate("prevText") %>";
+  let nextText = "<%= lib_translate("nextText") %>";
+  let currentText = "<%= lib_translate("currentText") %>";
+  let Jan = "<%= lib_translate("Jan") %>";
+  let Feb = "<%= lib_translate("Feb") %>";
+  let Mar = "<%= lib_translate("Mar") %>";
+  let Apr = "<%= lib_translate("Apr") %>";
+  let May = "<%= lib_translate("May") %>";
+  let Jun = "<%= lib_translate("Jun") %>";
+  let Jul = "<%= lib_translate("Jul") %>";
+  let Aug = "<%= lib_translate("Aug") %>";
+  let Sep = "<%= lib_translate("Sep") %>";
+  let Oct = "<%= lib_translate("Oct") %>";
+  let Nov = "<%= lib_translate("Nov") %>";
+  let Dec = "<%= lib_translate("Dec") %>";
+  let Mon = "<%= lib_translate("Mon") %>";
+  let Tue = "<%= lib_translate("Tue") %>";
+  let Wed = "<%= lib_translate("Wed") %>";
+  let Thu = "<%= lib_translate("Thu") %>";
+  let Fri = "<%= lib_translate("Fri") %>";
+  let Sat = "<%= lib_translate("Sat") %>";
+  let Sun = "<%= lib_translate("Sun") %>";
+
+
+  // datepicker
+  $( ".datepicker" ).datepicker({
+    showButtonPanel: true,
+    dateFormat: "dd/mm/yy",
+    changeMonth: true,
+    changeYear: true,
+    yearRange: "c-100:c+10",
+    dayNamesMin : [ "S", "M", "T", "W", "T", "F", "S" ],
+    // defaultDate: +1,
+    buttonImageOnly: true,
+    buttonImage: "<%= image_path('icon-calender-datepicker.png') %>",
+    showOn: "button",
+    buttonText: Choose_date,
+    closeText: closeText,
+    prevText: prevText,
+    nextText: nextText,
+    currentText: currentText,
+    monthNamesShort: [Jan, Feb, Mar, Apr,
+    May, Jun, Jul, Aug,
+    Sep, Oct, Nov, Dec],
+    dayNamesMin: [Mon, Tue, Wed, Thu,
+    Fri, Sat, Sun],
+    firstDay: 1,
+    isRTL: false,
+    showMonthAfterYear: false,
+    yearSuffix: "",
+  });
+  $(function () {
+        $(".datepicker").on('keydown', function (e) {
+            IsNumeric(this, e.keyCode);
+        });
+        var isShift = false;
+        var seperator = "/";
+        function IsNumeric(input, keyCode) {
+            if (keyCode == 16) {
+                isShift = true;
+            }
+            //Allow only Numeric Keys.
+            if (((keyCode >= 48 && keyCode <= 57) || keyCode == 8 || keyCode <= 37 || keyCode <= 39 || (keyCode >= 96 && keyCode <= 105)) && isShift == false) {
+                if ((input.value.length == 2 || input.value.length == 5) && keyCode != 8) {
+                    input.value += seperator;
+                }
+                return true;
+            }
+            else {
+                return false;
+            }
+        };
+        $(".datepicker").keyup(function(e) {
+          var datecheck = /^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]|(?:Jan|Mar|May|Jul|Aug|Oct|Dec)))\1|(?:(?:29|30)(\/|-|\.)(?:0?[1,3-9]|1[0-2]|(?:Jan|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec))\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)(?:0?2|(?:Feb))\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9]|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep))|(?:1[0-2]|(?:Oct|Nov|Dec)))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$/g;
+          var textcheck = /[A-Za-z]/g;
+          var special = /[!"`'#%&.,:;<>=@{}~\$\(\)\*\+\-\\\?\[\]\^\|]+/;
+          var unikey = /^[a-zA-Z_ÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ]+$/;
+             if (!datecheck.test(this.value))
+              {
+                this.value = this.value.replace(textcheck, '');
+                this.value = this.value.replace(special, '');
+                this.value = this.value.replace(unikey, '');
+              }
+
+              else {
+
+              }
+
+        });
+
+  });
+
+  
+
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

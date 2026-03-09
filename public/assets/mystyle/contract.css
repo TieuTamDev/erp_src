@@ -1,0 +1,6 @@
+#id_add_contract:hover, #id_cancel_add_contract{
+    color: var(--falcon-btn-falcon-success-color) !important;
+}
+#select2-contract_issued_by-container{
+    text-transform:capitalize !important;
+}

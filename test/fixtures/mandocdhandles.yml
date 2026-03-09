@@ -1,0 +1,17 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  mandoc: one
+  department: one
+  srole: MyString
+  deadline: 2023-02-02 01:02:32
+  contents: 
+  status: MyString
+
+two:
+  mandoc: two
+  department: two
+  srole: MyString
+  deadline: 2023-02-02 01:02:32
+  contents: 
+  status: MyString

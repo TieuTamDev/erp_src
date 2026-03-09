@@ -1,0 +1,253 @@
+<% content_for :style_profile do %>
+<%= stylesheet_link_tag '/assets/mystyle/bank.css'%>
+
+<% end %>
+<% content_for :javascript_profile do %>
+<%= javascript_include_tag '/assets/myjs/bank.js' %>
+
+
+<script>
+  let Please_enter_bank_branch = "<%= lib_translate("Please_enter_bank_branch")  %> ";
+  let Please_enter_bank_address = "<%= lib_translate("Please_enter_bank_address")  %> ";
+  let Please_enter_bank_name = "<%= lib_translate("Please_enter_bank_name")  %> ";
+  let Please_enter_ba_name = "<%= lib_translate("Please_enter_ba_name")  %> ";
+  let Please_enter_bank_ba_number = "<%= lib_translate("Please_enter_bank_ba_number")  %> ";
+       function clickDeleteBank(id,ba_name,user_id){
+        let href = '<%= url_for(action: :bank_del)%>';
+        href += `?id=${id}&uid=${user_id}`;
+
+        let html = `<%= lib_translate("Are_you_sure_to_delete_this_bank")%>  <span style="font-weight: bold; color: red">${ba_name}</span>?`
+        openConfirmDialog(html,(result )=>{
+          if(result){
+            doClick(href,'delete')
+          }
+        });
+
+      }
+
+</script>
+
+<style>
+  #id_add_relative_bank:hover{
+    color: var(--falcon-btn-falcon-success-color) !important;
+  }
+</style>
+
+<% end %>
+<hr class="mt-4 mb-3" style="width: 100%; height: 4px;background: var(--falcon-badge-soft-primary-background-color);">
+              <div class="row rounded">
+                <div id="txt_bank_title" class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 col-xxl-12 tag d-flex align-items-center">
+                  <h5 class="m-0 mb-2" style="font-size: 17px;"><%= lib_translate("Bank_account") %> </h5>
+                </div>
+                <div class="col-12 col-sm-12 col-md-12 col-lg-12 col-xl-12 col-xxl-12 action-right-top d-flex align-items-center justify-content-end">
+                  <%# <a class="nav-link ps-2 pe-2 border-end border-2 cursor-pointer" role="button" style="font-size: 13px; font-weight: 700; color: var(--falcon-orange)" href="#open_add_bank" for="show_feild_bank_others_information" onclick="show_feild_checked('bank')"  aria-expanded="false" data-bs-target="#open_add_bank" data-bs-toggle="collapse" > %>
+                    <%# <%= lib_translate("Edit_banking_information") %> 
+                  <%# </a> %>
+                <% if is_access(session["user_id"], request.env["PATH_INFO"] == "/user/details" ? "USER-DETAILS" : request.env["PATH_INFO"] == "/user/profile" ? "USER-PROFILE" : "","ADD") %>
+                    <a id="id_add_relative_bank" class="nav-link ps-2 pe-2 border-end border-2" onclick="openFormAddBank()" style="font-weight: 600;font-size: 13px;  color: var(--falcon-orange)" data-bs-toggle="collapse" href="#open_add_bank" role="button" aria-expanded="false" aria-controls="form_add_relative">
+                    <%= lib_translate("Edit_banking_information") %> 
+                    </a>
+                  <% end %>
+                  <a id="id_cancel_add_bank" class=" nav-link ps-2 pe-2 border-end border-2"  style="display:none; font-size: 13px; " data-bs-toggle="collapse" href="#open_add_bank" role="button" aria-expanded="false" aria-controls="open_add_bank">
+                    <%= lib_translate("Cancle") %> 
+                  </a> 
+                  <%# <input class="d-none" type="checkbox" name="show_feild" id="show_feild_bank_others_information"> %>
+                  <a class="nav-link ms-3 me-2" role="button" onclick="clickCollapseBank(this)"  data-bs-toggle="collapse" href="#open_form_ngan_hang" role="button" aria-expanded="false" aria-controls="open_form_ngan_hang">
+                    <span class="fas fa-caret-down" id="collapse-icon-bank"></span>
+                  </a>
+                </div>
+              </div>
+                <div class="collapse  rounded row" id="open_add_bank" style="background: var(--falcon-badge-soft-primary-background-color);">
+                  <div class="table-responsive scrollbar">
+                    <%= form_for @banks, :url=> user_bank_update_path, html: {method: :post } do |f| %>
+
+                      <div class="erro_labble mb-2" style="height: 40px;">
+                        <p style="display:none; color: rgb(197 82 82);border: 1px solid rgb(199 136 136 / 23%);background: rgb(255 54 54 / 16%);border-radius: 5px;padding: 10px;" id="erro_labble_content_bank"></p>
+                      </div>
+
+                      <div class="form-group" style="display:none;">
+                      <%= f.text_field :id, class: 'form-control', name: 'bank_id', id:"bank_id" %>
+                      </div>
+                      <div class="form-group" style="display:none;">
+                      <%= f.text_field :user_id, class: 'form-control', name: 'bank_user_id', id:"bank_user_id", :value => @user.id %>
+                      </div>
+
+                      <div class="row">
+                        <div class=" col-6 d-flex flex-column">
+                              <div class="form-group" id="ba_name">
+                              <label> <%= lib_translate("Bank_name")  %> <span style="color:red;" class="red">* </span></label>
+                              <%= f.text_field :ba_name, class: 'form-select', list:"sel_bank_name_add1" ,name: 'sel_bank_name_add', value:"BIDV",id:"sel_bank_name_add"  %>
+                                <datalist  id="sel_bank_name_add1" >
+                                  <option value="BIDV" >Đầu tư và Phát triển Việt Nam</option> 
+                                  <option value="VietinBank" >Công thương Việt Nam</option> 
+                                  <option value="Vietcombank" >Ngoại Thương Việt Nam</option> 
+                                  <option value="VPBank" >Việt Nam Thịnh Vượng</option> 
+                                  <option value="MB" >Quân Đội</option> 
+                                  <option value="Techcombank" >Kỹ Thương</option> 
+                                  <option value="Agribank" >NN&PT Nông thôn Việt Nam</option> 
+                                  <option value="ACB" >Á Châu</option> 
+                                  <option value="HDBank" >Phát triển Thành phố Hồ Chí Minh</option> 
+                                  <option value="SHB" >Sài Gòn – Hà Nội</option> 
+                                  <option value="Sacombank" >Sài Gòn Thương Tín</option> 
+                                  <option value="VBSP" >Chính sách xã hội Việt Nam</option> 
+                                  <option value="VIB" >Quốc Tế</option> 
+                                  <option value="MSB" >Hàng Hải</option> 
+                                  <option value="SCB" >Sài Gòn</option> 
+                                  <option value="VDB" >Phát triển Việt Nam</option> 
+                                  <option value="SeABank" >Đông Nam Á</option> 
+                                  <option value="OCB" >Phương Đông</option> 
+                                  <option value="Eximbank" >Xuất Nhập Khẩu</option> 
+                                  <option value="LienVietPostBank" >Bưu điện Liên Việt</option> 
+                                  <option value="TPBank" >Tiên Phong</option> 
+                                  <option value="PVcomBank" >Đại Chúng Việt Nam</option> 
+                                  <option value="Woori" >Woori Việt Nam</option> 
+                                  <option value="Bac A Bank" >Bắc Á</option> 
+                                  <option value="HSBC" >HSBC Việt Nam</option> 
+                                  <option value="SCBVL" >Standard Chartered Việt Nam</option> 
+                                  <option value="PBVN" >Public Bank Việt Nam</option> 
+                                  <option value="ABBANK" >An Bình</option> 
+                                  <option value="SHBVN" >Shinhan Việt Nam</option> 
+                                  <option value="VietABank" >Việt Á</option> 
+                                  <option value="DongA Bank" >Đông Á</option> 
+                                  <option value="UOB" >UOB Việt Nam</option> 
+                                  <option value="Vietbank" >Việt Nam Thương Tín</option> 
+                                  <option value="Nam A Bank" >Nam Á</option> 
+                                  <option value="NCB" >Quốc dân</option> 
+                                  <option value="OceanBank" >Đại Dương</option> 
+                                  <option value="CIMB" >CIMB Việt Nam</option> 
+                                  <option value="Viet Capital Bank" >Bản Việt</option> 
+                                  <option value="Kienlongbank" >Kiên Long</option> 
+                                  <option value="IVB" >Indovina</option> 
+                                  <option value="BAOVIET Bank" >Bảo Việt</option> 
+                                  <option value="SAIGONBANK" >Sài Gòn Công Thương</option> 
+                                  <option value="Co-opBank" >Hợp tác xã Việt Nam</option> 
+                                  <option value="GPBank" >Dầu khí toàn cầu</option> 
+                                  <option value="VRB" >Liên doanh Việt Nga</option> 
+                                  <option value="CB" >Xây dựng</option> 
+                                  <option value="PG Bank" >Xăng dầu Petrolimex</option> 
+                                  <option value="ANZVL" >ANZ Việt Nam</option> 
+                                  <option value="HLBVN" >Hong Leong Việt Nam</option> 
+                                </datalist>
+                              </div>
+                        </div>
+                        <div class=" col-6 d-flex flex-column">
+
+                         <div class="form-group" id="branch_bank">
+                              <label> <%= lib_translate("Branch")  %>  <span style="color:red;" class="red">* </span></label>
+                              <%= f.text_field :branch, class: 'form-control', name: 'txt_branch_bank', id:"txt_branch_bank" %>
+                              </div>
+                              
+                        </div>
+                           <div class="form-group" id="address_bank">
+                              <label> <%= lib_translate("Address")  %>  <span style="color:red;" class="red">* </span></label>
+                              <%= f.text_field :address, class: 'form-control', name: 'txt_address_bank', id:"txt_address_bank"  %>
+                              </div>
+
+                              <div class=" col-6 d-flex flex-column">
+                               <div class="form-group" id="name_bank">
+                              <label  > <%= lib_translate("Account_name")  %>  <span style="color:red;" class="red">* </span></label>
+                              <%= f.text_field :name, class: 'form-control', name: 'txt_name_bank',id:"txt_name_bank" %>
+                              </div>
+                              </div>
+
+                              <div class=" col-6 d-flex flex-column">
+                              <div class="form-group" id="ba_number">
+                              <label> <%= lib_translate("Account_number")  %>  <span style="color:red;" class="red">* </span></label>
+                              <%= f.text_field :ba_number, class: 'form-control', name: 'txt_ba_number' , id:"txt_ba_number" %>
+                              </div>
+                              </div>
+                              <div class="form-group" id="bank_status">
+                                <label> <%= lib_translate("Status")  %>  <span style="color:red;" class="red"></span></label>
+
+                                <input checked type="radio" id="sel_bank_status_active" class="form-check-input ms-1 me-1" value="ACTIVE" name="sel_status_ba"/>
+                                <label class="form-check-label" for="sel_bank_status_active" style="cursor: pointer"> ACTIVE</label>
+                              
+                                <input  type="radio" id="sel_bank_status_inactive" class="form-check-input ms-1 me-1" value="INACTIVE" name="sel_status_ba"/> 
+                                <label class="form-check-label" for="sel_bank_status_inactive" style="cursor: pointer"> INACTIVE</label>
+
+                              </div>
+
+
+                        
+                          <div class="form-group d-flex justify-content-end mt-3 mb-3">
+                            <%= f.submit  lib_translate("Update"), type:"button" , id:"btn_add_new_bank", class: "btn btn-primary  mt-3 mb-5 border-red border-pink-600 cls-bmtu-text-red md:group-hover:bg-pink-50 btn-block btn-block text-uppercase ", style: "width: 100%;",onclick:" ValidateActInsert()"  %>
+                              <div id="loading_button_bank" class= "btn btn-primary mt-3 mb-5 border-red border-pink-600 cls-bmtu-text-red md:group-hover:bg-pink-50 btn-block text-uppercase" style="opacity: 0.8;width: 100%; display:none;" >
+                                  <i class ="fa fa-spinner fa-spin"> </i>  <%=lib_translate("Save")%>
+                              </div>
+                          </div>
+                      </div>
+                    <% end %>
+                  </div>
+                </div>
+
+    <div class="tab-pane preview-tab-pane active" role="tabpanel" aria-labelledby="tab-dom-5a3c857c-8deb-4307-af64-a62f27089443" id="dom-5a3c857c-8deb-4307-af64-a62f27089443">
+      <div id="table_bank">
+        <div class="collapse show row" id="open_form_ngan_hang">
+            <div class="table-responsive scrollbar">
+              <table class="table" style="border: none; border-color: var(--falcon-bg-navbar-glass);">
+                <thead style="color: var(--falcon-btn-falcon-success-active-color); font-size: 13px;">
+                  <tr>
+                    <th data-sort="Name_bank" scope="col"><%= lib_translate("Account_name") %> </th>
+                    <th data-sort="Branch_bank" scope="col"><%= lib_translate("Branch") %> </th>
+                    <th data-sort="Ba_number_bank" scope="col"><%= lib_translate("Account_number") %> </th>
+                    <th data-sort="Ba_name_bank" scope="col"><%= lib_translate("Bank_name") %> </th>
+                    <th data-sort="Status_bank" scope="col"><%= lib_translate("Status") %> </th>
+                    <th scope="col"> </th>
+                  </tr>
+                </thead>
+                <tbody >
+                <tr></tr>
+                <% @bank.each do |bank| %>
+                  <tr>
+                    <td data-sort="Name_bank" style="vertical-align: middle;"><h6 class="m-0" style="font-weight: 600;"><%= bank.name %></h6></td>
+                    <td data-sort="Branch_bank" style="vertical-align: middle;"><h6 class="m-0" style="font-weight: 600;"><%= bank.branch %></h6></td>
+                    <td data-sort="Ba_number_bank" style="vertical-align: middle;"><h6 class="m-0" style="font-weight: 600;"><%= bank.ba_number %></h6></td>
+                    <td data-sort="Ba_name_bank" style="vertical-align: middle;"><h6 class="m-0" style="font-weight: 600;"><%= bank.ba_name %></h6></td>
+                    <td data-sort="Status_bank" style="vertical-align: middle; text-align: center;"><h6 class="m-0" style="font-weight: 600;">
+                                  <%= (
+                                    if bank.status == "ACTIVE"
+                                        lib_translate("ac_icon")
+                                    else bank.status == "INACTIVE"
+                                        lib_translate("inac_icon")
+                                    end
+                                    ) %></h6></td>
+                    <td style="vertical-align: middle;">
+                    <% if is_access(session["user_id"], request.env["PATH_INFO"] == "/user/details" ? "USER-DETAILS" : request.env["PATH_INFO"] == "/user/profile" ? "USER-PROFILE" : "","EDIT") %>
+                      <a class=" btn-alert btn-sm" style="text-decoration: none; cursor:pointer;" data-bs-toggle="collapse" data-bs-target="#open_add_bank" myid="<%= bank.id %>" aria-expanded="false" aria-controls="open_add_bank" onclick="openFormUpdateBank(
+                                    `<%= bank.id %>`,
+                                    `<%= bank.user_id %>`,
+                                    `<%= bank.name %>`,
+                                    `<%= bank.branch %>`,
+                                    `<%= bank.address %>`,
+                                    `<%= bank.ba_number %>`,
+                                    `<%= bank.ba_name %>`,
+                                    `<%= bank.status %>`,
+                                    `<%= bank.note %>`,
+                                    )">
+                                    <i class="fas fa-edit icon"></i>
+                      </a>
+                    <% end %>
+                  <% if is_access(session["user_id"], request.env["PATH_INFO"] == "/user/details" ? "USER-DETAILS" : request.env["PATH_INFO"] == "/user/profile" ? "USER-PROFILE" : "","DEL") %>
+                      <a onclick="clickDeleteBank(`<%= bank.id %>`,`<%= bank.ba_name %>`,`<%= bank.user_id %>`)" style="cursor: pointer" >
+                        <span class="text-danger fas fa-trash"  style="width: 12px" ></span>
+                      </a> 
+                  <% end %>                                  
+                    </td>
+                  </tr>
+                <% end %>
+                </tbody>
+              </table>
+            </div>
+        </div>
+      </div>
+    </div>
+
+
+
+
+
+
+
+
+
+

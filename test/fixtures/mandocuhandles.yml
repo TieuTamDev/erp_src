@@ -1,0 +1,23 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  mandocdhandle: one
+  user: one
+  srole: MyString
+  deadline: 2023-02-02 01:04:42
+  contents: 
+  status: MyString
+  notes: 
+  sread: MyString
+  received_at: 2023-02-02 01:04:42
+
+two:
+  mandocdhandle: two
+  user: two
+  srole: MyString
+  deadline: 2023-02-02 01:04:42
+  contents: 
+  status: MyString
+  notes: 
+  sread: MyString
+  received_at: 2023-02-02 01:04:42
