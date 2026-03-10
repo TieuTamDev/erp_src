@@ -674,60 +674,35 @@ function initFlatpickrWithAvailableDates(attendanceForCalendar, availableDates) 
         instance.setDate(instance.config.defaultDate || "today", true);
     },
   });
+  let suppressOnChange = false;
+  let tempRange = [];
+  let isInRangeState = false;
 
-  // Cấu hình Flatpickr cho ngày nhận bù (compensatory leave date - future dates only)
-  flatpickr("#comp-leave-date", {
-    dateFormat: "Y-m-d",
-    altInput: true,
-    altFormat: "l, d/m/Y",
-    locale: "vn",
-    minDate: "today", // chỉ từ hôm nay trở đi
-    defaultDate: "today",
-    allowInput: false, // không cho nhập tay
-    clickOpens: true,
-    onClose(selectedDates, dateStr, instance) {
-      // Không cho để trống
-      if (!dateStr)
-        instance.setDate(instance.config.defaultDate || "today", true);
-    },
-  });
-
-  // Cấu hình Flatpickr cho ngày làm vượt giờ (ngày trong quá khứ - 30 ngày trước)
-  const todayDate = new Date();
-  const thirtyDaysAgoDate = new Date(todayDate);
-  thirtyDaysAgoDate.setDate(thirtyDaysAgoDate.getDate() - 30);
-  
-  // Convert Date to YYYY-MM-DD string
-  const formatDateStr = (d) => {
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const da = String(d.getDate()).padStart(2, "0");
-    return `${y}-${m}-${da}`;
-  };
-  
-  const minDateStr = formatDateStr(thirtyDaysAgoDate);
-  const todayStr = formatDateStr(todayDate);
-  
+  // @author: an.cdb - @date: 10/03/2026 - cấu hình flatpickr cho nghỉ bù
+  // - cấu hình chọn ngày có ca làm việc vượt giờ
   flatpickr("#comp-original-date", {
     dateFormat: "Y-m-d",
     altInput: true,
     altFormat: "l, d/m/Y",
     locale: "vn",
-    minDate: minDateStr, // 30 ngày trước (string format)
-    maxDate: todayStr, // không vượt quá hôm nay
-    defaultDate: todayStr,
-    allowInput: false, // không cho nhập tay
-    clickOpens: true,
-    onClose(selectedDates, dateStr, instance) {
-      // Không cho để trống
-      if (!dateStr)
-        instance.setDate(instance.config.defaultDate || todayStr, true);
-    },
+    maxDate: "today",
+    defaultDate: "today",
+    clickOpens: true
   });
 
-  let suppressOnChange = false;
-  let tempRange = [];
-  let isInRangeState = false;
+  // - cấu hình ngày bù
+  flatpickr("#leave-date", {
+    dateFormat: "Y-m-d",
+    altInput: true,
+    altFormat: "l, d/m/Y",
+    locale: "vn",
+    minDate: "today",
+    defaultDate: "today",
+    clickOpens: true
+  });
+  
+
+  // cấu hình cho chọn nhiều ngày đi công tác
   flatpickr("#business_trip_range", {
     mode: "multiple",
     dateFormat: "Y-m-d",
@@ -1829,35 +1804,6 @@ document.addEventListener("DOMContentLoaded", function () {
       // }
     }
 
-      // @author: an.cdb
-      // @date: 09/03/2026
-      // Kiểm tra compensatory-leave - Đăng ký nghỉ bù
-      if (requestType === "compensatory-leave") {
-        const compOriginalDate = form.querySelector('div[id="section-compensatory-leave"] input[name="original_date"]');
-        if (!compOriginalDate || compOriginalDate.value.trim() === "") {
-          pushToast("Vui lòng chọn ngày làm vượt giờ.", false);
-          return;
-        }
-
-        const compLeaveDate = form.querySelector('div[id="section-compensatory-leave"] input[name="leave_date"]');
-        if (!compLeaveDate || compLeaveDate.value.trim() === "") {
-          pushToast("Vui lòng chọn ngày bù.", false);
-          return;
-        }
-
-        const compLeaveShift = form.querySelector('div[id="section-compensatory-leave"] select[name="leave_workshift_id"]');
-        if (!compLeaveShift || !compLeaveShift.value || compLeaveShift.value.trim() === "") {
-          pushToast("Vui lòng chọn ca nghỉ bù.", false);
-          return;
-        }
-
-        const compEvidence = document.getElementById("evidence-image");
-        if (!compEvidence || !compEvidence.files || compEvidence.files.length === 0) {
-          pushToast("Vui lòng cung cấp hình ảnh minh chứng.", false);
-          return;
-        }
-      }
-
     if (requestType === "update-shift") {
       const selUpdate = document.getElementById("shiftSelectUpdate");
       const opt = selUpdate?.options[selUpdate.selectedIndex];
@@ -2186,6 +2132,12 @@ function showShiftIssuePopup(props, ev) {
       }
       break;
     }
+
+    // @author: an.cdb - @date: 10/03/2026 - Thêm chi tiết cho đề xuất nghỉ bù
+    case "COMPENSATORY-LEAVE": {
+      extraHTML = `<span class="mb-2">Chi tiết nghỉ bù: <strong class="text-dark">${props.content || "-"}</strong></span>`;
+      break;
+    }
   }
 
   // @author: trong.lq
@@ -2241,6 +2193,7 @@ const titleMap = {
   ADDITIONAL_CHECK_IN: "chấm công vào làm bù",
   ADDITIONAL_CHECK_OUT: "chấm công tan làm bù",
   EDIT_PLAN: "chỉnh sửa kế hoạch làm việc",
+  COMPENSATORY_LEAVE: "nghỉ bù",
 };
 
 function mapStatusClass(status) {

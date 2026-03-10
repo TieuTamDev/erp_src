@@ -912,41 +912,26 @@
             </div>
             
             <div class="mt-3">
-              <label class="fs-0 fw-bold" for="original-date">Ngày làm vượt giờ<span class="text-danger">*</span>:</label>
-              <input class="form-control bg-light date-choose" id="original-date" type="text" name="original_date" readonly />
+              <label class="fs-0 fw-bold" for="comp-original-date">Ngày làm vượt giờ<span class="text-danger">*</span>:</label>
+              <input class="form-control bg-light date-choose" required id="comp-original-date" type="text" name="original_date" readonly />
             </div>
 
             <div class="row mt-3">
               <div class="col-6">
                 <label class="fs-0 fw-bold" for="leave-date">Ngày bù<span class="text-danger">*</span>:</label>
-                <input class="form-control date-choose" id="leave-date" type="text" name="leave_date" />
+                <input class="form-control date-choose" required id="leave-date" type="text" name="leave_date" />
               </div>
               <div class="col-6">
                 <label class="fs-0 fw-bold" for="leave-workshift">Ca nghỉ bù<span class="text-danger">*</span>:</label>
-                <select class="form-control" id="leave-workshift" name="leave_workshift_id"></select>
+                <select class="form-control" required id="leave-workshift" name="leave_workshift_id"></select>
               </div>
             </div>
 
-            <div class="mt-3">
+<%#             <div class="mt-3">
               <label class="fs-0 fw-bold" for="comp-reason">Lý do vượt giờ<span class="text-danger">*</span>:</label>
               <textarea class="form-control" id="comp-reason" name="reason" rows="3" 
                         placeholder="Nêu lý do vượt giờ"></textarea>
-            </div>
-
-            <div class="mt-3">
-              <label class="fs-0 fw-bold" for="evidence-image">Minh chứng<span class="text-danger">*</span>:</label>
-              <input class="form-control" type="file" id="evidence-image" name="image" 
-                    accept="image/*" />
-              <small class="text-muted">Tải ảnh giờ chấm công (jpg, png)</small>
-            </div>
-
-            <div class="mt-3">
-              <label class="fs-0 fw-bold" for="comp-manager">Lãnh đạo duyệt<span class="text-danger">*</span>:</label>
-              <select class="form-control" id="comp-manager" name="approved_id">
-                <option value="">-- Chọn lãnh đạo --</option>
-              </select>
-            </div>
-          </div>
+            </div> %>
 
           <div class="mt-3">
             <label class="fs-0 fw-bold" for="requestApprovedBy"><%= lib_translate("Trưởng/phó phòng phê duyệt") %>:</label>
