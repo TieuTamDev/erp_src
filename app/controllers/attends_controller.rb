@@ -763,32 +763,58 @@ class AttendsController < ApplicationController
   # @input: user_id, data
   # @return: JSON response
   def handle_compensatory_leave(user_id, data)
-    #Lấy ngày có ca làm việc dư (ngày gốc để được nghỉ bù) từ data[:date]
+    #Lấy ngày nghỉ hay lễ mà nhân sự đi làm việc
     attend_date = Date.parse(data[:date].to_s) rescue nil
-    return render json: { success: false, error: "Ngày không hợp lệ", data_input: data }, status: :ok unless attend_date
+    return render json: { 
+      success: false, 
+      error: "Ngày không hợp lệ", 
+      data_input: data }, 
+      status: :ok unless attend_date
 
     #Lấy ngày đăng ký nghỉ bù
     leave_date = Date.parse(params[:leave_date].to_s) rescue nil
-    return render json: { success: false, error: "Ngày đăng ký nghỉ bù không hợp lệ", data_input: data}, status: :ok unless leave_date
+    return render json: { 
+      success: false, 
+      error: "Ngày đăng ký nghỉ bù không hợp lệ", 
+      data_input: data}, 
+      status: :ok unless leave_date
 
-    leave_shift_id = params[:leave_workshift_id]
-    return render json: { success: false, error: "Vui lòng chọn ca nghỉ bù" }, status: :ok if leave_shift_id.blank?
+    shift = shiftSelection.joins(:scheduleweek)
+                      .where(scheduleweeks: { user_id: user_id })
+                      .where(work_date: attend_date)
+                      .first
+
+    unless shift && %w[OFF HOLIDAY].include?(shift.is_day_off)
+      return render json: {
+        success: false, 
+        error: "Ngày #{attend_date.strftime("%d/%m/%Y")} không phải là ngày lễ hoặc ngày nghỉ theo kế hoạch làm việc trong tuần"}, 
+        status: :ok
+    end
+
+    # leave_shift_id = params[:leave_workshift_id]
+    # return render json: { success: false, error: "Vui lòng chọn ca nghỉ bù" }, status: :ok if leave_shift_id.blank?
 
     if leave_date < attend_date
-      return render json: { success: false, error: "Ngày đăng ký nghỉ bù phải sau ngày có ca làm việc dư" }, status: :ok
+      return render json: { 
+        success: false, 
+        error: "Ngày đăng ký nghỉ bù phải sau ngày có ca làm việc dư" }, 
+        status: :ok
     end
 
     if leave_date > attend_date + 30.days
       return render json: {
         success:false, 
         error: "Ngày đăng ký nghỉ bù không được vượt quá 30 ngày kể từ thời điểm có ca làm việc vượt giờ",
-        data_input: data
-      }, status: :ok
+        data_input: data}, 
+        status: :ok
     end
 
-    # Tìm shiftselection tương ứng
-    shift = find_shift(user_id, attend_date, data[:workshift_id], include_day_off: true)
-    return render json: { success: false, error: "Không tìm thấy ca làm việc vào ngày #{attend_date.strftime('%d/%m/%Y')}" }, status: :ok unless shift
+    # # Tìm shiftselection tương ứng
+    # shift = find_shift(user_id, attend_date, data[:workshift_id], include_day_off: true)
+    # return render json: { 
+    #   success: false, 
+    #   error: "Không tìm thấy ca làm việc vào ngày #{attend_date.strftime('%d/%m/%Y')}" }, 
+    #   status: :ok unless shift
 
     # Kiểm tra trùng đề xuất
     existing = Shiftissue.where(
@@ -798,12 +824,20 @@ class AttendsController < ApplicationController
     ).exists?
 
     if existing
-      return render json: { success: false, error: "Đã tồn tại đơn đăng ký nghỉ bù cho ca làm việc này" }, status: :ok
+      return render json: { 
+        success: false, 
+        error: "Đã tồn tại đơn đăng ký nghỉ bù cho ca làm việc này" }, 
+        status: :ok
     end
 
-    leave_shift_name = Workshift.find_by(id: leave_shift_id)&.name || "N/A"
+    leave_shift_name = Workshift.find_by(id: params[:leave_shift_id])&.name || "N/A"
+    status_text = case shift.is_day_off
+                    when "OFF" then "Ngày nghỉ theo kế hoạch làm việc"
+                    when "HOLIDAY" then "Ngày nghỉ lễ"
+                    when "ON-LEAVE" then "Ngày nghỉ phép"
+                  end  
 
-    # Tạo Shiftissue
+                    # Tạo Shiftissue
     begin
       issue = Shiftissue.create!(
         shiftselection_id: shift.id,
@@ -812,10 +846,10 @@ class AttendsController < ApplicationController
         approved_by: data[:approver_id],
         note: data[:reason],
         docs: data[:file], # Đã được xử lý upload tự động từ hàm cha
-        content: "Nghỉ bù cho ngày: #{attend_date.strftime('%d/%m/%Y')} | Nghỉ ngày: #{leave_date.strftime('%d/%m/%Y')} | Ca: #{leave_shift_name}"
+        content: "Nghỉ bù cho ngày (#{status_text}) vào ngày #{attend_date.strftime("%d/%m/%Y")} - Ngày đăng ký nghỉ bù: #{leave_date.strftime("%d/%m/%Y")} - Ca nghỉ bù: #{leave_shift_name}"
       )
 
-      # Gọi hàm notify chuẩn của hệ thống (chỉ 2 tham số)
+      # Gọi hàm notify
       send_notify('COMPENSATORY-LEAVE', data[:approver_id])
 
       render json: {
