@@ -145,7 +145,8 @@ class ShiftissuesController < ApplicationController
       "ADDITIONAL-CHECK-OUT" => "Chấm công tan làm bù",
       "UPDATE-SHIFT" => "Cập nhật Ca",
       "WORK-TRIP" => "Đi công tác",
-      "EDIT-PLAN" => "Chỉnh sửa kế hoạch làm việc"
+      "EDIT-PLAN" => "Chỉnh sửa kế hoạch làm việc",
+      "COMPENSATORY-LEAVE" => "Nghỉ bù"
     }
     
     notify = Notify.create(

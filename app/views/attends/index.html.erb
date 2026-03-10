@@ -912,26 +912,27 @@
             </div>
             
             <div class="row mt-3">
+              <div class="row mt-3">
+                <div class="col-6">
+                  <label class="fs-0 fw-bold" for="leave-date">Ngày đăng ký nghỉ bù<span class="text-danger">*</span>:</label>
+                  <input class="form-control date-choose" required id="leave-date" type="text" name="leave_date" />
+                </div>
+                <div class="col-6">
+                  <label class="fs-0 fw-bold" for="leave-workshift">Ca đăng ký nghỉ bù<span class="text-danger">*</span>:</label>
+                  <select class="form-control" required id="leave-workshift" name="leave_workshift_id"></select>
+                </div>
+              </div>
               <div class="col-6">
-                <label class="fs-0 fw-bold" for="comp-original-date">Ngày làm vượt giờ<span class="text-danger">*</span>:</label>
+                <label class="fs-0 fw-bold" for="comp-original-date">Nghỉ bù cho ngày<span class="text-danger">*</span>:</label>
                 <input class="form-control bg-light date-choose" required id="comp-original-date" type="text" name="original_date" readonly />
               </div>
               <div class="col-6">
-                <label class="fs-0 fw-bold" for="comp-workshift">Ca làm vượt giờ<span class="text-danger">*</span>:</label>
+                <label class="fs-0 fw-bold" for="comp-workshift">Nghỉ bù cho ca<span class="text-danger">*</span>:</label>
                 <select class="form-control" required id="comp-workshift" name="workshift_id"></select>
               </div>
             </div>
 
-            <div class="row mt-3">
-              <div class="col-6">
-                <label class="fs-0 fw-bold" for="leave-date">Ngày bù<span class="text-danger">*</span>:</label>
-                <input class="form-control date-choose" required id="leave-date" type="text" name="leave_date" />
-              </div>
-              <div class="col-6">
-                <label class="fs-0 fw-bold" for="leave-workshift">Ca nghỉ bù<span class="text-danger">*</span>:</label>
-                <select class="form-control" required id="leave-workshift" name="leave_workshift_id"></select>
-              </div>
-            </div>
+
           </div>
 
           <div class="mt-3">

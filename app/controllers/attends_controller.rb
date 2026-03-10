@@ -1877,5 +1877,5 @@ class AttendsController < ApplicationController
                                  .where(work_date: Date.today.beginning_of_day..Date.today.end_of_day)
                                  .first
   end
-  
+
 end
