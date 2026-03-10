@@ -911,9 +911,15 @@
               Vui lòng cung cấp minh chứng ảnh giờ chấm công vào ngày làm vượt giờ
             </div>
             
-            <div class="mt-3">
-              <label class="fs-0 fw-bold" for="comp-original-date">Ngày làm vượt giờ<span class="text-danger">*</span>:</label>
-              <input class="form-control bg-light date-choose" required id="comp-original-date" type="text" name="original_date" readonly />
+            <div class="row mt-3">
+              <div class="col-6">
+                <label class="fs-0 fw-bold" for="comp-original-date">Ngày làm vượt giờ<span class="text-danger">*</span>:</label>
+                <input class="form-control bg-light date-choose" required id="comp-original-date" type="text" name="original_date" readonly />
+              </div>
+              <div class="col-6">
+                <label class="fs-0 fw-bold" for="comp-workshift">Ca làm vượt giờ<span class="text-danger">*</span>:</label>
+                <select class="form-control" required id="comp-workshift" name="workshift_id"></select>
+              </div>
             </div>
 
             <div class="row mt-3">
@@ -926,12 +932,7 @@
                 <select class="form-control" required id="leave-workshift" name="leave_workshift_id"></select>
               </div>
             </div>
-
-<%#             <div class="mt-3">
-              <label class="fs-0 fw-bold" for="comp-reason">Lý do vượt giờ<span class="text-danger">*</span>:</label>
-              <textarea class="form-control" id="comp-reason" name="reason" rows="3" 
-                        placeholder="Nêu lý do vượt giờ"></textarea>
-            </div> %>
+          </div>
 
           <div class="mt-3">
             <label class="fs-0 fw-bold" for="requestApprovedBy"><%= lib_translate("Trưởng/phó phòng phê duyệt") %>:</label>
