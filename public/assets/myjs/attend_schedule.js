@@ -404,51 +404,6 @@ function loadManagersAndRequests() {
   });
 }
 
-// @author: an.cdb - @date: 10/03/2026
-// Load shifts của ngày cụ thể cho compensatory-leave
-function loadCompensatoryShifts(dateStr, dropdownSelector) {
-  const date = dateStr || new Date().toISOString().split('T')[0];
-  const $dropdown = $(dropdownSelector);
-  
-  if (!$dropdown.length) {
-    console.warn(`Dropdown ${dropdownSelector} không tìm thấy`);
-    return;
-  }
-
-  // Sử dụng attendWorkshifts(danh sách master của tất cả ca) vì user có thể chọn bất kỳ ca nào
-  // Toàn bộ validate shift tồn tại ở backend
-  let attendWorkshifts = window.attendWorkshifts || [];
-  
-  if (attendWorkshifts.length === 0) {
-    // Nếu chưa load, load lúc này
-    $.ajax({
-      url: ERP_PATH + "/api/v1/mapi_utils/get_all_workshifts",
-      method: "GET",
-      async: false,
-      success: function(response) {
-        if (response.result) {
-          attendWorkshifts = response.result;
-          window.attendWorkshifts = attendWorkshifts;
-        }
-      }
-    });
-  }
-
-  // Populate dropdown
-  $dropdown.empty();
-  if (attendWorkshifts && attendWorkshifts.length > 0) {
-    attendWorkshifts.forEach(function(shift) {
-      const shiftLabel = shift.label || shift.name || ("Ca " + shift.id);
-      const option = $("<option>")
-        .val(shift.id)
-        .text(shiftLabel);
-      $dropdown.append(option);
-    });
-  } else {
-    $dropdown.append($("<option disabled selected>Chưa có dữ liệu ca làm việc</option>"));
-  }
-}
-
 //  Gọi API để load danh sách các ca làm việc và gán vào các dropdown tương ứng
 function loadWorkshifts() {
   $.ajax({
@@ -465,6 +420,7 @@ function loadWorkshifts() {
           $("#shiftSelectUpdate"),
           $("#shiftSelectNew"),
           $("#leave-workshift"),
+          $("#comp-workshift"),
         ];
 
         selects.forEach((select) => {
@@ -736,11 +692,7 @@ function initFlatpickrWithAvailableDates(attendanceForCalendar, availableDates) 
       maxDate: "today",
       defaultDate: "today",
       clickOpens: true,
-      onChange: function(selectedDates, dateStr) {
-        // Load shifts khi chọn ngày vượt giờ
-        loadCompensatoryShifts(dateStr, "#comp-workshift");
-      }
-  });~
+  });
 
   // Khởi tạo lịch cho Ngày bù (Chỉ cho phép chọn từ hôm nay trở đi)
   flatpickr("#leave-date", {
@@ -751,10 +703,6 @@ function initFlatpickrWithAvailableDates(attendanceForCalendar, availableDates) 
       minDate: "today",
       defaultDate: "today",
       clickOpens: true,
-      onChange: function(selectedDates, dateStr) {
-        // Load shifts khi chọn ngày bù
-        loadCompensatoryShifts(dateStr, "#leave-workshift");
-      }
   });
   
 
