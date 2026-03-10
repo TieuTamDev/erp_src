@@ -1633,19 +1633,7 @@ document.getElementById("request-type").addEventListener("change", function () {
         .prop("disabled", true)
         .trigger("change");
     }
-  } else if (type === "compensatory-leave") {
-    // @author: an.cdb - @date: 10/03/2026
-    // Load shifts cho cả ngày vượt giờ và ngày bù khi chọn loại đề xuất
-    const compOriginalDate = document.getElementById("comp-original-date").value;
-    const leaveDate = document.getElementById("leave-date").value;
-    
-    if (compOriginalDate) {
-      loadCompensatoryShifts(compOriginalDate, "#comp-workshift");
-    }
-    if (leaveDate) {
-      loadCompensatoryShifts(leaveDate, "#leave-workshift");
-    }
-  }
+  } 
 });
 document.addEventListener("DOMContentLoaded", function () {
   showFlashToasts();
@@ -1782,6 +1770,13 @@ document.addEventListener("DOMContentLoaded", function () {
       if (!originalDate || originalDate.value.trim() === "") {
         pushToast("Vui lòng chọn ngày làm vượt giờ.", false);
         return;
+      }
+
+      // Kiểm tra ca làm vượt giờ
+      const compWorkshift = document.getElementById("comp-workshift");
+      if (!compWorkshift || !compWorkshift.value) {
+          pushToast("Vui lòng chọn ca làm vượt giờ.", false);
+          return;
       }
 
       // Kiểm tra ngày bù
