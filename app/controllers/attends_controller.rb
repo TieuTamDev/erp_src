@@ -221,8 +221,6 @@ class AttendsController < ApplicationController
       'UPDATE-SHIFT'
     when 'edit-plan'
       'EDIT-PLAN'
-    when 'compensatory-leave' #THÊM mapping cho đề xuất nghỉ bù - @author:an.cdb @date: 09/03/2026
-      'COMPENSATORY-LEAVE'
     else
       nil
     end
@@ -471,7 +469,7 @@ class AttendsController < ApplicationController
     "ADDITIONAL-CHECK-OUT"    => "Chấm công tan làm bù",
     "ADDITIONAL-CHECK-IN-OUT" => "Chấm công bù vào/ra",
     "EDIT-PLAN"               => "Chỉnh sửa kế hoạch làm việc",
-    "COMPENSATORY-LEAVE"      => "Nghỉ bù" #Thêm mapping cho đề xuất nghỉ bù - @author:an.cdb @date: 09/03/2026
+    "COMPENSATORY-LEAVE"      => "Nghỉ bù"
   }.freeze
 
   # Tạo Shiftissue cho ca sáng hoặc ca chiều
@@ -757,7 +755,8 @@ class AttendsController < ApplicationController
     )
   end
 
-  # Method xử lý đăng ký nghỉ bù
+
+    # Method xử lý đăng ký nghỉ bù
   # @author: an.cdb
   # @date: 11/03/2026
   # @input: user_id, data
@@ -1612,7 +1611,9 @@ class AttendsController < ApplicationController
             registered_shift_end_time: sel.end_time || "00:00",
             checkin: checkin,
             checkout: checkout,
-            location:campus_map[sel.location] || '',
+            # Update 10/03/2026: Xử lý split location "/" theo campus_map
+            location: sel.location.split('/').map { |code| campus_map[code.strip] }.compact.join(', ') || '',
+            # location:campus_map[sel.location] || '',
             approved_by: week.checked_by,
             reason: sel.day_off_reason,
             is_day_off: has_work_trip ? "WORK-TRIP" : sel.is_day_off
@@ -1912,5 +1913,5 @@ class AttendsController < ApplicationController
                                  .where(work_date: Date.today.beginning_of_day..Date.today.end_of_day)
                                  .first
   end
-
+  
 end

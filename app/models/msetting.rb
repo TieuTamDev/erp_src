@@ -29,7 +29,8 @@ class Msetting < ApplicationRecord
     'LEAVE'   => 'Cấu hình nghỉ phép',
     'ORDER'   => 'Cấu hình mua sắm',
     'PAYROLL' => 'Cấu hình chấm công',
-    'SYSTEM'  => 'Thiết lập hệ thống'
+    'SYSTEM'  => 'Thiết lập hệ thống',
+    'ZALO_OA'  => 'Zalo oa'
   }.freeze
 
   # Chuẩn hoá trước khi validate

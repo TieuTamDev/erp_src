@@ -509,7 +509,17 @@
               type = false
       }
     let detail_content = type ? is_day_off : `${event.start} - ${event.end}`;
-    let location_content = type ? "" : `| ${campuses_map[event.location]}`;
+    // let location_content = type ? "" : `| ${campuses_map[event.location]}`;
+    const location_content = type
+      ? ""
+      : (() => {
+          const labels = String(event.location || "")
+            .split("/")
+            .map(v => v.trim())
+            .filter(Boolean)
+            .map(code => campuses_map[code] || code);
+          return labels.length ? `| ${labels.join(" / ")}` : "";
+        })();
     return `<div class="event-item text-truncate d-block" style="position: absolute;border-left: 4px solid ${event.color};" data-bs-toggle="tooltip" data-bs-placement="top" title="${event.title} ${detail_content} ${location_content}">
                 <span style="color:${event.color};filter: brightness(85%);font-weight: 600;">${event.title}</span> <span style="color:${event.color}"> ${detail_content} </span> <span style="color:${event.color}"> ${location_content} </span>
              </div>`;

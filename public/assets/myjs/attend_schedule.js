@@ -61,6 +61,21 @@ function getShiftStatusText(shift) {
   }
 }
 
+// [MULTI-LOCATION] Normalize location text from API (single value/CSV/semicolon/pipe)
+// and show as a clean comma-separated list in tooltip.
+function formatShiftLocation(locationRaw) {
+  const raw = String(locationRaw || "").trim();
+  if (!raw) return "Không có thông tin";
+
+  const parts = raw
+    .split(/[;,|]/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  if (!parts.length) return "Không có thông tin";
+  return Array.from(new Set(parts)).join(", ");
+}
+
 //// Khởi tạo & cấu hình lịch
 window.addEventListener("load", function () {
   initCalendarSchedule();
@@ -316,11 +331,14 @@ function showShiftTooltip(dateStr, e, shiftType = null) {
     filteredData
       .map((shift) => {
         const statusText = getShiftStatusText(shift);
+        const locationText = formatShiftLocation(shift.location);
         const useStatusForTime = ["Nghỉ hàng tuần", "Nghỉ lễ", "Nghỉ phép", "Lịch giảng dạy"].includes(statusText);
+        /*
         if (useStatusForTime) {
           return `
           <div class="mb-1">
             <strong>${shift.shift_name}${statusText ? ` (${statusText})` : ""}</strong><br>
+            📍 ${shift.location || "Không có thông tin"}
           </div>
         `;
         } else {
@@ -332,6 +350,26 @@ function showShiftTooltip(dateStr, e, shiftType = null) {
             🕒 ${shift.work_time}<br>
             ✅ Vào: ${checkin} | Ra: ${checkout}<br>
             📍 ${shift.location || "Không có thông tin"}
+          </div>
+        `;
+        }
+        */
+        if (useStatusForTime) {
+          return `
+          <div class="mb-1">
+            <strong>${shift.shift_name}${statusText ? ` (${statusText})` : ""}</strong><br>
+            📍 ${locationText}
+          </div>
+        `;
+        } else {
+          const checkin = shift.checkin || "---";
+          const checkout = shift.checkout || "---";
+          return `
+          <div class="mb-1">
+            <strong>${shift.shift_name}${statusText ? ` (${statusText})` : ""}</strong><br>
+            🕒 ${shift.work_time}<br>
+            ✅ Vào: ${checkin} | Ra: ${checkout}<br>
+            📍 ${locationText}
           </div>
         `;
         }
@@ -1633,7 +1671,7 @@ document.getElementById("request-type").addEventListener("change", function () {
         .prop("disabled", true)
         .trigger("change");
     }
-  } 
+  }
 });
 document.addEventListener("DOMContentLoaded", function () {
   showFlashToasts();

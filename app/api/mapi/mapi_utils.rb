@@ -2869,6 +2869,91 @@ end
           }
         end
       end
+    # ============================= API Zalo OA ================================
+    # @author: Quang Thái
+    # @date: 03/03/2026
+    # Gọi API đến zalo OA lấy danh sách bài viết
+    post :get_posts_zalo_oa do
+      begin
+        page  = params[:page].to_i
+        limit = params[:limit].to_i
+
+        offset = (page - 1) * limit
+        response = call_zalo_api(("https://openapi.zalo.me/v2.0/article/getslice?offset=#{offset}&limit=#{limit}&type=normal"))
+        if response["message"] == "Success"
+          result = response["data"]
+          total = result["total"]
+
+          total_pages = (total.to_f / limit).ceil
+          # Trả về kết quả từ API bên ngoài
+          {
+            msg: response["message"],
+            result: result["medias"] || [],
+            total_pages: total_pages
+          }
+        else
+          # Trả về lỗi nếu response code không phải 200
+          error_response = begin
+            JSON.parse(response.body)
+          rescue
+            { msg: "API returned status code #{response["message"]}" }
+          end
+
+          error!({
+            msg: "Error: API returned status code #{response["message"]}. #{error_response['msg'] || ''}",
+            result: []
+          }, response["message"])
+        end
+      rescue => e
+        return {
+          "msg" => "Error: #{e}",
+          result: false,
+        }
+      end
+    end
+    # @author: Quang Thái
+    # @date: 04/03/2026
+    # Gọi API đến zalo OA lấy chi tiết bài viết
+    desc "Gọi API đến zalo OA lấy chi tiết bài viết"
+    params do
+      optional :id, type: String, desc: "Id định danh bài viết"
+    end
+    get :get_details_post_zalo_oa do
+      begin
+        response = call_zalo_api(("https://openapi.zalo.me/v2.0/article/getdetail?id=#{params[:id]}"))
+
+        if response.code.to_i == 200
+          # Parse JSON response
+          result = JSON.parse(response.body)
+          # Trả về kết quả từ API bên ngoài
+          {
+            msg: result['msg'] || "Success",
+            result: result || [],
+            count: result['count'] || (result['result'] || []).length
+          }
+        else
+          # Trả về lỗi nếu response code không phải 200
+          error_response = begin
+            JSON.parse(response.body)
+          rescue
+            { msg: "API returned status code #{response.code}" }
+          end
+
+          error!({
+            msg: "Error: API returned status code #{response.code}. #{error_response['msg'] || ''}",
+            result: []
+          }, response.code.to_i)
+        end
+
+      rescue JSON::ParserError => e
+        # Lỗi khi parse JSON
+        error!({ msg: "Error parsing JSON: #{e.message}", result: [] }, 500)
+      rescue => e
+        # Lỗi khác
+        error!({ msg: "Error: #{e.message}", result: [] }, 500)
+      end
+    end
+  # ============================= API Zalo OA ================================
   # ============================= API APP iOS/Android ================================
       desc "device registration iOS/Android"
 			params do
@@ -5283,104 +5368,277 @@ end
       # @date: 26/02/2026
       # @input: user_id, shiftselection_id, file
       # @output: msg
-      desc "Save attend by shift id"
-      post :save_attend_by_shift do
+      # desc "Save attend by shift id"
+      # post :save_attend_by_shift do
+      #   begin
+      #     user_id  = params[:user_id]
+      #     shift_id = params[:shiftselection_id]
+      #     file     = params['file']
+
+      #     timezone = 'Asia/Ho_Chi_Minh'
+      #     current_time = Time.zone.now.in_time_zone(timezone)
+      #     day_start_utc = current_time.beginning_of_day.utc
+      #     day_end_utc   = current_time.end_of_day.utc
+
+      #     # 1️⃣ Check user
+      #     user = User.find_by(id: user_id)
+      #     return { msg: "user_not_exists", result: false } unless user
+
+      #     # 2️⃣ Check shift tồn tại và thuộc user
+      #     shift = Shiftselection
+      #               .joins(:scheduleweek)
+      #               .where(id: shift_id)
+      #               .where(scheduleweeks: { user_id: user_id, status: 'APPROVED' })
+      #               .where(is_day_off: nil)
+      #               .first
+
+      #     return { msg: "shift_not_found_or_not_allowed", result: false } unless shift
+
+      #     # 3️⃣ Check shift có phải hôm nay không
+      #     unless shift.work_date.between?(current_time.beginning_of_day, current_time.end_of_day)
+      #       return { msg: "shift_not_today", result: false }
+      #     end
+
+      #     # 4️⃣ Upload file
+      #     mediafile = upload_file(file)
+      #     return { msg: "media_file_upload_failed", result: false } unless mediafile[:id].present?
+
+      #     # 5️⃣ Chống duplicate trong 5 phút
+      #     duplicate = Attend.where(user_id: user_id, stype: 'ATTENDANCE')
+      #                       .where(shiftselection_id: shift_id)
+      #                       .where("(checkin BETWEEN ? AND ?) OR (checkout BETWEEN ? AND ?)",
+      #                         current_time - 5.minutes, current_time,
+      #                         current_time - 5.minutes, current_time)
+      #                       .exists?
+
+      #     return { msg: "Đã điểm danh thành công trước đó.", result: false } if duplicate
+
+      #     # 6️⃣ Tìm attend trong ngày cho shift này
+      #     attend = Attend.where(user_id: user_id)
+      #                   .where(stype: "ATTENDANCE", shiftselection_id: shift_id)
+      #                   .where(checkin: day_start_utc..day_end_utc)
+      #                   .order(created_at: :desc)
+      #                   .first
+
+      #     # =========================
+      #     # CHECKIN
+      #     # =========================
+      #     if attend.nil?
+      #       new_attend = Attend.new(
+      #         user_id: user_id,
+      #         checkin: current_time,
+      #         stype: 'ATTENDANCE',
+      #         status: 'CHECKIN',
+      #         shiftselection_id: shift_id,
+      #         note: "Checkin lúc #{current_time.strftime('%H:%M %d/%m/%Y')}"
+      #       )
+
+      #       ActiveRecord::Base.transaction do
+      #         new_attend.save!
+      #         Attenddetail.create!(
+      #           attend_id: new_attend.id,
+      #           dtcheckin: current_time,
+      #           pic: mediafile[:id],
+      #           stype: 'CHECKIN'
+      #         )
+      #       end
+
+      #       return { msg: "save_check_in_successfully", result: true }
+
+      #     # =========================
+      #     # CHECKOUT
+      #     # =========================
+      #     elsif attend.checkout.blank?
+      #       attend.update!(
+      #         checkout: current_time,
+      #         status: 'CHECKOUT',
+      #         note: "Checkout lúc #{current_time.strftime('%H:%M %d/%m/%Y')}"
+      #       )
+
+      #       Attenddetail.create!(
+      #         attend_id: attend.id,
+      #         dtcheckout: current_time,
+      #         pic: mediafile[:id],
+      #         stype: 'CHECKOUT'
+      #       )
+
+      #       return { msg: "save_check_out_successfully", result: true }
+
+      #     else
+      #       return { msg: "already_checked_in_and_out_today", result: false }
+      #     end
+
+      #   rescue => e
+      #     return { msg: "Error: #{e.message}", result: false }
+      #   end
+      # end
+
+      desc "Save attend of user"
+      post :save_attend_v2 do
         begin
-          user_id  = params[:user_id]
-          shift_id = params[:shiftselection_id]
-          file     = params['file']
+          user_id           = params[:user_id]
+          file              = params['file']
+          shiftselection_id = params[:shiftselection_id]
+          check_type        = params[:check_type]  # "checkin" hoặc "checkout"
+          timezone          = 'Asia/Ho_Chi_Minh'
+          current_time      = Time.zone.now.in_time_zone(timezone)
+          day_start_utc     = current_time.beginning_of_day.utc
+          day_end_utc       = current_time.end_of_day.utc
 
-          timezone = 'Asia/Ho_Chi_Minh'
-          current_time = Time.zone.now.in_time_zone(timezone)
-          day_start_utc = current_time.beginning_of_day.utc
-          day_end_utc   = current_time.end_of_day.utc
+          oUser = User.find_by(id: user_id)
+          return { msg: "user_not_exists", result: false } unless oUser
 
-          # 1️⃣ Check user
-          user = User.find_by(id: user_id)
-          return { msg: "user_not_exists", result: false } unless user
-
-          # 2️⃣ Check shift tồn tại và thuộc user
-          shift = Shiftselection
-                    .joins(:scheduleweek)
-                    .where(id: shift_id)
-                    .where(scheduleweeks: { user_id: user_id, status: 'APPROVED' })
-                    .where(is_day_off: nil)
-                    .first
-
-          return { msg: "shift_not_found_or_not_allowed", result: false } unless shift
-
-          # 3️⃣ Check shift có phải hôm nay không
-          unless shift.work_date.between?(current_time.beginning_of_day, current_time.end_of_day)
-            return { msg: "shift_not_today", result: false }
-          end
-
-          # 4️⃣ Upload file
+          # Xử lý lưu hình ảnh chấm công vào database
           mediafile = upload_file(file)
           return { msg: "media_file_upload_failed", result: false } unless mediafile[:id].present?
 
-          # 5️⃣ Chống duplicate trong 5 phút
+          # Chống trùng dữ liệu trong vòng 5 phút
           duplicate = Attend.where(user_id: user_id, stype: 'ATTENDANCE')
-                            .where(shiftselection_id: shift_id)
                             .where("(checkin BETWEEN ? AND ?) OR (checkout BETWEEN ? AND ?)",
-                              current_time - 5.minutes, current_time,
-                              current_time - 5.minutes, current_time)
+                                  5.minutes.ago, current_time, 5.minutes.ago, current_time)
                             .exists?
-
           return { msg: "Đã điểm danh thành công trước đó.", result: false } if duplicate
 
-          # 6️⃣ Tìm attend trong ngày cho shift này
-          attend = Attend.where(user_id: user_id)
-                        .where(stype: "ATTENDANCE", shiftselection_id: shift_id)
-                        .where(checkin: day_start_utc..day_end_utc)
-                        .order(created_at: :desc)
-                        .first
+          if shiftselection_id.present? && check_type.present?
+            # ── Nhánh mới: điểm danh theo ca và loại đã chọn ──
 
-          # =========================
-          # CHECKIN
-          # =========================
-          if attend.nil?
-            new_attend = Attend.new(
-              user_id: user_id,
-              checkin: current_time,
-              stype: 'ATTENDANCE',
-              status: 'CHECKIN',
-              shiftselection_id: shift_id,
-              note: "Checkin lúc #{current_time.strftime('%H:%M %d/%m/%Y')}"
-            )
+            # Validate ca thuộc user và hôm nay
+            sel = Shiftselection
+                    .joins(:scheduleweek)
+                    .where(
+                      id:            shiftselection_id,
+                      scheduleweeks: { user_id: user_id, status: 'APPROVED' },
+                      work_date:     current_time.beginning_of_day..current_time.end_of_day
+                    )
+                    .first
+            return { msg: "user_has_no_workshift_today", result: false } unless sel
 
-            ActiveRecord::Base.transaction do
-              new_attend.save!
-              Attenddetail.create!(
-                attend_id: new_attend.id,
-                dtcheckin: current_time,
-                pic: mediafile[:id],
-                stype: 'CHECKIN'
+            shift_id = sel.id
+
+            if check_type == "checkin"
+              # Chưa được tồn tại record checkin cho ca này
+              existing = Attend.where(user_id: user_id, stype: 'ATTENDANCE', shiftselection_id: shift_id)
+                              .where.not(checkin: nil).first
+              return { msg: "already_checked_in_for_this_shift", result: false } if existing
+
+              attend = Attend.new(
+                user_id:           user_id,
+                checkin:           current_time,
+                stype:             'ATTENDANCE',
+                status:            'CHECKIN',
+                shiftselection_id: shift_id,
+                note:              "Nhân viên chấm công vào làm trên B-ERP/Website vào lúc #{current_time.strftime('%H:%M %d/%m/%Y')}"
               )
+              ActiveRecord::Base.transaction do
+                attend.save!
+                Attenddetail.create!(
+                  attend_id: attend.id,
+                  dtcheckin: current_time,
+                  pic:       mediafile[:id],
+                  stype:     'CHECKIN'
+                )
+              end
+              return { msg: "save_check_in_successfully", result: true }
+
+            elsif check_type == "checkout"
+              # Phải có record checkin trước, chưa có checkout
+              att = Attend.where(user_id: user_id, stype: 'ATTENDANCE', shiftselection_id: shift_id)
+                          .where.not(checkin: nil)
+                          .where(checkout: nil)
+                          .order(created_at: :desc)
+                          .first
+              return { msg: "must_checkin_before_checkout", result: false }        unless att
+              return { msg: "already_checked_out_for_this_shift", result: false }  if att.checkout.present?
+
+              att.update!(
+                checkout: current_time,
+                status:   'CHECKOUT',
+                note:     "Nhân viên chấm công tan ca trên B-ERP/Website vào lúc #{current_time.strftime('%H:%M %d/%m/%Y')}"
+              )
+              Attenddetail.create!(
+                attend_id:  att.id,
+                dtcheckout: current_time,
+                pic:        mediafile[:id],
+                stype:      'CHECKOUT'
+              )
+              return { msg: "save_check_out_successfully", result: true }
+
+            else
+              return { msg: "invalid_check_type", result: false }
             end
 
-            return { msg: "save_check_in_successfully", result: true }
-
-          # =========================
-          # CHECKOUT
-          # =========================
-          elsif attend.checkout.blank?
-            attend.update!(
-              checkout: current_time,
-              status: 'CHECKOUT',
-              note: "Checkout lúc #{current_time.strftime('%H:%M %d/%m/%Y')}"
-            )
-
-            Attenddetail.create!(
-              attend_id: attend.id,
-              dtcheckout: current_time,
-              pic: mediafile[:id],
-              stype: 'CHECKOUT'
-            )
-
-            return { msg: "save_check_out_successfully", result: true }
-
           else
-            return { msg: "already_checked_in_and_out_today", result: false }
+            # ── Fallback: giữ nguyên logic cũ theo thứ tự ca ──
+
+            shiftIds = Shiftselection
+                        .joins(:scheduleweek, :workshift)
+                        .where(scheduleweeks: { user_id: user_id, status: 'APPROVED' })
+                        .where(is_day_off: nil)
+                        .where(work_date: current_time.beginning_of_day..current_time.end_of_day)
+                        .pluck(:id, :start_time)
+            return { msg: "user_has_no_workshift_today", result: false } if shiftIds.blank?
+
+            shiftIds = shiftIds.sort_by { |(_id, st)| Time.strptime(st, '%H:%M') rescue Time.at(0) }
+                              .map(&:first)
+
+            selected = nil
+            shiftIds.each do |sid|
+              att = Attend.where(user_id: user_id, stype: 'ATTENDANCE', shiftselection_id: sid)
+                          .where(checkin: day_start_utc..day_end_utc)
+                          .order(created_at: :desc)
+                          .first
+
+              if att.nil?
+                selected = { shift_id: sid, attend: nil, action: :checkin }
+                break
+              elsif att.checkout.blank?
+                selected = { shift_id: sid, attend: att, action: :checkout }
+                break
+              end
+            end
+
+            return { msg: "already_checked_in_and_out_today", result: false } if selected.nil?
+
+            shift_id = selected[:shift_id]
+            oAttend  = selected[:attend]
+
+            if oAttend.nil?
+              attend = Attend.new(
+                user_id:           user_id,
+                checkin:           current_time,
+                stype:             'ATTENDANCE',
+                status:            'CHECKIN',
+                shiftselection_id: shift_id,
+                note:              "Nhân viên chấm công vào làm trên B-ERP/Website vào lúc #{current_time.strftime('%H:%M %d/%m/%Y')}"
+              )
+              ActiveRecord::Base.transaction do
+                attend.save!
+                Attenddetail.create!(
+                  attend_id: attend.id,
+                  dtcheckin: current_time,
+                  pic:       mediafile[:id],
+                  stype:     'CHECKIN'
+                )
+              end
+              return { msg: "save_check_in_successfully", result: true }
+
+            elsif oAttend.checkout.blank?
+              oAttend.update!(
+                checkout: current_time,
+                status:   'CHECKOUT',
+                note:     "Nhân viên chấm công tan ca trên B-ERP/Website vào lúc #{current_time.strftime('%H:%M %d/%m/%Y')}"
+              )
+              Attenddetail.create!(
+                attend_id:  oAttend.id,
+                dtcheckout: current_time,
+                pic:        mediafile[:id],
+                stype:      'CHECKOUT'
+              )
+              return { msg: "save_check_out_successfully", result: true }
+
+            else
+              return { msg: "already_checked_in_and_out_today", result: false }
+            end
           end
 
         rescue => e
@@ -5401,11 +5659,11 @@ end
           current_time = Time.zone.now.in_time_zone("Asia/Ho_Chi_Minh")
           user = User.find_by(id: user_id)
 
-          if integer_string?(scode_campus)
-            @CSVC_PATH = request.base_url + "/masset/"
-            response = call_api(@CSVC_PATH + "api/v1/mapi_utils/get_campus_by_room_id?" + "room_id=" + scode_campus.to_s)
-            scode_campus = response["result"]
-          end
+          # if integer_string?(scode_campus)
+          #   @CSVC_PATH = request.base_url + "/masset/"
+          #   response = call_api(@CSVC_PATH + "api/v1/mapi_utils/get_campus_by_room_id?" + "room_id=" + scode_campus.to_s)
+          #   scode_campus = response["result"]
+          # end
 
           return  { result: false, msg: 'user_not_found' } unless user
           return  { result: false, msg: 'scode_campus_missing' } if scode_campus.blank?
@@ -5468,7 +5726,7 @@ end
 
 
           # Kiểm tra địa điểm làm việc
-          if scode_campus.present? && sel&.location.present? && scode_campus != sel.location
+          if scode_campus.present? && sel&.location.present? && !sel.location.to_s.split("$$$").include?(scode_campus)
             return { msg: "work_location_does_not_match_plan", result: false }
           end
 
@@ -5487,6 +5745,126 @@ end
             msg: "Error: #{e}",
             result: false,
           }
+        end
+      end
+
+      desc "Check condition user attendance"
+      post :check_condition_user_v2 do
+        begin
+          user_id          = params[:user_id]
+          scode_campus     = params[:scode_campus]
+          shiftselection_id = params[:shiftselection_id]
+          check_type       = params[:check_type]  # "checkin" hoặc "checkout"
+          current_time     = Time.zone.now.in_time_zone("Asia/Ho_Chi_Minh")
+          user             = User.find_by(id: user_id)
+
+          return { result: false, msg: 'user_not_found' }       unless user
+          return { result: false, msg: 'scode_campus_missing' } if scode_campus.blank?
+
+          # Kiểm tra miễn chấm công theo User.ignore_attend
+          user_exempt = User.where(id: user_id, ignore_attend: "TRUE").exists?
+          return { msg: "user_is_exempted_from_attendance_check", result: false } if user_exempt
+
+          # Kiểm tra danh sách nhân viên được miễn chấm công theo vị trí
+          exempt_position_scodes = Positionjob.where(ignore_attend: "TRUE").pluck(:scode)
+          exempted = if exempt_position_scodes.present?
+                      Work.joins(:positionjob)
+                          .where(user_id: user_id)
+                          .where.not(positionjob_id: nil)
+                          .where(
+                            Array.new(exempt_position_scodes.size, "positionjobs.scode LIKE ?").join(" OR "),
+                            *exempt_position_scodes.map { |p| "#{p}%" }
+                          )
+                          .exists?
+                    else
+                      false
+                    end
+          return { msg: "user_is_exempted_from_attendance_check.", result: false } if exempted
+
+          # ── Tìm ca theo shiftselection_id (nếu mobile truyền lên) hoặc fallback theo giờ ──
+          if shiftselection_id.present?
+            # Validate ca này thuộc về user và hôm nay
+            sel = Shiftselection
+                    .joins(:scheduleweek)
+                    .select(:id, :is_day_off, :location, :work_date, :start_time, :end_time)
+                    .find_by(
+                      id:            shiftselection_id,
+                      scheduleweeks: { user_id: user_id, status: 'APPROVED' },
+                      work_date:     current_time.beginning_of_day..current_time.end_of_day
+                    )
+
+            return { msg: "user_has_no_workshift_today", result: false } unless sel
+
+            current_shift_id = sel.id
+
+            # Kiểm tra đã chấm đúng loại chưa
+            if check_type == "checkin"
+              already_done = Attend.where(user_id: user_id, stype: 'ATTENDANCE',
+                                          shiftselection_id: current_shift_id)
+                                  .where.not(checkin: nil).exists?
+              return { msg: "already_checked_in_for_this_shift", result: false } if already_done
+            elsif check_type == "checkout"
+              # Phải checkin trước mới được checkout
+              checked_in = Attend.where(user_id: user_id, stype: 'ATTENDANCE',
+                                        shiftselection_id: current_shift_id)
+                                .where.not(checkin: nil).exists?
+              return { msg: "must_checkin_before_checkout", result: false } unless checked_in
+
+              already_done = Attend.where(user_id: user_id, stype: 'ATTENDANCE',
+                                          shiftselection_id: current_shift_id)
+                                  .where.not(checkout: nil).exists?
+              return { msg: "already_checked_out_for_this_shift", result: false } if already_done
+            end
+
+          else
+            # ── Fallback: giữ nguyên logic cũ tìm theo khung giờ ──
+            shiftIds = Shiftselection
+                        .joins(:scheduleweek, :workshift)
+                        .where(scheduleweeks: { user_id: user_id, status: 'APPROVED' })
+                        .where(is_day_off: nil)
+                        .where(work_date: current_time.beginning_of_day..current_time.end_of_day)
+                        .pluck(:id, :start_time)
+            return { msg: "user_has_no_workshift_today", result: false } unless shiftIds.present?
+
+            shiftIds = shiftIds.sort_by { |(_id, st)| Time.strptime(st, '%H:%M') rescue Time.at(0) }
+                              .map(&:first)
+
+            count_checkin  = Attend.where(user_id: user_id, stype: 'ATTENDANCE',
+                                          shiftselection_id: shiftIds).where.not(checkin: nil).count
+            count_checkout = Attend.where(user_id: user_id, stype: 'ATTENDANCE',
+                                          shiftselection_id: shiftIds).where.not(checkout: nil).count
+            current_shift_index = (count_checkin + count_checkout) / 2
+            return { msg: "already_checked_in_and_out_today", result: false } if current_shift_index >= 2
+
+            current_shift_id = shiftIds[current_shift_index]
+
+            sel = Shiftselection.select(:id, :is_day_off, :location, :work_date, :start_time, :end_time)
+                                .find_by(id: current_shift_id)
+          end
+
+          # ── Các validation chung cho cả 2 nhánh ──
+          is_off = sel&.is_day_off.to_s.upcase
+          return { msg: "user_has_no_workshift_today", result: false } if is_off == 'OFF'
+          return { msg: "today_is_a_holiday",          result: false } if is_off == 'HOLIDAY'
+          return { msg: "user_is_off_today",           result: false } if is_off == 'ON-LEAVE'
+
+          # Kiểm tra địa điểm làm việc
+          if scode_campus.present? && sel&.location.present? &&
+            !sel.location.to_s.split("$$$").include?(scode_campus)
+            return { msg: "work_location_does_not_match_plan", result: false }
+          end
+
+          # Kiểm tra đi công tác
+          all_shift_ids = shiftselection_id.present? ? [current_shift_id] : shiftIds
+          approved_worktrip_count = Shiftissue
+                                      .where(shiftselection_id: all_shift_ids,
+                                            stype: 'WORK-TRIP', status: 'APPROVED')
+                                      .distinct.count(:shiftselection_id)
+          return { msg: "user_has_worktrip_today", result: false } if approved_worktrip_count == all_shift_ids.size
+
+          return { msg: "eligible", result: true }
+        rescue => e
+          return { msg: "Error: #{e}", result: false }
         end
       end
       # danh sách nhân sự đang nghỉ Dashboard
@@ -6322,7 +6700,8 @@ end
         "ADDITIONAL-CHECK-IN" => "Chấm công vào làm bù",
         "UPDATE-SHIFT" => "Cập nhật ca",
         "WORK-TRIP" => "Công tác",
-        "EDIT-PLAN" => "Chỉnh sửa kế hoạch làm việc"
+        "EDIT-PLAN" => "Chỉnh sửa kế hoạch làm việc",
+        "COMPENSATORY-LEAVE" => "Nghỉ bù"
       }.freeze
 
       # Tạo đề xuất đi trễ / về sớm
@@ -9471,4 +9850,104 @@ def list_array_cancel(list_hpdetail)
     array_cancel << all_changes
   end
   array_cancel.join("\n")
+end
+
+def get_zalo_setting
+  record = Msetting.find_by(stype: "ZALO_OA", scode: "ZALO-ACCESS-TOKEN")
+
+  return nil unless record
+
+  JSON.parse(record.svalue)
+end
+
+def set_zalo_setting(access_token:, refresh_token:, expired_at:)
+
+  data = {
+    access_token: access_token,
+    refresh_token: refresh_token,
+    expired_at: expired_at
+  }
+
+  record = Msetting.find_or_initialize_by(
+    stype: "ZALO_OA",
+    scode: "ZALO-ACCESS-TOKEN"
+  )
+
+  record.name = "Zalo access token"
+  record.svalue = data.to_json
+
+  record.save!
+
+end
+
+def get_zalo_access_token
+
+  setting = get_zalo_setting
+
+  # raise "Zalo token chưa khởi tạo" unless setting
+
+  # expired_at = Time.parse(setting["expired_at"])
+
+  # if expired_at < Time.now + 300
+    refresh_zalo_token
+  # end
+
+  # setting["access_token"]
+
+end
+
+def refresh_zalo_token
+  setting = get_zalo_setting
+  raise "Zalo token chưa khởi tạo" unless setting
+
+  refresh_token = setting["refresh_token"]
+
+  uri = URI("https://oauth.zaloapp.com/v4/oa/access_token")
+
+  http = Net::HTTP.new(uri.host, uri.port)
+  http.use_ssl = true
+
+  request = Net::HTTP::Post.new(uri)
+  request["Content-Type"] = "application/x-www-form-urlencoded"
+  request["secret_key"] = "74qKDf5Rt8rKDd5bT4XY"
+
+  request.body = URI.encode_www_form(
+    app_id: "1385955203595521827",
+    refresh_token: refresh_token,
+    grant_type: "refresh_token",
+    secret_key: "74qKDf5Rt8rKDd5bT4XY"
+  )
+
+  response = http.request(request)
+
+  result = JSON.parse(response.body)
+
+  unless result["access_token"]
+    raise "Refresh token failed #{result}"
+  end
+
+  set_zalo_setting(
+    access_token: result["access_token"],
+    refresh_token: result["refresh_token"],
+    expired_at: (Time.now + result["expires_in"].to_i).iso8601
+  )
+
+  result["access_token"]
+end
+
+def call_zalo_api(url)
+
+  access_token = refresh_zalo_token
+
+  uri = URI(url)
+
+  http = Net::HTTP.new(uri.host, uri.port)
+  http.use_ssl = true
+
+  request = Net::HTTP::Get.new(uri)
+  request["access_token"] = access_token
+
+  response = http.request(request)
+
+  JSON.parse(response.body)
 end

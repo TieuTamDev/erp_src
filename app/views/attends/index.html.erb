@@ -44,7 +44,9 @@
     
     #workshiftModal {
         .modal-body {
-            color: #000000
+            color: #000000;
+            overflow-x: auto;
+            overflow-y: auto;
         }
 
         .custom-modal-width {
@@ -129,6 +131,12 @@
             align-items: end;
         }
 
+        @media (max-width: 768px) {
+            .template-shift-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
         .template-shift-row .tpl-group{
             display: flex;
             flex-direction: column;
@@ -145,6 +153,22 @@
             display: flex;
             align-items: center;
             gap: 8px;
+        }
+
+        .template-shift-row .tpl-fields input[type="text"] {
+            width: 70px;
+            flex-shrink: 0;
+        }
+
+        .template-shift-row .tpl-fields > span {
+            flex-shrink: 0;
+        }
+
+        .template-shift-row .tpl-fields #tpl-ca-sang-place-wrapper,
+        .template-shift-row .tpl-fields #tpl-ca-chieu-place-wrapper {
+            flex: 1 1 auto;
+            min-width: 120px;
+            max-width: 100%;
         }
 
         .template-shift-row .tpl-apply{
@@ -446,8 +470,182 @@
       overflow: unset !important
     }
 
+    /* CSS cho dropdown checkbox trong template shift */
+    .location-dropdown-wrapper {
+      position: relative;
+      width: 100%;
+      min-width: 120px;
+    }
 
+    .location-dropdown-toggle {
+      width: 100%;
+      text-align: left;
+      padding: 4px 8px;
+      font-size: 13px;
+      background-color: #fff;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      gap: 4px;
+    }
 
+    .location-dropdown-toggle:hover {
+      border-color: #86b7fe;
+    }
+
+    .location-dropdown-toggle .selected-text {
+      flex: 1 1 auto;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      min-width: 0;
+    }
+
+    .location-dropdown-toggle .caret {
+      flex: 0 0 auto;
+      width: 12px;
+      transition: transform 0.2s;
+      text-align: center;
+    }
+
+    .location-dropdown-toggle[aria-expanded="true"] .caret {
+      transform: rotate(180deg);
+    }
+
+    .location-dropdown-menu {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      max-height: 250px;
+      overflow-y: auto;
+      background: #fff;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      z-index: 1050;
+      margin-top: 2px;
+      padding: 4px 0;
+    }
+
+    .location-dropdown-menu.show {
+      display: block;
+    }
+
+    .location-dropdown-menu.hide {
+      display: none;
+    }
+
+    .location-dropdown-item {
+      padding: 6px 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+    }
+
+    .location-dropdown-item:hover {
+      background-color: #f8f9fa;
+    }
+
+    .location-dropdown-item input[type="checkbox"] {
+      cursor: pointer;
+      margin: 0;
+    }
+
+    .location-dropdown-item label {
+      cursor: pointer;
+      margin: 0;
+      flex: 1;
+      user-select: none;
+    }
+
+    /* CSS cho dropdown trong bảng ca làm việc */
+    td.row-workshift .location-dropdown-wrapper {
+      min-width: 100px;
+      max-width: 140px;
+      flex: 0 1 auto;
+      position: relative;
+      z-index: 10;
+    }
+
+    td.row-workshift .location-dropdown-wrapper.is-open {
+      z-index: 3000;
+    }
+
+    td.row-workshift .location-dropdown-toggle {
+      padding: 2px 6px;
+      font-size: 12px;
+      min-height: 28px;
+      position: relative;
+      z-index: 101;
+    }
+
+    td.row-workshift .location-dropdown-menu {
+      z-index: 3010 !important;
+      min-width: 180px;
+      left: 0 !important;
+      right: auto !important;
+      top: 100% !important;
+      bottom: auto !important;
+      margin-top: 4px;
+      margin-bottom: 0;
+      position: absolute;
+      max-width: 260px;
+    }
+
+    td.row-workshift.pending .location-dropdown-toggle,
+    td.row-workshift.day-off .location-dropdown-toggle,
+    td.row-workshift.off-holiday .location-dropdown-toggle,
+    td.row-workshift.off-leave .location-dropdown-toggle {
+      pointer-events: none;
+      opacity: 0.55;
+    }
+
+    /* Đảm bảo dropdown không bị ẩn */
+    .table-responsive {
+      overflow-x: auto;
+      overflow-y: visible;
+    }
+
+    #weekTabContent .tab-pane.table-responsive {
+      overflow-x: auto;
+      overflow-y: visible;
+    }
+
+    td.row-workshift {
+      position: relative;
+      overflow: visible !important;
+    }
+
+    /* Điều chỉnh layout trong ô ca làm việc */
+    td.row-workshift .d-flex {
+      gap: 4px;
+      flex-wrap: nowrap;
+      align-items: center;
+    }
+
+    td.row-workshift .d-flex input[type="text"] {
+      width: 65px;
+      flex: 0 0 65px;
+      padding: 4px 6px;
+      font-size: 13px;
+    }
+
+    td.row-workshift .d-flex > span {
+      flex: 0 0 20px;
+      text-align: center;
+    }
+
+    td.row-workshift .d-flex .location-wrapper-ca-sang,
+    td.row-workshift .d-flex .location-wrapper-ca-chieu {
+      flex: 1 1 auto;
+      min-width: 120px;
+    }
 
     /* Tổng thể lưới & viền */
     #schedule-calendar .fc .fc-scrollgrid,
@@ -908,20 +1106,20 @@
           <div id="section-compensatory-leave" class="mt-3 d-none">
             <div class="alert alert-info">
               <i class="fas fa-info-circle"></i> 
-              Vui lòng cung cấp minh chứng ảnh giờ chấm công vào ngày làm vượt giờ
+              Vui lòng cung cấp minh chứng hình ảnh
             </div>
             
             <div class="row mt-3">
-              <div class="row mt-3">
+              
                 <div class="col-6">
-                  <label class="fs-0 fw-bold" for="leave-date">Ngày đăng ký nghỉ bù<span class="text-danger">*</span>:</label>
+                  <label class="fs-0 fw-bold" for="leave-date">Ngày nghỉ bù<span class="text-danger">*</span>:</label>
                   <input class="form-control date-choose" required id="leave-date" type="text" name="leave_date" />
                 </div>
                 <div class="col-6">
-                  <label class="fs-0 fw-bold" for="leave-workshift">Ca đăng ký nghỉ bù<span class="text-danger">*</span>:</label>
+                  <label class="fs-0 fw-bold" for="leave-workshift">Ca nghỉ bù<span class="text-danger">*</span>:</label>
                   <select class="form-control" required id="leave-workshift" name="leave_workshift_id"></select>
                 </div>
-              </div>
+
               <div class="col-6">
                 <label class="fs-0 fw-bold" for="comp-original-date">Nghỉ bù cho ngày<span class="text-danger">*</span>:</label>
                 <input class="form-control bg-light date-choose" required id="comp-original-date" type="text" name="original_date" readonly />

@@ -317,7 +317,7 @@ function renderTemplateShiftRow () {
     const wrap = document.getElementById('templateShiftContainer');
     if (!wrap) return;
 
-    const optionHTML = makeLocationOptions();
+    // const optionHTML = makeLocationOptions();
 
     const label = document.createElement('label');
     label.className = 'form-label fw-bold mb-2 w-100';
@@ -326,6 +326,7 @@ function renderTemplateShiftRow () {
     const row = document.createElement('div');
     row.className = 'template-shift-row';
 
+    /*
     row.innerHTML = `
     ${workshifts.map(s => `
       <div class="tpl-group">
@@ -348,6 +349,30 @@ function renderTemplateShiftRow () {
     `).join('')}
     <button id="btnApplyTemplate" type="button" class="btn btn-primary btn-sm tpl-apply">Áp dụng</button>
   `;
+    */
+
+    row.innerHTML = `
+    ${workshifts.map(s => `
+      <div class="tpl-group">
+        <div class="tpl-label">${s.label}</div>
+        <div class="tpl-fields">
+          <input type="text"
+                 id="tpl-${s.code}-start"
+                 class="text-center form-control form-control-sm time-compact"
+                 value="${s.start}" readonly>
+          <span>→</span>
+          <input type="text"
+                 id="tpl-${s.code}-end"
+                 class="text-center form-control form-control-sm time-compact"
+                 value="${s.end}" readonly>
+          <div id="tpl-${s.code}-place-wrapper">
+            ${createLocationDropdownHTML(`tpl-${s.code}-place`)}
+          </div>
+        </div>
+      </div>
+    `).join('')}
+    <button id="btnApplyTemplate" type="button" class="btn btn-primary btn-sm tpl-apply">Áp dụng</button>
+  `;
 
     wrap.replaceChildren(label, row);
     wrap.classList.remove('d-none');
@@ -359,7 +384,8 @@ function renderTemplateShiftRow () {
     workshifts.forEach(s => {
         flatpickr(`#tpl-${s.code}-start`, { ...fpCommon, minTime: s.min, maxTime: s.max });
         flatpickr(`#tpl-${s.code}-end`,   { ...fpCommon, minTime: s.min, maxTime: s.max });
-        document.getElementById(`tpl-${s.code}-place`).value = defaultLocation || document.getElementById(`tpl-${s.code}-place`).options[0]?.value;
+        // Khởi tạo dropdown checkbox
+        initLocationDropdown(`tpl-${s.code}-place`, defaultLocation);
     });
 
     document.getElementById('btnApplyTemplate')
@@ -661,6 +687,7 @@ function buildWeekTable(id, monday, detail = [], status = 'TEMP', reason = '') {
                   <td class="text-center align-middle"></td>`;
             }
 
+            /*
             return `
                 <td class="${tdClasses.join(' ')} ${index === 0 ? 'pe-0' : ''}" data-shift-code="${ws.code}" data-location="${locValue}" data-start="${st || ''}" data-end="${et || ''}">
                     <div class="d-flex ${ws.code.includes("sang") ? 'me-3' : ''}">
@@ -674,6 +701,24 @@ function buildWeekTable(id, monday, detail = [], status = 'TEMP', reason = '') {
                         <select name="location" class="location form-select form-select-sm place-${ws.code}">
                            ${makeLocationOptions()}
                         </select>
+                    </div>
+                </td>
+                ${toggleCell}`;
+            */
+
+            return `
+                <td class="${tdClasses.join(' ')} ${index === 0 ? 'pe-0' : ''}" data-shift-code="${ws.code}" data-location="${locValue}" data-start="${st || ''}" data-end="${et || ''}">
+                    <div class="d-flex ${ws.code.includes("sang") ? 'me-3' : ''}">
+                        <input type="text" name="${ws.code}-start"
+                             class="me-1 text-center form-control ${ws.code}-start flat-${ws.code}-start"
+                             value="${st}" ${disabled}>
+                        <span class="text-center me-1">→</span>
+                        <input type="text" name="${ws.code}-end"
+                            class="me-2 text-center form-control ${ws.code}-end flat-${ws.code}-end"
+                            value="${et}" ${disabled}>
+                        <div class="location-wrapper-${ws.code}" data-location-value="${locValue}">
+                           ${createLocationDropdownHTML(`${id}-${ymd}-${ws.code}`)}
+                        </div>
                     </div>
                 </td>
                 ${toggleCell}`;
@@ -722,6 +767,7 @@ function buildWeekTable(id, monday, detail = [], status = 'TEMP', reason = '') {
     </table>`;
     document.getElementById('weekTabContent').appendChild(pane);
 
+    /*
     pane.querySelectorAll('td.row-workshift').forEach(td => {
         const code = td.dataset.shiftCode;
         const sel  = td.querySelector(`.place-${code}`);
@@ -730,6 +776,22 @@ function buildWeekTable(id, monday, detail = [], status = 'TEMP', reason = '') {
         const location = td.getAttribute('data-location') || '';
         if (location && Array.from(sel.options).some(o => o.value === location || o.text === location)) {
             sel.value = location;
+        }
+    });
+    */
+
+    // Khởi tạo dropdown checkbox cho location
+    pane.querySelectorAll('td.row-workshift').forEach(td => {
+        const code = td.dataset.shiftCode;
+        const wrapper = td.querySelector(`.location-wrapper-${code}`);
+        if (!wrapper) return;
+
+        const dropdownId = wrapper.querySelector('[data-dropdown-id]')?.getAttribute('data-dropdown-id');
+        const location = td.getAttribute('data-location') || '';
+        
+        if (dropdownId) {
+            const isDisabled = td.querySelector('input')?.disabled || false;
+            initLocationDropdown(dropdownId, location, isDisabled);
         }
     });
 
@@ -979,11 +1041,18 @@ function applyTemplateToWeek () {
 
             const tplStart = document.getElementById(`tpl-${s.code}-start`).value;
             const tplEnd   = document.getElementById(`tpl-${s.code}-end`).value;
-            const tplPlace = document.getElementById(`tpl-${s.code}-place`).value;
+            // const tplPlace = document.getElementById(`tpl-${s.code}-place`).value;
+
+            // Lấy tất cả giá trị được chọn từ dropdown checkbox template
+            const tplDropdownWrapper = document.querySelector(`[data-dropdown-id="tpl-${s.code}-place"]`);
+            const tplSelectedValues = tplDropdownWrapper ? tplDropdownWrapper.getSelectedValues() : [];
 
             const startInp = row.querySelector(`.${s.code}-start`);
             const endInp   = row.querySelector(`.${s.code}-end`);
-            const plcSel   = row.querySelector(`.place-${s.code}`);
+            // const plcSel   = row.querySelector(`.place-${s.code}`);
+            
+            // Tìm dropdown trong row hiện tại và set giá trị
+            const rowDropdownWrapper = td.querySelector('[data-dropdown-id]');
 
             if (startInp._flatpickr) {
                 startInp._flatpickr.setDate(tplStart, true, 'H:i');
@@ -996,7 +1065,45 @@ function applyTemplateToWeek () {
             } else {
                 endInp.value = tplEnd;
             }
-            plcSel.value = tplPlace || defaultLocation;
+            
+            // plcSel.value = tplPlace || defaultLocation;
+
+            // Set giá trị cho dropdown trong row
+            if (rowDropdownWrapper) {
+                const checkboxes = rowDropdownWrapper.querySelectorAll('input[type="checkbox"]');
+                const selectedText = rowDropdownWrapper.querySelector('.selected-text');
+                
+                // Bỏ check tất cả
+                checkboxes.forEach(cb => cb.checked = false);
+                
+                // Check tất cả checkbox tương ứng với giá trị được chọn từ template
+                tplSelectedValues.forEach(val => {
+                    const targetCheckbox = Array.from(checkboxes).find(cb => cb.value === val);
+                    if (targetCheckbox) {
+                        targetCheckbox.checked = true;
+                    }
+                });
+                
+                // Cập nhật text hiển thị
+                if (selectedText) {
+                    if (tplSelectedValues.length === 0) {
+                        selectedText.textContent = 'Chọn địa điểm';
+                        selectedText.title = '';
+                    } else if (tplSelectedValues.length === 1) {
+                        const checkbox = Array.from(checkboxes).find(cb => cb.checked);
+                        const label = checkbox?.nextElementSibling?.textContent || tplSelectedValues[0];
+                        selectedText.textContent = label;
+                        selectedText.title = label;
+                    } else {
+                        const labels = tplSelectedValues.map(val => {
+                            const cb = Array.from(checkboxes).find(c => c.value === val);
+                            return cb?.nextElementSibling?.textContent || val;
+                        }).join(', ');
+                        selectedText.textContent = `${tplSelectedValues.length} địa điểm`;
+                        selectedText.title = labels;
+                    }
+                }
+            }
         });
     });
     // updateWeeklyHoursUI();
@@ -1414,7 +1521,15 @@ function buildPayload (weekObj, btnType = 'DRAFT') {
             const td = row.querySelector(`td.row-workshift.shift-${s.code}`) || row.querySelector(`td.row-workshift[data-shift-code="${s.code}"]`);
             const startInp = td?.querySelector(`.${s.code}-start`);
             const endInp   = td?.querySelector(`.${s.code}-end`);
-            const plcSel   = td?.querySelector(`.place-${s.code}`);
+            // const plcSel   = td?.querySelector(`.place-${s.code}`);
+            
+            // Lấy location từ dropdown checkbox (lưu tất cả giá trị, phân cách bằng "/")
+            let locationValue = defaultLocation;
+            const dropdownWrapper = td?.querySelector('[data-dropdown-id]');
+            if (dropdownWrapper && typeof dropdownWrapper.getSelectedValues === 'function') {
+                const selectedValues = dropdownWrapper.getSelectedValues();
+                locationValue = selectedValues.length > 0 ? selectedValues.join('/') : defaultLocation;
+            }
 
             // Ưu tiên: HOLIDAY > ON-LEAVE > TEACHING-SCHEDULE > OFF > null
             let offFlag = null;
@@ -1429,7 +1544,8 @@ function buildPayload (weekObj, btnType = 'DRAFT') {
                 start_time   : startInp?.value || (s.code === 'ca-sang' ? "07:00" : "13:00"),
                 end_time     : endInp  ?.value || (s.code === 'ca-sang' ? "11:00" : "17:00"),
                 is_day_off   : offFlag,
-                location: plcSel?.value || defaultLocation
+                // location: plcSel?.value || defaultLocation
+                location: locationValue
             });
         });
     });
@@ -1560,6 +1676,145 @@ function normalizeCampus(raw) {
 
 function makeLocationOptions() {
     return workLocations.map(l => `<option value="${l.value}">${l.label}</option>`).join('');
+}
+
+/* ---------- TẠO DROPDOWN CHECKBOX CHO ĐỊA ĐIỂM ---------- */
+function createLocationDropdownHTML(id) {
+    const items = workLocations.map(loc => `
+        <div class="location-dropdown-item" data-value="${loc.value}">
+            <input type="checkbox" id="${id}-${loc.value}" value="${loc.value}">
+            <label for="${id}-${loc.value}">${loc.label}</label>
+        </div>
+    `).join('');
+
+    return `
+        <div class="location-dropdown-wrapper" data-dropdown-id="${id}">
+            <button type="button" class="location-dropdown-toggle" aria-expanded="false" data-toggle-id="${id}">
+                <span class="selected-text">Chọn địa điểm</span>
+                <span class="caret">▼</span>
+            </button>
+            <div class="location-dropdown-menu hide">
+                ${items}
+            </div>
+        </div>
+    `;
+}
+
+/* ---------- KHỞI TẠO DROPDOWN CHECKBOX ---------- */
+function initLocationDropdown(wrapperId, defaultValue, isDisabled = false) {
+    const wrapper = document.querySelector(`[data-dropdown-id="${wrapperId}"]`);
+    if (!wrapper) return;
+
+    const toggle = wrapper.querySelector('.location-dropdown-toggle');
+    const menu = wrapper.querySelector('.location-dropdown-menu');
+    const selectedText = toggle.querySelector('.selected-text');
+    const checkboxes = menu.querySelectorAll('input[type="checkbox"]');
+
+    // Disable dropdown nếu cần
+    if (isDisabled) {
+        toggle.disabled = true;
+        toggle.style.opacity = '0.6';
+        toggle.style.cursor = 'not-allowed';
+        checkboxes.forEach(cb => cb.disabled = true);
+    }
+
+    // Hàm cập nhật text hiển thị (giới hạn độ dài để tránh thay đổi layout)
+    const updateSelectedText = () => {
+        const checked = Array.from(checkboxes).filter(cb => cb.checked);
+        if (checked.length === 0) {
+            selectedText.textContent = 'Chọn địa điểm';
+            selectedText.title = ''; // Xóa tooltip
+        } else if (checked.length === 1) {
+            const label = checked[0].nextElementSibling.textContent;
+            selectedText.textContent = label;
+            selectedText.title = label; // Tooltip khi hover để xem đầy đủ
+        } else {
+            const labels = checked.map(cb => cb.nextElementSibling.textContent).join(', ');
+            selectedText.textContent = `${checked.length} địa điểm`;
+            selectedText.title = labels; // Tooltip hiển thị tất cả
+        }
+    };
+
+    // Hàm lấy giá trị đã chọn
+    wrapper.getSelectedValues = () => {
+        return Array.from(checkboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
+    };
+
+    // Set giá trị mặc định (hỗ trợ dạng "A/B/C" và dạng cũ "A")
+    if (defaultValue) {
+        const values = String(defaultValue)
+            .split('/')
+            .map(v => v.trim())
+            .filter(Boolean);
+
+        if (values.length > 0) {
+            checkboxes.forEach(cb => {
+                cb.checked = values.includes(cb.value);
+            });
+            updateSelectedText();
+        }
+    }
+
+    // Toggle dropdown
+    toggle.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (isDisabled) return;
+        
+        const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
+        
+        // Đóng tất cả dropdown khác
+        document.querySelectorAll('.location-dropdown-toggle[aria-expanded="true"]').forEach(t => {
+            if (t !== toggle) {
+                t.setAttribute('aria-expanded', 'false');
+                const otherWrap = t.closest('.location-dropdown-wrapper');
+                if (otherWrap) otherWrap.classList.remove('is-open');
+                t.parentElement.querySelector('.location-dropdown-menu').classList.remove('show');
+                t.parentElement.querySelector('.location-dropdown-menu').classList.add('hide');
+            }
+        });
+
+        // Toggle dropdown hiện tại
+        toggle.setAttribute('aria-expanded', !isExpanded);
+        menu.classList.toggle('show');
+        menu.classList.toggle('hide');
+
+        wrapper.classList.toggle('is-open', menu.classList.contains('show'));
+    });
+
+    // Xử lý sự kiện checkbox
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', (e) => {
+            e.stopPropagation();
+            updateSelectedText();
+        });
+    });
+
+    // Xử lý click item (bao gồm label)
+    menu.querySelectorAll('.location-dropdown-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            if (e.target.tagName === 'INPUT') return; // Đã xử lý ở checkbox
+            e.stopPropagation();
+            if (e.target.tagName === 'LABEL') return; // Native <label for> tự toggle checkbox
+            const checkbox = item.querySelector('input[type="checkbox"]');
+            if (!checkbox.disabled) {
+                checkbox.checked = !checkbox.checked;
+                checkbox.dispatchEvent(new Event('change'));
+            }
+        });
+    });
+
+    // Đóng dropdown khi click ra ngoài
+    document.addEventListener('click', (e) => {
+        if (!wrapper.contains(e.target)) {
+            toggle.setAttribute('aria-expanded', 'false');
+            menu.classList.remove('show');
+            menu.classList.add('hide');
+            wrapper.classList.remove('is-open');
+        }
+    });
 }
 
 function timeToMin (t) {
