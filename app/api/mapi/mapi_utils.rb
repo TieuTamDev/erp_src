@@ -8697,7 +8697,7 @@ end
       #   return "Không thể tạo đề xuất cho tháng khác tháng hiện tại"
       # end
       # Chỉ kiểm tra nếu không phải work-trip shift-change
-      return true if %w[work-trip shift-change].include?(request_type)
+      return true if %w[work-trip shift-change compensatory-leave].include?(request_type)
       # 2. Tìm ca làm việc tại ngày đó
       # shift = find_shift(user_id, date, workshift_id, include_day_off: true)
       shift = find_shift(user_id, date, workshift_id)
@@ -9160,7 +9160,8 @@ end
         "ADDITIONAL-CHECK-IN" => "Chấm công vào làm bù",
         "ADDITIONAL-CHECK-OUT" => "Chấm công tan làm bù",
         "UPDATE-SHIFT" => "Cập nhật Ca",
-        "WORK-TRIP" => "Đi công tác"
+        "WORK-TRIP" => "Đi công tác",
+        "COMPENSATORY-LEAVE" => "Nghỉ bù"
       }
 
       notify = Notify.create(

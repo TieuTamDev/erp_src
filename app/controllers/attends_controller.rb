@@ -575,7 +575,7 @@ class AttendsController < ApplicationController
     
     # Code mới - @author: trong.lq @date: 22/10/2025
     # Thêm edit-plan vào danh sách không cần validation date/workshift
-    elsif request_type != "update-shift" && request_type != "edit-plan"
+    elsif request_type != "update-shift" && request_type != "edit-plan" && request_type != "compensatory-leave"
       date = Date.parse(params[:original_date]) rescue nil
       validation = validate_attend_request_conditions(user_id, date, workshift_id, request_type)
       return render json: { success: false, error: validation }, status: :ok unless validation == true
@@ -759,7 +759,7 @@ class AttendsController < ApplicationController
 
   # Method xử lý đăng ký nghỉ bù
   # @author: an.cdb
-  # @date: 09/03/2026
+  # @date: 11/03/2026
   # @input: user_id, data
   # @return: JSON response
   def handle_compensatory_leave(user_id, data)
@@ -779,12 +779,12 @@ class AttendsController < ApplicationController
       data_input: data}, 
       status: :ok unless leave_date
 
-    shift = shiftSelection.joins(:scheduleweek)
+    shift = Shiftselection.joins(:scheduleweek)
                       .where(scheduleweeks: { user_id: user_id })
-                      .where(work_date: attend_date)
+                      .where(work_date: attend_date.beginning_of_day..attend_date.end_of_day)
                       .first
 
-    unless shift && %w[OFF HOLIDAY].include?(shift.is_day_off)
+    unless shift && %w[OFF HOLIDAY ON-LEAVE].include?(shift.is_day_off)
       return render json: {
         success: false, 
         error: "Ngày #{attend_date.strftime("%d/%m/%Y")} không phải là ngày lễ hoặc ngày nghỉ theo kế hoạch làm việc trong tuần"}, 
@@ -1872,7 +1872,8 @@ class AttendsController < ApplicationController
     #   return "Chỉ được tạo đề xuất cho tháng hiện tại hoặc tháng kế tiếp"
     # end
     # Chỉ kiểm tra nếu không phải work-trip
-    return true if %w[work-trip shift-change].include?(request_type)
+    #  @author: an.cdb - @date: 11/03/2026 - bổ sung chỉ kiểm tra nếu không phải nghỉ bù
+    return true if %w[work-trip shift-change compensatory-leave].include?(request_type)
     # 2. Tìm ca làm việc tại ngày đó
     shift = find_shift(user_id, date, workshift_id, include_day_off: true)
     return "Không có ca làm việc tại ngày #{date.strftime('%d/%m/%Y')}" unless shift
