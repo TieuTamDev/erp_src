@@ -221,6 +221,8 @@ class AttendsController < ApplicationController
       'UPDATE-SHIFT'
     when 'edit-plan'
       'EDIT-PLAN'
+    when 'compensatory-leave' #THÊM mapping cho đề xuất nghỉ bù - @author:an.cdb @date: 09/03/2026
+      'COMPENSATORY-LEAVE'
     else
       nil
     end
@@ -469,7 +471,7 @@ class AttendsController < ApplicationController
     "ADDITIONAL-CHECK-OUT"    => "Chấm công tan làm bù",
     "ADDITIONAL-CHECK-IN-OUT" => "Chấm công bù vào/ra",
     "EDIT-PLAN"               => "Chỉnh sửa kế hoạch làm việc",
-    "COMPENSATORY-LEAVE"      => "Nghỉ bù"
+    "COMPENSATORY-LEAVE"      => "Nghỉ bù" #Thêm mapping cho đề xuất nghỉ bù - @author:an.cdb @date: 09/03/2026
   }.freeze
 
   # Tạo Shiftissue cho ca sáng hoặc ca chiều
@@ -758,7 +760,7 @@ class AttendsController < ApplicationController
 
     # Method xử lý đăng ký nghỉ bù
   # @author: an.cdb
-  # @date: 11/03/2026
+  # @date: 12/03/2026
   # @input: user_id, data
   # @return: JSON response
   def handle_compensatory_leave(user_id, data)
@@ -777,22 +779,7 @@ class AttendsController < ApplicationController
       error: "Ngày đăng ký nghỉ bù không hợp lệ", 
       data_input: data}, 
       status: :ok unless leave_date
-
-    shift = Shiftselection.joins(:scheduleweek)
-                      .where(scheduleweeks: { user_id: user_id })
-                      .where(work_date: attend_date.beginning_of_day..attend_date.end_of_day)
-                      .first
-
-    unless shift && %w[OFF HOLIDAY ON-LEAVE].include?(shift.is_day_off)
-      return render json: {
-        success: false, 
-        error: "Ngày #{attend_date.strftime("%d/%m/%Y")} không phải là ngày lễ hoặc ngày nghỉ theo kế hoạch làm việc trong tuần"}, 
-        status: :ok
-    end
-
-    # leave_shift_id = params[:leave_workshift_id]
-    # return render json: { success: false, error: "Vui lòng chọn ca nghỉ bù" }, status: :ok if leave_shift_id.blank?
-
+    
     if leave_date < attend_date
       return render json: { 
         success: false, 
@@ -803,17 +790,24 @@ class AttendsController < ApplicationController
     if leave_date > attend_date + 30.days
       return render json: {
         success:false, 
-        error: "Ngày đăng ký nghỉ bù không được vượt quá 30 ngày kể từ thời điểm có ca làm việc vượt giờ",
+        error: "Ngày đăng ký nghỉ bù không được vượt quá 30 ngày kể từ thời điểm làm việc trong ngày lễ hoặc ngày nghỉ",
         data_input: data}, 
         status: :ok
     end
 
-    # # Tìm shiftselection tương ứng
-    # shift = find_shift(user_id, attend_date, data[:workshift_id], include_day_off: true)
-    # return render json: { 
-    #   success: false, 
-    #   error: "Không tìm thấy ca làm việc vào ngày #{attend_date.strftime('%d/%m/%Y')}" }, 
-    #   status: :ok unless shift
+    shift = Shiftselection.joins(:scheduleweek)
+                      .where(scheduleweeks: { user_id: user_id })
+                      .where(work_date: attend_date.beginning_of_day..attend_date.end_of_day)
+                      .where(workshift_id: data[:workshift_id])
+                      .first
+
+    unless shift && %w[OFF HOLIDAY ON-LEAVE].include?(shift.is_day_off)
+      return render json: {
+        success: false, 
+        error: "Ngày #{attend_date.strftime("%d/%m/%Y")} không phải là ngày lễ hoặc ngày nghỉ theo kế hoạch làm việc trong tuần"}, 
+        status: :ok
+    end
+
 
     # Kiểm tra trùng đề xuất
     existing = Shiftissue.where(
@@ -829,7 +823,13 @@ class AttendsController < ApplicationController
         status: :ok
     end
 
-    leave_shift_name = Workshift.find_by(id: params[:leave_shift_id])&.name || "N/A"
+    l_target_shift_id = params[:leave_shift_id] || params[:leave_workshift_id] || data[:leave_shift_id]
+  
+    if l_target_shift_id == "-1"
+      leave_shift_name = "Cả ngày"
+    else
+      leave_shift_name = Workshift.find_by(id: target_shift_id)&.name || "N/A"
+    end
     status_text = case shift.is_day_off
                     when "OFF" then "Ngày nghỉ theo kế hoạch làm việc"
                     when "HOLIDAY" then "Ngày nghỉ lễ"
@@ -843,6 +843,8 @@ class AttendsController < ApplicationController
         stype: 'COMPENSATORY-LEAVE',
         status: 'PENDING',
         approved_by: data[:approver_id],
+        us_start: leave_date.strftime("%Y-%m-%d"), # Lưu ngày nghỉ bù
+        us_end: l_target_shift_id,                   # Lưu ca nghỉ bù
         note: data[:reason],
         docs: data[:file], # Đã được xử lý upload tự động từ hàm cha
         content: "Nghỉ bù cho ngày (#{status_text}) vào ngày #{attend_date.strftime("%d/%m/%Y")} - Ngày đăng ký nghỉ bù: #{leave_date.strftime("%d/%m/%Y")} - Ca nghỉ bù: #{leave_shift_name}"
@@ -1692,10 +1694,15 @@ class AttendsController < ApplicationController
           end
 
           next if i.stype == "WORK-TRIP"
+          next if i.stype == "COMPENSATORY-LEAVE"
+
+          event_start = sel.work_date.strftime('%Y-%m-%d')
+          event_end   = sel.work_date.strftime('%Y-%m-%d')
+
           events << {
             title: "📅 #{type_name}#{time_display}",
-            start: sel.work_date.strftime('%Y-%m-%d'),
-            end: sel.work_date.strftime('%Y-%m-%d'),
+            start: event_start,
+            end:   event_end,
             allDay: true,
             displayOrder: 3,
             classNames: [i.status == "APPROVED" ? "fc-shift-approved" : i.status === "REJECTED" ? "fc-shift-rejected" : "fc-shift-pending"],
@@ -1718,6 +1725,50 @@ class AttendsController < ApplicationController
           }
         end
       end
+    end
+
+    # Fetch COMPENSATORY-LEAVE issues separately
+    begin
+      comp_issues = Shiftissue.joins(shiftselection: :scheduleweek)
+                              .where(scheduleweeks: { user_id: user_id })
+                              .where(stype: 'COMPENSATORY-LEAVE')
+                              .where("shiftissues.us_start >= ? AND shiftissues.us_start <= ?", start_date, end_date)
+                              .includes(shiftselection: :workshift)
+
+      comp_issues.each do |i|
+        user = User.find_by(id: i.approved_by)
+        approved_by_name = user ? "#{user.last_name} #{user.first_name} (#{user.sid})" : ""
+        media_file = Mediafile.where(id: i.docs, status: "ACTIVE").pluck(:file_name).first
+        image_doc = media_file.present? ? "#{request.base_url}/mdata/hrm/#{media_file}" : nil
+        leave_shift_name = Workshift.find_by(id: i.us_end)&.name || "N/A"
+        current_shiftissue = i.shiftselection
+        workshift = current_shiftissue.workshift
+        current_workshift = "#{workshift.name} #{current_shiftissue.start_time} - #{current_shiftissue.end_time}"
+
+        events << {
+          title: "📅 Nghỉ bù: #{leave_shift_name}",
+          start: i.us_start,
+          end: i.us_start,
+          allDay: true,
+          displayOrder: 3,
+          classNames: [i.status == "APPROVED" ? "fc-shift-approved" : i.status === "REJECTED" ? "fc-shift-rejected" : "fc-shift-pending"],
+          extendedProps: {
+            type: "SHIFT_ISSUE",
+            shiftselection_id: i.shiftselection_id,
+            current_workshift: current_workshift,
+            stype: i.stype,
+            note: i.note,
+            content: i.content,
+            approved_by: approved_by_name,
+            status: i.status,
+            us_start: i.us_start,
+            us_end: i.us_end,
+            docs: image_doc
+          }
+        }
+      end
+    rescue => e
+      logger.error "Error processing compensatory leave issues: #{e.message}"
     end
 
     events.sort_by! { |e| e[:start].is_a?(String) ? Time.zone.parse(e[:start]) : e[:start] }

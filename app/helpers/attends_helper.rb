@@ -74,4 +74,36 @@ module AttendsHelper
     end
   end
 
+  # Xử lý Model Shiftissue sau khi được APPROVE
+  # @author: an.cdb
+  # @date: 12/03/2026
+  # @input: shiftissue, status
+  # @return: nil
+  def process_shiftissue_compensatory_leave(shiftissue, status)
+    return unless status == "APPROVED"
+
+    original_shift = Shiftselection.find_by(id: shiftissue.shiftselection_id)
+    return unless original_shift
+
+    leave_date = Date.parse(shiftissue.us_start.to_s) rescue nil
+    leave_shift_id = shiftissue.us_end.to_s
+    user_id = original_shift.scheduleweek.user_id
+
+    return unless leave_date.present?
+
+    l_target_shift = Shiftselection.joins(:scheduleweek)
+                                   .where(scheduleweeks: { user_id: user_id, status: 'APPROVED' })
+                                   .where(work_date: leave_date.all_day)
+
+    unless leave_shift_id == "-1"
+      l_target_shift = l_target_shift.where(workshift_id: leave_shift_id)
+    end
+    
+    if l_target_shift.exists?
+      l_target_shift.update_all(
+        is_day_off: "COMPENSATORY-LEAVE", 
+        day_off_reason: "Nghỉ bù cho ngày #{original_shift.work_date.strftime('%d/%m/%Y')}"
+      )
+    end
+  end
 end

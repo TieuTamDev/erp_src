@@ -14,6 +14,7 @@
   <%= javascript_include_tag '/assets/myjs/attend.js' %>
   <%= javascript_include_tag '/assets/myjs/attend_schedule.js' %>
 <% end %>
+
 <style>
     /* CSS cho time picker cập nhật ca */
     .time-picker-update-shift {
@@ -97,7 +98,9 @@
         td.row-workshift.off-holiday input[type="text"],
         td.row-workshift.off-holiday select.location,
         td.row-workshift.off-leave input[type="text"],
-        td.row-workshift.off-leave select.location {
+        td.row-workshift.off-leave select.location,
+        td.row-workshift.off-compensatory input[type="text"],
+        td.row-workshift.off-compensatory select.location {
             pointer-events: none;
             opacity: .55;
         }
@@ -112,6 +115,11 @@
         td.row-workshift.off-holiday select.location {
             border-color: #b91c1c !important;
             color: #b91c1c !important;
+        }
+        td.row-workshift.off-compensatory input[type="text"],
+        td.row-workshift.off-compensatory select.location {
+           border-color: #993799!important;
+          color: #993799 !important;
         }
 
         .nav-week-tab.active a.week {
@@ -808,11 +816,13 @@
               <span class="legend-item"><span class="legend-dot" style="background:#000000"></span>Nghỉ hàng tuần</span>
               <span class="legend-item"><span class="legend-dot" style="background:#dc3545"></span>Nghỉ lễ</span>
               <span class="legend-item"><span class="legend-dot" style="background:#94a3b8"></span>Nghỉ phép</span>
+              <span class="legend-item"><span class="legend-dot" style="background:#993799"></span>Nghỉ bù</span
               <span class="legend-item"><span class="legend-dot" style="background:#125de7"></span>Lịch giảng dạy</span>
               <span class="legend-item"><span class="legend-dot" style="background:#fd7e14"></span>Ca làm việc đã duyệt</span>
               <span class="legend-item"><span class="legend-dot" style="background:#28a745"></span>Đã chấm công</span>
               <span class="legend-item"><span class="legend-square" style="background:#f59e0b"></span>Chưa duyệt</span>
               <span class="legend-item"><span class="legend-square" style="background:rgb(16, 185, 129)"></span>Đã duyệt</span>
+
             </div>
           </div>
           <div class="d-flex justify-content-between card-header pt-0">
@@ -1106,7 +1116,7 @@
           <div id="section-compensatory-leave" class="mt-3 d-none">
             <div class="alert alert-info">
               <i class="fas fa-info-circle"></i> 
-              Vui lòng cung cấp minh chứng hình ảnh
+              Vui lòng cung cấp minh chứng hình ảnh 
             </div>
             
             <div class="row mt-3">
@@ -1116,20 +1126,15 @@
                   <input class="form-control date-choose" required id="leave-date" type="text" name="leave_date" />
                 </div>
                 <div class="col-6">
-                  <label class="fs-0 fw-bold" for="leave-workshift">Ca nghỉ bù<span class="text-danger">*</span>:</label>
-                  <select class="form-control" required id="leave-workshift" name="leave_workshift_id"></select>
+                  <label class="fs-0 fw-bold" for="comp-original-date">Ngày làm vượt giờ<span class="text-danger">*</span>:</label>
+                  <input class="form-control bg-light date-choose" required id="comp-original-date" type="text" name="original_date" readonly />
                 </div>
 
-              <div class="col-6">
-                <label class="fs-0 fw-bold" for="comp-original-date">Nghỉ bù cho ngày<span class="text-danger">*</span>:</label>
-                <input class="form-control bg-light date-choose" required id="comp-original-date" type="text" name="original_date" readonly />
-              </div>
-              <div class="col-6">
-                <label class="fs-0 fw-bold" for="comp-workshift">Nghỉ bù cho ca<span class="text-danger">*</span>:</label>
-                <select class="form-control" required id="comp-workshift" name="workshift_id"></select>
+              <div class="col-12">
+                <label class="fs-0 fw-bold" for="leave-workshift">Ca nghỉ bù<span class="text-danger">*</span>:</label>
+                <select class="form-control" required id="leave-workshift" name="leave_workshift_id"></select>
               </div>
             </div>
-
 
           </div>
 

@@ -34,6 +34,8 @@ function getShiftColor(shiftData) {
       return "#94a3b8"; // Xám – nghỉ phép cá nhân
     case "TEACHING-SCHEDULE":
       return "#125de7"; // Xanh dương – lịch giảng dạy
+    case "COMPENSATORY-LEAVE":
+      return "#993799"; // Hồng - nghỉ bù
     case "WORK-TRIP":
       return "#28a745"; // Xanh – đủ công
     default:
@@ -52,6 +54,8 @@ function getShiftStatusText(shift) {
       return "Nghỉ lễ";
     case "ON-LEAVE":
       return "Nghỉ phép";
+    case "COMPENSATORY-LEAVE":
+      return "Nghỉ bù";
     case "TEACHING-SCHEDULE":
       return "Lịch giảng dạy";
     case "WORK-TRIP":
@@ -332,7 +336,7 @@ function showShiftTooltip(dateStr, e, shiftType = null) {
       .map((shift) => {
         const statusText = getShiftStatusText(shift);
         const locationText = formatShiftLocation(shift.location);
-        const useStatusForTime = ["Nghỉ hàng tuần", "Nghỉ lễ", "Nghỉ phép", "Lịch giảng dạy"].includes(statusText);
+        const useStatusForTime = ["Nghỉ hàng tuần", "Nghỉ lễ", "Nghỉ phép", "Lịch giảng dạy", "Nghỉ bù"].includes(statusText);
         /*
         if (useStatusForTime) {
           return `
@@ -466,32 +470,20 @@ function loadWorkshifts() {
             select.empty();
 
             // Nếu là selectUpdate thì thêm option "Cả ngày" trước
-            if (select.attr("id") === "shiftSelectUpdate") {
-              const caSang = data.find((item) => item.min < "12:00");
-              const caChieu = data.find((item) => item.min >= "12:00");
+            if (select.attr("id") === "shiftSelectUpdate" || select.attr("id") === "leave-workshift") {
+              const morningShift = data.find((item) => item.min < "12:00");
+              const aftetnoonShift = data.find((item) => item.min >= "12:00");
 
               select.append(
                 $("<option>")
                   .val("-1")
                   .text("Cả ngày")
                   .attr("data-shift-type", "full")
-                  .attr("data-morning-id", caSang?.id || "")
-                  .attr("data-afternoon-id", caChieu?.id || "")
+                  .attr("data-morning-id", morningShift?.id || "")
+                  .attr("data-afternoon-id", aftetnoonShift?.id || "")
               );
             }
 
-            // data.forEach((item) => {
-            //   let shiftType = "";
-            //   if (item.min < "12:00") shiftType = "morning";
-            //   else shiftType = "afternoon";
-
-            //   const option = $("<option>")
-            //     .val(item.id)
-            //     .text(item.label)
-            //     .attr("data-shift-type", shiftType);
-
-            //   select.append(option);
-            // });
             data.forEach((item) => {
               const shiftType = item.min < "12:00" ? "morning" : "afternoon";
               const option = $("<option>")
@@ -503,7 +495,8 @@ function loadWorkshifts() {
                 .attr("data-code", item.code); // (nếu cần)
               select.append(option);
             });
-            // ✅ Gán mặc định nếu chưa chọn
+
+            // Gán mặc định nếu chưa chọn
             const defaultValue = select
               .find("option")
               .filter(function () {
@@ -1809,14 +1802,6 @@ document.addEventListener("DOMContentLoaded", function () {
         pushToast("Vui lòng chọn ngày làm vượt giờ.", false);
         return;
       }
-
-      // Kiểm tra ca làm vượt giờ
-      const compWorkshift = document.getElementById("comp-workshift");
-      if (!compWorkshift || !compWorkshift.value) {
-          pushToast("Vui lòng chọn ca làm vượt giờ.", false);
-          return;
-      }
-
       // Kiểm tra ngày bù
       const leaveDate = form.querySelector('input[name="leave_date"]');
       if (!leaveDate || leaveDate.value.trim() === "") {
@@ -2600,6 +2585,12 @@ function buildCheckpointEventsFromAttendance(calendar) {
             color = "#94a3b8";
             className = "fc-leave";
             textColor = "#1b53a7";
+            break;
+          case "COMPENSATORY-LEAVE":
+            title = "🛌 Nghỉ bù";
+            color = "#6f42c1";
+            className = "fc-leave";
+            textColor = "#abd319";
             break;
         }
 

@@ -107,6 +107,8 @@ class ShiftissuesController < ApplicationController
                   # @date: 23/10/2025
                   # Xử lý duyệt đề xuất chỉnh sửa kế hoạch làm việc
                   process_shiftissue_edit_plan(shiftissue, status)
+                when "COMPENSATORY-LEAVE"
+                  process_shiftissue_compensatory_leave(shiftissue, status)
                 end
               end
               
@@ -301,6 +303,37 @@ class ShiftissuesController < ApplicationController
         start_time: shiftissue.us_start,
         end_time: shiftissue.us_end,
       })
+    end
+  end
+
+  # xử lý duyệt nghỉ bù: cập nhật is_day_off = COMPENSATORY-LEAVE
+  def process_shiftissue_compensatory_leave(shiftissue, status)
+    return unless status == "APPROVED"
+
+    original_shift = Shiftselection.find_by(id: shiftissue.shiftselection_id)
+    return unless original_shift
+    original_shift.update(is_day_off: "COMPENSATORY-LEAVE")
+    
+    # Lấy thông tin ngày nghỉ bù và ca nghỉ bù đã lưu
+    leave_date = Date.parse(shiftissue.us_start)
+    leave_shift_id = shiftissue.us_end.to_s
+    
+    # Lấy user từ shift gốc (ngày lễ đi làm)
+    user_id = original_shift.scheduleweek.user_id
+
+    l_target_shift = Shiftselection.joins(:scheduleweek)
+                                   .where(scheduleweeks: {user_id: user_id, status: 'APPROVE'})
+                                   .where(work_date: leave_date.all_day)
+    
+    unless leave_shift_id == "-1"
+      l_target_shift = l_target_shift.where(workshift_id: leave_shift_id)
+    end
+
+    if l_target_shift.exists?
+      l_target_shift.update_all(
+        is_day_off: "COMPENSATORY-LEAVE",
+        day_off_reason: "Nghỉ bù cho ngày #{original_shift.work_date.strftime('%d/%m/%Y')}"
+      )
     end
   end
 

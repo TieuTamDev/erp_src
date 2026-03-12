@@ -5723,6 +5723,8 @@ end
           return { msg: "today_is_a_holiday", result: false }          if is_off == 'HOLIDAY'
           # Kiểm tra nghỉ phép
           return { msg: "user_is_off_today", result: false }           if is_off == 'ON-LEAVE'
+          # Kiểm tra nghỉ bù
+          return { msg: "user_is_off_today", result: false }           if is_off == 'COMPENSATORY-LEAVE'
 
 
           # Kiểm tra địa điểm làm việc
@@ -5847,6 +5849,7 @@ end
           return { msg: "user_has_no_workshift_today", result: false } if is_off == 'OFF'
           return { msg: "today_is_a_holiday",          result: false } if is_off == 'HOLIDAY'
           return { msg: "user_is_off_today",           result: false } if is_off == 'ON-LEAVE'
+          return { msg: "user_is_off_today",           result: false } if is_off == 'COMPENSATORY-LEAVE'
 
           # Kiểm tra địa điểm làm việc
           if scode_campus.present? && sel&.location.present? &&
@@ -8021,6 +8024,9 @@ end
                                               start_time: shiftissue.us_start,
                                               end_time: shiftissue.us_end,
                                             })
+                    when "COMPENSATORY-LEAVE"
+                      shiftselection = Shiftselection.find(shiftissue.shiftselection_id)
+                      shiftselection.update({is_day_off: "COMPENSATORY-LEAVE"})
                     else
 
                     end

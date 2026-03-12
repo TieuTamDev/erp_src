@@ -643,6 +643,7 @@ function buildWeekTable(id, monday, detail = [], status = 'TEMP', reason = '') {
             const tdClasses = ['row-workshift', `shift-${ws.code}`];
 
             const isHolidayCell = (d.is_day_off === 'HOLIDAY') || (!hasAnyDetailInDay && !!holidayName);
+            const isCompensatoryCell = (d.is_day_off === 'COMPENSATORY-LEAVE'); // @author: an.cdb --/03/2026
             const isLeaveCell   = (d.is_day_off === 'ON-LEAVE') ||
                 (leaveType === 'ALL') ||
                 (leaveType === 'AM' && isMorningShift(ws)) ||
@@ -651,6 +652,7 @@ function buildWeekTable(id, monday, detail = [], status = 'TEMP', reason = '') {
             const isOffCell     = (d.is_day_off === 'OFF' || d.is_day_off === true);
 
             if (isHolidayCell) tdClasses.push('off-holiday');
+            if (isCompensatoryCell) tdClasses.push('off-compensatory');
             if (isLeaveCell)   tdClasses.push('off-leave');
             if (isTeachCell)   { tdClasses.push('teaching-schedule'); tdClasses.push('off-teaching'); }
             if (isOffCell)     tdClasses.push('day-off');
@@ -663,7 +665,7 @@ function buildWeekTable(id, monday, detail = [], status = 'TEMP', reason = '') {
             const suppressByTeaching = (hasTeachAM && isMorningShift(ws)) || (hasTeachPM && isAfternoonShift(ws));
 
             const showToggle = !(suppressByLeave || suppressByTeaching);
-            const mustOff = isHolidayCell || isOffCell;
+            const mustOff = isHolidayCell || isOffCell || isCompensatoryCell;
             const toggleDisabled = isReadonly ? 'disabled' : '';
 
             const toggleCell = showToggle
