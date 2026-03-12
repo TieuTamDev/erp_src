@@ -1537,6 +1537,7 @@ function buildPayload (weekObj, btnType = 'DRAFT') {
             let offFlag = null;
             if (td?.classList.contains('off-holiday')) offFlag = 'HOLIDAY';
             else if (td?.classList.contains('off-leave')) offFlag = 'ON-LEAVE';
+            else if (td?.classList.contains('off-compensatory')) offFlag = 'COMPENSATORY-LEAVE';
             else if (td?.classList.contains('teaching-schedule')) offFlag = 'TEACHING-SCHEDULE';
             else if (td?.classList.contains('day-off')) offFlag = 'OFF';
 

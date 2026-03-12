@@ -245,6 +245,7 @@ function renderShiftIndicators() {
         showShiftTooltip(dateStr, e, "morning")
       );
       s.addEventListener("mouseleave", hideShiftTooltip);
+      s.addEventListener("click", () => openCompensatoryLeaveModal(morning));
       container.appendChild(s);
     }
 
@@ -252,13 +253,14 @@ function renderShiftIndicators() {
       const c = document.createElement("div");
       c.innerText = "C";
       c.className = "shift-circle afternoon";
-      c.style = `background:${afternoonColor}; width:16px; height:16px; border-radius:50%; font-size:10px; color:white; text-align:center;`;
+      c.style = `background:${afternoonColor}; width:16px; height:16px; border-radius:50%; font-size:10px; color:white; text-align:center; cursor: pointer;`;
       c.setAttribute("data-date", dateStr);
       c.setAttribute("data-shift", "afternoon");
       c.addEventListener("mouseenter", (e) =>
         showShiftTooltip(dateStr, e, "afternoon")
       );
       c.addEventListener("mouseleave", hideShiftTooltip);
+      c.addEventListener("click", () => openCompensatoryLeaveModal(afternoon));
       container.appendChild(c);
     }
 
