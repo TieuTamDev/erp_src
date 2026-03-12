@@ -309,32 +309,29 @@ class ShiftissuesController < ApplicationController
   # xử lý duyệt nghỉ bù: cập nhật is_day_off = COMPENSATORY-LEAVE
   def process_shiftissue_compensatory_leave(shiftissue, status)
     return unless status == "APPROVED"
-
-    original_shift = Shiftselection.find_by(id: shiftissue.shiftselection_id)
-    return unless original_shift
-    original_shift.update(is_day_off: "COMPENSATORY-LEAVE")
+    shiftselection = Shiftselection.find_by(id: shiftissue.shiftselection_id)
+    if shiftselection.present?
+      shiftselection.update(is_day_off: "COMPENSATORY-LEAVE")
     
     # Lấy thông tin ngày nghỉ bù và ca nghỉ bù đã lưu
-    leave_date = Date.parse(shiftissue.us_start)
+    leave_date_str = shiftissue.us_start
     leave_shift_id = shiftissue.us_end.to_s
     
     # Lấy user từ shift gốc (ngày lễ đi làm)
+    original_shift = Shiftselection.find_by(id: shiftissue.shiftselection_id)
+    return unless original_shift
     user_id = original_shift.scheduleweek.user_id
-
-    l_target_shift = Shiftselection.joins(:scheduleweek)
-                                   .where(scheduleweeks: {user_id: user_id, status: 'APPROVE'})
-                                   .where(work_date: leave_date.all_day)
     
-    unless leave_shift_id == "-1"
-      l_target_shift = l_target_shift.where(workshift_id: leave_shift_id)
-    end
+    if leave_date_str.present? && leave_shift_id.present?
+      target_shift = Shiftselection.joins(:scheduleweek)
+                                   .where(scheduleweeks: { user_id: user_id, status: 'APPROVED' })
+                                   .where(work_date: Date.parse(leave_date_str).beginning_of_day..Date.parse(leave_date_str).end_of_day)
 
-    if l_target_shift.exists?
-      l_target_shift.update_all(
-        is_day_off: "COMPENSATORY-LEAVE",
-        day_off_reason: "Nghỉ bù cho ngày #{original_shift.work_date.strftime('%d/%m/%Y')}"
-      )
-    end
+      target_shift.update_all(is_day_off: "COMPENSATORY-LEAVE", day_off_reason: "Nghỉ bù cho ngày #{original_shift.work_date.strftime('%d/%m/%Y')}")
+
+      if target_shift
+        target_shift.update(is_day_off: "COMPENSATORY-LEAVE", day_off_reason: "Nghỉ bù cho ngày #{original_shift.work_date.strftime('%d/%m/%Y')}")
+      end
   end
 
   # xử lý nhóm dữ liệu đổi ca theo ngày 

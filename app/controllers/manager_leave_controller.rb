@@ -1392,9 +1392,8 @@ class ManagerLeaveController < ApplicationController
         
         department_user = fetch_leaf_departments_by_user(user_id)
         department = department_user.first
-        department_user_name = department&.name
         department_user_id = department&.id
-
+        department_user_name = fetch_root_department_name(user_id)
         # Lấy đúng Work gắn với positionjob thuộc về department_user
         work = Work.includes(:positionjob)
                   .where(user_id: user_id)
@@ -1930,7 +1929,7 @@ class ManagerLeaveController < ApplicationController
           revert_leave(user_id, amount_to_consume.sum(:itotal), amount_to_consume.pluck(:details),holpros_id)
           content = "Đơn nghỉ của nhân sự: <b>#{full_name}</b> - Mã nhân sự: <b>#{sid}</b> đã bị hủy, Lý do: #{note}"
         end
-        create_noti(content,holpros_id,list_user_id,true)
+        create_noti(content,holpros_id,list_user_id,true, "main", "refuse")
         flash[:success] = "Đã hủy đơn của nhân sự!"
       end
       redirect_to :back
@@ -2182,7 +2181,7 @@ class ManagerLeaveController < ApplicationController
           )
 
           content = "Đơn nghỉ phép của nhân sự: <b>#{full_name}</b> - Mã nhân sự: <b>#{sid}</b> cần được xử lý"
-          create_noti(content, holpros_id, Array(user_handle))
+          create_noti(content, holpros_id, Array(user_handle), "main", "handle")
         end
 
         flash[:success] = "Đã chuyển đơn nghỉ phép thành công!"
@@ -2326,8 +2325,7 @@ class ManagerLeaveController < ApplicationController
             success = "Đã duyệt điều chỉnh thành công!"
             content = "Đơn điều chỉnh của nhân sự: <b>#{full_name}</b> - Mã nhân sự: <b>#{sid}</b> đã được duyệt"
             list_user_id = get_list_user(holpros_id)
-
-            create_noti(content, holpros_id, list_user_id, true)
+            create_noti(content, holpros_id, list_user_id, true, "main", "approve")
           else
             # === Trường hợp duyệt đơn nghỉ bình thường ===
             list_mand = Mandocdhandle.where(mandoc_id: madoc.id).pluck(:id)
@@ -2389,8 +2387,8 @@ class ManagerLeaveController < ApplicationController
 
             ids_support      = ids
             ids_non_support  = list_user_id - ids
-            create_noti(content,     holpros_id, ids_non_support, true)
-            create_noti(content_sub, holpros_id, ids_support,     true)
+            create_noti(content,     holpros_id, ids_non_support, true, "main", "approve")
+            create_noti(content_sub, holpros_id, ids_support,     true, "sub", "approve")
           end
           flash[:success] = success
         end
@@ -2584,24 +2582,84 @@ class ManagerLeaveController < ApplicationController
       return [] if list_Dhandle.empty?
       Mandocuhandle.where(mandocdhandle_id: list_Dhandle).pluck(:user_id).uniq
     end
-    def create_noti(content, holpros_id, list_user_id, is_finish = false)
+
+    def create_noti(content, holpros_id, list_user_id = [], is_finish = false, check = nil, action = nil)
       new_notify = Notify.create!(
         title: "Nghỉ phép",
         contents: content,
         receivers: "Hệ thống ERP",
         stype: "LEAVE_REQUEST"
       )
-      list_user_id.each do |uid|
+      list_user_id ||= []
+      if check == "main" && action == "approve"
+        used_id_main = Holpro.find_by(id: holpros_id)&.holiday&.used_id
+        if used_id_main.present?
+          list_user_sub = manager_leave_sub_users(used_id_main)
+          list_user_id += list_user_sub
+        end
+        list_user_id << session[:user_id]
+      end
+      list_user_ids = list_user_id.compact.uniq
+      users = User.where(id: list_user_ids).index_by(&:id)
+      list_user_ids.each do |uid|
         Snotice.create!(
           notify_id: new_notify.id,
           user_id: uid,
           isread: false,
-          status: is_finish ? "FINISH" : nil,
+          status: is_finish ? "FINISH" : nil
         )
-        if (user = User.find_by(id: uid))&.email.present?
+        user = users[uid]
+        if user&.email.present?
           UserMailer.send_mail_leave_request(user.email, content).deliver_later
         end
       end
+    end
+
+    def manager_leave_sub_users(user_id)
+      # 1. Lấy department lá của user
+      positionjob_ids = Work.where(user_id: user_id)
+                            .where.not(positionjob_id: nil)
+                            .pluck(:positionjob_id)
+
+      department_ids = Positionjob.where(id: positionjob_ids).pluck(:department_id)
+
+      departments = Department.where(id: department_ids, status: "0")
+                              .where.not(parents: [nil, ""])
+
+      leaf_departments =
+        if departments.present?
+          parent_ids = departments.pluck(:parents).compact.map(&:to_i)
+          departments.reject { |dept| parent_ids.include?(dept.id) }
+        else
+          Department.where(id: department_ids, status: "0").limit(1)
+        end
+
+      return [] if leaf_departments.blank?
+
+      # 2. Lấy department chain (từ leaf -> root)
+      department_chain_ids = []
+      current_id = leaf_departments.first.id
+
+      while current_id.present? && !department_chain_ids.include?(current_id)
+        department_chain_ids << current_id
+        current_id = Department.find_by(id: current_id)&.parents&.to_i
+      end
+
+      # 3. Lấy user thuộc các department đó
+      user_ids_from_department =
+        Work.joins(:positionjob)
+            .where(positionjobs: { department_id: department_chain_ids })
+            .pluck(:user_id)
+
+      # 4. Lấy user có quyền MANAGER-LEAVE-SUB
+      manager_user_ids =
+        Work.joins(stask: [accesses: :resource])
+            .where(resources: { scode: "MANAGER-LEAVE-SUB" })
+            .where(accesses: { permision: "READ" })
+            .pluck(:user_id)
+
+      # 5. Lấy giao nhau
+      (user_ids_from_department & manager_user_ids).uniq
     end
     def history
       current_year = Time.current.year
@@ -4367,6 +4425,32 @@ class ManagerLeaveController < ApplicationController
       else
         Department.where(id: department_ids, status: "0").limit(1)
       end
+    end
+    def fetch_root_department_name(user_id)
+      department_ids = Work.where(user_id: user_id)
+                          .where.not(positionjob_id: nil)
+                          .joins(:positionjob)
+                          .pluck("positionjobs.department_id")
+
+      departments = Department.where(id: department_ids, status: "0")
+
+      return nil if departments.blank?
+
+      # tìm leaf department
+      parent_ids = departments.pluck(:parents).compact.map(&:to_i)
+      department = departments.reject { |d| parent_ids.include?(d.id) }.first || departments.first
+
+      return nil unless department
+
+      # tìm root department (tránh nil loop)
+      visited = []
+
+      while department&.parents.present? && !visited.include?(department.id)
+        visited << department.id
+        department = Department.find_by(id: department.parents)
+      end
+
+      department&.name
     end
     # Hàm lấy tất cả các department con theo cây
     def fetch_all_related_department_ids(root_ids)

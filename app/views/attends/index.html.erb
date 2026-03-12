@@ -14,7 +14,6 @@
   <%= javascript_include_tag '/assets/myjs/attend.js' %>
   <%= javascript_include_tag '/assets/myjs/attend_schedule.js' %>
 <% end %>
-
 <style>
     /* CSS cho time picker cập nhật ca */
     .time-picker-update-shift {
@@ -46,8 +45,6 @@
     #workshiftModal {
         .modal-body {
             color: #000000;
-            overflow-x: auto;
-            overflow-y: auto;
         }
 
         .custom-modal-width {
@@ -527,8 +524,9 @@
       position: absolute;
       top: 100%;
       left: 0;
-      right: 0;
+      right: auto;
       max-height: 250px;
+      min-width: 180px;
       overflow-y: auto;
       background: #fff;
       border: 1px solid #ced4da;
@@ -594,23 +592,22 @@
     }
 
     td.row-workshift .location-dropdown-menu {
-      z-index: 3010 !important;
-      min-width: 180px;
-      left: 0 !important;
-      right: auto !important;
-      top: 100% !important;
-      bottom: auto !important;
-      margin-top: 4px;
-      margin-bottom: 0;
       position: absolute;
-      max-width: 260px;
+      top: 100%;
+      left: 0;
+      right: auto;
+      max-height: 250px;
+      overflow-y: auto;      
+      z-index: 3010;
+      min-width: 180px;
+      margin-top: 2px;
     }
 
     td.row-workshift.pending .location-dropdown-toggle,
     td.row-workshift.day-off .location-dropdown-toggle,
     td.row-workshift.off-holiday .location-dropdown-toggle,
     td.row-workshift.off-leave .location-dropdown-toggle {
-      pointer-events: none;
+      /* pointer-events: none; */
       opacity: 0.55;
     }
 
@@ -822,7 +819,6 @@
               <span class="legend-item"><span class="legend-dot" style="background:#28a745"></span>Đã chấm công</span>
               <span class="legend-item"><span class="legend-square" style="background:#f59e0b"></span>Chưa duyệt</span>
               <span class="legend-item"><span class="legend-square" style="background:rgb(16, 185, 129)"></span>Đã duyệt</span>
-
             </div>
           </div>
           <div class="d-flex justify-content-between card-header pt-0">
@@ -1131,10 +1127,11 @@
                 </div>
 
               <div class="col-12">
-                <label class="fs-0 fw-bold" for="leave-workshift">Ca nghỉ bù<span class="text-danger">*</span>:</label>
+                 <label class="fs-0 fw-bold" for="leave-workshift">Ca nghỉ bù<span class="text-danger">*</span>:</label>
                 <select class="form-control" required id="leave-workshift" name="leave_workshift_id"></select>
               </div>
             </div>
+
 
           </div>
 

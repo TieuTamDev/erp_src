@@ -64,6 +64,7 @@ class SettingHolidaysController < ApplicationController
         .select(
           'users.id AS user_id',
           'users.sid AS user_sid',
+          'users.staff_status AS staff_status',
           "CONCAT(users.last_name, ' ', users.first_name) AS user_fullname",
           'departments.name AS department_name',
           'positionjobs.name AS positionjob_name',
@@ -80,6 +81,7 @@ class SettingHolidaysController < ApplicationController
         .select(
           'users.id AS user_id',
           'users.sid AS user_sid',
+          'users.staff_status AS staff_status',
           "CONCAT(users.last_name, ' ', users.first_name) AS user_fullname",
           'departments.name AS department_name',
           'positionjobs.name AS positionjob_name',
@@ -230,6 +232,7 @@ class SettingHolidaysController < ApplicationController
           user_id: user['user_id'],
           user_sid: user['user_sid'],
           user_fullname: user['user_fullname'],
+          user_status: user['staff_status'],
           department_name: department_name,
           positionjob_name: user['positionjob_name'],
           hol_positionjob: hol_positionjob_value,

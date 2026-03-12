@@ -35,7 +35,7 @@ function getShiftColor(shiftData) {
     case "TEACHING-SCHEDULE":
       return "#125de7"; // Xanh dương – lịch giảng dạy
     case "COMPENSATORY-LEAVE":
-      return "#993799"; // Hồng - nghỉ bù
+      return "#6f42c1"; // Tím - nghỉ bù
     case "WORK-TRIP":
       return "#28a745"; // Xanh – đủ công
     default:
@@ -63,6 +63,21 @@ function getShiftStatusText(shift) {
     default:
       return null;
   }
+}
+
+// [MULTI-LOCATION] Normalize location text from API (single value/CSV/semicolon/pipe)
+// and show as a clean comma-separated list in tooltip.
+function formatShiftLocation(locationRaw) {
+  const raw = String(locationRaw || "").trim();
+  if (!raw) return "Không có thông tin";
+
+  const parts = raw
+    .split(/[;,|]/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  if (!parts.length) return "Không có thông tin";
+  return Array.from(new Set(parts)).join(", ");
 }
 
 //// Khởi tạo & cấu hình lịch
@@ -230,7 +245,6 @@ function renderShiftIndicators() {
         showShiftTooltip(dateStr, e, "morning")
       );
       s.addEventListener("mouseleave", hideShiftTooltip);
-      s.addEventListener("click", () => openCompensatoryLeaveModal(morning));
       container.appendChild(s);
     }
 
@@ -245,7 +259,6 @@ function renderShiftIndicators() {
         showShiftTooltip(dateStr, e, "afternoon")
       );
       c.addEventListener("mouseleave", hideShiftTooltip);
-      c.addEventListener("click", () => openCompensatoryLeaveModal(afternoon));
       container.appendChild(c);
     }
 
@@ -322,7 +335,9 @@ function showShiftTooltip(dateStr, e, shiftType = null) {
     filteredData
       .map((shift) => {
         const statusText = getShiftStatusText(shift);
-        const useStatusForTime = ["Nghỉ hàng tuần", "Nghỉ lễ", "Nghỉ phép", "Lịch giảng dạy", "Nghỉ bù"].includes(statusText);        
+        const locationText = formatShiftLocation(shift.location);
+        const useStatusForTime = ["Nghỉ hàng tuần", "Nghỉ lễ", "Nghỉ phép", "Lịch giảng dạy", "Nghỉ bù"].includes(statusText);
+        /*
         if (useStatusForTime) {
           return `
           <div class="mb-1">
@@ -339,6 +354,26 @@ function showShiftTooltip(dateStr, e, shiftType = null) {
             🕒 ${shift.work_time}<br>
             ✅ Vào: ${checkin} | Ra: ${checkout}<br>
             📍 ${shift.location || "Không có thông tin"}
+          </div>
+        `;
+        }
+        */
+        if (useStatusForTime) {
+          return `
+          <div class="mb-1">
+            <strong>${shift.shift_name}${statusText ? ` (${statusText})` : ""}</strong><br>
+            📍 ${locationText}
+          </div>
+        `;
+        } else {
+          const checkin = shift.checkin || "---";
+          const checkout = shift.checkout || "---";
+          return `
+          <div class="mb-1">
+            <strong>${shift.shift_name}${statusText ? ` (${statusText})` : ""}</strong><br>
+            🕒 ${shift.work_time}<br>
+            ✅ Vào: ${checkin} | Ra: ${checkout}<br>
+            📍 ${locationText}
           </div>
         `;
         }
@@ -435,6 +470,7 @@ function loadWorkshifts() {
             select.empty();
 
             // Nếu là selectUpdate thì thêm option "Cả ngày" trước
+            if (select.attr("id") === "shiftSelectUpdate") {
             if (select.attr("id") === "shiftSelectUpdate" || select.attr("id") === "leave-workshift") {
               const morningShift = data.find((item) => item.min < "12:00");
               const aftetnoonShift = data.find((item) => item.min >= "12:00");
@@ -449,6 +485,18 @@ function loadWorkshifts() {
               );
             }
 
+            // data.forEach((item) => {
+            //   let shiftType = "";
+            //   if (item.min < "12:00") shiftType = "morning";
+            //   else shiftType = "afternoon";
+
+            //   const option = $("<option>")
+            //     .val(item.id)
+            //     .text(item.label)
+            //     .attr("data-shift-type", shiftType);
+
+            //   select.append(option);
+            // });
             data.forEach((item) => {
               const shiftType = item.min < "12:00" ? "morning" : "afternoon";
               const option = $("<option>")
@@ -460,8 +508,7 @@ function loadWorkshifts() {
                 .attr("data-code", item.code); // (nếu cần)
               select.append(option);
             });
-
-            // Gán mặc định nếu chưa chọn
+            // ✅ Gán mặc định nếu chưa chọn
             const defaultValue = select
               .find("option")
               .filter(function () {
@@ -1767,6 +1814,19 @@ document.addEventListener("DOMContentLoaded", function () {
         pushToast("Vui lòng chọn ngày làm vượt giờ.", false);
         return;
       }
+
+      // Kiểm tra ca làm vượt giờ
+      const compWorkshift = document.getElementById("comp-workshift");
+      if (!compWorkshift || !compWorkshift.value) {
+          pushToast("Vui lòng chọn ca làm vượt giờ.", false);
+          return;
+      }
+      // const compWorkshift = document.getElementById("comp-workshift");
+      // if (!compWorkshift || !compWorkshift.value) {
+      //     pushToast("Vui lòng chọn ca làm vượt giờ.", false);
+      //     return;
+      // }
+
       // Kiểm tra ngày bù
       const leaveDate = form.querySelector('input[name="leave_date"]');
       if (!leaveDate || leaveDate.value.trim() === "") {

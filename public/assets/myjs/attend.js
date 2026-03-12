@@ -1100,7 +1100,7 @@ function applyTemplateToWeek () {
                         const labels = tplSelectedValues.map(val => {
                             const cb = Array.from(checkboxes).find(c => c.value === val);
                             return cb?.nextElementSibling?.textContent || val;
-                        }).join(', ');
+                        }).join('/ ');
                         selectedText.textContent = `${tplSelectedValues.length} địa điểm`;
                         selectedText.title = labels;
                     }
@@ -1530,7 +1530,7 @@ function buildPayload (weekObj, btnType = 'DRAFT') {
             const dropdownWrapper = td?.querySelector('[data-dropdown-id]');
             if (dropdownWrapper && typeof dropdownWrapper.getSelectedValues === 'function') {
                 const selectedValues = dropdownWrapper.getSelectedValues();
-                locationValue = selectedValues.length > 0 ? selectedValues.join('/') : defaultLocation;
+                locationValue = selectedValues.length > 0 ? selectedValues.join('$$$') : defaultLocation;
             }
 
             // Ưu tiên: HOLIDAY > ON-LEAVE > TEACHING-SCHEDULE > OFF > null
@@ -1677,9 +1677,9 @@ function normalizeCampus(raw) {
     return out;
 }
 
-function makeLocationOptions() {
-    return workLocations.map(l => `<option value="${l.value}">${l.label}</option>`).join('');
-}
+// function makeLocationOptions() {
+//     return workLocations.map(l => `<option value="${l.value}">${l.label}</option>`).join('');
+// }
 
 /* ---------- TẠO DROPDOWN CHECKBOX CHO ĐỊA ĐIỂM ---------- */
 function createLocationDropdownHTML(id) {
@@ -1732,7 +1732,7 @@ function initLocationDropdown(wrapperId, defaultValue, isDisabled = false) {
             selectedText.textContent = label;
             selectedText.title = label; // Tooltip khi hover để xem đầy đủ
         } else {
-            const labels = checked.map(cb => cb.nextElementSibling.textContent).join(', ');
+            const labels = checked.map(cb => cb.nextElementSibling.textContent).join('/ ');
             selectedText.textContent = `${checked.length} địa điểm`;
             selectedText.title = labels; // Tooltip hiển thị tất cả
         }
@@ -1745,10 +1745,10 @@ function initLocationDropdown(wrapperId, defaultValue, isDisabled = false) {
             .map(cb => cb.value);
     };
 
-    // Set giá trị mặc định (hỗ trợ dạng "A/B/C" và dạng cũ "A")
+    // Set giá trị mặc định (hỗ trợ dạng "A$$$B$$$C" và dạng cũ "A")
     if (defaultValue) {
         const values = String(defaultValue)
-            .split('/')
+            .split('$$$')
             .map(v => v.trim())
             .filter(Boolean);
 

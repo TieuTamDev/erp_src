@@ -371,7 +371,8 @@ class AttendsController < ApplicationController
         shift_plan[ws_id] = {
           shiftselection_id: sel.id,
           is_day_off: is_day_off,
-          location: campus_map[sel.location],
+          # location: campus_map[sel.location],
+          location: sel.location.to_s.split('$$$').map { |code| campus_map[code.strip] }.compact.join('/ ') || nil,
           start_time: sel.start_time,
           end_time:   sel.end_time
         }
@@ -779,7 +780,6 @@ class AttendsController < ApplicationController
       error: "Ngày đăng ký nghỉ bù không hợp lệ", 
       data_input: data}, 
       status: :ok unless leave_date
-    
     if leave_date < attend_date
       return render json: { 
         success: false, 
@@ -823,9 +823,9 @@ class AttendsController < ApplicationController
         status: :ok
     end
 
-    l_target_shift_id = params[:leave_shift_id] || params[:leave_workshift_id] || data[:leave_shift_id]
-  
-    if l_target_shift_id == "-1"
+    target_shift_id = params[:leave_shift_id] || params[:leave_workshift_id] || data[:leave_shift_id]
+    
+    if l_target_shift_id.to_s == "-1"
       leave_shift_name = "Cả ngày"
     else
       leave_shift_name = Workshift.find_by(id: target_shift_id)&.name || "N/A"
@@ -1613,8 +1613,8 @@ class AttendsController < ApplicationController
             registered_shift_end_time: sel.end_time || "00:00",
             checkin: checkin,
             checkout: checkout,
-            # Update 10/03/2026: Xử lý split location "/" theo campus_map
-            location: sel.location.split('/').map { |code| campus_map[code.strip] }.compact.join(', ') || '',
+            # Update 10/03/2026: Xử lý split location "$$$" theo campus_map
+            location: sel.location.split('$$$').map { |code| campus_map[code.strip] }.compact.join('/ ') || '',
             # location:campus_map[sel.location] || '',
             approved_by: week.checked_by,
             reason: sel.day_off_reason,
@@ -1725,50 +1725,6 @@ class AttendsController < ApplicationController
           }
         end
       end
-    end
-
-    # Fetch COMPENSATORY-LEAVE issues separately
-    begin
-      comp_issues = Shiftissue.joins(shiftselection: :scheduleweek)
-                              .where(scheduleweeks: { user_id: user_id })
-                              .where(stype: 'COMPENSATORY-LEAVE')
-                              .where("shiftissues.us_start >= ? AND shiftissues.us_start <= ?", start_date, end_date)
-                              .includes(shiftselection: :workshift)
-
-      comp_issues.each do |i|
-        user = User.find_by(id: i.approved_by)
-        approved_by_name = user ? "#{user.last_name} #{user.first_name} (#{user.sid})" : ""
-        media_file = Mediafile.where(id: i.docs, status: "ACTIVE").pluck(:file_name).first
-        image_doc = media_file.present? ? "#{request.base_url}/mdata/hrm/#{media_file}" : nil
-        leave_shift_name = Workshift.find_by(id: i.us_end)&.name || "N/A"
-        current_shiftissue = i.shiftselection
-        workshift = current_shiftissue.workshift
-        current_workshift = "#{workshift.name} #{current_shiftissue.start_time} - #{current_shiftissue.end_time}"
-
-        events << {
-          title: "📅 Nghỉ bù: #{leave_shift_name}",
-          start: i.us_start,
-          end: i.us_start,
-          allDay: true,
-          displayOrder: 3,
-          classNames: [i.status == "APPROVED" ? "fc-shift-approved" : i.status === "REJECTED" ? "fc-shift-rejected" : "fc-shift-pending"],
-          extendedProps: {
-            type: "SHIFT_ISSUE",
-            shiftselection_id: i.shiftselection_id,
-            current_workshift: current_workshift,
-            stype: i.stype,
-            note: i.note,
-            content: i.content,
-            approved_by: approved_by_name,
-            status: i.status,
-            us_start: i.us_start,
-            us_end: i.us_end,
-            docs: image_doc
-          }
-        }
-      end
-    rescue => e
-      logger.error "Error processing compensatory leave issues: #{e.message}"
     end
 
     events.sort_by! { |e| e[:start].is_a?(String) ? Time.zone.parse(e[:start]) : e[:start] }

@@ -246,7 +246,7 @@ class LeaveRequestController < ApplicationController
         total_leave_revert = detail_leave ? detail_leave.sum { |item| item["itotal"].to_f } : 0
 
         # refund days leave
-        revert_leave(session[:user_id], total_leave_revert, detail_leave.pluck(:details))
+        revert_leave(session[:user_id], total_leave_revert, detail_leave.pluck(:details), holpros_id)
 
         # Update chấm công
         update_scheduleweek(session[:user_id], amount_to_consume.pluck(:details).uniq.join("$$$"), "CANCELED")
@@ -1170,7 +1170,7 @@ class LeaveRequestController < ApplicationController
       end
     end
 
-    def revert_leave(user_id, amount_to_remove, details)
+    def revert_leave(user_id, amount_to_remove, details,holpros_id)
       holiday = Holiday.find_by(user_id: user_id, year: Date.current.year)
       return false unless holiday
 
@@ -1184,58 +1184,152 @@ class LeaveRequestController < ApplicationController
       remain     = holdetails["Phép tồn"]
       seniority  = holdetails["Phép thâm niên"]
       position   = holdetails["Phép theo vị trí"]
-      summer   = holdetails["Phép theo vị trís"]
 
       used_remain    = remain&.used.to_f || 0
+      used_remain_current    = remain&.note.to_f || 0
       used_seniority = seniority&.used.to_f || 0
       used_position  = position&.used.to_f || 0
-      used_summer  = summer&.used.to_f || 0
-      remaining = amount_to_remove.to_f
-      if remaining.present?
-        total_used = holiday.used.to_f
-        total_revert = total_used - remaining
-        holiday.update(used: total_revert)
-      end
-      ActiveRecord::Base.transaction do
-        # 1. Giảm từ Phép theo vị trí (dù used > amount cũng ok)
-        if position && used_position > 0
-          to_restore = [remaining, used_position].min
-          position.used = used_position - to_restore
-          position.save!
-          remaining -= to_restore
-        end
+      amount_remain  = remain&.amount.to_f || 0
 
-        # 2. Giảm từ Phép thâm niên
-        if seniority && remaining > 0 && used_seniority > 0
-          to_restore = [remaining, used_seniority].min
-          seniority.used = used_seniority - to_restore
-          seniority.save!
-          remaining -= to_restore
+      ton_deadline      = remain&.dtdeadline&.strftime("%d/%m/%Y")
+      ton_deadline_date = Date.strptime(ton_deadline, "%d/%m/%Y") rescue nil
+      # --- Tách ngày trước & sau deadline ---
+      deadline_date = remain&.dtdeadline&.to_date
+
+      dates_before, dates_after = [], []
+      holpros_da_duyet   = Holpro.where(holiday_id: holiday.id, status: ["DONE", "CANCEL-DONE"]).where.not(id: holpros_id)
+      holpros_ids        = holpros_da_duyet.pluck(:id)
+      extra_holpros_ids = Holpro.joins(:holprosdetails)
+                            .where(holiday_id: holiday.id)
+                            .where(holprosdetails: { sholtype: ["NGHI-PHEP", "NGHI-CHE-DO"], status: "DONE" })
+                            .where.not(id: holpros_ids)
+                            .distinct
+                            .pluck(:id)
+      all_holpros_ids = holpros_ids + extra_holpros_ids
+      holpros_details    = Holprosdetail.where(holpros_id: all_holpros_ids, sholtype: ["NGHI-PHEP", "NGHI-CHE-DO"])
+
+
+      all_leave_dates = holpros_details.map(&:details).compact.flat_map { |d| d.split('$$$') }.map do |item|
+        date_part, session = item.split('-').map(&:strip)
+        date = Date.strptime(date_part, '%d/%m/%Y') rescue nil
+        next nil unless date
+        weight = case session&.upcase
+                when 'ALL', nil then 1.0
+                when 'AM', 'PM'  then 0.5
+                else 0
+                end
+        [date, weight]
+      end.compact
+
+      leave_dates_before_deadline = all_leave_dates.select { |date, _| date <= ton_deadline_date }
+      phep_ton_da_dung_thuc_te    = leave_dates_before_deadline.sum { |_, weight| weight }
+      details.each do |detail_str|
+        detail_str.split("$$$").each do |entry|
+          date_str, part = entry.split("-")
+          begin
+            date = Date.strptime(date_str.strip, "%d/%m/%Y")
+            duration = case part&.strip
+                      when "ALL" then 1.0
+                      when "AM", "PM" then 0.5
+                      else 0.0
+                      end
+            if deadline_date && date <= deadline_date
+              dates_before << duration
+            else
+              dates_after << duration
+            end
+          rescue ArgumentError
+            next
+          end
         end
-        # 3. Giả từ phép hè (nếu là BMU hoặc BMTU)
-        uorg = Uorg.joins(:organization).where(user_id: user_id).first
-        if !uorg.nil?
-          if uorg.organization.scode == "BMU" || uorg.organization.scode == "BMTU"
-             if summer
-              to_restore = [remaining, used_summer].min
-              summer.used = used_summer - to_restore
-              summer.save!
-              remaining -= to_restore
+      end
+
+      total_before = dates_before.sum
+      total_after  = dates_after.sum
+      skip_restore_remain = used_remain_current == amount_remain || (used_remain_current + phep_ton_da_dung_thuc_te) >= amount_remain
+
+      ActiveRecord::Base.transaction do
+        remaining_before = total_before
+        remaining_after  = total_after
+
+        # =====================================================
+        # 1. Trả lại phần <= deadline
+        # =====================================================
+        if remaining_before > 0
+          restore_from_seniority_first =
+            (seniority&.used.to_f > 0) || (position&.used.to_f > 0)
+
+          if restore_from_seniority_first
+            # --- THÂM NIÊN ---
+            if seniority && seniority.used.to_f > 0 && remaining_before > 0
+              to_restore = [remaining_before, seniority.used.to_f].min
+              seniority.update!(used: seniority.used.to_f - to_restore)
+              remaining_before -= to_restore
+            end
+
+            # --- VỊ TRÍ ---
+            if position && position.used.to_f > 0 && remaining_before > 0
+              to_restore = [remaining_before, position.used.to_f].min
+              position.update!(used: position.used.to_f - to_restore)
+              remaining_before -= to_restore
+            end
+
+            # --- PHÉP TỒN ---
+            if remain && remain.used.to_f > 0 && remaining_before > 0 && !skip_restore_remain
+              to_restore = [remaining_before, remain.used.to_f].min
+              remain.update!(used: remain.used.to_f - to_restore)
+              remaining_before -= to_restore
+            end
+
+          else
+            # Logic cũ: TỒN → THÂM NIÊN → VỊ TRÍ
+
+            if remain && remain.used.to_f > 0 && remaining_before > 0 && !skip_restore_remain
+              to_restore = [remaining_before, remain.used.to_f].min
+              remain.update!(used: remain.used.to_f - to_restore)
+              remaining_before -= to_restore
+            end
+
+            if seniority && seniority.used.to_f > 0 && remaining_before > 0
+              to_restore = [remaining_before, seniority.used.to_f].min
+              seniority.update!(used: seniority.used.to_f - to_restore)
+              remaining_before -= to_restore
+            end
+
+            if position && position.used.to_f > 0 && remaining_before > 0
+              to_restore = [remaining_before, position.used.to_f].min
+              position.update!(used: position.used.to_f - to_restore)
+              remaining_before -= to_restore
             end
           end
         end
-        # 4. Giảm từ Phép tồn (chỉ nếu còn hạn)
-        valid_ton_days = valid_remain_days(details, remain&.dtdeadline)
 
-        
-        holiday.save!
-        if remain && remaining > 0 && used_remain > 0 && valid_ton_days > 0
-          to_restore = [remaining, used_remain, valid_ton_days].min
-          remain.used = used_remain - to_restore
-          remain.save!
-          remaining -= to_restore
+        # =====================================================
+        # 2. Trả lại phần > deadline
+        # =====================================================
+
+        # THÂM NIÊN
+        if seniority && seniority.used.to_f > 0 && remaining_after > 0
+          to_restore = [remaining_after, seniority.used.to_f].min
+          seniority.update!(used: seniority.used.to_f - to_restore)
+          remaining_after -= to_restore
+        end
+
+        # VỊ TRÍ
+        if position && position.used.to_f > 0 && remaining_after > 0
+          to_restore = [remaining_after, position.used.to_f].min
+          position.update!(used: position.used.to_f - to_restore)
+          remaining_after -= to_restore
+        end
+
+        # PHÉP TỒN
+        if remain && remain.used.to_f > 0 && remaining_after > 0
+          to_restore = [remaining_after, remain.used.to_f].min
+          remain.update!(used: remain.used.to_f - to_restore)
+          remaining_after -= to_restore
         end
       end
+
     end
 
     def delete_detail

@@ -108,6 +108,7 @@
                       <th class="sort" style="width:4%; text-align: center;"><%= lib_translate("Oder") %></th>
                       <th class="sort"><%= sort_link('user_sid', lib_translate("Mã nhân sự")) %></th>
                       <th class="sort"><%= sort_link('user_fullname', lib_translate("Họ và tên")) %></th>
+                      <th class="sort"><%= sort_link('user_status', lib_translate("Trạng thái")) %></th>
                       <th class="sort"><%= sort_link('department_name', lib_translate("Phòng ban")) %></th>
                       <th class="sort"><%= sort_link('positionjob_name', lib_translate("Vị trí công việc")) %></th>
                       <th class="sort text-center" style="width: 6%;"><%= sort_link('hol_positionjob', lib_translate("Phép năm")) %></th>
@@ -125,6 +126,7 @@
                         <td style="text-align: center;"><%= (@page - 1) * @per_page + index + 1 %></td>
                         <td><%= data[:user_sid] %></td>
                         <td><%= data[:user_fullname] %></td>
+                        <td><%= data[:user_status] %></td>
                         <td><%= data[:department_name] %></td>
                         <td><%= data[:positionjob_name] %></td>
                         <td style="text-align: center; font-size: 14px;">
@@ -314,6 +316,7 @@
                       <th class="sort" style="width:4%; text-align: center;"><%= lib_translate("Oder") %></th>
                       <th class="sort"><%= sort_link('user_sid', lib_translate("Mã nhân sự")) %></th>
                       <th class="sort"><%= sort_link('user_fullname', lib_translate("Họ và tên")) %></th>
+                      <th class="sort"><%= sort_link('user_status', lib_translate("Trạng thái")) %></th>
                       <th class="sort"><%= sort_link('department_name', lib_translate("Phòng ban")) %></th>
                       <th class="sort"><%= sort_link('positionjob_name', lib_translate("Vị trí công việc")) %></th>
                       <th class="sort text-center" style="width: 7%;"><%= sort_link('hol_positionjob', lib_translate("Phép VTCV")) %></th>
@@ -332,6 +335,7 @@
                         <td style="text-align: center;"><%= (@page - 1) * @per_page + index + 1 %></td>
                         <td><%= data[:user_sid] %></td>
                         <td><%= data[:user_fullname] %></td>
+                        <td><%= data[:user_status] %></td>
                         <td><%= data[:department_name] %></td>
                         <td><%= data[:positionjob_name] %></td>
                         <td style="text-align: center; font-size: 14px;">
