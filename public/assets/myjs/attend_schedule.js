@@ -35,9 +35,11 @@ function getShiftColor(shiftData) {
     case "TEACHING-SCHEDULE":
       return "#125de7"; // Xanh dương – lịch giảng dạy
     case "COMPENSATORY-LEAVE":
-      return "#993799"; // Hồng - nghỉ bù
+      return "#807579"; // Xám - nghỉ bù
     case "WORK-TRIP":
       return "#28a745"; // Xanh – đủ công
+    case "OVERTIME":
+      return "#17a2b8"; // Xanh dương nhạt – tăng ca
     default:
       if (shiftData.checkin?.trim() && shiftData.checkout?.trim()) {
         return "#28a745"; // Xanh – đủ công
@@ -60,6 +62,8 @@ function getShiftStatusText(shift) {
       return "Lịch giảng dạy";
     case "WORK-TRIP":
       return "Đi công tác";
+    case "OVERTIME":
+      return "Tăng ca";
     default:
       return null;
   }
@@ -113,8 +117,18 @@ function initCalendarSchedule() {
                   } else {
                     attendanceForCalendar[dateKey] = ev.work_date;
                   }
-                  attendanceMap[dateKey][shiftType] = ev.extendedProps;
+                  //attendanceMap[dateKey][shiftType] = ev.extendedProps;
+                  // @author.an.cdb - thêm ghi đè trạng thái  nếu hiện tại chưa có dữ liệu HOẶC bản ghi mới có trạng thái nghỉ cụ thể
+                  const currentEntry = attendanceMap[dateKey][shiftType];
+                  const newStatus = ev.extendedProps.is_day_off;
+
+                  if (!currentEntry || (newStatus && newStatus !== "")) {
+                    if (ev.status === "APPROVED") {
+                      attendanceMap[dateKey][shiftType] = ev.extendedProps;
+                    }
+                  }
                 }
+
 
                 // Dữ liệu hỗ trợ khác
                 if (!shiftMap[dateKey]) shiftMap[dateKey] = [];
@@ -887,6 +901,92 @@ function initFlatpickrWithAvailableDates(attendanceForCalendar, availableDates) 
       });
     },
   });
+
+  // Cấu hình cho chọn nhiều ngày tăng ca
+  flatpickr("#overtime_range", {
+    mode: "multiple",
+    dateFormat: "Y-m-d",
+    altInput: true,
+    locale: "vn",
+    altFormat: "l - d/m/Y",
+    allowInput: false,
+    enable: enabledDates, // các ngày được phép chọn
+    onReady: function (selectedDates, instance) {
+      if (instance.altInput) {
+        instance.altInput.placeholder = "Chọn ngày tăng ca…";
+      }
+      if (selectedDates.length === 1) {
+        tempRange = [selectedDates[0]];
+      }
+    },
+    onChange: function (selectedDates, dateStr, instance) {
+      if (suppressOnChange) return;
+
+      const isRangeMode = document.getElementById("range_mode_toggle").checked;
+      const sorted = [...selectedDates].sort((a, b) => a - b);
+
+      if (isRangeMode) {
+        if (selectedDates.length === 1) {
+          // Chọn ngày đầu tiên
+          tempRange = [sorted[0]];
+          // isInRangeState = false;
+          updateOvertimeFields(sorted[0], null, [sorted[0]]);
+          return;
+        }
+
+        if (selectedDates.length === 2) {
+          const [start, end] = sorted;
+          const expectedLength =
+            Math.abs((end - start) / (1000 * 60 * 60 * 24)) + 1;
+
+          // Nếu chưa tạo range hoặc bị phá vỡ (bỏ mất ngày ở giữa)
+          if (!isInRangeState) {
+            const rangeDates = [];
+            let current = new Date(start);
+            while (current <= end) {
+              rangeDates.push(new Date(current));
+              current.setDate(current.getDate() + 1);
+            }
+
+            suppressOnChange = true;
+            instance.setDate(rangeDates, false); // không trigger lại
+            suppressOnChange = false;
+
+            tempRange = rangeDates;
+            isInRangeState = true; // ✅ Đánh dấu đang trong range
+            updateOvertimeFields(start, end, rangeDates);
+            return;
+          } else {
+            // ✅ Đã là range, người dùng bỏ 1 ngày giữa → chuyển sang multiple
+            tempRange = selectedDates;
+            isInRangeState = false;
+            updateOvertimeFields(start, end, selectedDates);
+            return;
+          }
+        }
+
+        if (selectedDates.length > 2)  {
+          tempRange = selectedDates;
+          isInRangeState = false;
+          const first = sorted[0];
+          const last = sorted[sorted.length - 1];
+          updateOvertimeFields(first, last, sorted);
+        }
+      } else {
+        // ⛅ Chế độ ngày lẻ (multiple)
+        tempRange = selectedDates;
+        isInRangeState = false;
+
+        if (selectedDates.length > 0) {
+          const first = sorted[0];
+          const last = sorted[sorted.length - 1];
+          updateOvertimeFields(first, last, sorted);
+        } else {
+          updateOvertimeFields(null, null, []);
+        }
+      }
+    },
+  });
 }
 //lấy giá trị ngày từ input.
 function getISODateStr(inputSelector) {
@@ -906,6 +1006,20 @@ document
     }
   });
 
+/**
+ * @author: dat.nh
+ * @date: 13/03/2026
+ */
+document.getElementById("clear_overtime")
+  .addEventListener("click", function () {
+    const fp = document.querySelector("#overtime_range")._flatpickr;
+    if (fp) {
+      fp.clear();
+      updateOvertimeFields(null, null, []);
+      toggleOvertimeFooter([]);
+    }
+  });
+
 function updateTripFields(start, end, dates) {
   // Cập nhật input ngày bắt đầu/kết thúc
   document.getElementById("trip_start").value = start ? formatDate(start) : "";
@@ -917,6 +1031,32 @@ function updateTripFields(start, end, dates) {
 
   // Render giao diện chọn ca
   renderBusinessTripShiftOptions(dates || []);
+
+  // Cập nhật dữ liệu shift (dạng JSON)
+  collectShiftData();
+  currentPage = 1;
+  paginateShiftRows();
+}
+
+/**
+ * @author: dat.nh
+ * @date: 13/03/2026
+ * 
+ * @param {Date} start - Ngày bắt đầu
+ * @param {Date} end - Ngày kết thúc
+ * @param {Date[]} dates - Danh sách ngày đã chọn
+ */
+function updateOvertimeFields(start, end, dates) {
+  // Cập nhật input ngày bắt đầu/kết thúc
+  document.getElementById("overtime_start").value = start ? formatDate(start) : "";
+  document.getElementById("overtime_end").value = end ? formatDate(end) : "";
+
+  // Cập nhật danh sách ngày đã chọn
+  const dateStrings = dates && dates.length ? dates.map(formatDate) : [];
+  document.getElementById("overtime_dates_filtered").value = dateStrings.join(",");
+
+  // Render giao diện chọn ca
+  renderOvertimeShiftOptions(dates || []);
 
   // Cập nhật dữ liệu shift (dạng JSON)
   collectShiftData();
@@ -1080,6 +1220,7 @@ function renderBusinessTripShiftOptions(dates) {
   paginateShiftRows();
 }
 
+/*
 // function renderBusinessTripShiftOptions(dates) {
 //   const container = document.getElementById("business-trip-shift-container");
 //   container.innerHTML = "";
@@ -1176,6 +1317,119 @@ function renderBusinessTripShiftOptions(dates) {
 //   paginateShiftRows();
 // }
 ////
+*/
+
+/**
+ * @author: dat.nh
+ * @date: 13/03/2026
+ * Render các tuỳ chọn ca làm việc cho ngày tăng ca
+ * 
+ * @param {Date[]} dates - Danh sách ngày đã chọn
+ */
+function renderOvertimeShiftOptions(dates) {
+  // Tương tự renderBusinessTripShiftOptions nhưng với container và name khác
+  const container = document.getElementById("overtime-shift-container");
+  container.innerHTML = "";
+
+  dates.forEach((date) => {
+    const dateStr = flatpickr.formatDate(date, "d-m-Y");
+
+    const row = document.createElement("div");
+    row.className = 
+          "d-flex justify-content-between align-items-center mb-2 px-2 py-1 border rounded shift-row flex-wrap";
+    row.dataset.date = dateStr;
+
+    // Nút xóa ngày
+    const removeBtn = document.createElement("button");
+    removeBtn.type = "button";
+    removeBtn.className = "btn btn-sm btn-link text-danger p-0 fw-bold";
+    removeBtn.innerHTML = "❌";
+    removeBtn.style.textDecoration = "none";
+    removeBtn.onclick = () => {
+      const fp = document.querySelector("#overtime_range")._flatpickr;
+      const remaining = fp.selectedDates.filter(
+        (d) => flatpickr.formatDate(d, "d-m-Y") !== dateStr
+      );
+      fp.setDate(remaining, false);
+      if (remaining.length > 0) {
+        updateOvertimeFields(
+          remaining[0],
+          remaining[remaining.length - 1],
+          remaining
+        );
+      } else {
+        updateOvertimeFields(null, null, []);
+      }
+    };
+
+    // Label ngày
+    const dateLabel = document.createElement("span");
+    dateLabel.className = "fw-bold";
+    dateLabel.textContent = dateStr;
+
+    // Gộp nút xoá và ngày vào bên trái
+    const leftCol = document.createElement("div");
+    leftCol.className = "d-flex align-items-center gap-2";
+    leftCol.appendChild(removeBtn);
+    leftCol.appendChild(dateLabel);
+
+    // Shift radio (Cả ngày / Sáng / Chiều / Tối)
+    const shiftGroup = document.createElement("div");
+    shiftGroup.className = "d-flex align-items-center gap-3 flex-wrap";
+
+    const options = [
+      { value: "Cả ngày", label: "Cả ngày" },
+      { value: "Sáng", label: "Sáng" },
+      { value: "Chiều", label: "Chiều" },
+    ];
+
+    options.forEach((opt, idx) => {
+      const wrapper = document.createElement("div");
+      wrapper.className = "form-check form-check-inline m-0";
+
+      const id = `shift-${dateStr}-${idx}`;
+      const r = document.createElement("input");
+      r.type = "radio";
+      r.name = `shift-radio-${dateStr}`;
+      r.id = id;
+      r.value = opt.value;
+      r.className = "form-check-input";
+      if (idx === 0) r.checked = true; // mặc định "Cả ngày"
+      r.addEventListener("change", () => {
+        calculateTotalOvertimeDays();
+        collectOvertimeShiftData();
+      });
+
+      const l = document.createElement("label");
+      l.setAttribute("for", id);
+      l.className = "form-check-label mb-0";
+      l.textContent = opt.label;
+
+      wrapper.appendChild(r);
+      wrapper.appendChild(l);
+      shiftGroup.appendChild(wrapper);
+    });
+
+    // Gắn vào dòng
+    row.appendChild(leftCol);
+    row.appendChild(shiftGroup);
+    container.appendChild(row);
+  });
+
+  // Cập nhật số ngày + JSON
+  calculateTotalDays();
+  collectShiftData();
+  toggleOvertimeFooter(dates);
+
+  // 👁️ Ẩn/hiện khu tổng số ngày
+  const footer = document.getElementById("overtime-footer-controls");
+  if (footer) {
+    footer.classList.toggle("d-none", dates.length === 0);
+  }
+
+  paginateShiftRows();
+}
+
 ////Xử lý form đề xuất
 const requestTypeEl = document.getElementById("request-type");
 const swapSel = document.getElementById("swap-with-user-id");
@@ -1224,6 +1478,7 @@ const toggleRequestSections = (type) => {
     "work-trip": "#section-work-trip",
     "edit-plan": "#section-edit-plan",
     "compensatory-leave": "#section-compensatory-leave",
+    "overtime": "#section-overtime",
   };
 
   const allSections = [
@@ -1234,6 +1489,7 @@ const toggleRequestSections = (type) => {
     "#section-work-trip",
     "#section-edit-plan",
     "#section-compensatory-leave",
+    "#section-overtime",
   ];
 
   const activeSectionId = map[type];
@@ -1767,6 +2023,14 @@ document.addEventListener("DOMContentLoaded", function () {
         pushToast("Vui lòng chọn ngày làm vượt giờ.", false);
         return;
       }
+
+      // Kiểm tra ca làm vượt giờ
+      const compWorkshift = document.getElementById("comp-workshift");
+      if (!compWorkshift || !compWorkshift.value) {
+          pushToast("Vui lòng chọn ca làm vượt giờ.", false);
+          return;
+      }
+
       // Kiểm tra ngày bù
       const leaveDate = form.querySelector('input[name="leave_date"]');
       if (!leaveDate || leaveDate.value.trim() === "") {
@@ -1955,6 +2219,17 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
           }
         }
+      }
+    }
+
+    // @author: dat.nh
+    // @date: 12/03/2026
+    // Kiểm tra ngày tăng ca không bỏ trống nếu là đề xuất tăng ca
+    if (requestType === "overtime") {
+      const overtimeRangeInput = document.getElementById("overtime_range");
+      if (!overtimeRangeInput || overtimeRangeInput.value.trim() === "") {
+        pushToast("Ngày tăng ca không được bỏ trống", false);
+        return;
       }
     }
 
@@ -2163,18 +2438,71 @@ function showShiftIssuePopup(props, ev) {
       extraHTML = `<span class="mb-2">Chi tiết nghỉ bù: <strong class="text-dark">${props.content || "-"}</strong></span>`;
       break;
     }
+
+    // @author: dat.nh
+    // @date: 12/03/2026
+    // Hiển thị mỗi ngyaf kèm nhãn ca (ca sáng/ca chiều/ca ngày) cho đề xuất tăng ca
+    case "OVERTIME": {
+      const grouped = Array.isArray(props.grouped_overtimes) ? props.grouped_overtimes : null;
+
+      if (grouped && grouped.length > 0) {
+        const byDate = {};
+        grouped.forEach((it) => {
+          const dYmd = String(it.work_date || "");
+          if (!dYmd) return;
+          if (!byDate[dYmd]) byDate[dYmd] = { morning: false, afternoon: false };
+          const name = (it.shift_name || "").toLowerCase();
+          if (name.includes("sáng")) byDate[dYmd].morning = true;
+          else if (name.includes("chiều")) byDate[dYmd].afternoon = true;
+          else {
+            const st = String(it.start_time || "");
+            if (st && st < "12:00") byDate[dYmd].morning = true; else byDate[dYmd].afternoon = true;
+          }
+        });
+
+        const entries = Object.keys(byDate)
+          .sort()
+          .map((dYmd) => {
+            const d = window.moment ? moment(dYmd).format("DD-MM-YYYY") : dYmd.split("-").reverse().join("-");
+            const f = byDate[dYmd];
+            let label = "";
+            if (f.morning && f.afternoon) label = "cả ngày";
+            else if (f.morning) label = "ca sáng";
+            else if (f.afternoon) label = "ca chiều";
+            else label = "ca";
+            return `<div class=\"mb-1\">📅 <strong>${d}</strong>: <strong>${label}</strong></div>`;
+          });
+
+        const mid = Math.ceil(entries.length / 2);
+        const col1 = entries.slice(0, mid).join("");
+        const col2 = entries.slice(mid).join("");
+
+        extraHTML = `
+          <div class=\"mt-1\">\n            <div class=\"mb-2\">Chi tiết tăng ca theo ngày:</div>\n            <div class=\"row\">\n              <div class=\"col-12 col-md-6\">${col1}</div>\n              <div class=\"col-12 col-md-6\">${col2}</div>\n            </div>\n          </div>`;
+      } else {
+        const dateText = props.currentDate || "-";
+        const label = (props.current_workshift || "").toLowerCase();
+        let sum = "ca";
+        if (label.includes("cả ngày")) sum = "cả ngày";
+        else if (label.includes("sáng")) sum = "ca sáng";
+        else if (label.includes("chiều")) sum = "ca chiều";
+        extraHTML = `
+          <div class=\"mt-1\">\n            <div class=\"mb-2\">Chi tiết tăng ca:</div>\n            <div>📅 <strong>${dateText}</strong>: <strong>${sum}</strong></div>\n          </div>`;
+      }
+      break;
+    }
   }
 
   // @author: trong.lq
   // @date: 30/10/2025
-  // Ẩn dòng "Ca hiện tại" cho WORK-TRIP vì đã có chi tiết theo ngày bên dưới
-  const currentShiftHtml = props.stype === "WORK-TRIP" ? "" : `
+  // Ẩn dòng "Ca hiện tại" cho WORK-TRIP và OVERTIME vì đã có chi tiết theo ngày bên dưới
+  const currentShiftHtml = (props.stype === "WORK-TRIP" || props.stype === "OVERTIME") ? "" : `
       <span class="mb-2">Ca hiện tại: <strong class="text-dark">${
         props.current_workshift || "-"
       }</strong></span>`;
 
-  // Ẩn dòng "Ngày làm việc" cho WORK-TRIP
-  const currentDateHtml = props.stype === "WORK-TRIP" ? "" : `
+  // Ẩn dòng "Ngày làm việc" cho WORK-TRIP và OVERTIME
+  const currentDateHtml = (props.stype === "WORK-TRIP" || props.stype === "OVERTIME") ? "" : `
       <span class="mb-2">Ngày làm việc: <strong class="text-dark">${
         currentDate || "-"
       }</strong></span>`;
@@ -2219,6 +2547,7 @@ const titleMap = {
   ADDITIONAL_CHECK_OUT: "chấm công tan làm bù",
   EDIT_PLAN: "chỉnh sửa kế hoạch làm việc",
   COMPENSATORY_LEAVE: "nghỉ bù",
+  OVERTIME: "tăng ca",
 };
 
 function mapStatusClass(status) {
@@ -2664,6 +2993,22 @@ function calculateTotalDays() {
  */
 function toggleTripFooter(dates) {
   const wrapper = document.getElementById("business-trip-wrapper");
+  if (wrapper) {
+    wrapper.classList.toggle("d-none", dates.length === 0);
+  }
+}
+
+/**
+ * @author: dat.nh
+ * @date: 13/03/2026
+ * Hiển thị hoặc ẩn khu vực footer của tăng ca
+ * (bao gồm chọn số dòng hiển thị và tổng số ngày)
+ * tùy theo số lượng ngày đã chọn.
+ * 
+ * @param {Date[]} dates - Danh sách ngày đã chọn
+ */
+function toggleOvertimeFooter(dates) {
+  const wrapper = document.getElementById("overtime-wrapper");
   if (wrapper) {
     wrapper.classList.toggle("d-none", dates.length === 0);
   }

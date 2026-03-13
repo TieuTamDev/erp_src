@@ -220,7 +220,7 @@
     <input name="request_type" value="" class="d-none" hidden/>
 <%end%>
 
-<%= form_tag shiftissues_update_shiftissue_path, method: :post, id: "form-update-process-attend",remote:true, authenticity_token: true do %>
+<%= form_tag shiftissues_update_shiftissue_path, method: :post, id: "form-update-process-attend",remote:true, format: :js, authenticity_token: true do %>
     <input name="status"class="d-none" hidden/>
     <textarea name="data" class="d-none" hidden> </textarea>
 <%end%>
@@ -728,7 +728,7 @@
   }
 
 
-  function onApproval(success) {
+  function onApproval(success, errorMsg) {
     showLoadding(false);
     if(success){
       $(".modal").modal("hide");
@@ -736,6 +736,7 @@
       showAlert("Cập nhật thành công","success");
     }else{
       showAlert("Lỗi khi duyệt","danger");
+      console.error("❌ onApproval error:", errorMsg);
     }
   }
   function onSearchUser(e, input) {

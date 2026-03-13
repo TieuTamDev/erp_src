@@ -81,7 +81,6 @@ class ShiftissuesController < ApplicationController
                 send_shiftissue_notification(shift_item, shift_item.status, reason)
               end
               
-              
             else
               shiftissue = representative
               if status == "REJECTED"
@@ -111,7 +110,6 @@ class ShiftissuesController < ApplicationController
                   process_shiftissue_compensatory_leave(shiftissue, status)
                 end
               end
-              
               send_shiftissue_notification(shiftissue, status, reason)
             end
           end
@@ -131,7 +129,7 @@ class ShiftissuesController < ApplicationController
     
     respond_to do |format|
       format.html
-      format.js { render js: "onApproval(#{success}); console.log(#{classified_cases.to_json.html_safe},#{data.to_json.html_safe})" }
+      format.js {  render js: "onApproval(#{success}, #{message.to_json}); console.log('classified_cases:', #{classified_cases.to_json.html_safe}, 'data:', #{data.to_json.html_safe})"  }
     end
   end
 
@@ -306,32 +304,48 @@ class ShiftissuesController < ApplicationController
     end
   end
 
-  # xử lý duyệt nghỉ bù: cập nhật is_day_off = COMPENSATORY-LEAVE
+  # @author: an.cdb
+  # @date: 12/03/2026
+  # Xử lý cập nhật shiftselection ngày nghỉ bù sau khi COMPENSATORY-LEAVE được APPROVED
+  # @input: shiftissue , status
+  # @return: nil
   def process_shiftissue_compensatory_leave(shiftissue, status)
     return unless status == "APPROVED"
-    shiftselection = Shiftselection.find_by(id: shiftissue.shiftselection_id)
-    if shiftselection.present?
-      shiftselection.update(is_day_off: "COMPENSATORY-LEAVE")
-    
-    # Lấy thông tin ngày nghỉ bù và ca nghỉ bù đã lưu
-    leave_date_str = shiftissue.us_start
-    leave_shift_id = shiftissue.us_end.to_s
-    
-    # Lấy user từ shift gốc (ngày lễ đi làm)
+
+    # Lấy ca gốc (ngày lễ/ngày nghỉ mà nhân sự đã đi làm)
     original_shift = Shiftselection.find_by(id: shiftissue.shiftselection_id)
     return unless original_shift
-    user_id = original_shift.scheduleweek.user_id
-    
-    if leave_date_str.present? && leave_shift_id.present?
-      target_shift = Shiftselection.joins(:scheduleweek)
-                                   .where(scheduleweeks: { user_id: user_id, status: 'APPROVED' })
-                                   .where(work_date: Date.parse(leave_date_str).beginning_of_day..Date.parse(leave_date_str).end_of_day)
 
-      target_shift.update_all(is_day_off: "COMPENSATORY-LEAVE", day_off_reason: "Nghỉ bù cho ngày #{original_shift.work_date.strftime('%d/%m/%Y')}")
+    user_id        = original_shift.scheduleweek&.user_id
+    return unless user_id
 
-      if target_shift
-        target_shift.update(is_day_off: "COMPENSATORY-LEAVE", day_off_reason: "Nghỉ bù cho ngày #{original_shift.work_date.strftime('%d/%m/%Y')}")
-      end
+    # us_start lưu ngày nghỉ bù (YYYY-MM-DD), us_end lưu workshift_id ca nghỉ bù (-1 = cả ngày)
+    leave_date_str = shiftissue.us_start.to_s
+    leave_shift_id = shiftissue.us_end.to_s
+    return unless leave_date_str.present?
+
+    leave_date = Date.parse(leave_date_str) rescue nil
+    return unless leave_date
+
+    original_date_label = original_shift.work_date.strftime('%d/%m/%Y')
+
+    # Tìm shiftselection(s) của ngày nghỉ bù
+    target_shifts = Shiftselection
+      .joins(:scheduleweek)
+      .where(scheduleweeks: { user_id: user_id, status: 'APPROVED' })
+      .where(work_date: leave_date)
+
+    # Nếu chọn ca cụ thể (không phải -1 = cả ngày) thì lọc thêm theo workshift_id
+    unless leave_shift_id == "-1"
+      target_shifts = target_shifts.where(workshift_id: leave_shift_id)
+    end
+
+    return unless target_shifts.exists?
+
+    target_shifts.update_all(
+      is_day_off:     "COMPENSATORY-LEAVE",
+      day_off_reason: "Nghỉ bù cho ngày #{original_date_label}"
+    )
   end
 
   # xử lý nhóm dữ liệu đổi ca theo ngày 
@@ -362,7 +376,6 @@ class ShiftissuesController < ApplicationController
         end
       end
     end
-  
     grouped.values
   end
 

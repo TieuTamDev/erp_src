@@ -221,8 +221,6 @@ class AttendsController < ApplicationController
       'UPDATE-SHIFT'
     when 'edit-plan'
       'EDIT-PLAN'
-    when 'compensatory-leave' #THÊM mapping cho đề xuất nghỉ bù - @author:an.cdb @date: 09/03/2026
-      'COMPENSATORY-LEAVE'
     else
       nil
     end
@@ -472,7 +470,7 @@ class AttendsController < ApplicationController
     "ADDITIONAL-CHECK-OUT"    => "Chấm công tan làm bù",
     "ADDITIONAL-CHECK-IN-OUT" => "Chấm công bù vào/ra",
     "EDIT-PLAN"               => "Chỉnh sửa kế hoạch làm việc",
-    "COMPENSATORY-LEAVE"      => "Nghỉ bù" #Thêm mapping cho đề xuất nghỉ bù - @author:an.cdb @date: 09/03/2026
+    "COMPENSATORY-LEAVE"      => "Nghỉ bù"
   }.freeze
 
   # Tạo Shiftissue cho ca sáng hoặc ca chiều
@@ -761,7 +759,7 @@ class AttendsController < ApplicationController
 
     # Method xử lý đăng ký nghỉ bù
   # @author: an.cdb
-  # @date: 12/03/2026
+  # @date: 11/03/2026
   # @input: user_id, data
   # @return: JSON response
   def handle_compensatory_leave(user_id, data)
@@ -798,7 +796,6 @@ class AttendsController < ApplicationController
     shift = Shiftselection.joins(:scheduleweek)
                       .where(scheduleweeks: { user_id: user_id })
                       .where(work_date: attend_date.beginning_of_day..attend_date.end_of_day)
-                      .where(workshift_id: data[:workshift_id])
                       .first
 
     unless shift && %w[OFF HOLIDAY ON-LEAVE].include?(shift.is_day_off)
@@ -823,12 +820,12 @@ class AttendsController < ApplicationController
         status: :ok
     end
 
-    target_shift_id = params[:leave_shift_id] || params[:leave_workshift_id] || data[:leave_shift_id]
+    l_target_shift_id = params[:leave_shift_id] || params[:leave_workshift_id] || data[:leave_shift_id]
     
     if l_target_shift_id.to_s == "-1"
       leave_shift_name = "Cả ngày"
     else
-      leave_shift_name = Workshift.find_by(id: target_shift_id)&.name || "N/A"
+      leave_shift_name = Workshift.find_by(id: l_target_shift_id)&.name || "N/A"
     end
     status_text = case shift.is_day_off
                     when "OFF" then "Ngày nghỉ theo kế hoạch làm việc"
@@ -1306,6 +1303,13 @@ class AttendsController < ApplicationController
 
       events = []
 
+      # Lấy tất cả nghỉ bù đã duyệt trong khoảng thời gian này của user - @author: an.cdb
+      approved_comp_leaves = Shiftissue.joins(shiftselection: :scheduleweek)
+                                      .where(stype: 'COMPENSATORY-LEAVE', status: 'APPROVED')
+                                      .where(scheduleweeks: { user_id: user_id })
+                                      .where("shiftissues.us_start BETWEEN ? AND ?", start_date, end_date)
+                                      .to_a
+
       # Code cũ - 17/09/2025: Không có error handling cho database queries
       # weeks = Scheduleweek
       #           .select("scheduleweeks.*, CONCAT(users.last_name, ' ', users.first_name) as user_name, users.sid")
@@ -1587,6 +1591,19 @@ class AttendsController < ApplicationController
         checkout = attend&.checkout&.strftime("%H:%M") || ''
         has_work_trip = sel.shiftissue.any? { |si| si.stype == "WORK-TRIP" && si.status == "APPROVED" }
 
+        #@author: an.cdb
+        is_comp_leave_day = approved_comp_leaves.any? do |cl|
+          cl.us_start == sel.work_date.to_date.to_s && (cl.us_end == "-1" || cl.us_end == sel.workshift_id.to_s)
+        end
+
+        # Ưu tiên hiển thị: Đi công tác > Nghỉ bù > Các trạng thái cũ (Lễ, Phép, OFF)
+        display_off_type = if has_work_trip
+                             "WORK-TRIP"
+                           elsif is_comp_leave_day
+                             "COMPENSATORY-LEAVE"
+                           else
+                             sel.is_day_off
+                           end
         # === Ca làm chính ===
         events << {
           title: '',
@@ -1618,7 +1635,7 @@ class AttendsController < ApplicationController
             # location:campus_map[sel.location] || '',
             approved_by: week.checked_by,
             reason: sel.day_off_reason,
-            is_day_off: has_work_trip ? "WORK-TRIP" : sel.is_day_off
+            is_day_off: display_off_type#has_work_trip ? "WORK-TRIP" : sel.is_day_off
           }
         }
 
@@ -1694,7 +1711,39 @@ class AttendsController < ApplicationController
           end
 
           next if i.stype == "WORK-TRIP"
-          next if i.stype == "COMPENSATORY-LEAVE"
+
+          if i.stype == "COMPENSATORY-LEAVE"
+            next unless i.status == "APPROVED"
+            leave_date_str = i.us_start.to_s  # us_start lưu ngày nghỉ bù (YYYY-MM-DD)
+            begin
+              leave_date = Date.parse(leave_date_str).strftime('%Y-%m-%d')
+            rescue
+              next
+            end
+            events << {
+              title: "🛌 Nghỉ bù",
+              start: leave_date,
+              end:   leave_date,
+              allDay: true,
+              displayOrder: 2,
+              color: "#807579",
+              textColor: "#ffffff",
+              classNames: ["fc-compensatory-leave"],
+              extendedProps: {
+                type: "SHIFT_ISSUE",
+                stype: "COMPENSATORY-LEAVE",
+                status: i.status,
+                note: i.note,
+                content: i.content,
+                approved_by: approved_by_name,
+                docs: image_doc,
+                current_workshift: current_workshift,
+                us_start: i.us_start,
+                us_end: i.us_end
+              }
+            }
+            next
+          end
 
           event_start = sel.work_date.strftime('%Y-%m-%d')
           event_end   = sel.work_date.strftime('%Y-%m-%d')
