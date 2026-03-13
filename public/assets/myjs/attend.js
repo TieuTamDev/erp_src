@@ -6,6 +6,9 @@ let activeWeekId = null;
 let holidayMap = {};
 let leaveMap   = {};
 let leaveLabelMap = {};
+//@author: an.cdb - 13032026-1621UTC+7
+let compensatoryMap   = {}; // { "YYYY-MM-DD": "ALL"|"AM"|"PM" }
+let compensatoryLabel = 'Nghỉ bù';
 let teachingMap = {};
 let teachingLabelMap = {};
 let workLocations = [];
@@ -140,6 +143,13 @@ async function openModal () {
                     if (index === 0) {
                         firstWeekId = id;
                     }
+                    if (Array.isArray(data.shift_details)) {
+                        data.shift_details.forEach(s => {
+                            if (s.is_day_off === 'COMPENSATORY-LEAVE' && s.work_date) {
+                                compensatoryMap[s.work_date] = true;
+                            }
+                        });
+                    }
                     buildWeekFromAPI(monday, data)
                 });
                 switchToWeek(firstWeekId);
@@ -225,6 +235,24 @@ async function loadSpecialDates () {
         } else {
             leaveMap = {};
             leaveLabelMap = {};
+        }
+        //@author:an.cdb - 13032026 - Load nghỉ bù
+        if (typeof get_compensatory_leaves !== 'undefined' && get_compensatory_leaves) {
+            const r3 = await fetch(get_compensatory_leaves);
+            const raw3 = await r3.json();
+            if (raw3 && Array.isArray(raw3.result)) {
+                const mapComp = {};
+                raw3.result.forEach(it => {
+                    const iso = it.date; // đã là YYYY-MM-DD
+                    if (!iso) return;
+                    mapComp[iso] = it.session || 'ALL';
+                });
+                compensatoryMap = mapComp;
+            } else {
+                compensatoryMap = {};
+            }
+        } else {
+            compensatoryMap = {};
         }
     } catch (e) {
         console.warn('Không tải được ngày: ', e);
@@ -620,6 +648,7 @@ function buildWeekTable(id, monday, detail = [], status = 'TEMP', reason = '') {
 
         const holidayName = holidayMap[ymd] || null;
         const leaveType   = (leaveMap[ymd] || '').toUpperCase();
+                const compType = (compensatoryMap[ymd] || '').toUpperCase(); // 'ALL', 'AM', 'PM' hoặc '' - @author: an.cdb
         const teachingSessions = Array.isArray(teachingMap[ymd]) ? teachingMap[ymd].map(s => String(s).toUpperCase()) : (teachingMap[ymd] ? [String(teachingMap[ymd]).toUpperCase()] : []);
         const hasTeachAM = teachingSessions.includes('AM');
         const hasTeachPM = teachingSessions.includes('PM');
@@ -639,11 +668,12 @@ function buildWeekTable(id, monday, detail = [], status = 'TEMP', reason = '') {
             const et = d.end_time   ?? ws.end   ?? '';
             const locValue = (d.location ?? defaultLocation) || defaultLocation;
             const isLeaveFull = leaveType === 'ALL';
-            const disabled    = (isReadonly || isLeaveFull) ? 'disabled' : '';
+            const isCompensatoryCell = (d.is_day_off === 'COMPENSATORY-LEAVE');
+            const disabled    = (isReadonly || isLeaveFull || isCompensatoryCell) ? 'disabled' : '';
             const tdClasses = ['row-workshift', `shift-${ws.code}`];
 
             const isHolidayCell = (d.is_day_off === 'HOLIDAY') || (!hasAnyDetailInDay && !!holidayName);
-            const isCompensatoryCell = (d.is_day_off === 'COMPENSATORY-LEAVE'); // @author: an.cdb --/03/2026
+        
             const isLeaveCell   = (d.is_day_off === 'ON-LEAVE') ||
                 (leaveType === 'ALL') ||
                 (leaveType === 'AM' && isMorningShift(ws)) ||
@@ -752,6 +782,13 @@ function buildWeekTable(id, monday, detail = [], status = 'TEMP', reason = '') {
                 title="${t}"
                 data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="${t}">${t}</span>`;
         }
+        else if (compType) {
+            rightStatus =
+                `<span class="ms-2 ws-status-badge ws-status-compensatory"
+                title="Nghỉ bù"
+                data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Nghỉ bù">🛌 Nghỉ bù</span>`;
+        }
+}
 
         return `
           <tr data-date="${ymd}">
@@ -872,13 +909,17 @@ function buildWeekTable(id, monday, detail = [], status = 'TEMP', reason = '') {
                 const isOffByDetail     = (d?.is_day_off === 'OFF');
                 const isHolidayByDetail = (d?.is_day_off === 'HOLIDAY');
                 const isLeaveByDetail   = (d?.is_day_off === 'ON-LEAVE');
+               
 
                 // Nếu đã có detail trong ngày: chỉ ca nào HOLIDAY/OFF trong DB mới bật.
                 // Nếu chưa có detail (tuần mới): auto bật theo holidayMap cho cả ngày.
                 const shouldCheck =
                     isHolidayByDetail ||
                     isOffByDetail ||
+                    isCompensatoryByDetail ||
                     (!hasAnyDetailInDay && isHolidayByMap);
+
+                if (isCompensatoryByDetail) td.classList.add('off-compensatory');
 
                 tgl.checked  = shouldCheck && !isLeaveByDetail; // không bật cho ca nghỉ phép
                 tgl.disabled = true;

@@ -2024,13 +2024,6 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
       }
 
-      // Kiểm tra ca làm vượt giờ
-      const compWorkshift = document.getElementById("comp-workshift");
-      if (!compWorkshift || !compWorkshift.value) {
-          pushToast("Vui lòng chọn ca làm vượt giờ.", false);
-          return;
-      }
-
       // Kiểm tra ngày bù
       const leaveDate = form.querySelector('input[name="leave_date"]');
       if (!leaveDate || leaveDate.value.trim() === "") {

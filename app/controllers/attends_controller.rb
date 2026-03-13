@@ -1282,6 +1282,32 @@ class AttendsController < ApplicationController
     return allowed
   end
 
+  # Thêm action get cho nghỉ bù
+  # @author: an.cdb
+  # @date: 13/03/2026
+  def get_compensatory_leaves
+  user_id = session[:user_id]
+  return render json: { result: [] } unless user_id
+
+  from_date = Date.current.beginning_of_week(:monday) - 1.month
+  to_date   = from_date + 3.months
+
+  issues = Shiftissue
+    .joins(shiftselection: :scheduleweek)
+    .where(stype: 'COMPENSATORY-LEAVE', status: 'APPROVED')
+    .where(scheduleweeks: { user_id: user_id })
+    .where("shiftissues.us_start BETWEEN ? AND ?", from_date.to_s, to_date.to_s)
+
+  result = issues.map do |i|
+    {
+      date:    i.us_start.to_s,   # YYYY-MM-DD — ngày được nghỉ bù
+      session: 'ALL'              # us_end = workshift_id hoặc -1, tạm return ALL
+    }
+  end
+
+  render json: { result: result }
+end
+
   # Fetch data attend by range date on calendar
   # @author: Trong Le
   # @date: 31/07/2025

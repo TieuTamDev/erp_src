@@ -869,7 +869,6 @@ delete '/singnature/remove_file' => 'users#remove_file'
       get :get_data_date_attend
     end
   end
-
   # Ca làm việc
   get '/workshifts/index' => "workshifts#index"
   post '/workshifts/update' => "workshifts#update"
