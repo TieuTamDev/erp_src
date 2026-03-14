@@ -5723,8 +5723,6 @@ end
           return { msg: "today_is_a_holiday", result: false }          if is_off == 'HOLIDAY'
           # Kiểm tra nghỉ phép
           return { msg: "user_is_off_today", result: false }           if is_off == 'ON-LEAVE'
-          # Kiểm tra nghỉ bù
-          return { msg: "user_is_off_today", result: false }           if is_off == 'COMPENSATORY-LEAVE'
 
 
           # Kiểm tra địa điểm làm việc
@@ -5849,7 +5847,6 @@ end
           return { msg: "user_has_no_workshift_today", result: false } if is_off == 'OFF'
           return { msg: "today_is_a_holiday",          result: false } if is_off == 'HOLIDAY'
           return { msg: "user_is_off_today",           result: false } if is_off == 'ON-LEAVE'
-          return { msg: "user_is_off_today",           result: false } if is_off == 'COMPENSATORY-LEAVE'
 
           # Kiểm tra địa điểm làm việc
           if scode_campus.present? && sel&.location.present? &&
@@ -6704,7 +6701,8 @@ end
         "UPDATE-SHIFT" => "Cập nhật ca",
         "WORK-TRIP" => "Công tác",
         "EDIT-PLAN" => "Chỉnh sửa kế hoạch làm việc",
-        "COMPENSATORY-LEAVE" => "Nghỉ bù"
+        "COMPENSATORY-LEAVE" => "Nghỉ bù",
+        "OVERTIME" => "Tăng ca"
       }.freeze
 
       # Tạo đề xuất đi trễ / về sớm
@@ -6790,7 +6788,6 @@ end
           end
         end
       end
-
 
       resource :attends do
         desc 'Lưu đề xuất chỉnh sửa kế hoạch làm việc'
@@ -7479,7 +7476,214 @@ end
         end
       end
 
+      resource :attends do
+        desc "Tạo đề xuất nghỉ bù"
+        params do
+          requires :user_id, type: String, desc: "ID người dùng"
+          requires :overtime_date, type: String, desc: "Ngày làm vượt giờ (YYYY-MM-DD)"
+          requires :compensatory_date, type: String, desc: "Ngày nghỉ bù (YYYY-MM-DD)"
+          requires :approved_id, type: Integer, desc: "ID người duyệt"
+          optional :workshift_id, type: Integer, desc: "ID ca nghỉ bù (nếu nghỉ cả ngày thì bỏ qua)"
+          optional :reason, type: String, desc: "Lý do"
+        end
 
+        post :compensatory_leave do
+          begin
+            user_id = params[:user_id]
+            return { msg: "Không xác định người dùng" } if user_id.blank?
+
+            overtime_date = Date.parse(params[:overtime_date]) rescue nil
+            return { msg: "Ngày làm vượt giờ không hợp lệ" } unless overtime_date
+
+            compensatory_date = Date.parse(params[:compensatory_date]) rescue nil
+            return { msg: "Ngày nghỉ bù không hợp lệ" } unless compensatory_date
+
+            approver_id = params[:approved_id]
+            reason = params[:reason]
+            workshift_id = params[:workshift_id]
+
+            # rule: nghỉ bù trong vòng 1 tháng
+            if compensatory_date > overtime_date + 1.month
+              return { msg: "Ngày nghỉ bù phải trong vòng 1 tháng kể từ ngày làm vượt giờ" }
+            end
+
+            # upload file
+            docs = nil
+            file = params[:file]
+            if file.present?
+              uploaded = upload_file(file)
+              return { error: "Tải file thất bại" } unless uploaded[:id]
+              docs = uploaded[:id]
+            end
+
+            # lấy danh sách ca trong ngày nghỉ bù
+            shifts = Shiftselection
+              .joins(:scheduleweek)
+              .where(scheduleweeks: { user_id: user_id, status: "APPROVED" })
+              .where(work_date: compensatory_date.beginning_of_day..compensatory_date.end_of_day)
+
+            return { msg: "Không tìm thấy ca làm việc ngày nghỉ bù" } if shifts.blank?
+
+            # nếu chọn 1 ca
+            if workshift_id.present?
+              shifts = shifts.where(workshift_id: workshift_id)
+              return { msg: "Không tìm thấy ca làm việc phù hợp" } if shifts.blank?
+            end
+
+            created_ids = []
+            duplicate_ids = []
+
+            shifts.each do |shift|
+
+              existing = Shiftissue.where(
+                shiftselection_id: shift.id,
+                stype: "COMPENSATORY-LEAVE",
+                status: %w[PENDING APPROVED]
+              ).first
+
+              if existing.present?
+                duplicate_ids << existing.id
+                next
+              end
+
+              issue = Shiftissue.create!(
+                shiftselection_id: shift.id,
+                stype: "COMPENSATORY-LEAVE",
+                name: REQUEST_TYPE_NAMES["COMPENSATORY-LEAVE"],
+                status: "PENDING",
+                note: reason,
+                approved_by: approver_id,
+                docs: docs
+              )
+
+              created_ids << issue.id
+            end
+
+            if created_ids.any?
+              send_notify(user_id, "COMPENSATORY-LEAVE", approver_id)
+
+              {
+                result: true,
+                msg: "Đã gửi đề xuất nghỉ bù",
+                issue_ids: created_ids,
+                duplicate_issue_ids: duplicate_ids,
+                overtime_date: overtime_date,
+                compensatory_date: compensatory_date
+              }
+            else
+              {
+                result: false,
+                msg: "Đề xuất nghỉ bù đã tồn tại",
+                duplicate_issue_ids: duplicate_ids
+              }
+            end
+
+          rescue => e
+            { error: "Lỗi hệ thống: #{e.message}" }
+          end
+        end
+      end
+
+      resource :attends do
+        desc "Tạo đề xuất tăng ca"
+        params do
+          requires :user_id, type: String, desc: "ID người dùng"
+          requires :overtime_date, type: String, desc: "Ngày tăng ca (YYYY-MM-DD)"
+          requires :approved_id, type: Integer, desc: "ID người duyệt"
+          requires :workshift_id, type: String, desc: "ID ca tăng ca hoặc ALL"
+          optional :reason, type: String, desc: "Lý do"
+        end
+
+        post :overtime do
+          begin
+            user_id = params[:user_id]
+            return { result: false, msg: "Không xác định người dùng" } if user_id.blank?
+
+            overtime_date = Date.parse(params[:overtime_date]) rescue nil
+            return { result: false, msg: "Ngày tăng ca không hợp lệ" } unless overtime_date
+
+            approved_id = params[:approved_id]
+            return { result: false, msg: "Thiếu người duyệt" } if approved_id.blank?
+
+            workshift_id = params[:workshift_id].to_s.strip
+            return { result: false, msg: "Thiếu ca tăng ca" } if workshift_id.blank?
+
+            reason = params[:reason]
+            file = params[:file]
+
+            # upload file nếu có
+            docs = nil
+            if file.present?
+              uploaded = upload_file(file)
+              return { result: false, msg: "Tải file thất bại" } unless uploaded[:id]
+              docs = uploaded[:id].to_s
+            end
+
+            # lấy danh sách ca làm việc trong ngày
+            shifts_in_day = Shiftselection
+                              .joins(:scheduleweek)
+                              .where(scheduleweeks: { user_id: user_id, status: "APPROVED" })
+                              .where(work_date: overtime_date.beginning_of_day..overtime_date.end_of_day)
+                              .where("COALESCE(shiftselections.is_day_off, '') != 'OFF'")
+
+            return { result: false, msg: "Không có ca làm việc trong ngày để đăng ký tăng ca" } if shifts_in_day.blank?
+
+            created_ids = []
+            duplicate_ids = []
+
+            if workshift_id == "ALL"
+              target_shifts = shifts_in_day
+            else
+              target_shifts = shifts_in_day.where(workshift_id: workshift_id)
+              return { result: false, msg: "Không tìm thấy ca làm việc phù hợp" } if target_shifts.blank?
+            end
+
+            target_shifts.each do |shift|
+              existing = Shiftissue.where(
+                shiftselection_id: shift.id,
+                stype: "OVERTIME",
+                status: %w[PENDING APPROVED]
+              ).first
+
+              if existing.present?
+                duplicate_ids << existing.id
+                next
+              end
+
+              issue = Shiftissue.create!(
+                shiftselection_id: shift.id,
+                stype: "OVERTIME",
+                name: REQUEST_TYPE_NAMES["OVERTIME"],
+                approved_by: approved_id,
+                status: "PENDING",
+                note: reason,
+                docs: docs
+              )
+
+              created_ids << issue.id
+            end
+
+            if created_ids.any?
+              send_notify(user_id, "OVERTIME", approved_id)
+              {
+                result: true,
+                msg: "Đã gửi đề xuất tăng ca thành công",
+                issue_ids: created_ids,
+                duplicate_issue_ids: duplicate_ids
+              }
+            else
+              {
+                result: false,
+                msg: "Đề xuất tăng ca đã tồn tại",
+                duplicate_issue_ids: duplicate_ids
+              }
+            end
+
+          rescue => e
+            { result: false, msg: "Lỗi hệ thống: #{e.message}" }
+          end
+        end
+      end
 
       resource :attends do
         desc "Lấy danh sách sự kiện chấm công và đề xuất trong ngày hoặc tháng của nhân sự"
@@ -8027,6 +8231,9 @@ end
                     when "COMPENSATORY-LEAVE"
                       shiftselection = Shiftselection.find(shiftissue.shiftselection_id)
                       shiftselection.update({is_day_off: "COMPENSATORY-LEAVE"})
+                    when "OVERTIME"
+                      shiftselection = Shiftselection.find(shiftissue.shiftselection_id)
+                      shiftselection.update({is_day_off: "OVERTIME"})
                     else
 
                     end
@@ -8678,7 +8885,9 @@ end
       "ADDITIONAL-CHECK-IN" => "Chấm công vào làm bù",
       "UPDATE-SHIFT" => "Cập nhật ca",
       "WORK-TRIP" => "Công tác",
-      "EDIT-PLAN" => "Chỉnh sửa kế hoạch làm việc"
+      "EDIT-PLAN" => "Chỉnh sửa kế hoạch làm việc",
+      "COMPENSATORY-LEAVE" => "Nghỉ bù",
+      "OVERTIME" => "Tăng ca",
     }.freeze
 
   def custom_round_number(value)
@@ -9546,7 +9755,8 @@ end
         "ADDITIONAL-CHECK-OUT" => "Chấm công tan làm bù",
         "UPDATE-SHIFT" => "Cập nhật Ca",
         "WORK-TRIP" => "Đi công tác",
-        "COMPENSATORY-LEAVE" => "Nghỉ bù"
+        "COMPENSATORY-LEAVE" => "Nghỉ bù",
+        "OVERTIME" => "Tăng ca"
       }
 
       notify = Notify.create(

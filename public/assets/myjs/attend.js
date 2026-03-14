@@ -648,7 +648,6 @@ function buildWeekTable(id, monday, detail = [], status = 'TEMP', reason = '') {
 
         const holidayName = holidayMap[ymd] || null;
         const leaveType   = (leaveMap[ymd] || '').toUpperCase();
-                const compType = (compensatoryMap[ymd] || '').toUpperCase(); // 'ALL', 'AM', 'PM' hoặc '' - @author: an.cdb
         const teachingSessions = Array.isArray(teachingMap[ymd]) ? teachingMap[ymd].map(s => String(s).toUpperCase()) : (teachingMap[ymd] ? [String(teachingMap[ymd]).toUpperCase()] : []);
         const hasTeachAM = teachingSessions.includes('AM');
         const hasTeachPM = teachingSessions.includes('PM');
@@ -673,7 +672,6 @@ function buildWeekTable(id, monday, detail = [], status = 'TEMP', reason = '') {
             const tdClasses = ['row-workshift', `shift-${ws.code}`];
 
             const isHolidayCell = (d.is_day_off === 'HOLIDAY') || (!hasAnyDetailInDay && !!holidayName);
-        
             const isLeaveCell   = (d.is_day_off === 'ON-LEAVE') ||
                 (leaveType === 'ALL') ||
                 (leaveType === 'AM' && isMorningShift(ws)) ||
@@ -782,13 +780,6 @@ function buildWeekTable(id, monday, detail = [], status = 'TEMP', reason = '') {
                 title="${t}"
                 data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="${t}">${t}</span>`;
         }
-        else if (compType) {
-            rightStatus =
-                `<span class="ms-2 ws-status-badge ws-status-compensatory"
-                title="Nghỉ bù"
-                data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Nghỉ bù">🛌 Nghỉ bù</span>`;
-        }
-}
 
         return `
           <tr data-date="${ymd}">
@@ -909,17 +900,13 @@ function buildWeekTable(id, monday, detail = [], status = 'TEMP', reason = '') {
                 const isOffByDetail     = (d?.is_day_off === 'OFF');
                 const isHolidayByDetail = (d?.is_day_off === 'HOLIDAY');
                 const isLeaveByDetail   = (d?.is_day_off === 'ON-LEAVE');
-               
 
                 // Nếu đã có detail trong ngày: chỉ ca nào HOLIDAY/OFF trong DB mới bật.
                 // Nếu chưa có detail (tuần mới): auto bật theo holidayMap cho cả ngày.
                 const shouldCheck =
                     isHolidayByDetail ||
                     isOffByDetail ||
-                    isCompensatoryByDetail ||
                     (!hasAnyDetailInDay && isHolidayByMap);
-
-                if (isCompensatoryByDetail) td.classList.add('off-compensatory');
 
                 tgl.checked  = shouldCheck && !isLeaveByDetail; // không bật cho ca nghỉ phép
                 tgl.disabled = true;

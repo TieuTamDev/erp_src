@@ -248,7 +248,6 @@
         .ws-status-holiday{ color:#dc3545; }
         .ws-status-leave  { color:#0d6efd; }
         .ws-status-compensatory {  color: #807579; font-weight: 500;}
-
     }
     .modal-content {
         border: 1px solid #E0E0E0;
@@ -791,6 +790,7 @@
     let get_data_request_attend_attends_path = "<%= get_data_request_attend_attends_path %>";
     let fetch_all_attends_in_month_attends_path = "<%= fetch_all_attends_in_month_attends_path %>";
     let get_all_workshifts = "<%= workshifts_get_all_workshifts_path %>";
+    //let get_compensatory_leaves = "/attends/get_compensatory_leaves";
     let get_all_managers = "<%= workshifts_get_all_managers_path %>";
     let get_holidays = "<%= @CSVC_PATH + "api/v1/mapi_utils/get_holidays?organization=" + @uorg_scode %>";
     let get_user_on_leaves = "<%= @ERP_PATH + "api/v1/mapi_utils/get_employee_leave_days?id=" + @id.to_s %>";

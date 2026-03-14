@@ -869,6 +869,8 @@ delete '/singnature/remove_file' => 'users#remove_file'
       get :get_data_date_attend
     end
   end
+  #Nghỉ bù - @an.cdb
+  #get 'attends/get_compensatory_leaves' => 'attends#get_compensatory_leaves'
   # Ca làm việc
   get '/workshifts/index' => "workshifts#index"
   post '/workshifts/update' => "workshifts#update"

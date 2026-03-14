@@ -695,11 +695,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         const row = instance.input.closest('tr');
         const tableId = row.closest('table').id;
-        if (tableId === 'user_bmu') {
-          // Cập nhật phép hè khi thay đổi deadline (chỉ cho user_bmu)
-          updateTotalHoliday(row, tableId);
-        }
-          updateTotalHoliday(row, tableId);
+        const row = instance.input.closest('tr');
+        const tableId = row.closest('table').id;
+        updateTotalHoliday(row, tableId);
         // Cập nhật tổng khi thay đổi deadline
       },
       onReady: function(selectedDates, dateStr, instance) {
@@ -779,7 +777,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const holPositionjobInput = row.querySelector('.hol-positionjob-input');
       const holPositionjob = parseFloat(holPositionjobInput.value) || 0;
 
-      const holSeniority = parseFloat(row.querySelector('td:nth-child(7)').textContent) || 0; // Phép thâm niên
+      const holSeniority = parseFloat(row.querySelector('.hol-seniority-value')?.value) || 0;
       const holExistInput = row.querySelector('.hol-exist-input');
       const holExistDeadline = row.querySelector('.hol-exist-deadline');
 
@@ -797,53 +795,50 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Hàm cập nhật Tổng (total_holiday)
     function updateTotalHoliday(row, tableId) {
-      const holSeniority = parseFloat(row.querySelector('td:nth-child(7)').textContent) || 0; // Phép thâm niên
-      const holExistInput = row.querySelector('.hol-exist-input');
-      const holExistDeadline = row.querySelector('.hol-exist-deadline');
-      const totalInput = row.querySelector('.total-holiday-input');
-      const totalFInput = row.querySelector('.total-fholiday-input');
+      const holSeniority = parseFloat(row.querySelector('.hol-seniority-value')?.value) || 0;
 
-      const holPositionjobInput = row.querySelector('.hol-positionjob-input');
-      const holPositionjob = parseFloat(holPositionjobInput.value) || 0;
+      const holPositionjob = parseFloat(row.querySelector('.hol-positionjob-input')?.value) || 0;
 
-      let holExist = parseFloat(holExistInput.value) || 0;
+      const holExistDeadline = row.querySelector('.hol-exist-deadline')?.value || '';
+      let holExist = parseFloat(row.querySelector('.hol-exist-input')?.value) || 0;
 
-      // Kiểm tra deadline của phép tồn
-      const deadlineParts = holExistDeadline.value.split('/');
-      const deadlineDate = new Date(`${deadlineParts[2]}-${deadlineParts[1]}-${deadlineParts[0]}`);
-      if (deadlineDate <= yesterday) {
-        holExist = 0; // Không sử dụng phép tồn nếu đã hết hạn
+      // check deadline tồn
+      if (holExistDeadline.includes('/')) {
+        const [dd, mm, yyyy] = holExistDeadline.split('/');
+        const deadlineDate = new Date(`${yyyy}-${mm}-${dd}`);
+        if (!isNaN(deadlineDate.getTime()) && deadlineDate <= yesterday) {
+          holExist = 0;
+        }
       }
 
-      let total;
-    
-      total = holPositionjob + holSeniority + holExist;
-      
-      const totalCount = Math.max(0, total);
+      const total = holPositionjob + holSeniority + holExist;
+      const totalFixed = customRoundToHalf(Math.max(0, total)).toFixed(1);
 
-      totalInput.value = customRoundToHalf(total).toFixed(1); // Giới hạn tối đa 50
-      totalInput.textContent = customRoundToHalf(total).toFixed(1);
+      const totalInput = row.querySelector('.total-holiday-input');
+      if (totalInput) totalInput.value = totalFixed;
 
-      // Cập nhật Còn lại sau khi tổng thay đổi
       updateRemaining(row);
     }
 
-    // Hàm cập nhật Còn lại
     function updateRemaining(row) {
       const totalInput = row.querySelector('.total-holiday-input');
-      const usedInput = row.querySelector('.used-holiday-input');
-      const usedfInput = row.querySelector('.used-fholiday-input');
+      const usedInput  = row.querySelector('.used-holiday-input');
+      const usedfInput = row.querySelector('.used-fholiday-input'); // BUH có, BMU không
       const remainingCell = row.querySelector('.remaining-value');
 
-      const total = parseFloat(totalInput.value) || 0;
-      const used = parseFloat(usedInput.value) || 0;
-      const usedf = parseFloat(usedfInput.value) || 0;
+      const total = parseFloat(totalInput?.value) || 0;
+      const used  = parseFloat(usedInput?.value) || 0;
+      const usedf = parseFloat(usedfInput?.value) || 0;
+
       const remaining = Math.max(0, total - (used + usedf));
-      remainingCell.textContent = customRoundToHalf(remaining).toFixed(1);
+      if (remainingCell) remainingCell.textContent = customRoundToHalf(remaining).toFixed(1);
     }
   });
 })();
 
+</script>
+<script>
+  const UPDATE_HOLIDAY_URL = "<%= setting_holidays_update_holiday_detail_path %>";
 </script>
 
 <script>
@@ -881,27 +876,21 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log("PAYLOAD gửi lên:", payload);
 
     $.ajax({
-      url: '/mywork/setting_holidays/update_holiday_detail',
+      url: UPDATE_HOLIDAY_URL,
       method: 'POST',
       data: payload,
       success: function (res) {
-        if (res.status === 'ok') {
+        console.log("SAVE RES:", res);
+        if (res.status === "ok") {
+          alert("Cập nhật thành công");
           window.location.reload();
-          alert('Cập nhật thành công');
         } else {
-          alert(res.message || 'Có lỗi khi lưu dữ liệu');
+          alert(res.message || "Có lỗi khi lưu");
         }
       },
-      error: function (xhr) {
-        let msg = "Có lỗi khi lưu dữ liệu";
-
-        if (xhr.responseJSON && xhr.responseJSON.message) {
-          msg = xhr.responseJSON.message;
-        } else if (xhr.responseText) {
-          msg = xhr.responseText;
-        }
-
-        alert(msg);
+      error: function(xhr){
+        console.log("SAVE ERR:", xhr.responseText);
+        alert("Lỗi lưu: " + (xhr.responseJSON?.message || xhr.statusText));
       }
     });
   }

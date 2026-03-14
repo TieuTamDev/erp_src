@@ -542,112 +542,47 @@ class SettingHolidaysController < ApplicationController
     }
     
     def update_holiday_detail
-      hol_positionjob = params[:hol_positionjob]
-      hol_seniority = params[:hol_seniority]
-      hol_exist = params[:hol_exist]
-      deadline_exist = params[:deadline_exist]
-
-      total_holiday = params[:total_holiday]
-      used_holiday = params[:used_holiday]
+      hol_positionjob   = params[:hol_positionjob]
+      hol_seniority     = params[:hol_seniority]
+      hol_exist         = params[:hol_exist]
+      deadline_exist    = params[:deadline_exist]
+      total_holiday     = params[:total_holiday]
+      used_holiday      = params[:used_holiday]
       id_curent_holiday = params[:id_curent_holiday]
-      user_id = params[:user_id]
+      user_id           = params[:user_id]
 
-      if id_curent_holiday.present?
-        oHoliday = Holiday.where(id: id_curent_holiday).first
-        if oHoliday.present?
-          oHoliday.update(
-            total: total_holiday,
-            used: used_holiday
-          )
+      begin
+        Holiday.transaction do
+          holiday =
+            if id_curent_holiday.present?
+              Holiday.find_by(id: id_curent_holiday)
+            else
+              Holiday.create!(user_id: user_id, year: Date.today.year)
+            end
 
-          # holdetail
-          oHolpositionjob = Holdetail.where(holiday_id: oHoliday&.id, stype: "VI-TRI").first
-          if oHolpositionjob.present?
-            oHolpositionjob.update({
-              amount: hol_positionjob
-            })
-          else
-            Holdetail.create({
-              holiday_id: oHoliday&.id,
-              name: "Phép theo vị trí",
-              amount: hol_positionjob,
-              stype: "VI-TRI"
-            })
+          unless holiday
+            render json: { status: "error", message: "Không tìm thấy Holiday để cập nhật." }, status: 404
+            return
           end
 
-          oHolseniority = Holdetail.where(holiday_id: oHoliday&.id, stype: "THAM-NIEN").first
-          if oHolseniority.present?
-            oHolseniority.update({
-              amount: hol_seniority
-            })
-          else
-            Holdetail.create({
-              holiday_id: oHoliday&.id,
-              name: "Phép thâm niên",
-              amount: hol_seniority,
-              stype: "THAM-NIEN"
-            })
-          end
+          # update holiday
+          holiday.update!(total: total_holiday, used: used_holiday)
 
-          oHolexist = Holdetail.where(holiday_id: oHoliday&.id, stype: "TON").first
-          if oHolexist.present?
-            oHolexist.update({
-              amount: hol_exist,
-              dtdeadline: Date.strptime(deadline_exist, "%d/%m/%Y")&.in_time_zone("Asia/Ho_Chi_Minh")&.iso8601
-            })
-          else
-            Holdetail.create({
-              holiday_id: oHoliday&.id,
-              name: "Phép tồn",
-              amount: hol_exist,
-              stype: "TON",
-              dtdeadline: Date.strptime(deadline_exist, "%d/%m/%Y")&.in_time_zone("Asia/Ho_Chi_Minh")&.iso8601
-            })
-          end
-          render json: { status: "ok" }
+          # upsert holdetails theo stype
+          upsert_holdetail(holiday.id, "VI-TRI",    "Phép theo vị trí", hol_positionjob)
+          upsert_holdetail(holiday.id, "THAM-NIEN", "Phép thâm niên",   hol_seniority)
+
+          dt = parse_vn_date(deadline_exist) # Date hoặc nil
+          upsert_holdetail(holiday.id, "TON", "Phép tồn", hol_exist, dt)
+
+          render json: { status: "ok", holiday_id: holiday.id }
         end
-      else
-        # Dùng cho nút lưu
-        oHolidayNew = Holiday.create({
-          user_id: user_id,
-          total: total_holiday,
-          used: used_holiday,
-          year: Date.today.year
-        })
-
-        if oHolidayNew.present?
-          # xóa bản ghi nếu tồn tại
-          listHoldetail = Holdetail.where(holiday_id: oHolidayNew&.id)
-          if listHoldetail.present?
-              listHoldetail.destroy_all
-          end
-
-          oHolpositionjobNew = Holdetail.create({
-            holiday_id: oHolidayNew&.id,
-            name: "Phép theo vị trí",
-            amount: hol_positionjob,
-            stype: "VI-TRI"
-          })
-        
-          oHolseniorityNew = Holdetail.create({
-            holiday_id: oHolidayNew&.id,
-            name: "Phép thâm niên",
-            amount: hol_seniority,
-            stype: "THAM-NIEN"
-          })
-        
-          oHolexistNew = Holdetail.create({
-            holiday_id: oHolidayNew&.id,
-            name: "Phép tồn",
-            amount: hol_exist,
-            stype: "TON",
-            dtdeadline: Date.strptime(deadline_exist, "%d/%m/%Y")&.in_time_zone("Asia/Ho_Chi_Minh")&.iso8601
-          })
-          
-          render json: { status: "ok" }
-        end
+      rescue => e
+        render json: { status: "error", message: e.message }, status: 422
       end
     end
+
+    
 
     # BIỂU MẪU IMPORT NGÀY NGHỈ NHÂN SỰ
     # 23/07/2025
@@ -2979,4 +2914,21 @@ class SettingHolidaysController < ApplicationController
           decimal_part.abs < 0.5 ? integer_part : integer_part - 1
         end
       end
+
+      private
+
+    def parse_vn_date(str)
+      return nil if str.blank?
+      Date.strptime(str, "%d/%m/%Y")
+    rescue
+      nil
+    end
+
+    def upsert_holdetail(holiday_id, stype, name, amount, dtdeadline=nil)
+      hd = Holdetail.find_or_initialize_by(holiday_id: holiday_id, stype: stype)
+      hd.name = name
+      hd.amount = amount
+      hd.dtdeadline = dtdeadline if stype == "TON"
+      hd.save!
+    end
 end  
