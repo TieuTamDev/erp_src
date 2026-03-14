@@ -39,7 +39,7 @@
                   <td><b>#{first.sid}</b></td>
                   <td><b>#{first.user_name}</b></td>
                   <td>#{stypes[first.stype]}</td>
-                  <td>#{attend.stype == 'COMPENSATORY-LEAVE' ? attend.us_start : (attend.work_date + 1.day).strftime(\"%d/%m/%Y\") + \" #{shift_name}: #{attend.start_time} - #{attend.end_time}\"}</td>
+                  <td>#{(first.work_date + 1.day).strftime("%d/%m/%Y")} - #{(last.work_date + 1.day).strftime("%d/%m/%Y")}</td>
                   <td><span style='color: #738ffb;'><b>Đi công tác</b></span></td>
                   <td>#{first.updated_at.strftime("%d/%m/%Y")}</td>
                   <td><b>#{note}</b></td>
@@ -110,16 +110,29 @@
           # Hiển thị thông tin chỉnh sửa kế hoạch làm việc trong danh sách duyệt
           # Sử dụng thời gian mặc định 8h00 cho EDIT-PLAN
           "<span>Giờ vào: </span><span style='color: #738ffb;'><b>08:00</b></span>"
+        when "COMPENSATORY-LEAVE" #@author: an.cdb
+          "<div style='white-space: normal; word-break: break-word; min-width: 120px;'><span>Ngày làm vượt giờ: </span><span style='color: #738ffb;'><b>#{(attend.work_date + 1.day).strftime("%d/%m/%Y")}</b></span></div>"
         else
           ""
       end
-
+      # @author:an.cdb - @date:14/03/2026 - thêm đoạn xử lý phần hiển thị ca đề xuất để không bị treo loading
+      ca_de_xuat = if attend.stype == 'COMPENSATORY-LEAVE'
+        leave_date_str = Date.parse(attend.us_start.to_s).strftime("%d/%m/%Y") rescue attend.us_start.to_s
+        if attend.us_end.to_s == "-1"
+          "#{leave_date_str} - Cả ngày"
+        else
+          ws = Workshift.find_by(id: attend.us_end.to_i)
+          ws ? "#{leave_date_str} - #{ws.name}: #{ws.start_time} - #{ws.end_time}" : "#{leave_date_str}"
+        end
+      else
+        "#{(attend.work_date + 1.day).strftime("%d/%m/%Y")} #{shift_name}: #{attend.start_time} - #{attend.end_time}"
+      end
       rows << " <tr data-row-id='#{attend.id}' style='vertical-align: middle;'>
                   <td class='text-center'>#{checkbox}</td>
                   <td><b>#{attend.sid}</b></td>
                   <td><b>#{attend.user_name}</b></td>
                   <td>#{stypes[attend.stype]}</td>
-                  <td>#{(attend.work_date + 1.day).strftime("%d/%m/%Y")} #{shift_name}: #{attend.start_time} - #{attend.end_time}</td>
+                  <td>#{ca_de_xuat}</td>
                   <td>#{detail_content}</td>
                   <td>#{attend.updated_at.strftime("%d/%m/%Y")}</td>
                   <td><b>#{attend.note}</b></td>

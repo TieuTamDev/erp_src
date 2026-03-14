@@ -576,13 +576,6 @@ class AttendsController < ApplicationController
     #   return render json: { success: false, error: validation }, status: :ok unless validation == true
     # end
     
-    # Code mới - @author: trong.lq @date: 22/10/2025
-    # Thêm edit-plan vào danh sách không cần validation date/workshift
-    elsif request_type != "update-shift" && request_type != "edit-plan" && request_type != "compensatory-leave"
-      date = Date.parse(params[:original_date]) rescue nil
-      validation = validate_attend_request_conditions(user_id, date, workshift_id, request_type)
-      return render json: { success: false, error: validation }, status: :ok unless validation == true
-    
     # @author: dat.nh @date: 13/03/2026
     # Thêm validation cho đề xuất tăng ca với mỗi ngày trong mảng overtime_shift_data
     elsif request_type == "overtime"
@@ -594,6 +587,13 @@ class AttendsController < ApplicationController
         validation = validate_attend_request_conditions(user_id, date, workshift_id, request_type)
         return render json: { success: false, error: validation }, status: :ok unless validation
       end
+    
+    # Code mới - @author: trong.lq @date: 22/10/2025
+    # Thêm edit-plan vào danh sách không cần validation date/workshift
+    elsif request_type != "update-shift" && request_type != "edit-plan" && request_type != "compensatory-leave"
+      date = Date.parse(params[:original_date]) rescue nil
+      validation = validate_attend_request_conditions(user_id, date, workshift_id, request_type)
+      return render json: { success: false, error: validation }, status: :ok unless validation == true
     end
     
     common_data = {
@@ -606,6 +606,7 @@ class AttendsController < ApplicationController
       check_in_time: params[:check_in_time],
       check_out_time: params[:check_out_time],
       trip_shift_data: trip_shift_data,
+      overtime_shift_data: overtime_shift_data,
       type: request_type
     }
 

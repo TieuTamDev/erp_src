@@ -3046,13 +3046,12 @@ function paginateShiftRows(type_section = "business-trip") {
  */
 // 🔢 Cập nhật hiển thị số trang
 function updatePageIndicator(current, total, type_section = "business-trip") {
-  if (type_section === "business-trip") {
-    const currentEl = document.getElementById("current-page");
-    const totalEl = document.getElementById("total-pages");
-  } else if (type_section === "overtime") {
-    const currentEl = document.getElementById("current-overtime-page");
-    const totalEl = document.getElementById("total-overtime-pages");
-  }
+  const currentEl = type_section === "business-trip"
+    ? document.getElementById("current-page")
+    : document.getElementById("current-overtime-page");
+  const totalEl = type_section === "business-trip"
+    ? document.getElementById("total-pages")
+    : document.getElementById("total-overtime-pages");
   if (currentEl && totalEl) {
     currentEl.textContent = current;
     totalEl.textContent = total;
