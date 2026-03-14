@@ -336,7 +336,7 @@ function showShiftTooltip(dateStr, e, shiftType = null) {
     filteredData
       .map((shift) => {
         const statusText = getShiftStatusText(shift);
-        const useStatusForTime = ["Nghỉ hàng tuần", "Nghỉ lễ", "Nghỉ phép", "Lịch giảng dạy", "Nghỉ bù"].includes(statusText);        
+        const useStatusForTime = ["Nghỉ hàng tuần", "Nghỉ lễ", "Nghỉ phép", "Lịch giảng dạy", "Nghỉ bù"].includes(statusText);
         if (useStatusForTime) {
           return `
           <div class="mb-1">
@@ -515,7 +515,7 @@ function loadSwapCandidates(originalDate, targetDate) {
     typeof gon !== "undefined" && gon.user_id
       ? gon.user_id
       : document.querySelector('meta[name="current-user-id"]')?.content ||
-        document.getElementById("current-user-id")?.value;
+      document.getElementById("current-user-id")?.value;
 
   if (!CURRENT_USER_ID) {
     $sel
@@ -580,7 +580,7 @@ function loadSwapCandidates(originalDate, targetDate) {
       let msg = "Lỗi tải danh sách";
       try {
         msg = JSON.parse(xhr.responseText).msg || msg;
-      } catch (_) {}
+      } catch (_) { }
       $sel
         .empty()
         .append(`<option disabled selected>${msg}</option>`)
@@ -616,10 +616,10 @@ document
 //  Khởi tạo Flatpickr để chọn ngày có ca làm việc (>= hôm nay) cho form đề xuất
 function initFlatpickrWithAvailableDates(attendanceForCalendar, availableDates) {
   if (
-      !availableDates ||
-      !availableDates.result ||
-      !availableDates.result.start_date ||
-      !availableDates.result.end_date
+    !availableDates ||
+    !availableDates.result ||
+    !availableDates.result.start_date ||
+    !availableDates.result.end_date
   ) {
     alert("Không còn ngày làm việc nào từ hôm nay trở đi.");
     return;
@@ -630,7 +630,7 @@ function initFlatpickrWithAvailableDates(attendanceForCalendar, availableDates) 
   const [ed, em, ey] = end_date.split("/").map(Number);
 
   const startDate = new Date(sy, sm - 1, sd, 0, 0, 0);
-  const endDate   = new Date(ey, em - 1, ed, 0, 0, 0);
+  const endDate = new Date(ey, em - 1, ed, 0, 0, 0);
 
   const enabledDates = [];
   for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
@@ -695,26 +695,25 @@ function initFlatpickrWithAvailableDates(attendanceForCalendar, availableDates) 
   // - cấu hình chọn ngày có ca làm việc vượt giờ
   // Khởi tạo lịch cho Ngày làm vượt giờ (Chỉ cho phép chọn quá khứ/hôm nay)
   flatpickr("#comp-original-date", {
-      dateFormat: "Y-m-d",
-      altInput: true,
-      altFormat: "l, d/m/Y",
-      locale: "vn",
-      maxDate: "today",
-      defaultDate: "today",
-      clickOpens: true,
+    dateFormat: "Y-m-d",
+    altInput: true,
+    altFormat: "l, d/m/Y",
+    locale: "vn",
+    maxDate: "today",
+    defaultDate: "today",
+    clickOpens: true,
   });
 
   // Khởi tạo lịch cho Ngày bù (Chỉ cho phép chọn từ hôm nay trở đi)
   flatpickr("#leave-date", {
-      dateFormat: "Y-m-d",
-      altInput: true,
-      altFormat: "l, d/m/Y",
-      locale: "vn",
-      minDate: "today",
-      defaultDate: "today",
-      clickOpens: true,
+    dateFormat: "Y-m-d",
+    altInput: true,
+    altFormat: "l, d/m/Y",
+    locale: "vn",
+    minDate: "today",
+    defaultDate: "today",
+    clickOpens: true,
   });
-  
 
   // cấu hình cho chọn nhiều ngày đi công tác
   flatpickr("#business_trip_range", {
@@ -840,33 +839,33 @@ function initFlatpickrWithAvailableDates(attendanceForCalendar, availableDates) 
         calendar.style.width = "auto";
         calendar.style.minWidth = "217px";
         calendar.style.maxWidth = "240px";
-        
+
         // Thêm class cụ thể cho popup của time picker cập nhật ca
         calendar.classList.add('time-picker-update-shift-flatpickr-popup');
-        
+
         // Vô hiệu hóa tất cả input trong popup
         const inputs = calendar.querySelectorAll('input');
         inputs.forEach(input => {
           input.setAttribute('readonly', 'readonly');
           input.style.pointerEvents = 'none';
-          
+
           // Ngăn chặn việc nhập tay trong popup
-          input.addEventListener('keydown', function(e) {
+          input.addEventListener('keydown', function (e) {
             e.preventDefault();
             return false;
           });
-          
-          input.addEventListener('keyup', function(e) {
+
+          input.addEventListener('keyup', function (e) {
             e.preventDefault();
             return false;
           });
-          
-          input.addEventListener('keypress', function(e) {
+
+          input.addEventListener('keypress', function (e) {
             e.preventDefault();
             return false;
           });
-          
-          input.addEventListener('input', function(e) {
+
+          input.addEventListener('input', function (e) {
             e.preventDefault();
             return false;
           });
@@ -878,30 +877,35 @@ function initFlatpickrWithAvailableDates(attendanceForCalendar, availableDates) 
       const input = instance.element;
       input.setAttribute('readonly', 'readonly');
       // Không set pointerEvents = 'none' để vẫn có thể click
-      
+
       // Ngăn chặn việc nhập tay bằng keyboard
-      input.addEventListener('keydown', function(e) {
+      input.addEventListener('keydown', function (e) {
         e.preventDefault();
         return false;
       });
-      
-      input.addEventListener('keyup', function(e) {
+
+      input.addEventListener('keyup', function (e) {
         e.preventDefault();
         return false;
       });
-      
-      input.addEventListener('keypress', function(e) {
+
+      input.addEventListener('keypress', function (e) {
         e.preventDefault();
         return false;
       });
-      
-      input.addEventListener('input', function(e) {
+
+      input.addEventListener('input', function (e) {
         e.preventDefault();
         return false;
       });
     },
   });
 
+  /**
+   * @author: dat.nh
+   * @date: 13/03/2026
+   * Cấu hình flatpickr cho chọn ngày tăng ca
+   */
   // Cấu hình cho chọn nhiều ngày tăng ca
   flatpickr("#overtime_range", {
     mode: "multiple",
@@ -965,7 +969,7 @@ function initFlatpickrWithAvailableDates(attendanceForCalendar, availableDates) 
           }
         }
 
-        if (selectedDates.length > 2)  {
+        if (selectedDates.length > 2) {
           tempRange = selectedDates;
           isInRangeState = false;
           const first = sorted[0];
@@ -1033,9 +1037,9 @@ function updateTripFields(start, end, dates) {
   renderBusinessTripShiftOptions(dates || []);
 
   // Cập nhật dữ liệu shift (dạng JSON)
-  collectShiftData();
+  collectShiftData("business-trip");
   currentPage = 1;
-  paginateShiftRows();
+  paginateShiftRows("business-trip");
 }
 
 /**
@@ -1059,13 +1063,19 @@ function updateOvertimeFields(start, end, dates) {
   renderOvertimeShiftOptions(dates || []);
 
   // Cập nhật dữ liệu shift (dạng JSON)
-  collectShiftData();
+  collectShiftData("overtime");
   currentPage = 1;
-  paginateShiftRows();
+  paginateShiftRows("overtime");
 }
 
-function collectShiftData() {
-  const container = document.getElementById("business-trip-shift-container");
+/**
+ * @author: dat.nh
+ * @date: 13/03/2026
+ * @update: Thêm type_section để tái sử dụng cho cả business-trip và overtime
+ * @param {*} type_section 
+ */
+function collectShiftData(type_section) {
+  const container = document.getElementById(`${type_section}-shift-container`);
   const rows = Array.from(container.querySelectorAll("div.shift-row"));
 
   const result = rows.map((row) => {
@@ -1090,7 +1100,11 @@ function collectShiftData() {
     return { date: dateStr, shifts: shiftIDs };
   });
 
-  document.getElementById("trip_shift_data").value = JSON.stringify(result);
+  if (type_section === "business-trip") {
+    document.getElementById("trip_shift_data").value = JSON.stringify(result);
+  } else if (type_section === "overtime") {
+    document.getElementById("overtime_shift_data").value = JSON.stringify(result);
+  }
 }
 
 function renderBusinessTripShiftOptions(dates) {
@@ -1186,8 +1200,8 @@ function renderBusinessTripShiftOptions(dates) {
       r.className = "form-check-input";
       if (idx === 0) r.checked = true; // mặc định "Cả ngày"
       r.addEventListener("change", () => {
-        calculateTotalDays();
-        collectShiftData();
+        calculateTotalDays("business-trip");
+        collectShiftData("business-trip");
       });
 
       const l = document.createElement("label");
@@ -1207,8 +1221,8 @@ function renderBusinessTripShiftOptions(dates) {
   });
 
   // 🔁 Cập nhật số ngày + JSON
-  calculateTotalDays();
-  collectShiftData();
+  calculateTotalDays("business-trip");
+  collectShiftData("business-trip");
   toggleTripFooter(dates);
 
   // 👁️ Ẩn/hiện khu tổng số ngày
@@ -1217,7 +1231,7 @@ function renderBusinessTripShiftOptions(dates) {
     footer.classList.toggle("d-none", dates.length === 0);
   }
 
-  paginateShiftRows();
+  paginateShiftRows("business-trip");
 }
 
 /*
@@ -1335,8 +1349,8 @@ function renderOvertimeShiftOptions(dates) {
     const dateStr = flatpickr.formatDate(date, "d-m-Y");
 
     const row = document.createElement("div");
-    row.className = 
-          "d-flex justify-content-between align-items-center mb-2 px-2 py-1 border rounded shift-row flex-wrap";
+    row.className =
+      "d-flex justify-content-between align-items-center mb-2 px-2 py-1 border rounded shift-row flex-wrap";
     row.dataset.date = dateStr;
 
     // Nút xóa ngày
@@ -1396,8 +1410,8 @@ function renderOvertimeShiftOptions(dates) {
       r.className = "form-check-input";
       if (idx === 0) r.checked = true; // mặc định "Cả ngày"
       r.addEventListener("change", () => {
-        calculateTotalOvertimeDays();
-        collectOvertimeShiftData();
+        calculateTotalDays("overtime");
+        collectShiftData("overtime");
       });
 
       const l = document.createElement("label");
@@ -1417,8 +1431,8 @@ function renderOvertimeShiftOptions(dates) {
   });
 
   // Cập nhật số ngày + JSON
-  calculateTotalDays();
-  collectShiftData();
+  calculateTotalDays("overtime");
+  collectShiftData("overtime");
   toggleOvertimeFooter(dates);
 
   // 👁️ Ẩn/hiện khu tổng số ngày
@@ -1427,7 +1441,7 @@ function renderOvertimeShiftOptions(dates) {
     footer.classList.toggle("d-none", dates.length === 0);
   }
 
-  paginateShiftRows();
+  paginateShiftRows("overtime");
 }
 
 ////Xử lý form đề xuất
@@ -1583,15 +1597,15 @@ function loadApprovedWeeks() {
     data: {
       user_id: gon.user_id || null  // Pass user_id if available
     },
-    beforeSend: function(xhr) {
+    beforeSend: function (xhr) {
       console.log('Sending request to:', ERP_PATH + "/api/v1/mapi_utils/get_scheduleweeks");
     },
-    success: function(response) {
+    success: function (response) {
       console.log('Success response:', response);
       if (response && response.result && Array.isArray(response.result)) {
         // Filter weeks with APPROVED status
         const approvedWeeks = response.result.filter(week => week.status === 'APPROVED');
-        
+
         // Add options to select
         approvedWeeks.forEach(week => {
           const option = document.createElement('option');
@@ -1609,14 +1623,14 @@ function loadApprovedWeeks() {
         }
       }
     },
-    error: function(xhr, status, error) {
+    error: function (xhr, status, error) {
       console.error('Error loading approved weeks:', error);
       console.error('Response:', xhr.responseText);
       console.error('Status:', xhr.status);
-      
+
       const option = document.createElement('option');
       option.value = "";
-      
+
       if (xhr.status === 401 || xhr.status === 403) {
         option.textContent = "-- Vui lòng đăng nhập --";
       } else if (xhr.status === 404) {
@@ -1626,7 +1640,7 @@ function loadApprovedWeeks() {
       } else {
         option.textContent = "-- Lỗi tải dữ liệu --";
       }
-      
+
       option.disabled = true;
       weekSelect.appendChild(option);
     }
@@ -1705,7 +1719,7 @@ function updateShiftInputs() {
 function setDefaultMorningTime() {
   const morningIn = document.getElementById("morning-check-in");
   const morningOut = document.getElementById("morning-check-out");
-  
+
   if (morningIn && !morningIn.value) {
     morningIn.value = "07:00";
   }
@@ -1729,13 +1743,13 @@ function setDefaultAfternoonTime() {
 // ✅ Function tính thời gian làm việc (tính bằng giờ)
 function calculateWorkDuration(startTime, endTime) {
   if (!startTime || !endTime) return 0;
-  
+
   const [startHour, startMinute] = startTime.split(':').map(Number);
   const [endHour, endMinute] = endTime.split(':').map(Number);
-  
+
   const startMinutes = startHour * 60 + startMinute;
   const endMinutes = endHour * 60 + endMinute;
-  
+
   const durationMinutes = endMinutes - startMinutes;
   return durationMinutes / 60; // Chuyển về giờ
 }
@@ -1743,10 +1757,10 @@ function calculateWorkDuration(startTime, endTime) {
 // ✅ Function chuyển đổi số giờ thập phân thành định dạng "X giờ Y phút"
 function formatDurationToHoursMinutes(durationInHours) {
   if (!durationInHours || durationInHours === 0) return "0 giờ";
-  
+
   const hours = Math.floor(durationInHours);
   const minutes = Math.round((durationInHours - hours) * 60);
-  
+
   if (minutes === 0) {
     return `${hours} giờ`;
   } else {
@@ -1757,21 +1771,21 @@ function formatDurationToHoursMinutes(durationInHours) {
 // ✅ Function lấy thời gian ca từ attendanceMap (thời gian đã đăng ký)
 function getShiftDurationFromAttendanceMap(dateStr, shiftType) {
   // Debug: Log để kiểm tra dateStr
-  
+
   if (!attendanceMap[dateStr] || !attendanceMap[dateStr][shiftType]) {
     return null;
   }
-  
+
   const shiftData = attendanceMap[dateStr][shiftType];
   // Lấy thời gian đã đăng ký (registered_shift_start_time/end_time)
   const startTime = shiftData.registered_shift_start_time;
   const endTime = shiftData.registered_shift_end_time;
-  
-  
+
+
   if (!startTime || !endTime) return null;
-  
+
   const duration = calculateWorkDuration(startTime, endTime);
-  
+
   return duration;
 }
 
@@ -1845,7 +1859,7 @@ $("#request-date-new").on("change", function () {
 
   // Code cũ - 17/09/2025: Không kiểm tra originalDate null
   // loadSwapCandidates(originalDate, targetDate);
-  
+
   // Code mới - 17/09/2025: Kiểm tra originalDate trước khi gọi function
   if (originalDate && originalDate.trim() !== '') {
     loadSwapCandidates(originalDate, targetDate);
@@ -1872,7 +1886,7 @@ document.getElementById("request-type").addEventListener("change", function () {
 
     // Code cũ - 17/09/2025: Không kiểm tra originalDate null
     // loadSwapCandidates(originalDate, targetDate);
-    
+
     // Code mới - 17/09/2025: Kiểm tra originalDate trước khi gọi function
     if (originalDate && originalDate.trim() !== '') {
       loadSwapCandidates(originalDate, targetDate);
@@ -1924,13 +1938,13 @@ document.addEventListener("DOMContentLoaded", function () {
   typeSel.addEventListener("change", () => {
     // Code cũ - 17/09/2025: Gọi loadSwapCandidates() không có tham số
     // if (typeSel.value === "shift-change") loadSwapCandidates();
-    
+
     // Code mới - 17/09/2025: Kiểm tra và truyền tham số đúng
     if (typeSel.value === "shift-change") {
       const $sec = $("#section-shift-change");
       const originalDate = $sec.find('input[name="original_date"]').val();
       const targetDate = $sec.find('input[name="target_date"]').val() || originalDate;
-      
+
       if (originalDate && originalDate.trim() !== '') {
         loadSwapCandidates(originalDate, targetDate);
       } else {
@@ -2180,7 +2194,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const morningDuration = calculateWorkDuration(morningIn?.value, morningOut?.value);
         const afternoonDuration = calculateWorkDuration(afternoonIn?.value, afternoonOut?.value);
         const totalDuration = morningDuration + afternoonDuration;
-        
+
         // Kiểm tra chính xác 8 giờ (không cho phép sai số)
         if (totalDuration !== 8) {
           pushToast(`Tổng thời gian làm việc phải chính xác 8 giờ. Hiện tại: ${totalDuration.toFixed(1)} giờ (Ca sáng: ${morningDuration.toFixed(1)}h, Ca chiều: ${afternoonDuration.toFixed(1)}h)`, false);
@@ -2194,11 +2208,11 @@ document.addEventListener("DOMContentLoaded", function () {
       const originalDateInput = updateShiftSection ? updateShiftSection.querySelector('input[name="original_date"]') : null;
       if (originalDateInput && originalDateInput.value) {
         const dateStr = originalDateInput.value;
-        
+
         if (type === "morning") {
           const formDuration = calculateWorkDuration(morningIn?.value, morningOut?.value);
           const attendanceDuration = getShiftDurationFromAttendanceMap(dateStr, "MORNING");
-          
+
           if (attendanceDuration !== null && formDuration !== attendanceDuration) {
             pushToast(`Thời gian ca sáng phải chính xác bằng thời gian theo kế hoạch. Đăng ký cập nhật ca: ${formatDurationToHoursMinutes(formDuration)}, Ca đăng ký theo kế hoạch: ${formatDurationToHoursMinutes(attendanceDuration)}`, false);
             return;
@@ -2206,7 +2220,7 @@ document.addEventListener("DOMContentLoaded", function () {
         } else if (type === "afternoon") {
           const formDuration = calculateWorkDuration(afternoonIn?.value, afternoonOut?.value);
           const attendanceDuration = getShiftDurationFromAttendanceMap(dateStr, "AFTERNOON");
-          
+
           if (attendanceDuration !== null && formDuration !== attendanceDuration) {
             pushToast(`Thời gian ca chiều phải chính xác bằng thời gian theo kế hoạch. Đăng ký cập nhật ca: ${formatDurationToHoursMinutes(formDuration)}, Ca đăng ký theo kế hoạch: ${formatDurationToHoursMinutes(attendanceDuration)}`, false);
             return;
@@ -2291,8 +2305,8 @@ function getWeekNumber(input) {
   const d =
     input instanceof Date
       ? new Date(
-          Date.UTC(input.getFullYear(), input.getMonth(), input.getDate())
-        )
+        Date.UTC(input.getFullYear(), input.getMonth(), input.getDate())
+      )
       : new Date(input + (input.length === 10 ? "T00:00:00" : ""));
 
   if (isNaN(d)) return "";
@@ -2313,50 +2327,41 @@ function showShiftIssuePopup(props, ev) {
   switch (props.stype) {
     case "LATE-CHECK-IN":
     case "ADDITIONAL-CHECK-IN":
-      timeHTML = `<span class="mb-2">Thời gian: <strong class="text-dark">${
-        props.us_start || "-"
-      }</strong></span>`;
+      timeHTML = `<span class="mb-2">Thời gian: <strong class="text-dark">${props.us_start || "-"
+        }</strong></span>`;
       break;
 
     case "EARLY-CHECK-OUT":
     case "ADDITIONAL-CHECK-OUT":
-      timeHTML = `<span class="mb-2">Thời gian: <strong class="text-dark">${
-        props.us_end || "-"
-      }</strong></span>`;
+      timeHTML = `<span class="mb-2">Thời gian: <strong class="text-dark">${props.us_end || "-"
+        }</strong></span>`;
       break;
 
     case "SHIFT-CHANGE": {
       extraHTML = `
-                <span class="mb-2">Đổi ca với: <strong class="text-dark">${
-                  props.to_user || "-"
-                }</strong></span>
-                <span class="mb-2">Ngày đăng ký đổi ca: <strong class="text-dark">${
-                  props.to_date || "-"
-                }</strong></span>
-                <span class="mb-2">Ca cần đổi: <strong class="text-dark">${
-                  props.to_workshift || "-"
-                }</strong></span>`;
+                <span class="mb-2">Đổi ca với: <strong class="text-dark">${props.to_user || "-"
+        }</strong></span>
+                <span class="mb-2">Ngày đăng ký đổi ca: <strong class="text-dark">${props.to_date || "-"
+        }</strong></span>
+                <span class="mb-2">Ca cần đổi: <strong class="text-dark">${props.to_workshift || "-"
+        }</strong></span>`;
       break;
     }
 
     case "SHIFT-CHANGE-APPROVED": {
       extraHTML = `
-                <span class="mb-2">Đổi ca với: <strong class="text-dark">${
-                  props.to_user || "-"
-                }</strong></span>
-                <span class="mb-2">Ngày bị đổi ca: <strong class="text-dark">${
-                  props.to_date || "-"
-                }</strong></span>
-                <span class="mb-2">Ca bị đổi: <strong class="text-dark">${
-                  props.to_workshift || "-"
-                }</strong></span>`;
+                <span class="mb-2">Đổi ca với: <strong class="text-dark">${props.to_user || "-"
+        }</strong></span>
+                <span class="mb-2">Ngày bị đổi ca: <strong class="text-dark">${props.to_date || "-"
+        }</strong></span>
+                <span class="mb-2">Ca bị đổi: <strong class="text-dark">${props.to_workshift || "-"
+        }</strong></span>`;
       break;
     }
 
     case "UPDATE-SHIFT": {
-      extraHTML = `<span class="mb-2">Thời gian thay đổi: <strong class="text-dark">${
-        `${props.us_start} - ${props.us_end}` || "-"
-      }</strong></span>`;
+      extraHTML = `<span class="mb-2">Thời gian thay đổi: <strong class="text-dark">${`${props.us_start} - ${props.us_end}` || "-"
+        }</strong></span>`;
       break;
     }
 
@@ -2364,9 +2369,8 @@ function showShiftIssuePopup(props, ev) {
       // @author: trong.lq
       // @date: 23/10/2025
       // Hiển thị chi tiết cho đề xuất chỉnh sửa kế hoạch làm việc
-      extraHTML = `<span class="mb-2">Tuần chỉnh sửa: <strong class="text-dark">${
-        props.content || "-"
-      }</strong></span>`;
+      extraHTML = `<span class="mb-2">Tuần chỉnh sửa: <strong class="text-dark">${props.content || "-"
+        }</strong></span>`;
       break;
     }
 
@@ -2490,36 +2494,31 @@ function showShiftIssuePopup(props, ev) {
   // @date: 30/10/2025
   // Ẩn dòng "Ca hiện tại" cho WORK-TRIP và OVERTIME vì đã có chi tiết theo ngày bên dưới
   const currentShiftHtml = (props.stype === "WORK-TRIP" || props.stype === "OVERTIME") ? "" : `
-      <span class="mb-2">Ca hiện tại: <strong class="text-dark">${
-        props.current_workshift || "-"
-      }</strong></span>`;
+      <span class="mb-2">Ca hiện tại: <strong class="text-dark">${props.current_workshift || "-"
+    }</strong></span>`;
 
   // Ẩn dòng "Ngày làm việc" cho WORK-TRIP và OVERTIME
   const currentDateHtml = (props.stype === "WORK-TRIP" || props.stype === "OVERTIME") ? "" : `
-      <span class="mb-2">Ngày làm việc: <strong class="text-dark">${
-        currentDate || "-"
-      }</strong></span>`;
+      <span class="mb-2">Ngày làm việc: <strong class="text-dark">${currentDate || "-"
+    }</strong></span>`;
 
   const html = `
     <div class="col-12 row text-left">
       <span class="mb-2">Trạng thái: <strong class="${mapStatusClass(
-        props.status
-      )}">${mapStatus(props.status) || "-"}</strong></span>
+    props.status
+  )}">${mapStatus(props.status) || "-"}</strong></span>
       ${currentDateHtml}
       ${currentShiftHtml}
-      <span class="mb-2">Người xử lý: <strong class="text-dark">${
-        props.approved_by || "-"
-      }</strong></span>
+      <span class="mb-2">Người xử lý: <strong class="text-dark">${props.approved_by || "-"
+    }</strong></span>
       ${timeHTML}
       ${extraHTML}
-      <span class="mb-2">Lý do: <strong class="text-dark">${
-        props.note || "-"
-      }</strong></span>
+      <span class="mb-2">Lý do: <strong class="text-dark">${props.note || "-"
+    }</strong></span>
       <span class="mb-2">Minh chứng:</span>
       <div class="ms-3 d-flex justify-content-center border rounded w-100 h-50">
-        <img class="img-fluid w-75" style="max-width: 75%" src="${
-          props.docs || avatar_url
-        }">
+        <img class="img-fluid w-75" style="max-width: 75%" src="${props.docs || avatar_url
+    }">
       </div>
     </div>`;
 
@@ -2601,7 +2600,7 @@ function showFlashToasts() {
         // ✅ remove khỏi DOM khi đã ẩn
         try {
           el.remove();
-        } catch {}
+        } catch { }
 
         // ✅ chỉ redirect/refetch đúng 1 lần nếu là toast success
         if (isSuccess) {
@@ -2641,7 +2640,7 @@ function maybeShowErrorModal() {
   if (body && (body.textContent || "").trim().length) {
     try {
       new bootstrap.Modal(modalEl).show();
-    } catch (_) {}
+    } catch (_) { }
   }
 }
 ////Upload & preview minh chứng
@@ -2746,7 +2745,7 @@ function applyAllRanges() {
       const opt = selUpdate.options[selUpdate.selectedIndex];
       if (!opt) return;
       const type = opt.getAttribute("data-shift-type"); // full/morning/afternoon
-      
+
       // Gọi updateShiftInputs để set thời gian mặc định cho ca sáng
       updateShiftInputs();
 
@@ -2843,12 +2842,10 @@ function buildCheckpointEventsFromAttendance(calendar) {
       const isDayOff = s.is_day_off;
 
       // ✅ Giờ mặc định cho mỗi ca (nếu không có giờ cụ thể)
-      const baseTimeStart = `${dateKey}T${
-        shiftType === "MORNING" ? "08:00:00" : "13:00:00"
-      }`;
-      const baseTimeEnd = `${dateKey}T${
-        shiftType === "MORNING" ? "12:00:00" : "17:00:00"
-      }`;
+      const baseTimeStart = `${dateKey}T${shiftType === "MORNING" ? "08:00:00" : "13:00:00"
+        }`;
+      const baseTimeEnd = `${dateKey}T${shiftType === "MORNING" ? "12:00:00" : "17:00:00"
+        }`;
 
       if (isDayOff) {
         let title = "",
@@ -2959,8 +2956,8 @@ function formatDate(date) {
   return `${year}-${month}-${day}`; // YYYY-MM-DD
 }
 
-function calculateTotalDays() {
-  const container = document.getElementById("business-trip-shift-container");
+function calculateTotalDays(type_section = "business-trip") {
+  const container = document.getElementById(`${type_section}-shift-container`);
   const rows = container.querySelectorAll(".shift-row"); // Mỗi dòng ứng với 1 ngày
 
   let total = 0;
@@ -2974,7 +2971,11 @@ function calculateTotalDays() {
       }
     });
   });
-  document.getElementById("total_days_selected").value = total;
+  if (type_section === "business-trip") {
+    document.getElementById("total_days_selected").value = total;
+  } else if (type_section === "overtime") {
+    document.getElementById("total_overtime_days_selected").value = total;
+  }
 }
 
 /**
@@ -3007,10 +3008,17 @@ function toggleOvertimeFooter(dates) {
   }
 }
 
+/**
+ * @author: dat.nh
+ * @date: 13/03/2026
+ * @update: Thêm tham số type_section để phân biệt giữa business-trip và overtime
+ * 
+ * @param {string} type_section - Loại (business-trip hoặc overtime)
+ */
 // 🧩 Hàm phân trang các dòng ca làm việc hiển thị theo trang
-function paginateShiftRows() {
+function paginateShiftRows(type_section = "business-trip") {
   const allRows = document.querySelectorAll(
-    "#business-trip-shift-container .shift-row"
+    `#${type_section}-shift-container .shift-row`
   );
   const totalPages = Math.ceil(allRows.length / rowsPerPage);
 
@@ -3027,20 +3035,42 @@ function paginateShiftRows() {
   updatePageIndicator(currentPage, totalPages);
 }
 
+/**
+ * @author: dat.nh
+ * @date: 13/03/2026
+ * @update: Thêm tham số type_section để phân biệt giữa business-trip và overtime
+ * Cập nhật hiển thị số trang hiện tại và tổng số trang
+ * @param {*} current 
+ * @param {*} total 
+ * @param {*} type_section 
+ */
 // 🔢 Cập nhật hiển thị số trang
-function updatePageIndicator(current, total) {
-  const currentEl = document.getElementById("current-page");
-  const totalEl = document.getElementById("total-pages");
+function updatePageIndicator(current, total, type_section = "business-trip") {
+  if (type_section === "business-trip") {
+    const currentEl = document.getElementById("current-page");
+    const totalEl = document.getElementById("total-pages");
+  } else if (type_section === "overtime") {
+    const currentEl = document.getElementById("current-overtime-page");
+    const totalEl = document.getElementById("total-overtime-pages");
+  }
   if (currentEl && totalEl) {
     currentEl.textContent = current;
     totalEl.textContent = total;
   }
 }
 
+/**
+ * @author: dat.nh
+ * @date: 13/03/2026
+ * @update: Thêm tham số type_section để phân biệt giữa business-trip và overtime
+ * Hàm gọi khi bấm nút chuyển trang (trước đây là prevBtn/nextBtn)
+ * @param {string} direction 
+ * @param {string} type_section 
+ */
 // ⏪⏩ Gọi khi bấm nút chuyển trang
-function goToPage(direction) {
+function goToPage(direction, type_section = "business-trip") {
   const allRows = document.querySelectorAll(
-    "#business-trip-shift-container .shift-row"
+    `#${type_section}-shift-container .shift-row`
   );
   const totalPages = Math.ceil(allRows.length / rowsPerPage);
 
@@ -3050,25 +3080,51 @@ function goToPage(direction) {
     currentPage++;
   }
 
-  paginateShiftRows();
+  paginateShiftRows(type_section);
 }
 
 // 🔄 Sự kiện: thay đổi số dòng/trang
 document.getElementById("rowsPerPage").addEventListener("change", (e) => {
   rowsPerPage = parseInt(e.target.value, 10);
   currentPage = 1;
-  paginateShiftRows();
+  paginateShiftRows("business-trip");
 });
 
+/**
+ * @author: dat.nh
+ * @date: 13/03/2026
+ */
+// 🔄 Sự kiện: thay đổi số dòng/trang
+document.getElementById("overtimeRowsPerPage").addEventListener("change", (e) => {
+  rowsPerPage = parseInt(e.target.value, 10);
+  currentPage = 1;
+  paginateShiftRows("overtime");
+});
+
+/**
+ * @author: dat.nh
+ * @date: 13/03/2026
+ * @update: Thêm sự kiện cho nút chuyển trang của tăng ca
+ */
 document.addEventListener("DOMContentLoaded", () => {
   const prevBtn = document.getElementById("prev-page");
   const nextBtn = document.getElementById("next-page");
+  const prevOvertimeBtn = document.getElementById("prev-overtime-page");
+  const nextOvertimeBtn = document.getElementById("next-overtime-page");
 
   if (prevBtn) {
-    prevBtn.addEventListener("click", () => goToPage("prev"));
+    prevBtn.addEventListener("click", () => goToPage("prev", "business-trip"));
   }
 
   if (nextBtn) {
-    nextBtn.addEventListener("click", () => goToPage("next"));
+    nextBtn.addEventListener("click", () => goToPage("next", "business-trip"));
+  }
+
+  if (prevOvertimeBtn) {
+    prevOvertimeBtn.addEventListener("click", () => goToPage("prev", "overtime"));
+  }
+
+  if (nextOvertimeBtn) {
+    nextOvertimeBtn.addEventListener("click", () => goToPage("next", "overtime"));
   }
 });
