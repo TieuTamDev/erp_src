@@ -221,6 +221,8 @@ class AttendsController < ApplicationController
       'UPDATE-SHIFT'
     when 'edit-plan'
       'EDIT-PLAN'
+    when "overtime"
+      'OVERTIME'
     else
       nil
     end
@@ -470,7 +472,8 @@ class AttendsController < ApplicationController
     "ADDITIONAL-CHECK-OUT"    => "Chấm công tan làm bù",
     "ADDITIONAL-CHECK-IN-OUT" => "Chấm công bù vào/ra",
     "EDIT-PLAN"               => "Chỉnh sửa kế hoạch làm việc",
-    "COMPENSATORY-LEAVE"      => "Nghỉ bù"
+    "COMPENSATORY-LEAVE"      => "Nghỉ bù",
+    "OVERTIME"                => "Tăng ca"
   }.freeze
 
   # Tạo Shiftissue cho ca sáng hoặc ca chiều
@@ -553,6 +556,7 @@ class AttendsController < ApplicationController
     end
     request_type = params[:request_type]
     trip_shift_data = JSON.parse(params[:trip_shift_data]) rescue []
+    overtime_shift_data = JSON.parse(params[:overtime_shift_data]) rescue []
     workshift_id = params[:workshift_id].to_i if params[:workshift_id].present?
 
     # Nếu là công tác thì kiểm tra từng ngày trong mảng
@@ -578,6 +582,18 @@ class AttendsController < ApplicationController
       date = Date.parse(params[:original_date]) rescue nil
       validation = validate_attend_request_conditions(user_id, date, workshift_id, request_type)
       return render json: { success: false, error: validation }, status: :ok unless validation == true
+    
+    # @author: dat.nh @date: 13/03/2026
+    # Thêm validation cho đề xuất tăng ca với mỗi ngày trong mảng overtime_shift_data
+    elsif request_type == "overtime"
+      overtime_shift_data.each do |entry|
+        date_str = entry["date"] || entry[:date]
+        date = Date.parse(date_str) rescue nil
+        next unless date
+    
+        validation = validate_attend_request_conditions(user_id, date, workshift_id, request_type)
+        return render json: { success: false, error: validation }, status: :ok unless validation
+      end
     end
     
     common_data = {
@@ -608,6 +624,8 @@ class AttendsController < ApplicationController
       handle_edit_plan(user_id, common_data)
     when "compensatory-leave" #Thêm case cho đề xuất nghỉ bù - @author:an.cdb @date: 09/03/2026
       handle_compensatory_leave(user_id, common_data)
+    when "overtime"
+      handle_overtime(user_id, common_data)
     else
       render json: { success: false, error: "Loại đề xuất không hợp lệ" }, status: :ok
     end
@@ -793,45 +811,81 @@ class AttendsController < ApplicationController
         status: :ok
     end
 
-    shift = Shiftselection.joins(:scheduleweek)
-                      .where(scheduleweeks: { user_id: user_id })
-                      .where(work_date: attend_date.beginning_of_day..attend_date.end_of_day)
-                      .first
+# Lấy TẤT CẢ ca trong ngày lễ đó của user
+    shifts_on_attend_date = Shiftselection
+      .joins(:scheduleweek)
+      .where(scheduleweeks: { user_id: user_id })
+      .where(work_date: attend_date.beginning_of_day..attend_date.end_of_day)
+      .where(is_day_off: %w[OFF HOLIDAY ON-LEAVE])
 
-    unless shift && %w[OFF HOLIDAY ON-LEAVE].include?(shift.is_day_off)
+    if shifts_on_attend_date.empty?
       return render json: {
-        success: false, 
-        error: "Ngày #{attend_date.strftime("%d/%m/%Y")} không phải là ngày lễ hoặc ngày nghỉ theo kế hoạch làm việc trong tuần"}, 
-        status: :ok
+        success: false,
+        error: "Ngày #{attend_date.strftime('%d/%m/%Y')} không phải là ngày lễ hoặc ngày nghỉ theo kế hoạch làm việc trong tuần"
+      }, status: :ok
     end
 
+    shift = shifts_on_attend_date.first
+    total_shifts = shifts_on_attend_date.count # số ca trong ngày lễ (1 hoặc 2)
 
-    # Kiểm tra trùng đề xuất
-    existing = Shiftissue.where(
-      shiftselection_id: shift.id,
-      stype: 'COMPENSATORY-LEAVE',
-      status: %w[PENDING APPROVED]
-    ).exists?
+    # Đếm số ca nghỉ bù đã đăng ký (PENDING/APPROVED) cho tất cả ca của ngày lễ này
+    existing_issues = Shiftissue
+      .where(shiftselection_id: shifts_on_attend_date.pluck(:id))
+      .where(stype: 'COMPENSATORY-LEAVE', status: %w[PENDING APPROVED])
 
-    if existing
-      return render json: { 
-        success: false, 
-        error: "Đã tồn tại đơn đăng ký nghỉ bù cho ca làm việc này" }, 
-        status: :ok
+    existing_count = existing_issues.sum do |i|
+      i.us_end.to_s == "-1" ? total_shifts : 1  # cả ngày = chiếm hết số ca
+    end
+
+    if existing_count >= total_shifts
+      return render json: {
+        success: false,
+        error: "Ngày #{attend_date.strftime('%d/%m/%Y')} đã đăng ký đủ số ca nghỉ bù (#{existing_count}/#{total_shifts} ca)"
+      }, status: :ok
     end
 
     l_target_shift_id = params[:leave_shift_id] || params[:leave_workshift_id] || data[:leave_shift_id]
-    
-    if l_target_shift_id.to_s == "-1"
-      leave_shift_name = "Cả ngày"
-    else
-      leave_shift_name = Workshift.find_by(id: l_target_shift_id)&.name || "N/A"
+
+    # Nếu chọn cả ngày nhưng đã có đơn ca lẻ → không cho
+    if l_target_shift_id.to_s == "-1" && existing_count > 0
+      return render json: {
+        success: false,
+        error: "Ngày #{attend_date.strftime('%d/%m/%Y')} đã có đơn nghỉ bù ca lẻ. Không thể đăng ký cả ngày"
+      }, status: :ok
     end
+
+    # Kiểm tra trùng ngày nghỉ bù (leave_date + ca)
+    leave_date_str = leave_date.strftime("%Y-%m-%d")
+    existing_leave = Shiftissue
+      .joins(shiftselection: :scheduleweek)
+      .where(scheduleweeks: { user_id: user_id })
+      .where(stype: 'COMPENSATORY-LEAVE', status: %w[PENDING APPROVED])
+      .where(us_start: leave_date_str)
+      .pluck(:us_end)
+
+    if l_target_shift_id.to_s == "-1"
+      if existing_leave.any?
+        return render json: {
+          success: false,
+          error: "Ngày nghỉ bù #{leave_date.strftime('%d/%m/%Y')} đã có đơn khác. Không thể đăng ký cả ngày"
+        }, status: :ok
+      end
+    else
+      if existing_leave.include?("-1") || existing_leave.include?(l_target_shift_id.to_s)
+        return render json: {
+          success: false,
+          error: "Ca này của ngày nghỉ bù #{leave_date.strftime('%d/%m/%Y')} đã được đăng ký"
+        }, status: :ok
+      end
+    end
+
+    leave_shift_name = l_target_shift_id.to_s == "-1" ? "Cả ngày" : (Workshift.find_by(id: l_target_shift_id)&.name || "N/A")
     status_text = case shift.is_day_off
-                    when "OFF" then "Ngày nghỉ theo kế hoạch làm việc"
-                    when "HOLIDAY" then "Ngày nghỉ lễ"
-                    when "ON-LEAVE" then "Ngày nghỉ phép"
-                  end  
+                  when "OFF"      then "Ngày nghỉ theo kế hoạch làm việc"
+                  when "HOLIDAY"  then "Ngày nghỉ lễ"
+                  when "ON-LEAVE" then "Ngày nghỉ phép"
+                  else "Ngày nghỉ"
+                  end
 
                     # Tạo Shiftissue
     begin
@@ -1095,6 +1149,82 @@ class AttendsController < ApplicationController
     end
   end
 
+  # @author: dat.nh
+  # @date: 13/03/2026
+  # @input: user_id, data
+  # @return: JSON response
+  # Method xử lý đăng ký tăng ca
+  def handle_overtime(user_id, data)
+    approver_id = data[:approver_id]
+    reason = data[:reason]
+    created_issues = []
+    errors = []
+  
+    Array(data[:overtime_shift_data]).each do |entry|
+      date = entry["date"] || entry[:date]
+      shift_ids = entry["shifts"] || entry[:shifts]
+
+      begin
+        date = date.is_a?(Date) ? date : Date.parse(date.to_s)
+      rescue ArgumentError
+        errors << "Ngày không hợp lệ: #{date}"
+        next
+      end
+
+      Array(shift_ids).each do |shift_id|
+        shift = find_shift(user_id, date, shift_id, include_day_off: true)
+        unless shift
+          errors << "Không tìm thấy ca làm việc với ID #{shift_id} vào ngày #{date}"
+          next
+        end
+
+        # Kiểm tra trùng đề xuất
+        exists = Shiftissue.exists?(
+          shiftselection_id: shift.id,
+          stype: "OVERTIME",
+          status: %w[PENDING APPROVED]
+        )
+        if exists
+          errors << "Đã tồn tại đề xuất tăng ca cho ca #{shift_id} vào ngày #{date}"
+          next
+        end
+
+        issue = Shiftissue.create(
+          shiftselection_id: shift.id,
+          stype: "OVERTIME",
+          status: "PENDING",
+          note: reason,
+          approved_by: approver_id,
+          us_start: shift.start_time,
+          us_end: shift.end_time,
+          docs: data[:file]
+        )
+        created_issues << {
+          issue_id: issue.id,
+          shiftselection_id: issue.shiftselection_id
+        } if issue.persisted?
+      end
+    end
+
+    if created_issues.any?
+      send_notify("OVERTIME", approver_id)
+      render json: {
+        success: true,
+        message: "Đã gửi đề xuất tăng ca",
+        created: created_issues,
+        errors: errors,
+        redirect_url: attends_path
+      }, status: :ok
+    else
+      render json: {
+        success: false,
+        error: "Không tạo được đề xuất nào.",
+        details: errors,
+        data_input: data
+      }, status: :ok
+    end
+  end
+
   # Xử lý đề xuất chỉnh sửa kế hoạch làm việc
   # @author: trong.lq
   # @date: 22/10/2025
@@ -1222,8 +1352,6 @@ class AttendsController < ApplicationController
     }, status: :ok
   end
 
-
-
   # Get list allow type request attend
   # @author: Dat Le
   # @date: 05/07/2025
@@ -1286,27 +1414,27 @@ class AttendsController < ApplicationController
   # @author: an.cdb
   # @date: 13/03/2026
   def get_compensatory_leaves
-  user_id = session[:user_id]
-  return render json: { result: [] } unless user_id
+    user_id = session[:user_id]
+    return render json: { result: [] } unless user_id
 
-  from_date = Date.current.beginning_of_week(:monday) - 1.month
-  to_date   = from_date + 3.months
+    from_date = Date.current.beginning_of_week(:monday) - 1.month
+    to_date   = from_date + 3.months
 
-  issues = Shiftissue
-    .joins(shiftselection: :scheduleweek)
-    .where(stype: 'COMPENSATORY-LEAVE', status: 'APPROVED')
-    .where(scheduleweeks: { user_id: user_id })
-    .where("shiftissues.us_start BETWEEN ? AND ?", from_date.to_s, to_date.to_s)
+    issues = Shiftissue
+      .joins(shiftselection: :scheduleweek)
+      .where(stype: 'COMPENSATORY-LEAVE', status: 'APPROVED')
+      .where(scheduleweeks: { user_id: user_id })
+      .where("shiftissues.us_start BETWEEN ? AND ?", from_date.to_s, to_date.to_s)
 
-  result = issues.map do |i|
-    {
-      date:    i.us_start.to_s,   # YYYY-MM-DD — ngày được nghỉ bù
-      session: 'ALL'              # us_end = workshift_id hoặc -1, tạm return ALL
-    }
+    result = issues.map do |i|
+      {
+        date:    i.us_start.to_s,   # YYYY-MM-DD — ngày được nghỉ bù
+        session: 'ALL'              # us_end = workshift_id hoặc -1, tạm return ALL
+      }
+    end
+
+    render json: { result: result }
   end
-
-  render json: { result: result }
-end
 
   # Fetch data attend by range date on calendar
   # @author: Trong Le
@@ -1945,7 +2073,7 @@ end
   #   end
   # end
 
-  def validate_attend_request_conditions(user_id, date, workshift_id,  request_type)
+  def validate_attend_request_conditions(user_id, date, workshift_id, request_type)
     # 1. Ngày không thuộc tháng hiện tại
     today = Time.zone.today
    # Chỉ cho phép tạo đề xuất cho tháng hiện tại hoặc tháng tiếp theo
@@ -1960,8 +2088,18 @@ end
     # 2. Tìm ca làm việc tại ngày đó
     shift = find_shift(user_id, date, workshift_id, include_day_off: true)
     return "Không có ca làm việc tại ngày #{date.strftime('%d/%m/%Y')}" unless shift
+
+    # @author: dat.nh - @date: 13/03/2026
+    # 3. Nếu là đề xuất tăng ca, chỉ được tạo nếu ngày đó là ngày nghỉ (OFF hoặc HOLIDAY)
+    if (request_type == "overtime") 
+      if shift.is_day_off != "OFF" && shift.is_day_off != "HOLIDAY"
+        return "Chỉ có thể tạo đề xuất làm thêm cho ngày nghỉ"
+      else
+        return true
+      end
+    end
   
-    # 3. Kiểm tra loại nghỉ
+    # 4. Kiểm tra loại nghỉ
     if shift.is_day_off == "OFF"
       return "Không thể tạo đề xuất vì là ngày nghỉ cố định"
     elsif shift.is_day_off == "HOLIDAY"

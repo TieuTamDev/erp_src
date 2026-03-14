@@ -332,7 +332,7 @@ class ShiftissuesController < ApplicationController
     # Tìm shiftselection(s) của ngày nghỉ bù
     target_shifts = Shiftselection
       .joins(:scheduleweek)
-      .where(scheduleweeks: { user_id: user_id, status: 'APPROVED' })
+      .where(scheduleweeks: { user_id: user_id, status: %w[PENDING APPROVED] })
       .where(work_date: leave_date)
 
     # Nếu chọn ca cụ thể (không phải -1 = cả ngày) thì lọc thêm theo workshift_id

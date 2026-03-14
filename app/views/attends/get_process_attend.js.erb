@@ -17,7 +17,11 @@
       # @date: 23/10/2025
       # Mapping tên hiển thị cho đề xuất chỉnh sửa kế hoạch làm việc
       "EDIT-PLAN" => "Chỉnh sửa kế hoạch làm việc",
-      "COMPENSATORY-LEAVE" => "Nghỉ bù"
+      "COMPENSATORY-LEAVE" => "Nghỉ bù",
+      # @author: dat.nh
+      # @date: 14/03/2026
+      # Thêm mapping cho loại đề xuất tăng ca
+      "OVERTIME" => "Tăng ca"
   }
 
   @shiftissue_pagin.each do |attend|
@@ -42,7 +46,30 @@
                   <td class='text-center' style='color:#{color_status[first.status]};vertical-align: middle;'><b>#{lib_translate("attendance.#{first.status}")}<b></td>
                   #{approval_btn}
                 </tr>"
-    elsif attend.stype != "WORK-TRIP"
+    # @author: dat.nh @date: 14/03/2026
+    # Thêm phần hiển thị chi tiết ngày tháng cho đề xuất tăng ca
+    elsif attend.respond_to?(:grouped_overtimes)
+      attends = attend.grouped_overtimes
+      first = attends.min_by(&:work_date)
+      last  = attends.max_by(&:work_date)
+      note = first.note.present? ? first.note : "Không có"
+
+      checkbox = first.status == "PENDING" ? "<input data-check-select name='check-box-#{first.id}' onchange='onChecShilfIssue(this)' class='form-check-input' type='checkbox' value='#{first.id}'/>" : ""
+      approval_btn = first.status == "PENDING" ? "<td class='text-center'><button class='btn btn-primary me-2' onclick='clickApprovalOne(#{first.id})'>Duyệt</button></td>" : ""
+
+      rows << " <tr data-row-id='#{first.id}' style='vertical-align: middle;'>
+                  <td class='text-center'>#{checkbox}</td>
+                  <td><b>#{first.sid}</b></td>
+                  <td><b>#{first.user_name}</b></td>
+                  <td>#{stypes[first.stype]}</td>
+                  <td>#{(first.work_date + 1.day).strftime("%d/%m/%Y")} - #{(last.work_date + 1.day).strftime("%d/%m/%Y")}</td>
+                  <td><span style='color: #738ffb;'><b>Tăng ca</b></span></td>
+                  <td>#{first.updated_at.strftime("%d/%m/%Y")}</td>
+                  <td><b>#{note}</b></td>
+                  <td class='text-center' style='color:#{color_status[first.status]};vertical-align: middle;'><b>#{lib_translate("attendance.#{first.status}")}<b></td>
+                  #{approval_btn}
+                </tr>"
+    elsif attend.stype != "WORK-TRIP" && attend.stype != "OVERTIME"
       checkbox = attend.status == "PENDING" ? "<input data-check-select name='check-box-#{attend.id}' onchange='onChecShilfIssue(this)' class='form-check-input' type='checkbox' value='#{attend.id}'/>" : ""
       approval_btn = attend.status == "PENDING" ? "<td class='text-center'><button class='btn btn-primary me-2' onclick='clickApprovalOne(#{attend.id})'>Duyệt</button></td>" : ""
       # Code cũ - @author: trong.lq @date: 23/10/2025
@@ -128,7 +155,25 @@ $('[name="check_all"]').prop("checked",false);
           }
         }
       )
-    elsif item.stype != "WORK-TRIP"
+    # @author: dat.nh @date: 14/03/2026
+    # Thêm phần hiển thị chi tiết ngày tháng cho đề xuất tăng ca
+    elsif item.respond_to?(:grouped_overtimes)
+      first = item.grouped_overtimes.min_by(&:work_date)
+      last  = item.grouped_overtimes.max_by(&:work_date)
+      shiftissues_array << item.as_json.merge(
+        "stype_text" => stypes[item.stype],
+        "start_date" => first.work_date,
+        "end_date"   => last.work_date,
+        "grouped_overtimes" => item.grouped_overtimes.map { |overtime|
+          {
+            "work_date" => overtime.work_date,
+            "start_time" => overtime.start_time,
+            "end_time" => overtime.end_time,
+            "note" => overtime.note
+          }
+        }
+      )
+    elsif item.stype != "WORK-TRIP" && item.stype != "OVERTIME"
       shiftissues_array << item.as_json.merge("stype_text" => stypes[item.stype])
     end
   end
