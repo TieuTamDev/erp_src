@@ -39,7 +39,7 @@
                   <td><b>#{first.sid}</b></td>
                   <td><b>#{first.user_name}</b></td>
                   <td>#{stypes[first.stype]}</td>
-                  <td>#{(first.work_date + 1.day).strftime("%d/%m/%Y")} - #{(last.work_date + 1.day).strftime("%d/%m/%Y")}</td>
+                  <td>#{attend.stype == 'COMPENSATORY-LEAVE' ? attend.us_start : (attend.work_date + 1.day).strftime(\"%d/%m/%Y\") + \" #{shift_name}: #{attend.start_time} - #{attend.end_time}\"}</td>
                   <td><span style='color: #738ffb;'><b>Đi công tác</b></span></td>
                   <td>#{first.updated_at.strftime("%d/%m/%Y")}</td>
                   <td><b>#{note}</b></td>
