@@ -795,7 +795,6 @@
     let get_holidays = "<%= @CSVC_PATH + "api/v1/mapi_utils/get_holidays?organization=" + @uorg_scode %>";
     let get_user_on_leaves = "<%= @ERP_PATH + "api/v1/mapi_utils/get_employee_leave_days?id=" + @id.to_s %>";
     let get_available_dates = "<%= @ERP_PATH + "api/v1/mapi_utils/get_available_dates" %>";
-    let get_compensatory_leaves = "<%= get_compensatory_leaves_attends_path %>"; //@author: an.cdb-13032026
     let get_campus = "<%= @CSVC_PATH + "api/v1/mapi_utils/get_all_campuses" %>";
     let get_teaching_schedules = "<%= @PMDT_PATH + "api/v1/mapi_utils/get_teaching_schedules?user_id=" + @id.to_s %>";
     let save_scheduleweeks = "<%= scheduleweeks_save_scheduleweeks_path %>";
