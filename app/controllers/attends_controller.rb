@@ -120,9 +120,9 @@ class AttendsController < ApplicationController
     week_num = params[:week_num].to_i rescue DateTime.now.cweek
     year = params[:year].to_i rescue DateTime.now.year
     request_type = params[:request_type].to_s.strip
-    search = params[:search].to_s.strip  
-    page = params[:page].to_i > 0 ? params[:page].to_i : 1  
-    per_page = params[:per_page].to_i > 0 ? params[:per_page].to_i : 10  
+    search = params[:search].to_s.strip
+    page = params[:page].to_i > 0 ? params[:page].to_i : 1
+    per_page = params[:per_page].to_i > 0 ? params[:per_page].to_i : 10
     start_date = Date.commercial(year, week_num, 1)
     end_date = Date.commercial(year, week_num, 7)
 

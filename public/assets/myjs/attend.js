@@ -552,6 +552,120 @@ function updateRemoveIcons () {
     }
 }
 
+/**
+ * @author: dat.nh
+ * @date: 16/03/2026
+ * Hàm kiểm tra xem có nên disable dropdown chọn địa điểm cho ô ca làm việc hay không, dựa trên class của ô đó
+ * @param {HTMLElement} td 
+ * @returns {boolean}
+ */
+function shouldDisableLocationForCell(td) {
+    if (!td) return true;
+    return td.classList.contains('pending') ||
+        td.classList.contains('day-off') ||
+        td.classList.contains('off-holiday') ||
+        td.classList.contains('off-leave') ||
+        td.classList.contains('off-compensatory') ||
+        td.classList.contains('off-teaching') ||
+        td.classList.contains('teaching-schedule');
+}
+
+/**
+ * @author: dat.nh
+ * @date: 16/03/2026
+ * Hàm set trạng thái disabled cho dropdown chọn địa điểm trong ô ca làm việc, bao gồm cả toggle và các checkbox bên trong
+ * @param {HTMLElement} wrapper 
+ * @param {boolean} isDisabled 
+ * @returns {void}
+ */
+function setLocationDropdownDisabledState(wrapper, isDisabled) {
+    if (!wrapper) return;
+    const toggle = wrapper.querySelector('.location-dropdown-toggle');
+    const checkboxes = wrapper.querySelectorAll('input[type="checkbox"]');
+    if (toggle) {
+        toggle.disabled = !!isDisabled;
+        toggle.style.opacity = isDisabled ? '0.6' : '';
+        toggle.style.cursor = isDisabled ? 'not-allowed' : '';
+        if (isDisabled) {
+            toggle.setAttribute('aria-expanded', 'false');
+        }
+    }
+    checkboxes.forEach(cb => {
+        cb.disabled = !!isDisabled;
+    });
+    const menu = wrapper.querySelector('.location-dropdown-menu');
+    if (menu && isDisabled) {
+        menu.classList.remove('show');
+        menu.classList.add('hide');
+        wrapper.classList.remove('is-open');
+    }
+}
+
+/**
+ * @author: dat.nh
+ * @date: 16/03/2026
+ * Hàm đồng bộ trạng thái dropdown chọn địa điểm cho ô ca làm việc
+ * @param {HTMLElement} td 
+ * @returns {void}
+ */
+function syncLocationStateForCell(td) {
+    if (!td) return;
+    const wrapper = td.querySelector('[data-dropdown-id]');
+    if (!wrapper) return;
+    const disabledByClass = shouldDisableLocationForCell(td);
+    const disabledByInput = !!td.querySelector('input[type="text"]:disabled');
+    setLocationDropdownDisabledState(wrapper, disabledByClass || disabledByInput);
+}
+
+/**
+ * @author: dat.nh
+ * @date: 16/03/2026
+ * Hàm tìm phần tử cha có thể cuộn dọc
+ * @param {HTMLElement} el 
+ * @returns {HTMLElement|null}
+ */
+function getScrollableParent(el) {
+    let parent = el?.parentElement;
+    while (parent) {
+        const style = window.getComputedStyle(parent);
+        const canScrollY = /(auto|scroll)/.test(style.overflowY || '');
+        if (canScrollY && parent.scrollHeight > parent.clientHeight) return parent;
+        parent = parent.parentElement;
+    }
+    return null;
+}
+
+/**
+ * @author: dat.nh
+ * @date: 16/03/2026
+ * Hàm đảm bảo dropdown chọn địa điểm hiển thị đầy đủ trong viewport
+ * @param {HTMLElement} wrapper 
+ * @param {HTMLElement} menu 
+ * @returns {void}
+ */
+function ensureLocationDropdownVisible(wrapper, menu) {
+    if (!wrapper || !menu || !menu.classList.contains('show')) return;
+
+    const scrollParent = getScrollableParent(wrapper) ||
+        document.querySelector('#workshiftModal .modal-body') ||
+        document.scrollingElement;
+    if (!scrollParent) return;
+
+    const menuRect = menu.getBoundingClientRect();
+    const parentRect = scrollParent === document.scrollingElement
+        ? { top: 0, bottom: window.innerHeight }
+        : scrollParent.getBoundingClientRect();
+
+    const overflowBottom = menuRect.bottom - parentRect.bottom;
+    if (overflowBottom > 0) {
+        if (scrollParent === document.scrollingElement) {
+            window.scrollBy({ top: overflowBottom + 12, behavior: 'smooth' });
+        } else {
+            scrollParent.scrollTop += overflowBottom + 12;
+        }
+    }
+}
+
 /* ---------- FECTH DATA SCHEDULE WEEK ---------- */
 function buildWeekFromAPI (monday, ws) {
     const id = `week-${monday.format('YYYY-MM-DD')}`;
@@ -820,7 +934,14 @@ function buildWeekTable(id, monday, detail = [], status = 'TEMP', reason = '') {
         const location = td.getAttribute('data-location') || '';
         
         if (dropdownId) {
-            const isDisabled = td.querySelector('input')?.disabled || false;
+            /**
+             * @author: dat.nh
+             * @date: 16/03/2026
+             * Logic disable dropdown chọn địa điểm: nếu ô ca làm việc có class thuộc dạng disable 
+             * (pending, day-off, off-holiday, off-leave, off-compensatory, off-teaching, teaching-schedule) 
+             * hoặc có input bị disabled thì dropdown cũng bị disable
+             */
+            const isDisabled = shouldDisableLocationForCell(td) || !!td.querySelector('input[type="text"]:disabled');
             initLocationDropdown(dropdownId, location, isDisabled);
         }
     });
@@ -860,7 +981,8 @@ function buildWeekTable(id, monday, detail = [], status = 'TEMP', reason = '') {
         tg.onchange = e => {
             const tr = e.target.closest('tr');
             const td = e.target.closest('td');
-            const tdWorkshift = td.previousElementSibling
+            const tdWorkshift = td.previousElementSibling;
+            if (!tdWorkshift) return;
             const ymd = tr.dataset.date;
             const checked = e.target.checked;
             const isHolidayRow = !!holidayMap[ymd];
@@ -871,6 +993,13 @@ function buildWeekTable(id, monday, detail = [], status = 'TEMP', reason = '') {
             } else {
                 tdWorkshift.classList.toggle('day-off', checked);
             }
+            /**
+             * @author: dat.nh
+             * @date: 16/03/2026
+             * Khi toggle nghỉ thì cần đồng bộ lại trạng thái disabled của dropdown chọn địa điểm, 
+             * vì toggle nghỉ sẽ thêm bớt class ảnh hưởng đến trạng thái disabled của dropdown
+             */
+            syncLocationStateForCell(tdWorkshift);
             updateWeeklyHoursUI();
         };
     });
@@ -911,6 +1040,14 @@ function buildWeekTable(id, monday, detail = [], status = 'TEMP', reason = '') {
                 tgl.checked  = shouldCheck && !isLeaveByDetail; // không bật cho ca nghỉ phép
                 tgl.disabled = true;
             });
+
+            /**
+             * @author: dat.nh
+             * @date: 16/03/2026
+             * Khi tuần ở trạng thái PENDING hoặc APPROVED thì dropdown chọn địa điểm của tất cả ca trong tuần đó đều bị disable, 
+             * nên cần đồng bộ lại trạng thái disabled của dropdown cho tất cả ca trong tuần đó
+             */
+            tr.querySelectorAll('td.row-workshift').forEach(td => syncLocationStateForCell(td));
         });
         updateWeeklyHoursUI();
     }
@@ -1067,7 +1204,7 @@ function applyTemplateToWeek () {
                 || row.querySelector(`td.row-workshift[data-shift-code="${s.code}"]`);
             if (!td) return;
 
-            if (td.classList.contains('off-holiday') || td.classList.contains('off-leave') || td.classList.contains('off-teaching'))   return;
+            if (td.classList.contains('off-holiday') || td.classList.contains('off-leave') || td.classList.contains('off-teaching') || td.classList.contains('day-off') || td.classList.contains('off-compensatory'))   return;
 
             const tplStart = document.getElementById(`tpl-${s.code}-start`).value;
             const tplEnd   = document.getElementById(`tpl-${s.code}-end`).value;
@@ -1147,6 +1284,13 @@ function validateAll (btn, activeId) {
 
     const detailedErrors = [];
     const uniqueGlobalErrors = new Set();
+    /**
+     * @author: dat.nh
+     * @date: 16/03/2026
+     * Cờ để kiểm tra xem có tồn tại lỗi nào liên quan đến việc chưa chọn địa điểm hay không, 
+     * nếu có thì sẽ hiển thị một thông báo chung ở đầu form thay vì hiển thị lỗi riêng lẻ trên từng ô ca làm việc
+     */
+    let hasLocationMissing = false;
     let allOK = true;
 
     // Xác định tuần cần validate
@@ -1171,6 +1315,13 @@ function validateAll (btn, activeId) {
         pane.querySelectorAll('tbody tr').forEach(row => {
             // clear lỗi cũ
             row.querySelectorAll('input[type="text"]').forEach(i => i.classList.remove('is-invalid'));
+            /**
+             * @author: dat.nh
+             * @date: 16/03/2026
+             * Khi bắt đầu validate thì sẽ xóa hết class is-invalid trên tất cả dropdown chọn địa điểm, 
+             * để reset lại trạng thái hiển thị của dropdown
+             */
+            row.querySelectorAll('.location-dropdown-toggle').forEach(i => i.classList.remove('is-invalid'));
 
             const ymd = row.getAttribute('data-date');
             const isHoliday = !!holidayMap?.[ymd];
@@ -1198,6 +1349,7 @@ function validateAll (btn, activeId) {
 
                 const isOffHoliday = td?.classList.contains('off-holiday');
                 const isOffLeave   = td?.classList.contains('off-leave');
+                const isOffCompensatory = td?.classList.contains('off-compensatory');
                 const isTeachingSchedule   = td?.classList.contains('teaching-schedule');
                 const isOffToggle  = td?.classList.contains('day-off');
 
@@ -1214,8 +1366,25 @@ function validateAll (btn, activeId) {
                 }
 
                 // Ca bị chặn nếu là 1 trong 3 loại
-                const blocked = isOffHoliday || isOffLeave || isOffToggle || isTeachingSchedule;
+                const blocked = isOffHoliday || isOffLeave || isOffCompensatory || isOffToggle || isTeachingSchedule;
                 if (blocked) return;
+                /**
+                 * @author: dat.nh
+                 * @date: 16/03/2026
+                 * Kiểm tra validate chọn địa điểm: nếu là nút SUBMIT thì mới kiểm tra
+                 */
+                if (btn === 'SUBMIT') {
+                    const dropdownWrapper = td?.querySelector('[data-dropdown-id]');
+                    const selectedValues = (dropdownWrapper && typeof dropdownWrapper.getSelectedValues === 'function')
+                        ? dropdownWrapper.getSelectedValues()
+                        : [];
+                    if (!selectedValues.length) {
+                        dayOK = false;
+                        allOK = false;
+                        hasLocationMissing = true;
+                        td?.querySelector('.location-dropdown-toggle')?.classList.add('is-invalid');
+                    }
+                }
 
                 enabledShifts += 1;
 
@@ -1315,10 +1484,21 @@ function validateAll (btn, activeId) {
         // }
     });
 
+    /**
+     * @author: dat.nh
+     * @date: 16/03/2026
+     * Nếu có lỗi nào liên quan đến việc chưa chọn địa điểm thì sẽ hiển thị một thông báo chung ở đầu form
+     */
+    if (hasLocationMissing) {
+        showAlert('Cần chọn ít nhất 1 địa điểm chấm công', 'warning');
+    }
+
     const allErrors = [...uniqueGlobalErrors, ...detailedErrors];
     if (!allOK) {
-        alertBox.classList.remove('d-none');
-        alertBox.innerHTML = allErrors.join('<br>');
+        if (allErrors.length) {
+            alertBox.classList.remove('d-none');
+            alertBox.innerHTML = allErrors.join('<br>');
+        }
     }
     return allOK;
 }
@@ -1742,12 +1922,7 @@ function initLocationDropdown(wrapperId, defaultValue, isDisabled = false) {
     const checkboxes = menu.querySelectorAll('input[type="checkbox"]');
 
     // Disable dropdown nếu cần
-    if (isDisabled) {
-        toggle.disabled = true;
-        toggle.style.opacity = '0.6';
-        toggle.style.cursor = 'not-allowed';
-        checkboxes.forEach(cb => cb.disabled = true);
-    }
+    setLocationDropdownDisabledState(wrapper, isDisabled);
 
     // Hàm cập nhật text hiển thị (giới hạn độ dài để tránh thay đổi layout)
     const updateSelectedText = () => {
@@ -1813,6 +1988,9 @@ function initLocationDropdown(wrapperId, defaultValue, isDisabled = false) {
         menu.classList.toggle('hide');
 
         wrapper.classList.toggle('is-open', menu.classList.contains('show'));
+        if (menu.classList.contains('show')) {
+            window.requestAnimationFrame(() => ensureLocationDropdownVisible(wrapper, menu));
+        }
     });
 
     // Xử lý sự kiện checkbox
