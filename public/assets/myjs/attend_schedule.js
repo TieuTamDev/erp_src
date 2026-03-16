@@ -519,7 +519,9 @@ function loadMyShifts(date) {
       }
       $sel.append('<option value="" disabled selected>— Chọn ca —</option>');
       shifts.forEach(s => {
-        $sel.append(`<option value="${s.id}">${s.shift_name} (${s.work_time})</option>`);
+        $sel.append(
+          $(`<option value="${s.workshift_id}" data-shift-id="${s.id}">${s.shift_name} (${s.work_time})</option>`)
+        );
       });
     },
     error: function() {
@@ -533,15 +535,19 @@ function loadTargetShifts(excludeWorksiftId) {
   $sel.empty();
   $sel.append('<option value="" disabled selected>— Chọn ca muốn nhận —</option>');
 
-  // Thêm option "Cả ngày"
-  $sel.append('<option value="ALL">Cả ngày</option>');
+  const origDate  = $("#original-date").val();
+  const targDate  = $("#request-date-new").val();
+  const isSameDay = origDate && targDate && origDate === targDate;
 
-  // Lấy từ attendWorkshifts đã load sẵn
   (attendWorkshifts || []).forEach(function(ws) {
-    // Bỏ ca mình đang có
     if (String(ws.id) === String(excludeWorksiftId)) return;
     $sel.append(`<option value="${ws.id}">${ws.label} (${ws.min} - ${ws.max})</option>`);
   });
+
+  // Chỉ cho chọn "Cả ngày" khi khác ngày
+  if (!isSameDay) {
+    $sel.append('<option value="ALL">Cả ngày</option>');
+  }
 }
 
 //lấy người có thể đổi ca.
@@ -727,6 +733,15 @@ function initFlatpickrWithAvailableDates(attendanceForCalendar, availableDates) 
       const selectedDate = selectedDates[0];
       const weekNum = getWeekNumber(selectedDate);
       document.getElementById("week_num").value = weekNum;
+
+      // Load ca của mình khi chọn ngày đổi ca - @author: an.cdb - @date: 16/03/2026
+      const activeType = document.querySelector('input[name="request_type"]:checked')?.value;
+      if (activeType === "shift-change" && dateStr) {
+        loadMyShifts(dateStr);
+        updateShiftChangePreview();
+        const targDate = $("#request-date-new").val() || dateStr;
+        loadSwapCandidates(dateStr, targDate);
+      }
     },
 
     onReady: function (selectedDates) {
@@ -1600,6 +1615,13 @@ const toggleRequestSections = (type) => {
     if (swapSel) {
       swapSel.disabled = false;
       swapSel.required = true;
+          // Load ca ngay khi chuyển sang loại "Đổi ca"
+      const origDate = $("#original-date").val();
+      if (origDate) {
+        loadMyShifts(origDate);
+        const targDate = $("#request-date-new").val() || origDate;
+        loadSwapCandidates(origDate, targDate);
+      }
       if (!swapSel.value && !swapSel.querySelector('option[value=""]')) {
         const opt = document.createElement("option");
         opt.value = "";

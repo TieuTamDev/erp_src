@@ -1357,6 +1357,7 @@ class AttendsController < ApplicationController
 
       {
         id: sel.id,
+        workshift_id: sel.workshift_id,
         shift_name: workshift&.name || "",
         shift_type: workshift&.start_time.to_s < "12:00" ? "MORNING" : "AFTERNOON",
         work_time: "#{workshift&.start_time || ''} - #{workshift&.end_time || ''}",
