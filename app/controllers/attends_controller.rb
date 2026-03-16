@@ -164,9 +164,11 @@ class AttendsController < ApplicationController
     all_results = base_query.order('shiftissues.created_at DESC, shiftissues.id DESC')
 
     work_trip_requests = all_results.select { |item| item.stype == "WORK-TRIP" }
-    other_requests = all_results.reject { |item| item.stype == "WORK-TRIP" }
+    overtime_requests = all_results.select { |item| item.stype == "OVERTIME" }
+    other_requests = all_results.reject { |item| ["WORK-TRIP", "OVERTIME"].include?(item.stype) }
 
     grouped_work_trips = work_trip_requests.group_by { |item| [item.sid, item.created_at] }
+    grouped_overtimes = overtime_requests.group_by { |item| [item.sid, item.created_at] }
 
     final_results = []
 
@@ -181,6 +183,18 @@ class AttendsController < ApplicationController
       representative.define_singleton_method(:work_days_count) { work_dates.length }
       representative.define_singleton_method(:is_one_day_trip) { work_dates.length == 1 }
       
+      final_results << representative
+    end
+
+    grouped_overtimes.each do |(sid, created_date), attends|
+      representative = attends.min_by(&:work_date)
+
+      representative.define_singleton_method(:grouped_overtimes) { attends }
+      representative.define_singleton_method(:sort_key) { representative.created_at }
+
+      work_dates = attends.map(&:work_date).uniq
+      representative.define_singleton_method(:work_days_count) { work_dates.length }
+
       final_results << representative
     end
 
@@ -221,6 +235,8 @@ class AttendsController < ApplicationController
       'UPDATE-SHIFT'
     when 'edit-plan'
       'EDIT-PLAN'
+    when 'compensatory-leave'
+      'COMPENSATORY-LEAVE'
     when "overtime"
       'OVERTIME'
     else
@@ -978,8 +994,12 @@ class AttendsController < ApplicationController
       return render json: { success: false, error: "Ngày không hợp lệ", result: [] }, status: :ok
     end
 
-    my_shifts      = shifts_in_day(user_id, original_date)
-    partner_shifts = shifts_in_day(partner_id, target_date)
+    #Bổ sung khai báo cho phần ca để check đổi ca (shifft_change) - @author: an.cdb - @date:16/03/2026
+    my_workshift_id      = params[:my_workshift_id].present? ? params[:my_workshift_id].to_i : nil
+    partner_workshift_id = params[:partner_workshift_id].present? ? params[:partner_workshift_id].to_i : nil
+
+    my_shifts      = shifts_in_day(user_id, original_date, my_workshift_id)
+    partner_shifts = shifts_in_day(partner_id, target_date, partner_workshift_id)
 
     return render json: { success: false, error: "Bạn không có ca làm trong ngày #{original_date}", result: [] }, status: :ok if my_shifts.empty?
     return render json: { success: false, error: "Đối tác không có ca làm trong ngày #{target_date}", result: [] }, status: :ok if partner_shifts.empty?
@@ -1308,7 +1328,7 @@ class AttendsController < ApplicationController
   # @author: trong Le
   # @date: 28/07/2025
   def get_data_date_attend
-    user_id = session[:user_id]
+    user_id = params[:user_id].present? ? params[:user_id] : session[:user_id]
     date = params[:date]
 
     return render json: { error: 'Invalid date' }, status: 400 unless user_id.present? && date.present?
@@ -1318,17 +1338,17 @@ class AttendsController < ApplicationController
     end_time   = work_date.end_of_day
     return render json: { error: 'Invalid date format' }, status: 400 if work_date.nil?
 
-    # Lấy danh sách ca trong ngày
+    # Lấy danh sách ca trong ngày - join qua scheduleweek vì Shiftselection không có user_id - @author:an.cdb - @date: 16/03/2026
     shiftselections = Shiftselection
+                        .joins(:scheduleweek)
                         .includes(:workshift)
-                        .where(user_id: user_id, work_date:  start_time..end_time)
-                        .where(status: %w[PENDING APPROVED])
+                        .where(scheduleweeks: { user_id: user_id, status: %w[PENDING APPROVED] })
+                        .where(work_date: work_date.beginning_of_day..work_date.end_of_day)
 
     # Dữ liệu chấm công
     shift_ids = shiftselections.map(&:id)
     attends = Attend
-                .includes(:attenddetails)
-                .where(user_id: user_id, shiftselection_id: shift_ids)
+                .where(shiftselection_id: shift_ids)
                 .index_by(&:shiftselection_id)
 
     shifts = shiftselections.map do |sel|
@@ -2050,12 +2070,14 @@ class AttendsController < ApplicationController
   end
 
   # Tìm ca trong ngày theo user qua scheduleweeks
-  def shifts_in_day(user_id, date)
-    Shiftselection
-      .joins(:scheduleweek)
-      .where(scheduleweeks: { user_id: user_id })
-      .where(work_date: date.beginning_of_day..date.end_of_day)
-      .to_a
+  # Cập nhật để truy vấn ca trong ngày - @author:an.cdb - @date: 16/03/2026
+  def shifts_in_day(user_id, date, workshift_id = nil)
+    q = Shiftselection
+          .joins(:scheduleweek)
+          .where(scheduleweeks: { user_id: user_id })
+          .where(work_date: date.beginning_of_day..date.end_of_day)
+    q = q.where(workshift_id: workshift_id) if workshift_id
+    q.to_a
   end
 
   def local_date(datetime)
