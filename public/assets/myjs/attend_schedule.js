@@ -518,6 +518,7 @@ function loadMyShifts(date) {
         return;
       }
       $sel.append('<option value="" disabled selected>— Chọn ca —</option>');
+      $sel.append('<option value="ALL">Cả ngày</option>');
       shifts.forEach(s => {
         $sel.append(
           $(`<option value="${s.workshift_id}" data-shift-id="${s.id}">${s.shift_name} (${s.work_time})</option>`)
@@ -529,6 +530,24 @@ function loadMyShifts(date) {
     }
   });
 }
+
+function resetShiftChangeSelects() {
+  // Reset "Muốn đổi ca"
+  $("#my-workshift-select").empty()
+    .append('<option value="" disabled selected>— Chọn ngày trước —</option>');
+
+  // Reset "Thành ca"
+  $("#target-workshift-select").empty()
+    .append('<option value="" disabled selected>— Chọn ca muốn nhận —</option>');
+
+  // Reset "Đổi với"
+  $("#swap-with-user-id").empty()
+    .append('<option disabled selected>Chưa chọn ngày</option>')
+    .prop("disabled", true).trigger("change");
+
+  // Ẩn preview
+  $("#shift-change-preview").addClass("d-none");
+}
 // Ca muốn nhận
 function loadTargetShifts(excludeWorksiftId) {
   const $sel = $("#target-workshift-select");
@@ -538,15 +557,22 @@ function loadTargetShifts(excludeWorksiftId) {
   const origDate  = $("#original-date").val();
   const targDate  = $("#request-date-new").val();
   const isSameDay = origDate && targDate && origDate === targDate;
+  const isAll     = String(excludeWorksiftId) === "ALL";
 
-  (attendWorkshifts || []).forEach(function(ws) {
-    if (String(ws.id) === String(excludeWorksiftId)) return;
-    $sel.append(`<option value="${ws.id}">${ws.label} (${ws.min} - ${ws.max})</option>`);
-  });
-
-  // Chỉ cho chọn "Cả ngày" khi khác ngày
-  if (!isSameDay) {
-    $sel.append('<option value="ALL">Cả ngày</option>');
+  if (isAll) {
+    // Muốn đổi "Cả ngày" -> Thành ca chỉ được "Cả ngày", bắt buộc khác ngày
+    if (!isSameDay) {
+      $sel.append('<option value="ALL">Cả ngày</option>');
+    } else {
+      $sel.append('<option value="" disabled>Phải chọn ngày khác khi đổi cả ngày</option>');
+    }
+  } else {
+    // Muốn đổi ca cụ thể -> chỉ hiện các ca, không có "Cả ngày"
+    (attendWorkshifts || []).forEach(function(ws) {
+      // Cùng ngày: bỏ ca trùng. Khác ngày: hiện tất cả
+      if (isSameDay && String(ws.id) === String(excludeWorksiftId)) return;
+      $sel.append(`<option value="${ws.id}">${ws.label} (${ws.min} - ${ws.max})</option>`);
+    });
   }
 }
 
@@ -556,7 +582,19 @@ function loadSwapCandidates(originalDate, targetDate) {
   const $sel = $("#swap-with-user-id");
   if (type !== "shift-change") return;
 
-  if (!originalDate) {
+  const myWsVal = $("#my-workshift-select").val();
+  const trgWsVal = $("#target-workshift-select").val();
+
+  // Validate: nếu chọn "Cả ngày" mà không chọn ngày hoặc cùng ngày → chặn
+  const isSameDay = originalDate && targetDate && originalDate === targetDate;
+  if (trgWsVal === "ALL" && isSameDay) {
+    $sel.empty()
+        .append("<option disabled selected>Không thể chọn 'Cả ngày' khi cùng ngày đổi ca</option>")
+        .prop("disabled", true).trigger("change");
+    return;
+  }
+
+    if (!originalDate) {
     $sel
       .empty()
       .append("<option disabled selected>Chưa chọn ngày</option>")
@@ -580,6 +618,17 @@ function loadSwapCandidates(originalDate, targetDate) {
     return;
   }
 
+
+  // Khi trgWsVal === "ALL" thì không truyền target_workshift_id (để API hiểu là "tất cả ca")
+  const dataPayload = {
+    user_id: CURRENT_USER_ID,
+    original_date: originalDate,
+    target_date: targetDate || originalDate,
+    my_workshift_id: myWsVal || "",
+    target_workshift_id: (trgWsVal && trgWsVal !== "ALL") ? trgWsVal : "",
+    require_full_day: trgWsVal === "ALL" ? "1" : "0", 
+  };
+
   $sel
     .prop("disabled", true)
     .empty()
@@ -590,13 +639,14 @@ function loadSwapCandidates(originalDate, targetDate) {
     url: ERP_PATH + "/api/v1/mapi_utils/attends/available_swap_candidates",
     method: "POST", // PHẢI LÀ POST
     dataType: "json",
-    data: {
-      user_id: CURRENT_USER_ID,
-      original_date: originalDate,
-      target_date: targetDate || originalDate,
-      my_workshift_id: $("#my-workshift-select").val() || "",
-      target_workshift_id: $("#target-workshift-select").val() || "",   
-    },
+    data: dataPayload,
+    // {
+    //   user_id: CURRENT_USER_ID,
+    //   original_date: originalDate,
+    //   target_date: targetDate || originalDate,
+    //   my_workshift_id: $("#my-workshift-select").val() || "",
+    //   target_workshift_id: $("#target-workshift-select").val() || "",   
+    // },
     success: function (res) {
       // Chuẩn hoá về mảng
       const raw = (res && (res.data ?? res.result)) ?? res;
@@ -735,8 +785,10 @@ function initFlatpickrWithAvailableDates(attendanceForCalendar, availableDates) 
       document.getElementById("week_num").value = weekNum;
 
       // Load ca của mình khi chọn ngày đổi ca - @author: an.cdb - @date: 16/03/2026
-      const activeType = document.querySelector('input[name="request_type"]:checked')?.value;
+      const activeType = document.getElementById("request-type")?.value;
       if (activeType === "shift-change" && dateStr) {
+        // Reset các trường phụ thuộc trước khi load lại
+        resetShiftChangeSelects();
         loadMyShifts(dateStr);
         updateShiftChangePreview();
         const targDate = $("#request-date-new").val() || dateStr;
@@ -755,6 +807,7 @@ function initFlatpickrWithAvailableDates(attendanceForCalendar, availableDates) 
         instance.setDate(instance.config.defaultDate || "today", true);
     },
   });
+
   let suppressOnChange = false;
   let tempRange = [];
   let isInRangeState = false;
@@ -1946,13 +1999,22 @@ document
 // @author:an.cdb - @date:16/03/2026
 $("#my-workshift-select").on("change", function() {
   const myWsId = $(this).val();
+  const origDate = $("#original-date").val();
+  const targDate = $("#request-date-new").val();
+
+  // Nếu chọn "Cả ngày" mà cùng ngày → cảnh báo và reset ngày nhận
+  if (myWsId === "ALL" && targDate && targDate === origDate) {
+    alert("Đổi cả ngày phải chọn ngày nhận khác ngày đổi.");
+    $("#request-date-new").val("");
+    loadTargetShifts("ALL");
+    return;
+  }
+
   loadTargetShifts(myWsId);
   updateShiftChangePreview();
-  const origDate = $("#original-date").val();
-  const targDate = $("#request-date-new").val() || origDate;
-  if (origDate) loadSwapCandidates(origDate, targDate);
+  const finalTargDate = $("#request-date-new").val() || origDate;
+  if (origDate) loadSwapCandidates(origDate, finalTargDate);
 });
-
 // Khi chọn "Thành ca" → cập nhật preview + reload candidates
 $("#target-workshift-select").on("change", function() {
   updateShiftChangePreview();
@@ -1966,14 +2028,23 @@ $("#swap-with-user-id").on("change", function() {
   const uid = $(this).val();
   const targDate = $("#request-date-new").val() || $("#original-date").val();
   if (!targDate) return;
-  loadPartnerShifts(uid, targDate);
 });
 $("#request-date-new").on("change", function () {
   const targetDate = this.value;
   const $sec = $("#section-shift-change"); // <-- scope đúng section
   const originalDate =
     $sec.find('input[name="original_date"]').val() || targetDate;
-    updateShiftChangePreview();
+  // Reload ca của mình (giữ lại selection) và re-validate cùng ngày
+  if (originalDate && originalDate.trim() !== '') {
+    loadMyShifts(originalDate);  // ← thêm dòng này
+    const myWsId = $("#my-workshift-select").val();
+    if (myWsId) loadTargetShifts(myWsId);  // ← thêm dòng này
+  }
+
+  updateShiftChangePreview();
+
+  // Reset các trường phụ thuộc trước
+  resetShiftChangeSelects()
 
   // Code cũ - 17/09/2025: Không kiểm tra originalDate null
   // loadSwapCandidates(originalDate, targetDate);

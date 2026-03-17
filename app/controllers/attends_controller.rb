@@ -716,7 +716,7 @@ class AttendsController < ApplicationController
     human_name = REQUEST_TYPE_NAMES[stype.upcase] || stype.titleize
 
     day_range = date.in_time_zone.all_day
-    existing = Shiftissue.where(shiftselection_id: shift.id, stype: stype_up, status: %w[PENDING APPROVED]).first
+    existing_issue = Shiftissue.where(shiftselection_id: shift.id, stype: stype_up, status: %w[PENDING APPROVED]).first
     if existing_issue
       return render json: {
         success: false,
@@ -996,7 +996,7 @@ class AttendsController < ApplicationController
 
     #Bổ sung khai báo cho phần ca để check đổi ca (shifft_change) - @author: an.cdb - @date:16/03/2026
     my_workshift_id      = params[:my_workshift_id].present? ? params[:my_workshift_id].to_i : nil
-    partner_workshift_id = params[:partner_workshift_id].present? ? params[:partner_workshift_id].to_i : nil
+    partner_workshift_id = params[:target_workshift_id].present? ? params[:target_workshift_id].to_i : nil
 
     my_shifts      = shifts_in_day(user_id, original_date, my_workshift_id)
     partner_shifts = shifts_in_day(partner_id, target_date, partner_workshift_id)
@@ -1004,9 +1004,9 @@ class AttendsController < ApplicationController
     return render json: { success: false, error: "Bạn không có ca làm trong ngày #{original_date}", result: [] }, status: :ok if my_shifts.empty?
     return render json: { success: false, error: "Đối tác không có ca làm trong ngày #{target_date}", result: [] }, status: :ok if partner_shifts.empty?
 
-    if my_shifts.size != partner_shifts.size
-      return render json: { success: false, error: "Số ca giữa hai ngày không khớp (#{my_shifts.size} vs #{partner_shifts.size}). Vui lòng chọn lại.", result: [] }, status: :ok
-    end
+    # if my_shifts.size != partner_shifts.size
+    #   return render json: { success: false, error: "Số ca giữa hai ngày không khớp (#{my_shifts.size} vs #{partner_shifts.size}). Vui lòng chọn lại.", result: [] }, status: :ok
+    # end
 
     created_ids = []
     missing_workshift_errors = []
@@ -1052,11 +1052,13 @@ class AttendsController < ApplicationController
       else
         # Code cũ - @author: trong.lq @date: 15/01/2025
         # Trường hợp KHÁC NGÀY: Giữ nguyên logic cũ (sort theo start_time và zip)
-        my_shifts.sort_by!      { |s| (s.start_time || '00:00') }
-        partner_shifts.sort_by! { |s| (s.start_time || '00:00') }
+        my_shifts.sort_by! { |s| s.start_time || '00:00' }
+        partner_shifts.sort_by! { |s| s.start_time || '00:00' }
 
-        my_shifts.zip(partner_shifts).each do |mine, theirs|
+        my_shifts.each_with_index do |mine, i|
+          theirs = partner_shifts[i]  # ghép theo thứ tự start_time
           next unless mine && theirs
+
           dup = Shiftissue.exists?(
             shiftselection_id: mine.id,
             ref_shift_changed: theirs.id.to_s,
@@ -1244,6 +1246,50 @@ class AttendsController < ApplicationController
         data_input: data
       }, status: :ok
     end
+  end
+
+  # @author: dat.nh
+  # @date: 16/03/2026
+  # @input: user_id (params hoặc session)
+  # @return: danh sách user có quyền ATTEND-APPROVED-OVERTIME cùng organization với user_id
+  def get_attend_approver_overtime
+    user_id = params[:user_id].present? ? params[:user_id].to_i : session[:user_id].to_i
+    permission_code = "ATTEND-APPROVED-OVERTIME"
+
+    # Xác định organization của user hiện tại
+    caller_org_scodes = Organization.where(id: User.find(user_id).uorgs.pluck(:organization_id)).pluck(:scode)
+    target_org_scodes = (caller_org_scodes & ["BMU", "BMTU"]).any? ? ["BMU", "BMTU"] : ["BUH"]
+
+    # Lấy user_ids thuộc tổ chức mục tiêu để lọc
+    org_user_ids = Uorg.joins(:organization)
+                       .where(organizations: { scode: target_org_scodes })
+                       .pluck(:user_id).uniq
+
+    users_with_positionjob = Work.joins(:user)
+                                 .left_outer_joins(positionjob: { stasks: { accesses: :resource } })
+                                 .where(user_id: org_user_ids)
+                                 .where(resources: { scode: permission_code })
+                                 .where.not(accesses: { permision: nil })
+                                 .where(users: { staff_status: ["Đang làm việc", "DANG-LAM-VIEC"] })
+                                 .where.not(users: { status: "INACTIVE" })
+                                 .select("works.user_id", "CONCAT(users.last_name, ' ', users.first_name) AS name", "users.email", "users.sid")
+                                 .map { |w| { user_id: w.user_id.to_i, name: w.name, email: w.email, sid: w.sid } }
+
+    users_with_stask = Work.joins(:user)
+                           .left_outer_joins(stask: { accesses: :resource })
+                           .where(user_id: org_user_ids)
+                           .where(resources: { scode: permission_code })
+                           .where.not(accesses: { permision: nil })
+                           .where(users: { staff_status: ["Đang làm việc", "DANG-LAM-VIEC"] })
+                           .where.not(users: { status: "INACTIVE" })
+                           .select("works.user_id", "CONCAT(users.last_name, ' ', users.first_name) AS name", "users.email", "users.sid")
+                           .map { |w| { user_id: w.user_id.to_i, name: w.name, email: w.email, sid: w.sid } }
+
+    result = (users_with_positionjob + users_with_stask).uniq { |u| u[:user_id] }
+
+    render json: { msg: "success", result: result }
+  rescue => e
+    render json: { msg: "Error: #{e.message}", result: [] }
   end
 
   # Xử lý đề xuất chỉnh sửa kế hoạch làm việc

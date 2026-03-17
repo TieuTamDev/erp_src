@@ -6863,10 +6863,12 @@ end
           optional :require_full_day, type: Boolean, default: false
         end
 
-        post :available_swap_candidates do
+        post :available_swap_candidates_v2 do
+          begin
             current_user = User.find(params[:user_id])
             return { status: "invalid", code: "USER_NOT_FOUND",
             msg: "Không thể tìm thấy user #{params[:user_id]}", result: [] } unless current_user
+          end
 
           original_date = Date.parse(params[:original_date])
           target_date   = Date.parse(params[:target_date])
@@ -6889,15 +6891,14 @@ end
           # 2️⃣ Kiểm tra: Bạn có ca làm ngày original_date? (và scheduleweek phải APPROVED)
           # @author: trong.lq
           # @date: 16/01/2025
-          my_workshift_id = params[:my_workshift_id].present? ? params[:my_workshift_id].to_i : nil
+          has_shift_original = Shiftselection
+                                 .joins(:scheduleweek)
+                                 .where(scheduleweeks: { user_id: current_user.id, status: "APPROVED" })
+                                 .where(work_date: original_date.beginning_of_day..original_date.end_of_day)
+                                 .where("COALESCE(shiftselections.is_day_off, '') != 'OFF','HOLIDAY','ON-LEAVE','COMPENSATORY-LEAVE')")
+                                 .exists?
 
-          my_shifts_query = Shiftselection
-                              .joins(:scheduleweek)
-                              .where(scheduleweeks: { user_id: current_user.id, status: "APPROVED" })
-                              .where(work_date: original_date.beginning_of_day..original_date.end_of_day)
-                              .where("COALESCE(shiftselections.is_day_off, '') != 'OFF'")
-          my_shifts_query = my_shifts_query.where(workshift_id: my_workshift_id) if my_workshift_id
-          has_shift_original = my_shifts_query.exists?
+          unless has_shift_original
             return { status: "empty", code: "NO_ORIGINAL_SHIFT",
                      msg: "Bạn không có ca làm để nhường vào ngày #{original_date} hoặc tuần làm việc chưa được duyệt", result: [] }
           end
@@ -6965,7 +6966,7 @@ end
           #     .exists?
           # end
 
-          #Code thay đổi mới
+                    #Code thay đổi mới
           #@author: an.cdb - @date:16/03/2026
           # 3️⃣ Lấy ca của mình vào ngày original_date để biết mình đang có ca nào
           my_shift_workshift_ids = Shiftselection
@@ -7055,42 +7056,463 @@ end
 
           # Code mới - @author: trong.lq @date: 16/01/2025
           # Sửa: Lấy scheduleweek và shift từ target_date (đúng) để hiển thị đúng ca làm vào ngày target_date
-          # rows = available_swap_candidates.flat_map do |u|
-          #   # Lấy tất cả ca làm vào ngày target_date của user này
-          #   target_shifts = Shiftselection
-          #                     .joins(:scheduleweek)
-          #                     .where(scheduleweeks: { user_id: u.user_id, status: "APPROVED" })
-          #                     .where(work_date: target_date.beginning_of_day..target_date.end_of_day)
-          #                     .where("COALESCE(is_day_off, '') != ?", 'OFF')
-
-          #   # Nếu không có ca nào, bỏ qua user này
-          #   next [] if target_shifts.empty?
-
-            # Build rows cho từng ca
-            # Chỉnh sửa build row từng ca - @author: an.cdb - @date: 16/03/2026
-            rows = available_swap_candidates.flat_map do |u|
+          rows = available_swap_candidates.flat_map do |u|
+            # Lấy tất cả ca làm vào ngày target_date của user này
             target_shifts = Shiftselection
                               .joins(:scheduleweek)
                               .where(scheduleweeks: { user_id: u.user_id, status: "APPROVED" })
                               .where(work_date: target_date.beginning_of_day..target_date.end_of_day)
-                              #Thêm check kiểm tra nhân sự thay thế có nghỉ không, nếu có thì không thêm vào danh sách đổi ca
-                              .where("COALESCE(is_day_off, '') != ?", 'OFF','HOLIDAY','ON-LEAVE','COMPENSATORY-LEAVE') 
+                              .where("COALESCE(is_day_off, '') != ?", 'OFF')
+
+            # Nếu không có ca nào, bỏ qua user này
             next [] if target_shifts.empty?
+
+            # Build rows cho từng ca
             target_shifts.map do |shift|
-              ws = Workshift.find_by(id: shift.workshift_id)
               {
-                user_id: u.user_id, sid: u.sid,
+                user_id: u.user_id,
+                sid: u.sid,
                 name: "#{u.last_name} #{u.first_name}",
                 department_id: u.department_id || "Không xác định",
                 scheduleweek: {
-                  id: shift.scheduleweek.id, week_num: shift.scheduleweek.week_num,
-                  start_date: shift.scheduleweek.start_date, status: shift.scheduleweek.status
+                  id: shift.scheduleweek.id,
+                  week_num: shift.scheduleweek.week_num,
+                  start_date: shift.scheduleweek.start_date,
+                  status: shift.scheduleweek.status
                 },
                 shift: {
-                  id: shift.id, work_date: shift.work_date,
-                  workshift_id: shift.workshift_id,
-                  workshift_name: ws&.name || "",
-                  start_time: shift.start_time, end_time: shift.end_time,
+                  id: shift.id,
+                  work_date: shift.work_date,
+                  status: shift.status
+                }
+              }
+            end
+          end
+
+          # 8️⃣ Gộp theo user_id, gom nhiều ca vào mảng shifts
+          final = rows
+                    .group_by { |r| r[:user_id] }
+                    .map do |_uid, items|
+            first = items.first
+            {
+              user_id:       first[:user_id],
+              sid:           first[:sid],
+              name:          first[:name],
+              department_id: first[:department_id],
+              scheduleweek:  first[:scheduleweek],
+              shifts:        items.map { |it| it[:shift] }.compact.uniq { |s| s[:id] }
+            }
+          end
+
+          return { status: "empty", code: "NO_CANDIDATE",
+          msg:   "Không có ứng viên phù hợp", result: [],
+          original_date: original_date, target_date: target_date } if final.empty?
+
+          {
+            msg: 'success',
+            original_date: original_date,
+            target_date: target_date,
+            result: final
+          }
+
+        end
+      end
+
+      # Tìm người có thể đổi ca cho đề xuất đổi ca
+      resource :attends do
+        desc "Tìm danh sách người có thể đổi ca (hỗ trợ theo ca hoặc cả ngày)"
+
+        params do
+          requires :user_id,       type: String, desc: "ID người dùng hiện tại"
+          requires :original_date, type: String, desc: "Ngày nhường ca"
+          requires :target_date,   type: String, desc: "Ngày nhận ca"
+          optional :original_shift, type: String, default: "ALL", desc: "Ca ngày nhường (id hoặc ALL)"
+          optional :target_shift,   type: String, default: "ALL", desc: "Ca ngày nhận (id hoặc ALL)"
+        end
+
+        post :available_swap_candidates_v3 do
+          begin
+            # =========================
+            # 1. Validate user
+            # =========================
+            current_user = User.find_by(id: params[:user_id])
+            return {
+              status: "invalid",
+              code: "USER_NOT_FOUND",
+              msg: "Không thể tìm thấy user",
+              result: []
+            } unless current_user
+
+            original_date = Date.parse(params[:original_date])
+            target_date   = Date.parse(params[:target_date])
+
+            original_shift = params[:original_shift] || "ALL"
+            target_shift   = params[:target_shift]   || "ALL"
+            if original_shift == "ALL" && target_shift != "ALL"
+              return {
+                status: "empty",
+                code: "NO_ORIGINAL_SHIFT",
+                msg: "Nếu ngày làm việc là cả ngày thì ngày đổi cũng phải cả ngày",
+                result: []
+              }
+            end
+            if original_shift != "ALL" && target_shift == "ALL"
+              return {
+                status: "empty",
+                code: "NO_ORIGINAL_SHIFT",
+                msg: "Nếu chọn ca cho ngày làm việc thì ngày đổi cũng phải chọn ca",
+                result: []
+              }
+            end
+            # =========================
+            # 2. Lấy department
+            # =========================
+            department_id = Positionjob
+              .joins(:works)
+              .where(works: { user_id: current_user.id })
+              .pluck(:department_id)
+              .first
+
+            # =========================
+            # 3. Check ca ngày ORIGINAL
+            # =========================
+            original_scope = Shiftselection
+              .joins(:scheduleweek)
+              .where(scheduleweeks: { user_id: current_user.id, status: "APPROVED" })
+              .where(work_date: original_date.beginning_of_day..original_date.end_of_day)
+              .where("COALESCE(is_day_off, '') != 'OFF'")
+
+            original_scope = original_scope.where(workshift_id: original_shift) unless original_shift == "ALL"
+
+            unless original_scope.exists?
+              return {
+                status: "empty",
+                code: "NO_ORIGINAL_SHIFT",
+                msg: "Bạn không có ca phù hợp để nhường",
+                result: []
+              }
+            end
+
+            # =========================
+            # 4. Check target trống
+            # =========================
+            target_scope = Shiftselection
+              .joins(:scheduleweek)
+              .where(scheduleweeks: { user_id: current_user.id, status: "APPROVED" })
+              .where(work_date: target_date.beginning_of_day..target_date.end_of_day)
+
+            has_slot =
+              if target_shift == "ALL"
+                target_scope.where(is_day_off: "OFF").exists?
+              else
+                target_scope
+                  .where(workshift_id: target_shift)
+                  .where("COALESCE(is_day_off, '') = 'OFF'")
+                  .exists?
+              end
+
+            unless has_slot
+              return {
+                status: "empty",
+                code: "HAS_SHIFT_ON_TARGET",
+                msg: "Bạn không có slot trống phù hợp",
+                result: []
+              }
+            end
+
+            # =========================
+            # 5. Lấy user cùng phòng
+            # =========================
+            base_users = User
+              .joins(works: { positionjob: :department })
+              .where(departments: { id: department_id })
+              .where.not(users: { id: current_user.id })
+              .where(users: { status: [nil, "", "ACTIVE"] })
+              .distinct
+
+            # =========================
+            # 6. Người nghỉ ngày original
+            # =========================
+            users_day_off = base_users
+              .joins("INNER JOIN scheduleweeks sw1 ON sw1.user_id = users.id")
+              .joins("INNER JOIN shiftselections ss1 ON ss1.scheduleweek_id = sw1.id")
+              .where("ss1.work_date BETWEEN ? AND ?", original_date.beginning_of_day, original_date.end_of_day)
+              .where("sw1.status = ?", "APPROVED")
+              .where("ss1.is_day_off = ?", "OFF")
+
+            if original_shift != "ALL"
+              users_day_off = users_day_off.where("ss1.workshift_id = ?", original_shift)
+            end
+
+            users_day_off = users_day_off.select(
+                                    "users.id AS user_id",
+                                    "users.sid",
+                                    "users.first_name",
+                                    "users.last_name",
+                                    "departments.name AS department_name",
+                                    "departments.id AS department_id",
+                                    "sw1.id AS scheduleweek_id",
+                                    "sw1.week_num",
+                                    "sw1.start_date",
+                                    "sw1.status AS scheduleweek_status",
+                                    "ss1.id AS shiftselection_id",
+                                    "ss1.work_date",
+                                    "ss1.status AS shiftselection_status",
+                                    "ss1.is_day_off"
+                                  ).distinct
+
+            # =========================
+            # 7. Filter theo target shift
+            # =========================
+            candidates = users_day_off.select do |u|
+              scope = Shiftselection
+                .joins(:scheduleweek)
+                .where(scheduleweeks: { user_id: u.user_id, status: "APPROVED" })
+                .where(work_date: target_date.beginning_of_day..target_date.end_of_day)
+                .where("COALESCE(is_day_off, '') != ?", "OFF")
+
+              scope = scope.where(workshift_id: target_shift) unless target_shift == "ALL"
+
+              scope.exists?
+            end
+
+            # =========================
+            # 8. Build result
+            # =========================
+            rows = candidates.flat_map do |u|
+
+              shifts = Shiftselection
+                .joins(:scheduleweek)
+                .where(scheduleweeks: { user_id: u.user_id, status: "APPROVED" })
+                .where(work_date: target_date.beginning_of_day..target_date.end_of_day)
+                .where("COALESCE(is_day_off, '') != ?", "OFF")
+
+              shifts = shifts.where(workshift_id: target_shift) unless target_shift == "ALL"
+
+              shifts.map do |shift|
+                {
+                  user_id: u.user_id,
+                  sid: u.sid,
+                  name: "#{u.last_name} #{u.first_name}",
+                  department_id: u.department_id || "Không xác định",
+                  scheduleweek: {
+                    id: shift.scheduleweek.id,
+                    week_num: shift.scheduleweek.week_num,
+                    start_date: shift.scheduleweek.start_date,
+                    status: shift.scheduleweek.status
+                  },
+                  shift: {
+                    id: shift.id,
+                    work_date: shift.work_date,
+                    status: shift.status
+                  }
+                }
+              end
+            end
+
+            final = rows.group_by { |r| r[:user_id] }.map do |_uid, items|
+              first = items.first
+              {
+                user_id:       first[:user_id],
+                sid:           first[:sid],
+                name:          first[:name],
+                department_id: first[:department_id],
+                scheduleweek:  first[:scheduleweek],
+                shifts:        items.map { |it| it[:shift] }.compact.uniq { |s| s[:id] }
+              }
+            end
+
+            if final.empty?
+              return {
+                status: "empty",
+                code: "NO_CANDIDATE",
+                msg: "Không có ứng viên phù hợp",
+                result: []
+              }
+            end
+
+            {
+              msg: "success",
+              original_date: original_date,
+              target_date: target_date,
+              result: final
+            }
+
+          rescue => e
+            {
+              status: "error",
+              msg: "Lỗi hệ thống: #{e.message}",
+              result: []
+            }
+          end
+        end
+      end
+
+      # Tìm người có thể đổi ca cho đề xuất đổi ca
+      resource :attends do
+        desc "Tìm danh sách người có thể đổi ca"
+        params do
+          requires :user_id,       type: String, desc: "ID người dùng hiện tại"
+          requires :original_date, type: String, desc: "Ngày bạn muốn nhường ca (YYYY-MM-DD)"
+          requires :target_date,   type: String, desc: "Ngày bạn muốn nhận ca (YYYY-MM-DD)"
+        end
+
+        post :available_swap_candidates do
+          begin
+            current_user = User.find(params[:user_id])
+            return { status: "invalid", code: "USER_NOT_FOUND",
+            msg: "Không thể tìm thấy user #{params[:user_id]}", result: [] } unless current_user
+          end
+
+          original_date = Date.parse(params[:original_date])
+          target_date   = Date.parse(params[:target_date])
+
+          # Code mới - @author: trong.lq
+          # @date: 16/01/2025
+          # Logic: Áp dụng chung cho tất cả phòng ban (bỏ logic riêng cho CTV)
+          # ============================================================
+          # 1️⃣ Lấy department_id của current_user
+          # @author: trong.lq
+          # @date: 16/01/2025
+          department_info = Positionjob
+                            .joins(:works, :department)
+                            .where(works: { user_id: current_user.id })
+                            .select("positionjobs.department_id")
+                            .first
+
+          department_id = department_info&.department_id
+
+          # 2️⃣ Kiểm tra: Bạn có ca làm ngày original_date? (và scheduleweek phải APPROVED)
+          # @author: trong.lq
+          # @date: 16/01/2025
+          has_shift_original = Shiftselection
+                                 .joins(:scheduleweek)
+                                 .where(scheduleweeks: { user_id: current_user.id, status: "APPROVED" })
+                                 .where(work_date: original_date.beginning_of_day..original_date.end_of_day)
+                                 .where("COALESCE(shiftselections.is_day_off, '') != 'OFF'")
+                                 .exists?
+          unless has_shift_original
+            return { status: "empty", code: "NO_ORIGINAL_SHIFT",
+                     msg: "Bạn không có ca làm để nhường vào ngày #{original_date} hoặc tuần làm việc chưa được duyệt", result: [] }
+          end
+
+          # 3️⃣ Kiểm tra: Bạn phải nghỉ ngày target_date (và scheduleweek phải APPROVED)
+          # @author: trong.lq
+          # @date: 16/01/2025
+          has_day_off_target = Shiftselection
+                                 .joins(:scheduleweek)
+                                 .where(scheduleweeks: { user_id: current_user.id, status: "APPROVED" })
+                                 .where(work_date: target_date.beginning_of_day..target_date.end_of_day)
+                                 .where(is_day_off: "OFF")
+                                 .exists?
+          unless has_day_off_target
+            return { status: "empty", code: "HAS_SHIFT_ON_TARGET",
+                     msg: "Bạn đang có ca làm vào ngày #{target_date}, không thể nhận thêm hoặc tuần làm việc chưa được duyệt", result: [] }
+          end
+
+          # 4️⃣ Lấy danh sách người trong cùng phòng ban (trừ current_user)
+          # @author: trong.lq
+          # @date: 16/01/2025
+          base_users = User
+                         .joins(works: { positionjob: :department })
+                         .where(departments: { id: department_id })
+                         .where.not(users: { id: current_user.id })
+                         .where(users: { status: [nil, "", "ACTIVE"] })
+                         .distinct
+
+          # 5️⃣ Tìm user có CA NGHỈ vào ngày original_date (và scheduleweek phải APPROVED)
+          # @author: trong.lq
+          # @date: 16/01/2025
+          users_day_off = base_users
+                            .joins("INNER JOIN scheduleweeks sw1 ON sw1.user_id = users.id")
+                            .joins("INNER JOIN shiftselections ss1 ON ss1.scheduleweek_id = sw1.id")
+                            .where("ss1.work_date BETWEEN ? AND ?", original_date.beginning_of_day, original_date.end_of_day)
+                            .where("ss1.is_day_off = ?", "OFF")
+                            .where("sw1.status = ?", "APPROVED")
+                            .select(
+                              "users.id AS user_id",
+                              "users.sid",
+                              "users.first_name",
+                              "users.last_name",
+                              "departments.name AS department_name",
+                              "departments.id AS department_id",
+                              "sw1.id AS scheduleweek_id",
+                              "sw1.week_num",
+                              "sw1.start_date",
+                              "sw1.status AS scheduleweek_status",
+                              "ss1.id AS shiftselection_id",
+                              "ss1.work_date",
+                              "ss1.status AS shiftselection_status",
+                              "ss1.is_day_off"
+                            )
+                            .distinct
+
+          # 6️⃣ Tìm người đang có CA LÀM vào ngày target_date (và scheduleweek phải APPROVED)
+          # @author: trong.lq
+          # @date: 16/01/2025
+          available_swap_candidates = users_day_off.select do |u|
+            Shiftselection
+              .joins(:scheduleweek)
+              .where(scheduleweeks: { user_id: u.user_id, status: "APPROVED" })
+              .where(work_date: target_date.beginning_of_day..target_date.end_of_day)
+              .where("COALESCE(is_day_off, '') != ?", 'OFF')
+              .exists?
+          end
+          # ============================================================
+
+          # 7️⃣ Build từng dòng (rows) từ danh sách candidate
+          # @author: trong.lq
+          # @date: 16/01/2025
+          # Code cũ - Lấy scheduleweek và shift từ original_date (SAI)
+          # rows = available_swap_candidates.map do |u|
+          #   {
+          #     user_id: u.user_id,
+          #     sid: u.sid,
+          #     name: "#{u.last_name} #{u.first_name}",
+          #     department_id: u.department_id || "Không xác định",
+          #     scheduleweek: {
+          #       id: u.scheduleweek_id,  # ❌ Từ original_date
+          #       week_num: u.week_num,
+          #       start_date: u.start_date,
+          #       status: u.scheduleweek_status  # ❌ Có thể là "TEMP"
+          #     },
+          #     shift: {
+          #       id: u.shiftselection_id,  # ❌ Từ original_date
+          #       work_date: u.work_date,  # ❌ "2026-01-28" thay vì "2026-01-30"
+          #       status: u.shiftselection_status
+          #     }
+          #   }
+          # end
+
+          # Code mới - @author: trong.lq @date: 16/01/2025
+          # Sửa: Lấy scheduleweek và shift từ target_date (đúng) để hiển thị đúng ca làm vào ngày target_date
+          rows = available_swap_candidates.flat_map do |u|
+            # Lấy tất cả ca làm vào ngày target_date của user này
+            target_shifts = Shiftselection
+                              .joins(:scheduleweek)
+                              .where(scheduleweeks: { user_id: u.user_id, status: "APPROVED" })
+                              .where(work_date: target_date.beginning_of_day..target_date.end_of_day)
+                              .where("COALESCE(is_day_off, '') != ?", 'OFF')
+
+            # Nếu không có ca nào, bỏ qua user này
+            next [] if target_shifts.empty?
+
+            # Build rows cho từng ca
+            target_shifts.map do |shift|
+              {
+                user_id: u.user_id,
+                sid: u.sid,
+                name: "#{u.last_name} #{u.first_name}",
+                department_id: u.department_id || "Không xác định",
+                scheduleweek: {
+                  id: shift.scheduleweek.id,
+                  week_num: shift.scheduleweek.week_num,
+                  start_date: shift.scheduleweek.start_date,
+                  status: shift.scheduleweek.status
+                },
+                shift: {
+                  id: shift.id,
+                  work_date: shift.work_date,
                   status: shift.status
                 }
               }
@@ -8540,9 +8962,7 @@ end
           { msg: "Error: #{e.message}"}
         end
       end
-
-
-
+    end
   # ==================================================================================
     end
   end

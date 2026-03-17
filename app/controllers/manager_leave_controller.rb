@@ -2592,7 +2592,7 @@ class ManagerLeaveController < ApplicationController
       )
       list_user_id ||= []
       if check == "main" && action == "approve"
-        used_id_main = Holpro.find_by(id: holpros_id)&.holiday&.used_id
+        used_id_main = Holpro.find_by(id: holpros_id)&.holiday&.user_id
         if used_id_main.present?
           list_user_sub = manager_leave_sub_users(used_id_main)
           list_user_id += list_user_sub
@@ -2616,16 +2616,12 @@ class ManagerLeaveController < ApplicationController
     end
 
     def manager_leave_sub_users(user_id)
-      # 1. Lấy department lá của user
       positionjob_ids = Work.where(user_id: user_id)
                             .where.not(positionjob_id: nil)
                             .pluck(:positionjob_id)
-
       department_ids = Positionjob.where(id: positionjob_ids).pluck(:department_id)
-
       departments = Department.where(id: department_ids, status: "0")
                               .where.not(parents: [nil, ""])
-
       leaf_departments =
         if departments.present?
           parent_ids = departments.pluck(:parents).compact.map(&:to_i)
@@ -2633,32 +2629,37 @@ class ManagerLeaveController < ApplicationController
         else
           Department.where(id: department_ids, status: "0").limit(1)
         end
-
       return [] if leaf_departments.blank?
-
-      # 2. Lấy department chain (từ leaf -> root)
+      start_department_id = leaf_departments.first.id
       department_chain_ids = []
-      current_id = leaf_departments.first.id
+      current_id = start_department_id
 
       while current_id.present? && !department_chain_ids.include?(current_id)
         department_chain_ids << current_id
         current_id = Department.find_by(id: current_id)&.parents&.to_i
       end
+      children_ids = []
+      queue = [start_department_id]
+      while queue.any?
+        parent_id = queue.shift
 
-      # 3. Lấy user thuộc các department đó
+        child_ids = Department.where(parents: parent_id).pluck(:id)
+        child_ids.each do |cid|
+          next if children_ids.include?(cid)
+          children_ids << cid
+          queue << cid
+        end
+      end
+      all_department_ids = (department_chain_ids + children_ids).uniq
       user_ids_from_department =
         Work.joins(:positionjob)
-            .where(positionjobs: { department_id: department_chain_ids })
+            .where(positionjobs: { department_id: all_department_ids })
             .pluck(:user_id)
-
-      # 4. Lấy user có quyền MANAGER-LEAVE-SUB
       manager_user_ids =
         Work.joins(stask: [accesses: :resource])
             .where(resources: { scode: "MANAGER-LEAVE-SUB" })
             .where(accesses: { permision: "READ" })
             .pluck(:user_id)
-
-      # 5. Lấy giao nhau
       (user_ids_from_department & manager_user_ids).uniq
     end
     def history
@@ -4190,36 +4191,47 @@ class ManagerLeaveController < ApplicationController
     end
 
     # Hàm lấy ngày nghỉ từng tháng
-    def parse_holiday_details(user_id, year)
-      monthly_leave_days = Array.new(12, 0.0)
-      oHoliday = Holiday.where(user_id: user_id, year: year).first
-      holpros = Holpro.joins(:holprosdetails, :holiday)
-                      .where(holiday_id: oHoliday&.id)
-                      .where("holpros.status = ?",'DONE')
-                      .select('holprosdetails.details', 'holprosdetails.sholtype','holpros.status')
+    def parse_holiday_details(user_id, year_export, holtypes: nil, statuses: nil)
+      year_i = year_export.to_i
+      monthly = Array.new(12, 0.0)
 
-      # Xử lý dữ liệu
-      holpros.each do |holpro|
-        next unless holpro.details.present? && holpro.sholtype == 'NGHI-PHEP' || holpro.sholtype == 'NGHI-HE' || holpro.sholtype == 'NGHI-BU' || holpro.sholtype == 'DI-HOC' || holpro.sholtype == 'NGHI-CHE-DO'  || holpro.sholtype == 'LE-TET'
-        holpro.details.split('$$$').each do |entry|
-          date_str, period = entry.split('-')
-          next unless date_str && period
+      # mặc định loại đơn cần tính
+      holtypes ||= %w[NGHI-PHEP NGHI-HE NGHI-BU DI-HOC NGHI-CHE-DO LE-TET]
+      # mặc định trạng thái tính
+      statuses ||= %w[DONE CANCEL-DONE]
+
+      holiday_ids = Holiday.where(user_id: user_id).pluck(:id)
+      return monthly if holiday_ids.blank?
+
+      # Lấy thẳng details + sholtype (tránh load nguyên object)
+      rows = Holprosdetail
+              .joins(:holpro)
+              .where(holpros: { holiday_id: holiday_ids, status: statuses })
+              .where(sholtype: holtypes)
+              .where.not(details: [nil, ""])
+              .pluck(:details) # nếu bạn không cần sholtype thì chỉ pluck details là đủ
+
+      rows.each do |details|
+        details.to_s.split('$$$').each do |item|
+          date_str, session = item.split('-', 2)
+          next if date_str.blank?
 
           begin
-            date = Date.strptime(date_str, '%d/%m/%Y')
-            next unless date.year == year
-
-            days = period == 'ALL' ? 1.0 : 0.5
-            month_index = date.month - 1
-            monthly_leave_days[month_index] += days
-          rescue ArgumentError => e
-            Rails.logger.error "Invalid date format in details: #{date_str}, error: #{e.message}"
+            date = Date.strptime(date_str.strip, '%d/%m/%Y')
+          rescue ArgumentError
             next
           end
+
+          next unless date.year == year_i
+
+          ses = session.to_s.strip.upcase
+          days = (ses == 'ALL' || ses.blank?) ? 1.0 : 0.5
+
+          monthly[date.month - 1] += days
         end
       end
 
-      monthly_leave_days
+      monthly
     end
 
     # Hàm trả về số ngày trong tháng của năm
@@ -4250,44 +4262,30 @@ class ManagerLeaveController < ApplicationController
     end
 
     # Hàm lấy chi tiết nghỉ làm bảng chấm công
-    def parse_holiday_details_date(user_id, year, month)
-      count_date = days_in_month(year, month)
-      leave_days = Array.new(31, nil) # Khởi tạo mảng với nil thay vì "X" để xử lý sau
+    def parse_holiday_details_date(user_id, year, month, statuses: nil, holtypes: nil)
+      year_i  = year.to_i
+      month_i = month.to_i
 
-      # Gán giá trị mặc định dựa trên ngày trong tháng
-      (1..count_date).each do |day|
-        date = Date.new(year.to_i, month.to_i, day)
-        leave_days[day - 1] = date.sunday? ? "-" : "X" # Nếu Chủ nhật thì "-", còn lại "X"
+      count_date = days_in_month(year_i, month_i)
+      leave_days = Array.new(31, nil)
+
+      # default calendar
+      (1..count_date).each do |d|
+        date = Date.new(year_i, month_i, d)
+        leave_days[d - 1] = date.sunday? ? "-" : "X"
       end
-
-      # Gán "-" cho các ngày vượt quá count_date
       (count_date...31).each { |i| leave_days[i] = "-" } if count_date < 31
 
-      oHoliday = Holiday.where(user_id: user_id, year: year).first
-      return {
-        leave_days: leave_days,
-        nc_tong: "-",
-        nghi_phep: "-",
-        nghi_bu: "-",
-        di_hoc: "-",
-        nghi_che_do: "-",
-        nghi_le_tet: "-",
-        hoc_viec: "-",
-        khong_luong: "-",
-        che_do_bhxh: "-",
-        thai_san: "-"
-      } unless oHoliday
+      # defaults
+      statuses ||= %w[DONE CANCEL-DONE]
+      holtypes  ||= %w[
+        NGHI-PHEP NGHI-HE NGHI-BU DI-HOC NGHI-CHE-DO NGHI-LE
+        HOC-VIEC NGHI-KHONG-LUONG NGHI-CHE-DO-BAO-HIEM-XA-HOI THAI-SAN
+      ]
 
-      # Truy vấn Holpro với INNER JOIN và chọn cả sholtype
-      holpros = Holpro.joins(:holprosdetails, :holiday)
-                      .where(holidays: { id: oHoliday.id })
-                      .where("holpros.status = ?",'DONE')
-                      .select('holprosdetails.details', 'holprosdetails.sholtype','holpros.status')
+      # nc_chuan
+      nc_chuan = count_days_excluding_sundays(year_i, month_i)
 
-      # Tính nc_chuan
-      nc_chuan = count_days_excluding_sundays(year.to_i, month.to_i)
-      
-      # Đếm số ngày nghỉ cho từng loại
       leave_counts = {
         'NGHI-PHEP' => 0.0,
         'NGHI-BU' => 0.0,
@@ -4299,61 +4297,120 @@ class ManagerLeaveController < ApplicationController
         'NGHI-CHE-DO-BAO-HIEM-XA-HOI' => 0.0,
         'THAI-SAN' => 0.0
       }
-      nc_tong_types = ['NGHI-KHONG-LUONG', 'NGHI-CHE-DO-BAO-HIEM-XA-HOI', 'HOC-VIEC', 'THAI-SAN']
+      nc_tong_types = %w[NGHI-KHONG-LUONG NGHI-CHE-DO-BAO-HIEM-XA-HOI HOC-VIEC THAI-SAN]
 
-      holpros.each do |holpro|
-        next unless holpro.details.present? && holpro.sholtype.present?
+      # ✅ lấy tất cả holiday_ids của user (không lọc theo year)
+      holiday_ids = Holiday.where(user_id: user_id).pluck(:id)
+      if holiday_ids.blank?
+        return {
+          leave_days: leave_days,
+          nc_tong: "-",
+          nghi_phep: "-",
+          nghi_bu: "-",
+          di_hoc: "-",
+          nghi_che_do: "-",
+          nghi_le_tet: "-",
+          hoc_viec: "-",
+          khong_luong: "-",
+          che_do_bhxh: "-",
+          thai_san: "-"
+        }
+      end
 
-        holpro.details.split('$$$').each do |entry|
-          date_str, period = entry.split('-')
-          next unless date_str && period
+      # ✅ lấy details + sholtype theo tất cả holpros của user
+      rows = Holprosdetail
+              .joins(:holpro)
+              .where(holpros: { holiday_id: holiday_ids, status: statuses })
+              .where(sholtype: holtypes)
+              .where.not(details: [nil, ""])
+              .pluck(:details, :sholtype)
+
+      # ✅ gom dữ liệu theo ngày: {day_index => { "AM"=>type, "PM"=>type, "ALL"=>type } }
+      day_map = Hash.new { |h, k| h[k] = {} }
+
+      rows.each do |details, sholtype|
+        details.to_s.split('$$$').each do |entry|
+          date_str, period = entry.split('-', 2)
+          next if date_str.blank?
 
           begin
-            date = Date.strptime(date_str, '%d/%m/%Y')
-            next unless date.year == year && date.month == month # Chỉ lấy tháng được chọn
-
-            day_index = date.day - 1
-            next unless day_index >= 0 && day_index < count_date
-
-            # Tính số ngày nghỉ
-            days = period == 'ALL' ? 1.0 : 0.5
-            leave_counts[holpro.sholtype] += days if leave_counts.key?(holpro.sholtype)
-
-            # Xác định trạng thái chấm công, ghi đè giá trị mặc định
-            case holpro.sholtype
-            when 'NGHI-PHEP'
-              leave_days[day_index] = period == 'ALL' ? 'P' : 'X/P'
-            when 'NGHI-HE'
-              leave_days[day_index] = period == 'ALL' ? 'P' : 'X/P'
-            when 'NGHI-BU'
-              leave_days[day_index] = period == 'ALL' ? 'NB' : 'X/NB'
-            when 'DI-HOC'
-              leave_days[day_index] = period == 'ALL' ? 'DH' : 'X/DH'
-            when 'NGHI-CHE-DO'
-              leave_days[day_index] = period == 'ALL' ? 'CD' : 'CD/KL'
-            when 'NGHI-LE'
-              leave_days[day_index] = period == 'ALL' ? 'LT' : 'X/LT'
-            when 'HOC-VIEC'
-              leave_days[day_index] = period == 'ALL' ? 'HV' : 'X/HV'
-            when 'NGHI-KHONG-LUONG'
-              leave_days[day_index] = period == 'ALL' ? 'KL' : 'X/KL'
-            when 'NGHI-CHE-DO-BAO-HIEM-XA-HOI'
-              leave_days[day_index] = period == 'ALL' ? 'BH' : 'BH/KL'
-            when 'THAI-SAN'
-              leave_days[day_index] = period == 'ALL' ? 'TS' : 'X/TS'
-            end
-          rescue ArgumentError => e
-            Rails.logger.error "Invalid date format in details: #{date_str}, error: #{e.message}"
+            date = Date.strptime(date_str.strip, '%d/%m/%Y')
+          rescue ArgumentError
             next
           end
+
+          next unless date.year == year_i && date.month == month_i
+
+          day_index = date.day - 1
+          next unless day_index.between?(0, count_date - 1)
+
+          p = period.to_s.strip.upcase
+          p = 'ALL' if p.blank?
+
+          # lưu vào map (ALL sẽ có quyền ghi đè)
+          day_map[day_index][p] = sholtype
+
+          # cộng days
+          days = (p == 'ALL') ? 1.0 : 0.5
+          leave_counts[sholtype] += days if leave_counts.key?(sholtype)
         end
       end
 
-      # Tính leave_count
-      leave_count = nc_tong_types.sum { |type| leave_counts[type] }
+      # ✅ convert map -> ký hiệu hiển thị
+      convert = lambda do |stype, p|
+        case stype
+        when 'NGHI-PHEP', 'NGHI-HE'
+          (p == 'ALL') ? 'P' : (p == 'AM' ? 'P/X' : 'X/P')
+        when 'NGHI-BU'
+          (p == 'ALL') ? 'NB' : (p == 'AM' ? 'NB/X' : 'X/NB')
+        when 'DI-HOC'
+          (p == 'ALL') ? 'DH' : (p == 'AM' ? 'DH/X' : 'X/DH')
+        when 'NGHI-CHE-DO'
+          (p == 'ALL') ? 'CD' : 'CD/KL'
+        when 'NGHI-LE'
+          (p == 'ALL') ? 'LT' : (p == 'AM' ? 'LT/X' : 'X/LT')
+        when 'HOC-VIEC'
+          (p == 'ALL') ? 'HV' : (p == 'AM' ? 'HV/X' : 'X/HV')
+        when 'NGHI-KHONG-LUONG'
+          (p == 'ALL') ? 'KL' : (p == 'AM' ? 'KL/X' : 'X/KL')
+        when 'NGHI-CHE-DO-BAO-HIEM-XA-HOI'
+          (p == 'ALL') ? 'BH' : (p == 'AM' ? 'BH/X' : 'X/BH')
+        when 'THAI-SAN'
+          (p == 'ALL') ? 'TS' : (p == 'AM' ? 'TS/X' : 'X/TS')
+        else
+          'X'
+        end
+      end
+
+      day_map.each do |day_index, periods|
+        # ưu tiên ALL
+        if periods['ALL'].present?
+          leave_days[day_index] = convert.call(periods['ALL'], 'ALL')
+          next
+        end
+
+        # AM/PM
+        am = periods['AM']
+        pm = periods['PM']
+
+        if am.present? && pm.present?
+          # nếu 2 loại khác nhau => gộp
+          left  = convert.call(am, 'AM')
+          right = convert.call(pm, 'PM')
+
+          # nếu 2 cái đều dạng "X/.." hoặc ".. /X" thì nối bằng ", "
+          leave_days[day_index] = "#{left}, #{right}"
+        elsif am.present?
+          leave_days[day_index] = convert.call(am, 'AM')
+        elsif pm.present?
+          leave_days[day_index] = convert.call(pm, 'PM')
+        end
+      end
+
+      # nc_tong
+      leave_count = nc_tong_types.sum { |t| leave_counts[t].to_f }
       nc_tong = nc_chuan - leave_count
 
-      # Trả về kết quả
       {
         leave_days: leave_days,
         nc_tong: nc_tong,

@@ -8,12 +8,14 @@ class ShiftissuesController < ApplicationController
     data = JSON.parse(raw_data) rescue []
     
     success = false
+    message = nil
     results = []
     begin
       ActiveRecord::Base.transaction do
         data.each do |issue|
           representative_id = issue["id"]
           reason = issue["reason"]
+          selected_approver_id = issue["approved_by"].presence
           
           representative = Shiftissue.joins(shiftselection: :scheduleweek)
                                     .joins("LEFT JOIN users ON users.id = scheduleweeks.user_id")
@@ -80,6 +82,40 @@ class ShiftissuesController < ApplicationController
               
                 send_shiftissue_notification(shift_item, shift_item.status, reason)
               end
+
+            elsif representative.stype == 'OVERTIME'
+              grouped_items = Shiftissue.joins(shiftselection: :scheduleweek)
+                                        .joins("LEFT JOIN users ON users.id = scheduleweeks.user_id")
+                                        .where("shiftissues.stype = 'OVERTIME'")
+                                        .where("users.sid = ?", representative.sid)
+                                        .where("shiftissues.created_at = ?", representative.created_at)
+
+              grouped_items.each do |shift_item|
+                attrs =
+                  if status == 'APPROVED'
+                    if shift_item.status == 'PENDING'
+                      {
+                        status: 'WAITING_APPROVAL',
+                        approved_at: Time.current,
+                        approved_by: selected_approver_id.presence || shift_item.approved_by
+                      }
+                    else
+                      {
+                        status: 'APPROVED',
+                        approved_at: Time.current,
+                      }
+                    end
+                  else
+                    {
+                      status: 'REJECTED',
+                      content: reason,
+                      approved_at: Time.current
+                    }
+                  end
+
+                shift_item.update!(attrs)
+                send_shiftissue_notification(shift_item, shift_item.status, reason)
+              end
               
             else
               shiftissue = representative
@@ -88,26 +124,26 @@ class ShiftissuesController < ApplicationController
               else
                 shiftissue.update({status: status, approved_at: Time.now})
                 case shiftissue.stype
-                when "EARLY-CHECK-OUT"
-                  process_shiftissue_early(shiftissue, status)
-                when "LATE-CHECK-IN"
-                  process_shiftissue_late(shiftissue, status)
-                when "SHIFT-CHANGE"
-                  shiftissue.update({status: "PENDING", approved_at: Time.now})
-                  results << process_shiftissue_change(shiftissue, status)
-                when "ADDITIONAL-CHECK-IN"
-                  process_shiftissue_additional_in(shiftissue, status)
-                when "ADDITIONAL-CHECK-OUT"
-                  process_shiftissue_additional_out(shiftissue, status)
-                when "UPDATE-SHIFT"
-                  process_shiftissue_update(shiftissue, status)
-                when "EDIT-PLAN"
-                  # @author: trong.lq
-                  # @date: 23/10/2025
-                  # Xử lý duyệt đề xuất chỉnh sửa kế hoạch làm việc
-                  process_shiftissue_edit_plan(shiftissue, status)
-                when "COMPENSATORY-LEAVE"
-                  process_shiftissue_compensatory_leave(shiftissue, status)
+                  when "EARLY-CHECK-OUT"
+                    process_shiftissue_early(shiftissue, status)
+                  when "LATE-CHECK-IN"
+                    process_shiftissue_late(shiftissue, status)
+                  when "SHIFT-CHANGE"
+                    shiftissue.update({status: "PENDING", approved_at: Time.now})
+                    results << process_shiftissue_change(shiftissue, status)
+                  when "ADDITIONAL-CHECK-IN"
+                    process_shiftissue_additional_in(shiftissue, status)
+                  when "ADDITIONAL-CHECK-OUT"
+                    process_shiftissue_additional_out(shiftissue, status)
+                  when "UPDATE-SHIFT"
+                    process_shiftissue_update(shiftissue, status)
+                  when "EDIT-PLAN"
+                    # @author: trong.lq
+                    # @date: 23/10/2025
+                    # Xử lý duyệt đề xuất chỉnh sửa kế hoạch làm việc
+                    process_shiftissue_edit_plan(shiftissue, status)
+                  when "COMPENSATORY-LEAVE"
+                    process_shiftissue_compensatory_leave(shiftissue, status)
                 end
               end
               send_shiftissue_notification(shiftissue, status, reason)
@@ -136,7 +172,9 @@ class ShiftissuesController < ApplicationController
 
 
   def send_shiftissue_notification(shiftissue, final_status, reason)
-    result_message = final_status == "APPROVED" ? "được duyệt" : "bị từ chối"
+    result_message = final_status == "APPROVED" 
+      ? "được duyệt" : final_status == "WAITING_APPROVAL" 
+        ? "được gửi đến phòng TC-HC xử lý" : "bị từ chối"
     stypes = {
       "EARLY-CHECK-OUT" => "Về sớm",
       "LATE-CHECK-IN" => "Đi trễ", 
@@ -146,7 +184,8 @@ class ShiftissuesController < ApplicationController
       "UPDATE-SHIFT" => "Cập nhật Ca",
       "WORK-TRIP" => "Đi công tác",
       "EDIT-PLAN" => "Chỉnh sửa kế hoạch làm việc",
-      "COMPENSATORY-LEAVE" => "Nghỉ bù"
+      "COMPENSATORY-LEAVE" => "Nghỉ bù",
+      "OVERTIME" => "Tăng ca"
     }
     
     notify = Notify.create(

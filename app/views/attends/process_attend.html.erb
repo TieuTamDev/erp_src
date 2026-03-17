@@ -9,9 +9,10 @@
 <% end %>
 
 <script>
-    let get_image_evidence_attends_path = "<%= get_image_evidence_attends_path %>";
-    let approve_request_attends_path = "<%= approve_request_attends_path %>";
-    let reject_request_attends_path = "<%= reject_request_attends_path %>";
+  let get_image_evidence_attends_path = "<%= get_image_evidence_attends_path %>";
+  let approve_request_attends_path = "<%= approve_request_attends_path %>";
+  let reject_request_attends_path = "<%= reject_request_attends_path %>";
+  let get_attend_approver_overtime_attends_path = "<%= get_attend_approver_overtime_attends_path %>";
 </script>
 
 
@@ -233,6 +234,7 @@
   let selectItems = [];
   let currentTime = moment().startOf('isoWeek').add(1, 'weeks');
   let time_type = "week";
+  let overtimeApproverOptions = [];
 
   let colors = [
               "#0EA5E9",
@@ -377,7 +379,7 @@
       @author: dat.nh @date: 14/03/2026
       Thêm phần hiển thị chi tiết ngày tháng cho đề xuất tăng ca
       */
-      else if (item.type === "OVERTIME") {
+      else if (item.stype === "OVERTIME") {
         if (Array.isArray(item.grouped_overtimes)) {
           item.grouped_overtimes.forEach(overtime => {
             let date = overtime.work_date ? moment(overtime.work_date).format("YYYY-MM-DD") : null;
@@ -498,10 +500,62 @@
     renderPopup(selectItems,status);
   }
 
-  function renderPopup(ids,status) {
+  async function loadOvertimeApprovers() {
+    if (overtimeApproverOptions.length > 0) return overtimeApproverOptions;
+
+    try {
+      const res = await fetch(get_attend_approver_overtime_attends_path, {
+        method: "GET",
+        headers: {
+          "Accept": "application/json"
+        }
+      });
+
+      const json = await res.json();
+      overtimeApproverOptions = Array.isArray(json.result) ? json.result : [];
+    } catch (error) {
+      console.error("Failed to load overtime approvers:", error);
+      overtimeApproverOptions = [];
+    }
+
+    return overtimeApproverOptions;
+  }
+
+  function renderOvertimeApproverSelect(shiftissue) {
+    const optionsHtml = overtimeApproverOptions.length > 0
+      ? overtimeApproverOptions
+          .map((user) => {
+            const userId = user.user_id || "";
+            const name = user.name || "";
+            return `<option value="${userId}">${name}</option>`;
+          })
+          .join("")
+      : `<option value="">Không có dữ liệu</option>`;
+
+    return `
+      <div class="mb-2">
+        <label class="form-label" for="overtime-approver-${shiftissue.id}">Người duyệt chuyển tiếp:</label>
+        <select class="form-select" id="overtime-approver-${shiftissue.id}">
+          <option value="">-- Chọn người duyệt --</option>
+          ${optionsHtml}
+        </select>
+      </div>`;
+  }
+
+  async function renderPopup(ids,status) {
     let popupID = "modal-approval-shiftissue";
     let dialog = $("#" + popupID);
     let listwrap = dialog.find("#shiftissue-list");
+
+    const hasOvertimeIssue = ids.some((id) => {
+      const shiftissue = shiftissues.find((item) => item.id == id);
+      return shiftissue && shiftissue.stype === "OVERTIME";
+    });
+
+    if (hasOvertimeIssue) {
+      await loadOvertimeApprovers();
+    }
+
     listwrap.html(``);
     ids.forEach(id=>{
       let shiftissue = shiftissues.find(item=>{return item.id == id});
@@ -512,8 +566,9 @@
     });
 
     dialog.find(".confirm-btn").off().on('click',()=>{
-      if(!IsValidFormApproval(ids,status)){
-        alert("Vui lòng nhập lý do từ chối!");
+      const validationMessage = validateApprovalForm(ids, status);
+      if (validationMessage) {
+        alert(validationMessage);
         return;
       }
       submitUpdate(popupID,status);
@@ -525,22 +580,38 @@
     dialog.modal('show');
   }
 
-  function IsValidFormApproval(ids,status) {
-    if(status == "REJECTED"){
+  function validateApprovalForm(ids, status) {
+    if (status === "REJECTED") {
       for (let i = 0; i < ids.length; i++) {
         const id = ids[i];
-        let reason = $("#reason-"+id).val().trim();
-        if(reason == ""){
-          return false;
+        let reason = $("#reason-" + id).val().trim();
+        if (reason === "") {
+          return "Vui lòng nhập lý do từ chối!";
         }
       }
     }
-    return true;
+
+    if (status === "APPROVED") {
+      for (let i = 0; i < ids.length; i++) {
+        const id = ids[i];
+        const shiftissue = shiftissues.find((item) => String(item.id) === String(id));
+        if (!shiftissue || shiftissue.stype !== "OVERTIME" || shiftissue.status !== "PENDING") continue;
+
+        const overtimeApproverId = $(`#overtime-approver-${id}`).val();
+        if (!overtimeApproverId) {
+          return "Vui lòng chọn người duyệt chuyển tiếp cho đề xuất tăng ca!";
+        }
+      }
+    }
+
+    return null;
   }
 
   function renderShiftissueItem(shiftissue, status) {
 
       let details = renderItemDetails(shiftissue);
+      let overtimeApproverSelect = (shiftissue.stype === "OVERTIME" && shiftissue.status === "PENDING") 
+        ? renderOvertimeApproverSelect(shiftissue) : "";
 
       let inputReason = "";
       if (status === "REJECTED") {
@@ -689,6 +760,7 @@
                   <span>Lý do đề xuất: </span> 
                   <b><span style="color: #f57557;">${shiftissue.note || "Không có"}</span></b>
               </div>
+                ${overtimeApproverSelect}
               <div class="mb-2">
                   <span>Minh chứng: </span> 
                   <b><span>${docText}</span></b>
@@ -769,6 +841,12 @@
             <span>Tuần chỉnh sửa: </span><span style="color: #738ffb;"><b>${shiftissue.content || "-"}</b></span>
           </div>`;
         break;
+      case "OVERTIME":
+        details = `
+          <div class="mb-2">
+            <span>Giờ làm thêm: </span><span style="color: #738ffb;"><b>${shiftissue.us_start || "-"} - ${shiftissue.us_end || "-"}</b></span>
+          </div>`;
+        break;
       default:
         break;
     }
@@ -781,26 +859,30 @@
   }
 
   function submitUpdate(popupID, status) {
-      let popup = $("#" + popupID);
-      let data = [];
-      
-      selectItems.forEach(id => {
-          let reason = $(`#reason-${id}`).val();
-          
-          
-          data.push({
-              id: id,
-              reason: reason,
-              is_work_trip_representative: true 
-          });
+    let popup = $("#" + popupID);
+    let data = [];
+    
+    selectItems.forEach(id => {
+      let reason = $(`#reason-${id}`).val();
+      let overtimeApproverEl = $(`#overtime-approver-${id}`);
+      let overtimeApproverId = overtimeApproverEl.length > 0 ? overtimeApproverEl.val() : null;
+        
+        
+      data.push({
+        id: id,
+        reason: reason,
+        approved_by: overtimeApproverId,
+        is_work_trip_representative: true 
       });
-      
-      let form = $("#form-update-process-attend");
-      form.find('textarea[name="data"]').val(JSON.stringify(data));
-      form.find('input[name="status"]').val(status);
-      form.submit();
-      showLoadding(true);
-      popup.modal("hide");
+    });
+    
+    let form = $("#form-update-process-attend");
+    form.find('textarea[name="data"]').val(JSON.stringify(data));
+    form.find('input[name="status"]').val(status);
+    form.attr("method", "post");
+    form.submit();
+    showLoadding(true);
+    popup.modal("hide");
   }
 
   function onApproval(success, errorMsg) {

@@ -1967,7 +1967,7 @@ function initLocationDropdown(wrapperId, defaultValue, isDisabled = false) {
     toggle.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        if (isDisabled) return;
+        if (toggle.disabled) return;
         
         const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
         
