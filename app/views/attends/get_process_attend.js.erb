@@ -117,7 +117,7 @@
       end
       # @author:an.cdb - @date:14/03/2026 - thêm đoạn xử lý phần hiển thị ca đề xuất để không bị treo loading
       ca_de_xuat = if attend.stype == 'COMPENSATORY-LEAVE'
-        leave_date_str = Date.parse(attend.us_start.to_s).strftime("%d/%m/%Y") rescue attend.us_start.to_s
+      leave_date_str = Date.parse(attend.us_start.to_s).strftime("%d/%m/%Y") rescue attend.us_start.to_s
         if attend.us_end.to_s == "-1"
           "#{leave_date_str} - Cả ngày"
         else
