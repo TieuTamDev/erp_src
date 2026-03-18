@@ -2123,6 +2123,7 @@ vi:
    PENDING: "Chờ duyệt"
    APPROVED: "Đã duyệt"
    REJECTED: "Từ chối"
+   WAITING_APPROVAL: "Đang chờ duyệt"
 
   task_list: "Danh sách tác vụ"
   processing_task: "Tác vụ xử lý"

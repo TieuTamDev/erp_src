@@ -2918,6 +2918,7 @@ end
     params do
       optional :id, type: String, desc: "Id định danh bài viết"
     end
+
     get :get_details_post_zalo_oa do
       begin
         response = call_zalo_api(("https://openapi.zalo.me/v2.0/article/getdetail?id=#{params[:id]}"))
@@ -2952,6 +2953,28 @@ end
         # Lỗi khác
         error!({ msg: "Error: #{e.message}", result: [] }, 500)
       end
+    end
+    post :decrypt_phone do
+      token = params[:token]
+      access_token = params[:access_token]
+      secret_key = "74qKDf5Rt8rKDd5bT4XY"
+
+      uri = URI("https://graph.zalo.me/v2.0/me/info")
+
+      http = Net::HTTP.new(uri.host, uri.port)
+      http.use_ssl = true
+
+      request = Net::HTTP::Get.new(uri)
+
+      # ✅ Header chuẩn theo doc
+      request["access_token"] = access_token
+      request["code"] = token
+      request["secret_key"] = secret_key
+
+      response = http.request(request)
+      result = JSON.parse(response.body)
+
+      result
     end
   # ============================= API Zalo OA ================================
   # ============================= API APP iOS/Android ================================
@@ -6851,272 +6874,6 @@ end
           end
         end
       end
-      # Tìm người có thể đổi ca cho đề xuất đổi ca
-      resource :attends do
-        desc "Tìm danh sách người có thể đổi ca"
-        params do
-          requires :user_id,       type: String, desc: "ID người dùng hiện tại"
-          requires :original_date, type: String, desc: "Ngày bạn muốn nhường ca (YYYY-MM-DD)"
-          requires :target_date,   type: String, desc: "Ngày bạn muốn nhận ca (YYYY-MM-DD)"
-          optional :my_workshift_id,  type: Integer, desc: "ID ca mình muốn nhường (nếu không truyền = tất cả ca)"
-          optional :target_workshift_id, type: String, desc: "Ca muốn nhận (ALL = cả ngày)"
-          optional :require_full_day, type: Boolean, default: false
-        end
-
-        post :available_swap_candidates_v2 do
-          begin
-            current_user = User.find(params[:user_id])
-            return { status: "invalid", code: "USER_NOT_FOUND",
-            msg: "Không thể tìm thấy user #{params[:user_id]}", result: [] } unless current_user
-          end
-
-          original_date = Date.parse(params[:original_date])
-          target_date   = Date.parse(params[:target_date])
-
-          # Code mới - @author: trong.lq
-          # @date: 16/01/2025
-          # Logic: Áp dụng chung cho tất cả phòng ban (bỏ logic riêng cho CTV)
-          # ============================================================
-          # 1️⃣ Lấy department_id của current_user
-          # @author: trong.lq
-          # @date: 16/01/2025
-          department_info = Positionjob
-                            .joins(:works, :department)
-                            .where(works: { user_id: current_user.id })
-                            .select("positionjobs.department_id")
-                            .first
-
-          department_id = department_info&.department_id
-
-          # 2️⃣ Kiểm tra: Bạn có ca làm ngày original_date? (và scheduleweek phải APPROVED)
-          # @author: trong.lq
-          # @date: 16/01/2025
-          has_shift_original = Shiftselection
-                                 .joins(:scheduleweek)
-                                 .where(scheduleweeks: { user_id: current_user.id, status: "APPROVED" })
-                                 .where(work_date: original_date.beginning_of_day..original_date.end_of_day)
-                                 .where("COALESCE(shiftselections.is_day_off, '') != 'OFF','HOLIDAY','ON-LEAVE','COMPENSATORY-LEAVE')")
-                                 .exists?
-
-          unless has_shift_original
-            return { status: "empty", code: "NO_ORIGINAL_SHIFT",
-                     msg: "Bạn không có ca làm để nhường vào ngày #{original_date} hoặc tuần làm việc chưa được duyệt", result: [] }
-          end
-
-          # # 3️⃣ Kiểm tra: Bạn phải nghỉ ngày target_date (và scheduleweek phải APPROVED)
-          # # @author: trong.lq
-          # # @date: 16/01/2025
-          # has_day_off_target = Shiftselection
-          #                        .joins(:scheduleweek)
-          #                        .where(scheduleweeks: { user_id: current_user.id, status: "APPROVED" })
-          #                        .where(work_date: target_date.beginning_of_day..target_date.end_of_day)
-          #                        .where(is_day_off: "OFF")
-          #                        .exists?
-          # unless has_day_off_target
-          #   return { status: "empty", code: "HAS_SHIFT_ON_TARGET",
-          #            msg: "Bạn đang có ca làm vào ngày #{target_date}, không thể nhận thêm hoặc tuần làm việc chưa được duyệt", result: [] }
-          # end
-
-          # # 4️⃣ Lấy danh sách người trong cùng phòng ban (trừ current_user)
-          # # @author: trong.lq
-          # # @date: 16/01/2025
-          # base_users = User
-          #                .joins(works: { positionjob: :department })
-          #                .where(departments: { id: department_id })
-          #                .where.not(users: { id: current_user.id })
-          #                .where(users: { status: [nil, "", "ACTIVE"] })
-          #                .distinct
-
-          # # 5️⃣ Tìm user có CA NGHỈ vào ngày original_date (và scheduleweek phải APPROVED)
-          # # @author: trong.lq
-          # # @date: 16/01/2025
-          # users_day_off = base_users
-          #                   .joins("INNER JOIN scheduleweeks sw1 ON sw1.user_id = users.id")
-          #                   .joins("INNER JOIN shiftselections ss1 ON ss1.scheduleweek_id = sw1.id")
-          #                   .where("ss1.work_date BETWEEN ? AND ?", original_date.beginning_of_day, original_date.end_of_day)
-          #                   .where("ss1.is_day_off = ?", "OFF")
-          #                   .where("sw1.status = ?", "APPROVED")
-          #                   .select(
-          #                     "users.id AS user_id",
-          #                     "users.sid",
-          #                     "users.first_name",
-          #                     "users.last_name",
-          #                     "departments.name AS department_name",
-          #                     "departments.id AS department_id",
-          #                     "sw1.id AS scheduleweek_id",
-          #                     "sw1.week_num",
-          #                     "sw1.start_date",
-          #                     "sw1.status AS scheduleweek_status",
-          #                     "ss1.id AS shiftselection_id",
-          #                     "ss1.work_date",
-          #                     "ss1.status AS shiftselection_status",
-          #                     "ss1.is_day_off"
-          #                   )
-          #                   .distinct
-
-          # # 6️⃣ Tìm người đang có CA LÀM vào ngày target_date (và scheduleweek phải APPROVED)
-          # # @author: trong.lq
-          # # @date: 16/01/2025
-          # available_swap_candidates = users_day_off.select do |u|
-          #   Shiftselection
-          #     .joins(:scheduleweek)
-          #     .where(scheduleweeks: { user_id: u.user_id, status: "APPROVED" })
-          #     .where(work_date: target_date.beginning_of_day..target_date.end_of_day)
-          #     .where("COALESCE(is_day_off, '') != ?", 'OFF')
-          #     .exists?
-          # end
-
-                    #Code thay đổi mới
-          #@author: an.cdb - @date:16/03/2026
-          # 3️⃣ Lấy ca của mình vào ngày original_date để biết mình đang có ca nào
-          my_shift_workshift_ids = Shiftselection
-                                     .joins(:scheduleweek)
-                                     .where(scheduleweeks: { user_id: current_user.id, status: "APPROVED" })
-                                     .where(work_date: original_date.beginning_of_day..original_date.end_of_day)
-                                     .where("COALESCE(shiftselections.is_day_off, '') NOT IN ('OFF','HOLIDAY','ON-LEAVE')")
-                                     .pluck(:workshift_id)
-
-          # Nếu truyền my_workshift_id thì chỉ lấy ca đó
-          if params[:my_workshift_id].present?
-            my_shift_workshift_ids = my_shift_workshift_ids & [params[:my_workshift_id].to_i]
-          end
-
-          # 4️⃣ Lấy danh sách người trong cùng phòng ban (trừ current_user)
-          base_users = User
-                         .joins(works: { positionjob: :department })
-                         .where(departments: { id: department_id })
-                         .where.not(users: { id: current_user.id })
-                         .where(users: { status: [nil, "", "ACTIVE"] })
-                         .distinct
-
-          # 5️⃣ Tìm người có ca làm vào ngày target_date mà mình KHÔNG có
-          # Tức là: họ có ca workshift khác với ca của mình, hoặc họ có ca mà mình không có
-          users_with_target_shift = base_users
-                                      .joins("INNER JOIN scheduleweeks sw1 ON sw1.user_id = users.id")
-                                      .joins("INNER JOIN shiftselections ss1 ON ss1.scheduleweek_id = sw1.id")
-                                      .where("ss1.work_date BETWEEN ? AND ?", target_date.beginning_of_day, target_date.end_of_day)
-                                      .where("COALESCE(ss1.is_day_off, '') NOT IN ('OFF','HOLIDAY','ON-LEAVE')")
-                                      .where("sw1.status = ?", "APPROVED")
-                                      .select(
-                                        "users.id AS user_id",
-                                        "users.sid",
-                                        "users.first_name",
-                                        "users.last_name",
-                                        "departments.name AS department_name",
-                                        "departments.id AS department_id",
-                                        "sw1.id AS scheduleweek_id",
-                                        "sw1.week_num",
-                                        "sw1.start_date",
-                                        "sw1.status AS scheduleweek_status",
-                                        "ss1.id AS shiftselection_id",
-                                        "ss1.workshift_id AS ss_workshift_id",
-                                        "ss1.work_date",
-                                        "ss1.start_time AS ss_start_time",
-                                        "ss1.end_time AS ss_end_time",
-                                        "ss1.status AS shiftselection_status",
-                                        "ss1.is_day_off"
-                                      )
-                                      .distinct
-
-          # 6️⃣ Filter: chỉ lấy người có ca KHÁC với ca mình đang có
-          # Ví dụ A có ca sáng → tìm B có ca chiều (workshift_id khác)
-          available_swap_candidates = users_with_target_shift.select do |u|
-            partner_workshift_id = u.ss_workshift_id.to_i
-            # Ca của đối tác phải khác ca của mình (để đổi có ý nghĩa)
-            next false if my_shift_workshift_ids.include?(partner_workshift_id)
-            # Đối tác phải KHÔNG có ca mà mình đang có vào ngày target_date
-            # (nếu họ cũng có ca sáng thì không cần đổi)
-            true
-          end
-          # ============================================================
-
-          # 7️⃣ Build từng dòng (rows) từ danh sách candidate
-          # @author: trong.lq
-          # @date: 16/01/2025
-          # Code cũ - Lấy scheduleweek và shift từ original_date (SAI)
-          # rows = available_swap_candidates.map do |u|
-          #   {
-          #     user_id: u.user_id,
-          #     sid: u.sid,
-          #     name: "#{u.last_name} #{u.first_name}",
-          #     department_id: u.department_id || "Không xác định",
-          #     scheduleweek: {
-          #       id: u.scheduleweek_id,  # ❌ Từ original_date
-          #       week_num: u.week_num,
-          #       start_date: u.start_date,
-          #       status: u.scheduleweek_status  # ❌ Có thể là "TEMP"
-          #     },
-          #     shift: {
-          #       id: u.shiftselection_id,  # ❌ Từ original_date
-          #       work_date: u.work_date,  # ❌ "2026-01-28" thay vì "2026-01-30"
-          #       status: u.shiftselection_status
-          #     }
-          #   }
-          # end
-
-          # Code mới - @author: trong.lq @date: 16/01/2025
-          # Sửa: Lấy scheduleweek và shift từ target_date (đúng) để hiển thị đúng ca làm vào ngày target_date
-          rows = available_swap_candidates.flat_map do |u|
-            # Lấy tất cả ca làm vào ngày target_date của user này
-            target_shifts = Shiftselection
-                              .joins(:scheduleweek)
-                              .where(scheduleweeks: { user_id: u.user_id, status: "APPROVED" })
-                              .where(work_date: target_date.beginning_of_day..target_date.end_of_day)
-                              .where("COALESCE(is_day_off, '') != ?", 'OFF')
-
-            # Nếu không có ca nào, bỏ qua user này
-            next [] if target_shifts.empty?
-
-            # Build rows cho từng ca
-            target_shifts.map do |shift|
-              {
-                user_id: u.user_id,
-                sid: u.sid,
-                name: "#{u.last_name} #{u.first_name}",
-                department_id: u.department_id || "Không xác định",
-                scheduleweek: {
-                  id: shift.scheduleweek.id,
-                  week_num: shift.scheduleweek.week_num,
-                  start_date: shift.scheduleweek.start_date,
-                  status: shift.scheduleweek.status
-                },
-                shift: {
-                  id: shift.id,
-                  work_date: shift.work_date,
-                  status: shift.status
-                }
-              }
-            end
-          end
-
-          # 8️⃣ Gộp theo user_id, gom nhiều ca vào mảng shifts
-          final = rows
-                    .group_by { |r| r[:user_id] }
-                    .map do |_uid, items|
-            first = items.first
-            {
-              user_id:       first[:user_id],
-              sid:           first[:sid],
-              name:          first[:name],
-              department_id: first[:department_id],
-              scheduleweek:  first[:scheduleweek],
-              shifts:        items.map { |it| it[:shift] }.compact.uniq { |s| s[:id] }
-            }
-          end
-
-          return { status: "empty", code: "NO_CANDIDATE",
-          msg:   "Không có ứng viên phù hợp", result: [],
-          original_date: original_date, target_date: target_date } if final.empty?
-
-          {
-            msg: 'success',
-            original_date: original_date,
-            target_date: target_date,
-            result: final
-          }
-
-        end
-      end
 
       # Tìm người có thể đổi ca cho đề xuất đổi ca
       resource :attends do
@@ -7837,6 +7594,138 @@ end
             partner_shifts.sort_by! { |s| (s.start_time || '00:00') }
 
             my_shifts.zip(partner_shifts).each do |mine, theirs|
+              next unless mine && theirs
+
+              dup = Shiftissue.exists?(
+                shiftselection_id: mine.id,
+                ref_shift_changed: theirs.id.to_s,
+                stype: 'SHIFT-CHANGE',
+                status: %w[PENDING APPROVED]
+              )
+              next if dup
+
+              issue = Shiftissue.create!(
+                shiftselection_id: mine.id,
+                stype: 'SHIFT-CHANGE',
+                status: 'PENDING',
+                note: reason,
+                approved_by: approver_id,
+                ref_shift_changed: theirs.id.to_s,
+                us_start: mine.start_time,
+                us_end: mine.end_time,
+                docs: docs
+              )
+
+              created_ids << issue.id
+            end
+          end
+
+          if created_ids.any?
+            send_notify(user_id, "SHIFT-CHANGE", approver_id)
+            { msg: 'success', result: created_ids }
+          else
+            { msg: 'Đề xuất đã được tạo', result: [] }
+          end
+        rescue => e
+          fail!(e.message, 422)
+        end
+      end
+
+      resource :attends do
+        desc 'Tạo đề xuất đổi ca (hỗ trợ theo ca hoặc cả ngày)'
+
+        params do
+          requires :user_id, type: Integer
+          requires :request_type, type: String, values: ['shift-change']
+          requires :original_date, type: String
+          requires :target_date, type: String
+          requires :partner_user_id, type: String
+          requires :approved_id, type: String
+          optional :reason, type: String
+
+          # NEW
+          optional :original_shift, type: String, default: "ALL"
+          optional :target_shift,   type: String, default: "ALL"
+        end
+
+        post :save_shift_change_v2 do
+          uid = params[:user_id]
+          fail!('Không xác định người dùng', 401) unless uid
+          fail!('Sai loại đề xuất', 422) unless params[:request_type] == 'shift-change'
+
+          original_date = Date.iso8601(params[:original_date]) rescue nil
+          target_date   = Date.iso8601(params[:target_date]) rescue nil
+          fail!('Ngày không hợp lệ', 422) unless original_date && target_date
+
+          partner_id  = params[:partner_user_id].to_i
+          approver_id = params[:approved_id]
+          reason      = (params[:reason] || '').strip
+
+          original_shift = params[:original_shift] || "ALL"
+          target_shift   = params[:target_shift]   || "ALL"
+
+          if original_shift == "ALL" && target_shift != "ALL"
+            fail!("Nếu ngày làm việc là cả ngày thì ngày đổi cũng phải cả ngày", 422)
+          end
+          if original_shift != "ALL" && target_shift == "ALL"
+            fail!("Nếu chọn ca cho ngày làm việc thì ngày đổi cũng phải chọn ca", 422)
+          end
+
+          # upload file
+          docs = nil
+          file = params[:file]
+          if file.present?
+            uploaded = upload_file(file)
+            fail!('Tải file thất bại', 422) unless uploaded[:id]
+            docs = uploaded[:id]
+          end
+
+          # =========================
+          # LẤY SHIFT THEO CA
+          # =========================
+          my_shifts = shifts_in_day(uid, original_date)
+          partner_shifts = shifts_in_day(partner_id, target_date)
+
+          # FILTER THEO CA
+          if original_shift != "ALL"
+            my_shifts = my_shifts.select { |s| s.workshift_id.to_s == original_shift.to_s }
+          end
+
+          if target_shift != "ALL"
+            partner_shifts = partner_shifts.select { |s| s.workshift_id.to_s == target_shift.to_s }
+          end
+
+          fail!("Bạn không có ca phù hợp để đổi", 422) if my_shifts.empty?
+          fail!("Đối tác không có ca phù hợp", 422) if partner_shifts.empty?
+
+          # =========================
+          # LOGIC MATCH CA
+          # =========================
+          created_ids = []
+
+          ActiveRecord::Base.transaction do
+
+            # 🔥 CASE 1: ĐỔI CẢ NGÀY
+            if original_shift == "ALL" && target_shift == "ALL"
+
+              if my_shifts.size != partner_shifts.size
+                fail!("Số ca không khớp", 422)
+              end
+
+              my_shifts.sort_by! { |s| s.start_time || "00:00" }
+              partner_shifts.sort_by! { |s| s.start_time || "00:00" }
+
+              pairs = my_shifts.zip(partner_shifts)
+
+            else
+              # 🔥 CASE 2: ĐỔI 1 CA
+              pairs = [[my_shifts.first, partner_shifts.first]]
+            end
+
+            # =========================
+            # TẠO ISSUE
+            # =========================
+            pairs.each do |mine, theirs|
               next unless mine && theirs
 
               dup = Shiftissue.exists?(
@@ -10660,6 +10549,22 @@ def call_zalo_api(url)
 
   request = Net::HTTP::Get.new(uri)
   request["access_token"] = access_token
+
+  response = http.request(request)
+
+  JSON.parse(response.body)
+end
+
+def call_zalo_post_api(url, body)
+  uri = URI(url)
+
+  http = Net::HTTP.new(uri.host, uri.port)
+  http.use_ssl = true
+
+  request = Net::HTTP::Post.new(uri)
+  request["Content-Type"] = "application/json"
+
+  request.body = body.to_json
 
   response = http.request(request)
 

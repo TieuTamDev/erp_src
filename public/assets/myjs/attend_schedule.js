@@ -38,6 +38,10 @@ function getShiftColor(shiftData) {
       return "#807579"; // Xám - nghỉ bù
     case "WORK-TRIP":
       return "#28a745"; // Xanh – đủ công
+    /**
+     * @author: dat.nh
+     * @date: 17/03/2026
+     */
     case "OVERTIME":
       return "#17a2b8"; // Xanh dương nhạt – tăng ca
     default:
@@ -62,6 +66,10 @@ function getShiftStatusText(shift) {
       return "Lịch giảng dạy";
     case "WORK-TRIP":
       return "Đi công tác";
+    /**
+     * @author: dat.nh
+     * @date: 17/03/2026
+     */
     case "OVERTIME":
       return "Tăng ca";
     default:
@@ -554,7 +562,7 @@ function loadTargetShifts(excludeWorksiftId) {
   $sel.empty();
   $sel.append('<option value="" disabled selected>— Chọn ca muốn nhận —</option>');
 
-  const origDate  = $("#original-date").val();
+  const origDate  = $("#section-shift-change").find('[name="original_date"]').val();
   const targDate  = $("#request-date-new").val();
   const isSameDay = origDate && targDate && origDate === targDate;
   const isAll     = String(excludeWorksiftId) === "ALL";
@@ -636,8 +644,8 @@ function loadSwapCandidates(originalDate, targetDate) {
     .trigger("change");
 
   $.ajax({
-    url: ERP_PATH + "/api/v1/mapi_utils/attends/available_swap_candidates",
-    method: "POST", // PHẢI LÀ POST
+    url: ERP_PATH + "/api/v1/mapi_utils/attends/available_swap_candidates_v3",
+    method: "POST", // PHẢI LÀ PO
     dataType: "json",
     data: dataPayload,
     // {
@@ -671,7 +679,6 @@ function loadSwapCandidates(originalDate, targetDate) {
         if (item.shift) byUser[uid].shifts.push(item.shift);
       });
       const uniq = Object.values(byUser);
-      
 
       // Render
       $sel.empty();
@@ -696,7 +703,6 @@ function loadSwapCandidates(originalDate, targetDate) {
     },
   });
 }
-
 
 ////
 ////Flatpickr & chọn ngày/giờ
@@ -1135,9 +1141,9 @@ document
  * @author: dat.nh
  * @date: 13/03/2026
  */
-document
-  .getElementById("clear_overtime")
-  .addEventListener("click", function () {
+const clearOvertimeBtn = document.getElementById("clear_overtime");
+if (clearOvertimeBtn) {
+  clearOvertimeBtn.addEventListener("click", function () {
     const fp = document.querySelector("#overtime_range")._flatpickr;
     if (fp) {
       fp.clear();
@@ -1145,6 +1151,7 @@ document
       toggleOvertimeFooter([]);
     }
   });
+}
 
 function updateTripFields(start, end, dates) {
   // Cập nhật input ngày bắt đầu/kết thúc
@@ -1669,7 +1676,7 @@ const toggleRequestSections = (type) => {
       swapSel.disabled = false;
       swapSel.required = true;
           // Load ca ngay khi chuyển sang loại "Đổi ca"
-      const origDate = $("#original-date").val();
+      const origDate = $("#section-shift-change").find('[name="original_date"]').val()
       if (origDate) {
         loadMyShifts(origDate);
         const targDate = $("#request-date-new").val() || origDate;
@@ -1920,7 +1927,7 @@ function getShiftDurationFromAttendanceMap(dateStr, shiftType) {
 
 //// Hàm cập nhật preview tóm tắt cho phần đổi ca
 function updateShiftChangePreview() {
-  const origDate  = $("#original-date").val();
+  const origDate  = $("#section-shift-change").find('[name="original_date"]').val()
   const targDate  = $("#request-date-new").val();
   const myWsText  = $("#my-workshift-select option:selected").text();
   const trgWsText = $("#target-workshift-select option:selected").text();
@@ -1999,7 +2006,7 @@ document
 // @author:an.cdb - @date:16/03/2026
 $("#my-workshift-select").on("change", function() {
   const myWsId = $(this).val();
-  const origDate = $("#original-date").val();
+  const origDate = $("#section-shift-change").find('[name="original_date"]').val()
   const targDate = $("#request-date-new").val();
 
   // Nếu chọn "Cả ngày" mà cùng ngày → cảnh báo và reset ngày nhận
@@ -2018,7 +2025,7 @@ $("#my-workshift-select").on("change", function() {
 // Khi chọn "Thành ca" → cập nhật preview + reload candidates
 $("#target-workshift-select").on("change", function() {
   updateShiftChangePreview();
-  const origDate = $("#original-date").val();
+  const origDate = $$("#section-shift-change").find('[name="original_date"]').val()
   const targDate = $("#request-date-new").val() || origDate;
   if (origDate) loadSwapCandidates(origDate, targDate);
 });
@@ -2026,7 +2033,7 @@ $("#target-workshift-select").on("change", function() {
 // Thêm mới ngay
 $("#swap-with-user-id").on("change", function() {
   const uid = $(this).val();
-  const targDate = $("#request-date-new").val() || $("#original-date").val();
+  const targDate = $("#request-date-new").val() || $("#section-shift-change").find('[name="original_date"]').val();
   if (!targDate) return;
 });
 $("#request-date-new").on("change", function () {

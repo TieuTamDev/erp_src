@@ -146,7 +146,18 @@ async function openModal () {
                     if (Array.isArray(data.shift_details)) {
                         data.shift_details.forEach(s => {
                             if (s.is_day_off === 'COMPENSATORY-LEAVE' && s.work_date) {
-                                compensatoryMap[s.work_date] = true;
+                                // Suy ra session từ workshift (ca sáng = AM, ca chiều = PM)
+                                // Nếu cùng ngày đã có entry thì merge thành ALL
+                                const existing = compensatoryMap[s.work_date];
+                                const wsCode = (s.workshift_id || '').toLowerCase();
+                                const session = wsCode.includes('sang') || wsCode.includes('ca-sang') ? 'AM'
+                                              : wsCode.includes('chieu') || wsCode.includes('ca-chieu') ? 'PM'
+                                              : 'ALL';
+                                if (!existing) {
+                                    compensatoryMap[s.work_date] = session;
+                                } else if (existing !== session) {
+                                    compensatoryMap[s.work_date] = 'ALL'; // cả hai ca => cả ngày
+                                }
                             }
                         });
                     }
@@ -236,16 +247,23 @@ async function loadSpecialDates () {
             leaveMap = {};
             leaveLabelMap = {};
         }
-        //@author:an.cdb - 13032026 - Load nghỉ bù
+        //@author:an.cdb - 13032026 - Load nghỉ bù (cả PENDING và APPROVED)
         if (typeof get_compensatory_leaves !== 'undefined' && get_compensatory_leaves) {
             const r3 = await fetch(get_compensatory_leaves);
             const raw3 = await r3.json();
             if (raw3 && Array.isArray(raw3.result)) {
                 const mapComp = {};
                 raw3.result.forEach(it => {
-                    const iso = it.date; // đã là YYYY-MM-DD
+                    const iso = it.date;
                     if (!iso) return;
-                    mapComp[iso] = it.session || 'ALL';
+                    const sess = (it.session || 'ALL').toUpperCase();
+                    // Merge session: nếu cùng ngày có 2 ca → ALL
+                    const prev = mapComp[iso];
+                    if (!prev) {
+                        mapComp[iso] = sess;
+                    } else if (prev !== sess) {
+                        mapComp[iso] = 'ALL';
+                    }
                 });
                 compensatoryMap = mapComp;
             } else {
@@ -770,6 +788,7 @@ function buildWeekTable(id, monday, detail = [], status = 'TEMP', reason = '') {
 
         const leaveLabel  = (typeof leaveLabelMap !== 'undefined' && leaveLabelMap && leaveLabelMap[ymd]) ? leaveLabelMap[ymd] : 'Nghỉ phép';
         const leftLabel   = dayName;
+        const compSession = (compensatoryMap?.[ymd] || '').toUpperCase(); // 'ALL'|'AM'|'PM'|''
 
         /* ----- lấy giờ từ map, ngược lại lấy giờ mặc định ------ */
         const rowData = map[ymd] || {};
@@ -781,7 +800,12 @@ function buildWeekTable(id, monday, detail = [], status = 'TEMP', reason = '') {
             const et = d.end_time   ?? ws.end   ?? '';
             const locValue = (d.location ?? defaultLocation) || defaultLocation;
             const isLeaveFull = leaveType === 'ALL';
-            const isCompensatoryCell = (d.is_day_off === 'COMPENSATORY-LEAVE');
+            // COMPENSATORY-LEAVE: đã duyệt (từ DB) hoặc đang chờ duyệt (từ compensatoryMap)
+            const isCompensatoryApproved = (d.is_day_off === 'COMPENSATORY-LEAVE');
+            const isCompensatoryPending  = compSession === 'ALL'
+                || (compSession === 'AM' && isMorningShift(ws))
+                || (compSession === 'PM' && isAfternoonShift(ws));
+            const isCompensatoryCell = isCompensatoryApproved || isCompensatoryPending;
             const disabled    = (isReadonly || isLeaveFull || isCompensatoryCell) ? 'disabled' : '';
             const tdClasses = ['row-workshift', `shift-${ws.code}`];
 
@@ -1676,6 +1700,14 @@ function requiredWeeklyHours(weekId) {
             else {
                 if (lv === 'AM') reduce += 4;
                 if (lv === 'PM') reduce += 4;
+            }
+
+            // Nghỉ bù (mỗi ca -4h; ALL -8h)
+            const comp = (compensatoryMap?.[ymd] || '').toUpperCase();
+            if (comp === 'ALL') reduce += 8;
+            else {
+                if (comp === 'AM') reduce += 4;
+                if (comp === 'PM') reduce += 4;
             }
 
             // Lịch giảng dạy (mỗi ca -4h; ALL -8h)

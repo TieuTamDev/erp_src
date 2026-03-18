@@ -43,6 +43,7 @@ class LeaveRequestController < ApplicationController
                     LEFT JOIN holtypes ON holtypes.code = holprosdetails.sholtype
                   ")
                   .where(holiday_id: holidays.select(:id))
+                  .distinct
       else
         holiday = Holiday.find_by(year: current_year, user_id: user_id)
         holpros = Holpro.joins("
@@ -105,7 +106,16 @@ class LeaveRequestController < ApplicationController
       end
 
       holpros = holpros.as_json
-      render_button(holpros)
+      # Business rule:
+      # If all sholtype = NGHI-KHONG-LUONG → allow cancel even when DONE
+      holpros_ids = datas.map { |d| d["id"] }
+      invalid_ids = Holprosdetail.where(holpros_id: holpros_ids)
+                      .where.not(sholtype: "NGHI-KHONG-LUONG")
+                      .pluck(:holpros_id)
+                      .uniq
+      all_khong_luong_ids = holpros_ids - invalid_ids
+      # end
+      render_button(holpros, all_khong_luong_ids)
 
       render json: {
         draw: params[:draw],
@@ -119,7 +129,7 @@ class LeaveRequestController < ApplicationController
       
     end
 
-    def render_button(datas)
+    def render_button(datas, all_khong_luong_ids)
       datas.each do |data|
         data_encode = Base64.encode64({
           holprosdetails: data["holprosdetails"], 
@@ -127,6 +137,9 @@ class LeaveRequestController < ApplicationController
           holpros_id: data["id"],
           stype: data["stype"],
         }.to_json )
+        
+        is_all_khong_luong = all_khong_luong_ids.include?(data["id"])
+
         data[:btn] = ""
         if data["status"] == "TEMP"
           # btn edit
@@ -157,7 +170,7 @@ class LeaveRequestController < ApplicationController
         end
 
         # BUH CANCEL WHEN LEADER APPROVE YET
-        if (data["status"] == "PENDING" || data["status"] == "PROCESSING") && user_id == session[:user_id] && session[:organization].first == "BUH"
+        if ((data["status"] == "PENDING" || data["status"] == "PROCESSING") && user_id == session[:user_id] && session[:organization].first == "BUH") || is_all_khong_luong
           data[:btn] += "<a class='ms-2 btn-remove' type='button' onclick='onCancelLeaveRequest(`#{data["id"]}`)' data-toggle='tooltip' data-placement='top' title='Hủy đơn' data-bs-toggle='modal' data-bs-target='#genericCancelModal'><span class='far fa-times-circle text-danger'></span></a>" 
         end
 
@@ -167,7 +180,6 @@ class LeaveRequestController < ApplicationController
         end
       end
     end
-
     def allow_cancel_leave?(holpros_id)
       details = Holprosdetail.where(holpros_id: holpros_id)
 

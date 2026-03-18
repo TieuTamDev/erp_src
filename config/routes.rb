@@ -867,6 +867,10 @@ delete '/singnature/remove_file' => 'users#remove_file'
       post :reject_request
       get :export_excel
       get :get_data_date_attend
+      # @author: dat.nh
+      # @date: 17/03/2026
+      # Thêm route để lấy danh sách người duyệt tăng ca
+      get :get_attend_approver_overtime
     end
   end
   #Nghỉ bù - @an.cdb

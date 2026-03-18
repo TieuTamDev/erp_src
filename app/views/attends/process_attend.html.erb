@@ -144,6 +144,9 @@
                     <option value="additional-check-out">Chấm công tan làm bù</option>
                     <option value="update-shift">Cập nhật ca</option>
                     <option value="compensatory-leave">Nghỉ bù</option>
+                    <!-- @author: dat.nh
+                         @date: 17/03/2026 
+                         Thêm loại đề xuất tăng ca -->
                     <option value="overtime">Tăng ca</option>
                     <!-- @author: trong.lq @date: 23/10/2025 - Option cho đề xuất chỉnh sửa kế hoạch làm việc -->
                     <option value="edit-plan">Chỉnh sửa kế hoạch làm việc</option>
@@ -234,6 +237,11 @@
   let selectItems = [];
   let currentTime = moment().startOf('isoWeek').add(1, 'weeks');
   let time_type = "week";
+  /**
+   * @author: dat.nh
+   * @date: 17/03/2026
+   * Thêm loại đề xuất tăng ca
+   */
   let overtimeApproverOptions = [];
 
   let colors = [
@@ -500,6 +508,11 @@
     renderPopup(selectItems,status);
   }
 
+  /*
+   * @author: dat.nh
+   * @date: 17/03/2026
+   * Thêm loại đề xuất tăng ca
+   */
   async function loadOvertimeApprovers() {
     if (overtimeApproverOptions.length > 0) return overtimeApproverOptions;
 
@@ -547,6 +560,7 @@
     let dialog = $("#" + popupID);
     let listwrap = dialog.find("#shiftissue-list");
 
+    // Kiểm tra nếu có đề xuất tăng ca nào trong danh sách được chọn, nếu có thì tải danh sách người duyệt chuyển tiếp
     const hasOvertimeIssue = ids.some((id) => {
       const shiftissue = shiftissues.find((item) => item.id == id);
       return shiftissue && shiftissue.stype === "OVERTIME";
@@ -566,6 +580,7 @@
     });
 
     dialog.find(".confirm-btn").off().on('click',()=>{
+      // Trước khi submit, thực hiện validate form duyệt nhóm đề xuất
       const validationMessage = validateApprovalForm(ids, status);
       if (validationMessage) {
         alert(validationMessage);
@@ -580,6 +595,12 @@
     dialog.modal('show');
   }
 
+  /*
+   * @author: dat.nh
+   * @date: 17/03/2026
+   * Thêm validate form duyệt nhóm đề xuất, nếu là từ chối thì bắt buộc phải nhập lý do, 
+   * nếu là duyệt thì kiểm tra nếu có đề xuất tăng ca nào thì phải chọn người duyệt chuyển tiếp
+   */
   function validateApprovalForm(ids, status) {
     if (status === "REJECTED") {
       for (let i = 0; i < ids.length; i++) {
@@ -610,8 +631,8 @@
   function renderShiftissueItem(shiftissue, status) {
 
       let details = renderItemDetails(shiftissue);
-      let overtimeApproverSelect = (shiftissue.stype === "OVERTIME" && shiftissue.status === "PENDING") 
-        ? renderOvertimeApproverSelect(shiftissue) : "";
+      // Nếu là đề xuất tăng ca và đang ở trạng thái PENDING thì hiển thị thêm select người duyệt chuyển tiếp
+      let overtimeApproverSelect = (shiftissue.stype === "OVERTIME" && shiftissue.status === "PENDING") ? renderOvertimeApproverSelect(shiftissue) : "";
 
       let inputReason = "";
       if (status === "REJECTED") {
@@ -841,6 +862,7 @@
             <span>Tuần chỉnh sửa: </span><span style="color: #738ffb;"><b>${shiftissue.content || "-"}</b></span>
           </div>`;
         break;
+      // @author: dat.nh @date: 14/03/2026
       case "OVERTIME":
         details = `
           <div class="mb-2">
@@ -858,6 +880,13 @@
     renderPopup([id],"APPROVED");
   }
 
+  /*
+   * @author: dat.nh
+   * @date: 17/03/2026
+   * Cập nhật lại hàm submit khi duyệt nhóm đề xuất, 
+   * nếu là duyệt thì sẽ gửi kèm theo id người duyệt chuyển tiếp (nếu có) 
+   * và khi từ chối thì sẽ gửi kèm theo lý do từ chối của từng đề xuất
+   */
   function submitUpdate(popupID, status) {
     let popup = $("#" + popupID);
     let data = [];
@@ -879,7 +908,6 @@
     let form = $("#form-update-process-attend");
     form.find('textarea[name="data"]').val(JSON.stringify(data));
     form.find('input[name="status"]').val(status);
-    form.attr("method", "post");
     form.submit();
     showLoadding(true);
     popup.modal("hide");

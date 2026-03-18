@@ -15,6 +15,9 @@ class ShiftissuesController < ApplicationController
         data.each do |issue|
           representative_id = issue["id"]
           reason = issue["reason"]
+          # @author: dat.nh
+          # @date: 17/03/2026
+          # Lấy thông tin người duyệt chuyển tiếp
           selected_approver_id = issue["approved_by"].presence
           
           representative = Shiftissue.joins(shiftselection: :scheduleweek)
@@ -83,12 +86,16 @@ class ShiftissuesController < ApplicationController
                 send_shiftissue_notification(shift_item, shift_item.status, reason)
               end
 
+            # @author: dat.nh
+            # @date: 17/03/2026
+            # Xử lý nhóm các đề xuất tăng ca theo user và ngày tạo, cập nhật trạng thái và gửi thông báo cho từng đề xuất con
             elsif representative.stype == 'OVERTIME'
               grouped_items = Shiftissue.joins(shiftselection: :scheduleweek)
                                         .joins("LEFT JOIN users ON users.id = scheduleweeks.user_id")
                                         .where("shiftissues.stype = 'OVERTIME'")
                                         .where("users.sid = ?", representative.sid)
                                         .where("shiftissues.created_at = ?", representative.created_at)
+                                        .select("shiftissues.*, users.sid, users.last_name, users.first_name, shiftselections.work_date")
 
               grouped_items.each do |shift_item|
                 attrs =
@@ -115,6 +122,7 @@ class ShiftissuesController < ApplicationController
 
                 shift_item.update!(attrs)
                 send_shiftissue_notification(shift_item, shift_item.status, reason)
+                send_shiftissue_notification_to_approver(shift_item) if status == 'APPROVED' && shift_item.status == 'WAITING_APPROVAL'
               end
               
             else
@@ -169,12 +177,10 @@ class ShiftissuesController < ApplicationController
     end
   end
 
-
-
-  def send_shiftissue_notification(shiftissue, final_status, reason)
-    result_message = final_status == "APPROVED" 
-      ? "được duyệt" : final_status == "WAITING_APPROVAL" 
-        ? "được gửi đến phòng TC-HC xử lý" : "bị từ chối"
+  # @author: dat.nh
+  # @date: 17/03/2026
+  # Gửi nối tiếp thông báo đến người duyệt tiếp theo của đề xuất chấm công
+  def send_shiftissue_notification_to_approver(shiftissue)    
     stypes = {
       "EARLY-CHECK-OUT" => "Về sớm",
       "LATE-CHECK-IN" => "Đi trễ", 
@@ -185,6 +191,50 @@ class ShiftissuesController < ApplicationController
       "WORK-TRIP" => "Đi công tác",
       "EDIT-PLAN" => "Chỉnh sửa kế hoạch làm việc",
       "COMPENSATORY-LEAVE" => "Nghỉ bù",
+      "OVERTIME" => "Tăng ca"
+    }
+    
+    # Lấy thông tin user từ shiftissue
+    shiftselection = shiftissue.shiftselection
+    scheduleweek = shiftselection.scheduleweek
+    user = scheduleweek.user
+    user_name = "#{user.last_name} #{user.first_name} (#{user.sid})"
+    request_type_name = stypes[shiftissue.stype] || shiftissue.stype.titleize
+    
+    notify = Notify.create(
+      title: "Thông báo gửi đề xuất chấm công",
+      contents: "Nhân viên <strong>#{user_name}</strong> đã gửi đề xuất <strong>#{request_type_name}</strong>.<br>",
+      receivers: "Hệ thống ERP",
+      senders: user_name,
+      stype: "SHIFTISSUE"
+    )
+    
+    Snotice.create(
+      notify_id: notify.id,
+      user_id: shiftissue.approved_by,
+      isread: false,
+      username: nil
+    )
+  end
+
+  def send_shiftissue_notification(shiftissue, final_status, reason)
+    # @author: dat.nh
+    # @date: 17/03/2026
+    # Cập nhật thêm nội dung kết quả duyệt vào thông báo với đề xuất được chuyển tiếp
+    result_message = final_status == "APPROVED" ? "được duyệt" : final_status == "WAITING_APPROVAL" ? "được gửi đến phòng TC-HC xử lý" : "bị từ chối"
+    stypes = {
+      "EARLY-CHECK-OUT" => "Về sớm",
+      "LATE-CHECK-IN" => "Đi trễ", 
+      "SHIFT-CHANGE" => "Đổi ca",
+      "ADDITIONAL-CHECK-IN" => "Chấm công vào làm bù",
+      "ADDITIONAL-CHECK-OUT" => "Chấm công tan làm bù",
+      "UPDATE-SHIFT" => "Cập nhật Ca",
+      "WORK-TRIP" => "Đi công tác",
+      "EDIT-PLAN" => "Chỉnh sửa kế hoạch làm việc",
+      "COMPENSATORY-LEAVE" => "Nghỉ bù",
+      # @author: dat.nh
+      # @date: 17/03/2026
+      # Thêm mapping tên hiển thị cho đề xuất tăng ca
       "OVERTIME" => "Tăng ca"
     }
     

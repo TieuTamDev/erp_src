@@ -164,10 +164,16 @@ class AttendsController < ApplicationController
     all_results = base_query.order('shiftissues.created_at DESC, shiftissues.id DESC')
 
     work_trip_requests = all_results.select { |item| item.stype == "WORK-TRIP" }
+    # @author: dat.nh
+    # @date: 17/03/2026
+    # Thêm lọc các đề xuất tăng ca để gom nhóm
     overtime_requests = all_results.select { |item| item.stype == "OVERTIME" }
     other_requests = all_results.reject { |item| ["WORK-TRIP", "OVERTIME"].include?(item.stype) }
 
     grouped_work_trips = work_trip_requests.group_by { |item| [item.sid, item.created_at] }
+    # @author: dat.nh
+    # @date: 17/03/2026
+    # Gom nhóm các đề xuất tăng ca theo user và ngày tạo để hiển thị
     grouped_overtimes = overtime_requests.group_by { |item| [item.sid, item.created_at] }
 
     final_results = []
@@ -186,6 +192,9 @@ class AttendsController < ApplicationController
       final_results << representative
     end
 
+    # @author: dat.nh
+    # @date: 17/03/2026
+    # Xử lý nhóm đề xuất tăng ca để hiển thị theo nhóm trên view
     grouped_overtimes.each do |(sid, created_date), attends|
       representative = attends.min_by(&:work_date)
 
@@ -237,6 +246,8 @@ class AttendsController < ApplicationController
       'EDIT-PLAN'
     when 'compensatory-leave'
       'COMPENSATORY-LEAVE'
+    # @author: dat.nh
+    # @date: 17/03/2026
     when "overtime"
       'OVERTIME'
     else
@@ -489,6 +500,8 @@ class AttendsController < ApplicationController
     "ADDITIONAL-CHECK-IN-OUT" => "Chấm công bù vào/ra",
     "EDIT-PLAN"               => "Chỉnh sửa kế hoạch làm việc",
     "COMPENSATORY-LEAVE"      => "Nghỉ bù",
+    # @author: dat.nh
+    # @date: 17/03/2026
     "OVERTIME"                => "Tăng ca"
   }.freeze
 
@@ -572,6 +585,9 @@ class AttendsController < ApplicationController
     end
     request_type = params[:request_type]
     trip_shift_data = JSON.parse(params[:trip_shift_data]) rescue []
+    # @author: dat.nh
+    # @date: 17/03/2026
+    # Thêm parsing JSON cho dữ liệu đề xuất tăng ca từ frontend, mặc định là mảng rỗng nếu có lỗi
     overtime_shift_data = JSON.parse(params[:overtime_shift_data]) rescue []
     workshift_id = params[:workshift_id].to_i if params[:workshift_id].present?
 
@@ -622,6 +638,9 @@ class AttendsController < ApplicationController
       check_in_time: params[:check_in_time],
       check_out_time: params[:check_out_time],
       trip_shift_data: trip_shift_data,
+      # @author: dat.nh
+      # @date: 17/03/2026
+      # Thêm parsing JSON cho dữ liệu đề xuất tăng ca từ frontend, mặc định là mảng rỗng nếu có lỗi
       overtime_shift_data: overtime_shift_data,
       type: request_type
     }
@@ -641,6 +660,8 @@ class AttendsController < ApplicationController
       handle_edit_plan(user_id, common_data)
     when "compensatory-leave" #Thêm case cho đề xuất nghỉ bù - @author:an.cdb @date: 09/03/2026
       handle_compensatory_leave(user_id, common_data)
+    # @author: dat.nh
+    # @date: 17/03/2026
     when "overtime"
       handle_overtime(user_id, common_data)
     else
@@ -985,8 +1006,9 @@ class AttendsController < ApplicationController
     end
   end
 
-  def handle_shift_change(user_id, data)
+def handle_shift_change(user_id, data)
     partner_id = params[:swap_with_user_id].to_i
+    
     begin
       original_date = params[:original_date].is_a?(Date) ? params[:original_date] : Date.parse(params[:original_date].to_s)
       target_date   = params[:target_date].is_a?(Date)   ? params[:target_date]   : Date.parse(params[:target_date].to_s)
@@ -994,7 +1016,7 @@ class AttendsController < ApplicationController
       return render json: { success: false, error: "Ngày không hợp lệ", result: [] }, status: :ok
     end
 
-    #Bổ sung khai báo cho phần ca để check đổi ca (shifft_change) - @author: an.cdb - @date:16/03/2026
+    # Bổ sung khai báo cho phần ca để check đổi ca (shifft_change) - @author: an.cdb - @date:16/03/2026
     my_workshift_id      = params[:my_workshift_id].present? ? params[:my_workshift_id].to_i : nil
     partner_workshift_id = params[:target_workshift_id].present? ? params[:target_workshift_id].to_i : nil
 
@@ -1004,26 +1026,21 @@ class AttendsController < ApplicationController
     return render json: { success: false, error: "Bạn không có ca làm trong ngày #{original_date}", result: [] }, status: :ok if my_shifts.empty?
     return render json: { success: false, error: "Đối tác không có ca làm trong ngày #{target_date}", result: [] }, status: :ok if partner_shifts.empty?
 
-    # if my_shifts.size != partner_shifts.size
-    #   return render json: { success: false, error: "Số ca giữa hai ngày không khớp (#{my_shifts.size} vs #{partner_shifts.size}). Vui lòng chọn lại.", result: [] }, status: :ok
-    # end
-
     created_ids = []
     missing_workshift_errors = []
-    is_same_day = original_date == target_date
 
-    ActiveRecord::Base.transaction do
-      if is_same_day
-        # Code mới - @author: trong.lq @date: 15/01/2025
-        # Trường hợp CÙNG NGÀY: Ghép ca theo workshift_id để đảm bảo đúng ca làm việc
-        my_shifts.each do |mine|
-          next unless mine
-          
-          # Tìm ca của đối tác có cùng workshift_id
-          theirs = partner_shifts.find { |s| s.workshift_id == mine.workshift_id }
+    begin
+      ActiveRecord::Base.transaction do
+        # Sắp xếp cả hai danh sách ca làm việc theo thời gian bắt đầu
+        my_shifts.sort_by! { |s| s.start_time || '00:00' }
+        partner_shifts.sort_by! { |s| s.start_time || '00:00' }
+
+        # Sử dụng index để ghép cặp ca (v3 ưu tiên ghép theo thứ tự chọn)
+        my_shifts.each_with_index do |mine, i|
+          theirs = partner_shifts[i]
           
           if theirs.nil?
-            missing_workshift_errors << "Không tìm thấy ca workshift_id=#{mine.workshift_id} của đối tác trong ngày #{target_date}"
+            missing_workshift_errors << "Không tìm thấy ca đối ứng để ghép cặp cho ca của bạn vào ngày #{original_date}"
             next
           end
 
@@ -1049,57 +1066,28 @@ class AttendsController < ApplicationController
           )
           created_ids << issue.id
         end
+      end # Kết thúc Transaction
+
+      # Trả kết quả sau khi kết thúc transaction thành công
+      if missing_workshift_errors.any?
+        render json: { 
+          success: false, 
+          error: "Không thể ghép ca: #{missing_workshift_errors.join('; ')}", 
+          result: [] 
+        }, status: :ok
+      elsif created_ids.any?
+        send_notify("SHIFT-CHANGE", data[:approver_id])
+        render json: { success: true, message: "Đã gửi đề xuất đổi ca", result: created_ids, redirect_url: attends_path }, status: :ok
       else
-        # Code cũ - @author: trong.lq @date: 15/01/2025
-        # Trường hợp KHÁC NGÀY: Giữ nguyên logic cũ (sort theo start_time và zip)
-        my_shifts.sort_by! { |s| s.start_time || '00:00' }
-        partner_shifts.sort_by! { |s| s.start_time || '00:00' }
-
-        my_shifts.each_with_index do |mine, i|
-          theirs = partner_shifts[i]  # ghép theo thứ tự start_time
-          next unless mine && theirs
-
-          dup = Shiftissue.exists?(
-            shiftselection_id: mine.id,
-            ref_shift_changed: theirs.id.to_s,
-            stype: 'SHIFT-CHANGE',
-            status: %w[PENDING APPROVED]
-          )
-          next if dup
-
-          issue = Shiftissue.create!(
-            shiftselection_id: mine.id,
-            stype: 'SHIFT-CHANGE',
-            status: 'PENDING',
-            note: data[:reason],
-            approved_by: data[:approver_id],
-            ref_shift_changed: theirs.id.to_s,
-            us_start: mine.start_time,
-            us_end: mine.end_time,
-            docs: data[:file]
-          )
-          created_ids << issue.id
-        end
+        render json: { success: false, error: "Đề xuất đã được tạo", result: [] }, status: :ok
       end
-    end
 
-    if missing_workshift_errors.any?
-      render json: { 
-        success: false, 
-        error: "Không thể ghép ca: #{missing_workshift_errors.join('; ')}", 
-        result: [] 
-      }, status: :ok
-    elsif created_ids.any?
-      send_notify("SHIFT-CHANGE", data[:approver_id])
-      render json: { success: true, message: "Đã gửi đề xuất đổi ca", result: created_ids, redirect_url: attends_path }, status: :ok
-    else
-      render json: { success: false, error: "Đề xuất đã được tạo", result: [] }, status: :ok
+    rescue ActiveRecord::RecordInvalid => e
+      render json: { success: false, error: "Dữ liệu không hợp lệ: #{e.record.errors.full_messages.join(', ')}", result: [] }, status: :ok
+    rescue => e
+      render json: { success: false, error: "Lỗi hệ thống: #{e.message}", result: [] }, status: :ok
     end
-  rescue ActiveRecord::RecordInvalid => e
-    render json: { success: false, error: "Dữ liệu không hợp lệ: #{e.record.errors.full_messages.join(', ')}", result: [] }, status: :ok
-  rescue => e
-    render json: { success: false, error: "Lỗi hệ thống: #{e.message}", result: [] }, status: :ok
-  end
+  end # Kết thúc phương thức handle_shift_change
 
   def handle_work_trip(user_id, data)
     approver_id = data[:approver_id]
@@ -1490,14 +1478,26 @@ class AttendsController < ApplicationController
 
     issues = Shiftissue
       .joins(shiftselection: :scheduleweek)
-      .where(stype: 'COMPENSATORY-LEAVE', status: 'APPROVED')
+      .where(stype: 'COMPENSATORY-LEAVE', status: %w[PENDING APPROVED])
       .where(scheduleweeks: { user_id: user_id })
       .where("shiftissues.us_start BETWEEN ? AND ?", from_date.to_s, to_date.to_s)
 
+        # Preload workshifts từ us_end (workshift_id của ca nghỉ bù)
+    ws_ids = issues.map { |i| i.us_end.to_s }.reject { |v| v == '-1' || v.blank? }.map(&:to_i).uniq
+    ws_map = Workshift.where(id: ws_ids).index_by { |w| w.id.to_s }
+
     result = issues.map do |i|
+      # us_end = workshift_id của ca nghỉ bù, hoặc '-1' = cả ngày
+      session = if i.us_end.to_s == '-1' || i.us_end.blank?
+                  'ALL'
+                else
+                  ws = ws_map[i.us_end.to_s]
+                  ws&.start_time.present? ? (ws.start_time < '12:00' ? 'AM' : 'PM') : 'ALL'
+                end
       {
-        date:    i.us_start.to_s,   # YYYY-MM-DD — ngày được nghỉ bù
-        session: 'ALL'              # us_end = workshift_id hoặc -1, tạm return ALL
+        date:    i.us_start.to_s,  # YYYY-MM-DD — ngày được nghỉ bù
+        session: session,
+        status:  i.status          # PENDING | APPROVED
       }
     end
 
@@ -1935,40 +1935,14 @@ class AttendsController < ApplicationController
           next if i.stype == "WORK-TRIP"
 
           if i.stype == "COMPENSATORY-LEAVE"
-            next unless i.status == "APPROVED"
-            leave_date_str = i.us_start.to_s  # us_start lưu ngày nghỉ bù (YYYY-MM-DD)
-            begin
-              leave_date = Date.parse(leave_date_str).strftime('%Y-%m-%d')
-            rescue
-              next
-            end
-            events << {
-              title: "🛌 Nghỉ bù",
-              start: leave_date,
-              end:   leave_date,
-              allDay: true,
-              displayOrder: 2,
-              color: "#807579",
-              textColor: "#ffffff",
-              classNames: ["fc-compensatory-leave"],
-              extendedProps: {
-                type: "SHIFT_ISSUE",
-                stype: "COMPENSATORY-LEAVE",
-                status: i.status,
-                note: i.note,
-                content: i.content,
-                approved_by: approved_by_name,
-                docs: image_doc,
-                current_workshift: current_workshift,
-                us_start: i.us_start,
-                us_end: i.us_end
-              }
-            }
-            next
+            next if i.status == "REJECTED"
+            leave_date = Date.parse(i.us_start.to_s).strftime('%Y-%m-%d')
+            event_start = leave_date   
+            event_end   = leave_date
+          else
+            event_start = sel.work_date.strftime('%Y-%m-%d') 
+            event_end   = sel.work_date.strftime('%Y-%m-%d')
           end
-
-          event_start = sel.work_date.strftime('%Y-%m-%d')
-          event_end   = sel.work_date.strftime('%Y-%m-%d')
 
           events << {
             title: "📅 #{type_name}#{time_display}",

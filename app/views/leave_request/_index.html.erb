@@ -2183,11 +2183,52 @@ function onShowIssuePlace(select, index) {
         // currentForm.find(".lb-place-before-hol").html("Địa chỉ trước khi xuất cảnh<span class='text-danger'>*</span>");
     }
 }
-function getHoltypeSelected(select,index) {
+// function getHoltypeSelected(select,index) {
+//     let nameHoltype = $(select).find("option:selected").text();
+//     $(`.holtype-title-${index}`).text(nameHoltype);
+//     validLeaveChoosed();
+//     // disabledOptionHoltype()
+// }
+// H.anh: Bổ sung chọn ngày cũ đối với loại không lương
+function getHoltypeSelected(select, index) {
+    let holtype = $(select).val();
     let nameHoltype = $(select).find("option:selected").text();
     $(`.holtype-title-${index}`).text(nameHoltype);
+    const rangePicker = $(`#leave-request-${index} input[name="date_leave_range"]`);
+    const fp = rangePicker.data('flatpickrInstance');
+    let prevHoltype = rangePicker.data("prevHoltype");
+    if (prevHoltype === "NGHI-KHONG-LUONG" && holtype !== "NGHI-KHONG-LUONG") {
+        if (fp) fp.clear();
+        delete allSelectedDates[index];
+        delete allSelectedDateTimes[index];
+        prevSelectedDatesByIndex[index] = [];
+        const container = $(`#leave-request-${index} .detail-date-lr`);
+        container.find("div.row").remove();
+        container.find("p.text-center").show();
+        $(`#leave-request-${index} #dttotal`).val(0);
+        rangePicker.val("");
+        updateOtherPickers(index);
+        updateLeaveDatePagination(index);
+    }
+    if (fp) {
+        const now = new Date();
+        const hour = now.getHours();
+        if (holtype === "NGHI-KHONG-LUONG") {
+            let minDate = new Date();
+            minDate.setDate(minDate.getDate() - 30);
+            fp.set("minDate", minDate);
+        } else {
+            let minDate = (hour >= 19 || (hour > svalue_leave_pm && gon.organization != "BUH"))
+                ? new Date().fp_incr(1)
+                : "today";
+            fp.set("minDate", minDate);
+        }
+        const disabledDates = getAllSelectedDatesExcluding(index)
+            .map(date => flatpickr.parseDate(date, "d/m/Y"));
+        fp.set("disable", disabledDates);
+    }
+    rangePicker.data("prevHoltype", holtype);
     validLeaveChoosed();
-    // disabledOptionHoltype()
 }
 function getDayLeave(input, index) {
     let value = input.value;

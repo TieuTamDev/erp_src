@@ -795,7 +795,7 @@
     let get_data_request_attend_attends_path = "<%= get_data_request_attend_attends_path %>";
     let fetch_all_attends_in_month_attends_path = "<%= fetch_all_attends_in_month_attends_path %>";
     let get_all_workshifts = "<%= workshifts_get_all_workshifts_path %>";
-    //let get_compensatory_leaves = "/attends/get_compensatory_leaves";
+    let get_compensatory_leaves = "/attends/get_compensatory_leaves";
     let get_all_managers = "<%= workshifts_get_all_managers_path %>";
     let get_holidays = "<%= @CSVC_PATH + "api/v1/mapi_utils/get_holidays?organization=" + @uorg_scode %>";
     let get_user_on_leaves = "<%= @ERP_PATH + "api/v1/mapi_utils/get_employee_leave_days?id=" + @id.to_s %>";
@@ -913,6 +913,9 @@
               <option value="update-shift">Cập nhật ca</option>
               <option value="edit-plan">Chỉnh sửa kế hoạch làm việc</option>
               <option value="compensatory-leave">Nghỉ bù</option>
+              <!-- @author: dat.nh
+                   @date: 17/03/2026 
+                   Thêm loại đề xuất tăng ca -->
               <option value="overtime">Tăng ca</option>
             </select>
           </div>
@@ -937,14 +940,14 @@
           <!-- === Đổi Ca === -->
         <div id="section-shift-change" class="mt-3 d-none">
 
-            <%# Row 1: Ngày đổi ca + Ngày nhận ca %>
+            <%# Row 1: Ngày làm việc và ngày đăng ký đổi ca%>
             <div class="row mt-3">
               <div class="col-6">
-                <label class="fs-0 fw-bold">Ngày đổi ca<span class="text-danger">*</span>:</label>
+                <label class="fs-0 fw-bold">Ngày làm việc<span class="text-danger">*</span>:</label>
                 <input class="form-control bg-light t date-choose" id="original-date" type="text" name="original_date" placeholder="Ngày bạn muốn đổi" />
               </div>
               <div class="col-6">
-                <label class="fs-0 fw-bold">Ngày nhận ca<span class="text-danger">*</span>:</label>
+                <label class="fs-0 fw-bold">Ngày đăng ký đổi ca<span class="text-danger">*</span>:</label>
                 <input class="form-control bg-light t date-choose" id="request-date-new" type="text" name="target_date" placeholder="Ngày bạn muốn nhận" />
               </div>
             </div>
@@ -956,7 +959,7 @@
                 <select name="my_workshift_id" class="form-control" id="my-workshift-select">
                   <option value="" disabled selected>— Chọn ngày trước —</option>
                 </select>
-                <small class="text-muted">Ca bạn đang có muốn nhường</small>
+                <small class="text-muted">Ca bạn đang có và muốn đổi</small>
               </div>
               <div class="col-6">
                 <label class="fs-0 fw-bold">Thành ca<span class="text-danger">*</span>:</label>
@@ -1170,74 +1173,81 @@
 
           </div>
 
-          <!-- === Tăng ca === -->
-            <!-- Row 1: Ngày làm việc -->
-          <div id="section-overtime" class="mt-3 d-none">
-            <div class="row">
-              <div class="col-12">
-                <label class="fs-0 fw-bold" for="overtime_range">Ngày làm vượt giờ <span class="text-danger">*</span>:</label>
+          <%if is_access(session["user_id"],"OVERTIME-INDEX","READ")%>
 
-                <!-- Thêm checkbox tại đây -->
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                  <!-- Checkbox: chọn khoảng liên tiếp -->
-                  <div class="form-check mb-0">
-                    <input class="form-check-input" type="checkbox" id="range_mode_toggle" checked>
-                    <label class="form-check-label" for="range_mode_toggle">
-                      Chọn khoảng thời gian liên tiếp
-                    </label>
+            <!-- @author: dat.nh
+                @date: 17/03/2026 
+                Thêm loại đề xuất tăng ca -->
+            <!-- === Tăng ca === -->
+              <!-- Row 1: Ngày làm việc -->
+            <div id="section-overtime" class="mt-3 d-none">
+              <div class="row">
+                <div class="col-12">
+                  <label class="fs-0 fw-bold" for="overtime_range">Ngày làm vượt giờ <span class="text-danger">*</span>:</label>
+
+                  <!-- Thêm checkbox tại đây -->
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <!-- Checkbox: chọn khoảng liên tiếp -->
+                    <div class="form-check mb-0">
+                      <input class="form-check-input" type="checkbox" id="range_mode_toggle" checked>
+                      <label class="form-check-label" for="range_mode_toggle">
+                        Chọn khoảng thời gian liên tiếp
+                      </label>
+                    </div>
+
+                    <!-- Nút xóa -->
+                    <button type="button" id="clear_overtime" class="btn btn-sm btn-outline-secondary" style="background-color: #518ddd; color: white;">
+                      Xóa ngày chọn trên lịch
+                    </button>
                   </div>
 
-                  <!-- Nút xóa -->
-                  <button type="button" id="clear_overtime" class="btn btn-sm btn-outline-secondary" style="background-color: #518ddd; color: white;">
-                    Xóa ngày chọn trên lịch
-                  </button>
-                </div>
+                  <input class="form-control bg-light t date-choose"
+                        id="overtime_range"
+                        type="text"
+                        name="overtime_range" />
 
-                <input class="form-control bg-light t date-choose"
-                      id="overtime_range"
-                      type="text"
-                      name="overtime_range" />
+                  <input type="hidden" id="overtime_start" name="overtime_start">
+                  <input type="hidden" id="overtime_end" name="overtime_end">
+                  <input type="hidden" id="overtime_dates_filtered" name="overtime_dates_filtered">
+                  <input type="hidden" id="overtime_shift_data" name="overtime_shift_data" value="[]">
 
-                <input type="hidden" id="overtime_start" name="overtime_start">
-                <input type="hidden" id="overtime_end" name="overtime_end">
-                <input type="hidden" id="overtime_dates_filtered" name="overtime_dates_filtered">
-                <input type="hidden" id="overtime_shift_data" name="overtime_shift_data" value="[]">
+                  <div id="excluded-dates-container" class="mt-2"></div>
+                  
+                  <div id="overtime-wrapper" class="p-2 rounded border bg-light-subtle d-none">
+                    <!-- Hiển thị lựa chọn ca làm việc -->
+                    <div id="overtime-shift-container" class="mt-3" style="max-height: 320px; overflow-y: auto;"></div>
 
-                <div id="excluded-dates-container" class="mt-2"></div>
-                
-                <div id="overtime-wrapper" class="p-2 rounded border bg-light-subtle d-none">
-                  <!-- Hiển thị lựa chọn ca làm việc -->
-                  <div id="overtime-shift-container" class="mt-3" style="max-height: 320px; overflow-y: auto;"></div>
+                    <!-- Tổng vùng điều khiển bên dưới lịch -->
+                    <!-- Vùng footer điều khiển: phân trang + tổng số ngày -->
+                    <div id="overtime-footer-controls" class="d-flex align-items-center gap-3 mt-2 flex-wrap d-none">
+                      <!-- Chọn số dòng hiển thị -->
+                      <div class="d-flex align-items-center gap-2">
+                        <select id="overtimeRowsPerPage" class="form-select form-select-sm w-auto">
+                          <option value="5" selected>5</option>
+                          <option value="10">10</option>
+                          <option value="20">20</option>
+                        </select>
+                      </div>
 
-                  <!-- Tổng vùng điều khiển bên dưới lịch -->
-                  <!-- Vùng footer điều khiển: phân trang + tổng số ngày -->
-                  <div id="overtime-footer-controls" class="d-flex align-items-center gap-3 mt-2 flex-wrap d-none">
-                    <!-- Chọn số dòng hiển thị -->
-                    <div class="d-flex align-items-center gap-2">
-                      <select id="overtimeRowsPerPage" class="form-select form-select-sm w-auto">
-                        <option value="5" selected>5</option>
-                        <option value="10">10</option>
-                        <option value="20">20</option>
-                      </select>
-                    </div>
+                      <!-- Pagination kiểu << 1 / 3 >> -->
+                      <div id="pagination-controls" class="d-flex align-items-center gap-2">
+                        <button type="button" id="prev-overtime-page" class="btn btn-sm btn-outline-primary px-2">&laquo;</button>
+                        <span><span id="current-overtime-page">1</span>/<span id="total-overtime-pages">1</span></span>
+                        <button type="button" id="next-overtime-page" class="btn btn-sm btn-outline-primary px-2">&raquo;</button>
+                      </div>
 
-                    <!-- Pagination kiểu << 1 / 3 >> -->
-                    <div id="pagination-controls" class="d-flex align-items-center gap-2">
-                      <button type="button" id="prev-overtime-page" class="btn btn-sm btn-outline-primary px-2">&laquo;</button>
-                      <span><span id="current-overtime-page">1</span>/<span id="total-overtime-pages">1</span></span>
-                      <button type="button" id="next-overtime-page" class="btn btn-sm btn-outline-primary px-2">&raquo;</button>
-                    </div>
-
-                    <!-- Tổng số ngày -->
-                    <div class="d-flex align-items-center gap-2">
-                      <label class="mb-0 fw-bold">Tổng ngày:</label>
-                      <input type="text" id="total_overtime_days_selected" class="form-control form-control-sm" style="width: 50px;" readonly value="0">
+                      <!-- Tổng số ngày -->
+                      <div class="d-flex align-items-center gap-2">
+                        <label class="mb-0 fw-bold">Tổng ngày:</label>
+                        <input type="text" id="total_overtime_days_selected" class="form-control form-control-sm" style="width: 50px;" readonly value="0">
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
+
+          <%end%>
 
           <div class="mt-3">
             <label class="fs-0 fw-bold" for="requestApprovedBy"><%= lib_translate("Trưởng/phó phòng phê duyệt") %>:</label>
