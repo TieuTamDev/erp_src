@@ -382,37 +382,6 @@
             });
           });
         }
-      } 
-      /*
-      @author: dat.nh @date: 14/03/2026
-      Thêm phần hiển thị chi tiết ngày tháng cho đề xuất tăng ca
-      */
-      else if (item.stype === "OVERTIME") {
-        if (Array.isArray(item.grouped_overtimes)) {
-          item.grouped_overtimes.forEach(overtime => {
-            let date = overtime.work_date ? moment(overtime.work_date).format("YYYY-MM-DD") : null;
-            if (!date) return;
-
-            let start = "07:30";
-            let end = "17:00";
-
-            let key = `${item.id}_${date}_${start}_${end}`;
-            if (seen.has(key)) return;
-            seen.add(key);
-
-            events.push({
-              id: key,
-              original_id: item.id,
-              user_id: item.user_id,
-              title: item.stype_text || "Tăng ca",
-              user_name: item.user_name || "",
-              date: date,
-              start: start,
-              end: end,
-              color: color,
-            });
-          });
-        }
       } else {
         let date = item.work_date ? moment(item.work_date).format("YYYY-MM-DD") : null;
         if (!date) return;
@@ -699,58 +668,8 @@
                 <div class="col-12 col-md-6">${col2}</div>
               </div>
             </div>`;
-      }
-      /*
-      @author: dat.nh @date: 14/03/2026
-      Thêm phần hiển thị chi tiết ngày tháng cho đề xuất tăng ca
-      */ 
-      else if (shiftissue.stype === "OVERTIME" && Array.isArray(shiftissue.grouped_overtimes)) {
-          // Gom nhóm dữ liệu theo ngày
-          const byDate = {};
-          shiftissue.grouped_overtimes.forEach((overtime) => {
-              const dateYmd = moment(overtime.work_date).format("YYYY-MM-DD");
-              if (!byDate[dateYmd]) byDate[dateYmd] = { morning: false, afternoon: false };
-
-              const start = overtime.start_time;
-              const end = overtime.end_time;
-
-              // Xác định ca dựa vào giờ
-              if (start && end) {
-                  const startHour = parseInt(start.split(":")[0], 10);
-                  if (startHour < 12) byDate[dateYmd].morning = true;
-                  else byDate[dateYmd].afternoon = true;
-              }
-          });
-
-          // Render HTML tương tự đoạn mẫu
-          const entries = Object.keys(byDate)
-              .sort()
-              .map((dYmd) => {
-                  const d = moment(dYmd).format("DD-MM-YYYY");
-                  const f = byDate[dYmd];
-                  let label = "";
-                  if (f.morning && f.afternoon) label = "cả ngày";
-                  else if (f.morning) label = "ca sáng";
-                  else if (f.afternoon) label = "ca chiều";
-                  else label = "ca";
-
-                  return `<div class="mb-1">📅 <strong>${d}</strong>: <strong>${label}</strong></div>`;
-              });
-
-          const mid = Math.ceil(entries.length / 2);
-          const col1 = entries.slice(0, mid).join("");
-          const col2 = entries.slice(mid).join("");
-
-          dateHtml = `
-            <div class="mt-1">
-              <div class="mb-2">Chi tiết tăng ca theo ngày:</div>
-              <div class="row">
-                <div class="col-12 col-md-6">${col1}</div>
-                <div class="col-12 col-md-6">${col2}</div>
-              </div>
-            </div>`;
       } else if (shiftissue.start_date && shiftissue.end_date) {
-          // Trường hợp có start_date, end_date nhưng không có grouped_overtimes hoặc grouped_work_trips
+          // Trường hợp có start_date, end_date nhưng không có grouped_work_trips
           dateHtml = `
             <div class="mb-2">
               <span>Ngày: </span>
@@ -866,7 +785,7 @@
       case "OVERTIME":
         details = `
           <div class="mb-2">
-            <span>Giờ làm thêm: </span><span style="color: #738ffb;"><b>${shiftissue.us_start || "-"} - ${shiftissue.us_end || "-"}</b></span>
+            <span>Giờ vào: </span><span style="color: #738ffb;"><b>${shiftissue.us_start}</b></span> <span class="me-2 ms-2">-</span> <span>Giờ ra: </span><span style="color: #738ffb;"><b>${shiftissue.us_end}</b></span>
           </div>`;
         break;
       default:

@@ -95,7 +95,7 @@ class ShiftissuesController < ApplicationController
                                         .where("shiftissues.stype = 'OVERTIME'")
                                         .where("users.sid = ?", representative.sid)
                                         .where("shiftissues.created_at = ?", representative.created_at)
-                                        .select("shiftissues.*, users.sid, users.last_name, users.first_name, shiftselections.work_date")
+                                        .select("shiftissues.*, users.sid, users.last_name, users.first_name, shiftselections.work_date, shiftselections.id as shiftselection_id")
 
               grouped_items.each do |shift_item|
                 attrs =
@@ -121,6 +121,16 @@ class ShiftissuesController < ApplicationController
                   end
 
                 shift_item.update!(attrs)
+
+                if (shift_item.status == 'APPROVED')
+                  shiftselection = Shiftselection.find_by(id: shift_item.shiftselection_id)
+                  shiftselection.update({
+                    is_day_off: 'OVERTIME',
+                    start_time: shift_item.us_start,
+                    end_time: shift_item.us_end,
+                  }) if shiftselection.present?
+                end
+
                 send_shiftissue_notification(shift_item, shift_item.status, reason)
                 send_shiftissue_notification_to_approver(shift_item) if status == 'APPROVED' && shift_item.status == 'WAITING_APPROVAL'
               end

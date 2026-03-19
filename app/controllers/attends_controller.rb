@@ -622,8 +622,11 @@ class AttendsController < ApplicationController
     
     # Code mới - @author: trong.lq @date: 22/10/2025
     # Thêm edit-plan vào danh sách không cần validation date/workshift
+    # Code mới - @author: an.cdb - @date: 15/03/2026 - Thêm compensatory vào danh sách
     elsif request_type != "update-shift" && request_type != "edit-plan" && request_type != "compensatory-leave"
-      date = Date.parse(params[:original_date]) rescue nil
+      date_str = params[:original_date].to_s
+      date = Date.strptime(date_str, "%d/%m/%Y") rescue Date.parse(date_str) rescue nil
+      
       validation = validate_attend_request_conditions(user_id, date, workshift_id, request_type)
       return render json: { success: false, error: validation }, status: :ok unless validation == true
     end
@@ -1006,67 +1009,103 @@ class AttendsController < ApplicationController
     end
   end
 
-def handle_shift_change(user_id, data)
+#@author: an.cdb - @date: 18/03/2026
+  def handle_shift_change(user_id, data)
     partner_id = params[:swap_with_user_id].to_i
     
     begin
-      original_date = params[:original_date].is_a?(Date) ? params[:original_date] : Date.parse(params[:original_date].to_s)
-      target_date   = params[:target_date].is_a?(Date)   ? params[:target_date]   : Date.parse(params[:target_date].to_s)
+      original_date_str = params[:original_date].to_s
+      target_date_str   = params[:target_date].to_s
+      # Ưu tiên parse theo DD/MM/YYYY trước, nếu lỗi mới fallback về parse chuẩn quốc tế
+      original_date = Date.strptime(original_date_str, '%d/%m/%Y') rescue Date.parse(original_date_str)
+      target_date   = Date.strptime(target_date_str, '%d/%m/%Y') rescue Date.parse(target_date_str)
     rescue ArgumentError, TypeError
       return render json: { success: false, error: "Ngày không hợp lệ", result: [] }, status: :ok
     end
 
     # Bổ sung khai báo cho phần ca để check đổi ca (shifft_change) - @author: an.cdb - @date:16/03/2026
-    my_workshift_id      = params[:my_workshift_id].present? ? params[:my_workshift_id].to_i : nil
-    partner_workshift_id = params[:target_workshift_id].present? ? params[:target_workshift_id].to_i : nil
+    # "ALL" -> nil -> không filter -> lấy tất cả ca
+    my_ws_raw            = params[:my_workshift_id].to_s.strip
+    partner_ws_raw       = params[:target_workshift_id].to_s.strip
+    my_workshift_id      = (my_ws_raw.present? && my_ws_raw != 'ALL') ? my_ws_raw : nil
+    partner_workshift_id = (partner_ws_raw.present? && partner_ws_raw != 'ALL') ? partner_ws_raw : nil
 
     my_shifts      = shifts_in_day(user_id, original_date, my_workshift_id)
     partner_shifts = shifts_in_day(partner_id, target_date, partner_workshift_id)
 
-    return render json: { success: false, error: "Bạn không có ca làm trong ngày #{original_date}", result: [] }, status: :ok if my_shifts.empty?
-    return render json: { success: false, error: "Đối tác không có ca làm trong ngày #{target_date}", result: [] }, status: :ok if partner_shifts.empty?
+    return render json: { success: false, error: "Bạn không có ca làm trong ngày #{original_date.strftime('%d/%m/%Y')} (Ca chọn: #{my_workshift_id || 'Tất cả'}", result: [] }, status: :ok if my_shifts.empty?
+    return render json: { success: false, error: "Đối tác không có ca làm trong ngày #{target_date.strftime('%d/%m/%Y')} (Ca chọn: #{partner_workshift_id || 'Tất cả'}", result: [] }, status: :ok if partner_shifts.empty?
+
+    if my_shifts.size != partner_shifts.size
+      return render json: { 
+        success: false, 
+        error: "Số lượng ca làm việc không tương xứng (Bạn có #{my_shifts.size} ca, đối tác có #{partner_shifts.size} ca). Vui lòng chọn ca cụ thể để đổi.", 
+        result: [] 
+      }, status: :ok
+    end
 
     created_ids = []
     missing_workshift_errors = []
 
     begin
       ActiveRecord::Base.transaction do
-        # Sắp xếp cả hai danh sách ca làm việc theo thời gian bắt đầu
-        my_shifts.sort_by! { |s| s.start_time || '00:00' }
-        partner_shifts.sort_by! { |s| s.start_time || '00:00' }
+        is_full_day = my_ws_raw.blank? || my_ws_raw == 'ALL'
+        if is_full_day
+          # Ca 'Ca ngay': chi tao 1 Shiftissue duy nhat dung ca dau tien lam dai dien
+          mine   = my_shifts.sort_by { |s| s.start_time || '00:00' }.first
+          theirs = partner_shifts.sort_by { |s| s.start_time || '00:00' }.first
 
-        # Sử dụng index để ghép cặp ca (v3 ưu tiên ghép theo thứ tự chọn)
-        my_shifts.each_with_index do |mine, i|
-          theirs = partner_shifts[i]
-          
-          if theirs.nil?
-            missing_workshift_errors << "Không tìm thấy ca đối ứng để ghép cặp cho ca của bạn vào ngày #{original_date}"
-            next
-          end
-
-          # Kiểm tra trùng đề xuất
           dup = Shiftissue.exists?(
             shiftselection_id: mine.id,
-            ref_shift_changed: theirs.id.to_s,
             stype: 'SHIFT-CHANGE',
             status: %w[PENDING APPROVED]
           )
-          next if dup
+          unless dup
+            issue = Shiftissue.create!(
+              shiftselection_id: mine.id,
+              stype: 'SHIFT-CHANGE',
+              status: 'PENDING',
+              note: data[:reason],
+              approved_by: data[:approver_id],
+              ref_shift_changed: theirs.id.to_s,
+              us_start: 'ALL',
+              us_end: 'ALL',
+              docs: data[:file]
+            )
+            created_ids << issue.id
+          end
+        else
+          # Ca cu the: sort va ghep cap theo thu tu start_time
+          my_shifts.sort_by! { |s| s.start_time || '00:00' }
+          partner_shifts.sort_by! { |s| s.start_time || '00:00' }
 
-          issue = Shiftissue.create!(
-            shiftselection_id: mine.id,
-            stype: 'SHIFT-CHANGE',
-            status: 'PENDING',
-            note: data[:reason],
-            approved_by: data[:approver_id],
-            ref_shift_changed: theirs.id.to_s,
-            us_start: mine.start_time,
-            us_end: mine.end_time,
-            docs: data[:file]
-          )
-          created_ids << issue.id
+          my_shifts.each_with_index do |mine, i|
+            theirs = partner_shifts[i]
+            next unless mine && theirs
+
+            dup = Shiftissue.exists?(
+              shiftselection_id: mine.id,
+              ref_shift_changed: theirs.id.to_s,
+              stype: 'SHIFT-CHANGE',
+              status: %w[PENDING APPROVED]
+            )
+            next if dup
+
+            issue = Shiftissue.create!(
+              shiftselection_id: mine.id,
+              stype: 'SHIFT-CHANGE',
+              status: 'PENDING',
+              note: data[:reason],
+              approved_by: data[:approver_id],
+              ref_shift_changed: theirs.id.to_s,
+              us_start: mine.start_time,
+              us_end: mine.end_time,
+              docs: data[:file]
+            )
+            created_ids << issue.id
+          end
         end
-      end # Kết thúc Transaction
+      end
 
       # Trả kết quả sau khi kết thúc transaction thành công
       if missing_workshift_errors.any?
@@ -2092,12 +2131,19 @@ def handle_shift_change(user_id, data)
 
   # Tìm ca trong ngày theo user qua scheduleweeks
   # Cập nhật để truy vấn ca trong ngày - @author:an.cdb - @date: 16/03/2026
-  def shifts_in_day(user_id, date, workshift_id = nil)
+  def shifts_in_day(user_id, date, shift_ref_id = nil)
+    # Đưa về đúng múi giờ của Rails (VN) để chặn lỗi lệch ngày ở tầng Database
+    start_time = date.in_time_zone("Asia/Ho_Chi_Minh").beginning_of_day
+    end_time   = date.in_time_zone("Asia/Ho_Chi_Minh").end_of_day
     q = Shiftselection
           .joins(:scheduleweek)
-          .where(scheduleweeks: { user_id: user_id })
-          .where(work_date: date.beginning_of_day..date.end_of_day)
-    q = q.where(workshift_id: workshift_id) if workshift_id
+          .where(scheduleweeks: { user_id: user_id, status: %w[PENDING APPROVED] })
+          .where(work_date: start_time..end_time)
+        
+    # Nếu người dùng chọn 1 ca cụ thể (khác null, undefined, -1)  THÌ MỚI thêm dòng lệnh lọc đúng ca đó ra.
+    if shift_ref_id.present? && !["null", "undefined", "-1"].include?(shift_ref_id.to_s)
+      q = q.where("shiftselections.workshift_id = :id OR shiftselections.id = :id", id: shift_ref_id)
+    end
     q.to_a
   end
 

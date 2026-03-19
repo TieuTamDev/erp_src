@@ -108,7 +108,7 @@ class LeaveRequestController < ApplicationController
       holpros = holpros.as_json
       # Business rule:
       # If all sholtype = NGHI-KHONG-LUONG → allow cancel even when DONE
-      holpros_ids = datas.map { |d| d["id"] }
+      holpros_ids = holpros.map { |d| d["id"] }
       invalid_ids = Holprosdetail.where(holpros_id: holpros_ids)
                       .where.not(sholtype: "NGHI-KHONG-LUONG")
                       .pluck(:holpros_id)
@@ -250,7 +250,7 @@ class LeaveRequestController < ApplicationController
 
         #
         content = "Đơn nghỉ phép của nhân sự: <b>#{full_name}</b> - Mã nhân sự: <b>#{user_request&.sid}</b> đã bị hủy. Lý do:<b>#{cancel_reason_leave}</b>"
-        create_noti_cancel(content,list_user_id)
+        create_noti_cancel(content, list_user_id, holpros_id)
 
         # get days leave
         amount_to_consume = Holprosdetail.where(holpros_id: holpros_id)
@@ -270,14 +270,23 @@ class LeaveRequestController < ApplicationController
       redirect_to request.referer
     end
 
-    def create_noti_cancel(content,list_user_id)
+    def create_noti_cancel(content, list_user_ids, holpros_id)
+      list_user_id ||= []
+      used_id_main = Holpro.find_by(id: holpros_id)&.holiday&.user_id
+      if used_id_main.present?
+        list_user_sub = manager_leave_sub_users(used_id_main)
+        list_user_id += list_user_sub
+      end
+
+      list_user_ids = list_user_id.compact.uniq
+
       new_notify = Notify.create!(
         title: "Nghỉ phép",
         contents: content,
         receivers: "Hệ thống ERP",
         stype: "LEAVE_REQUEST"
       )
-      list_user_id.each do |uid|
+      list_user_ids.each do |uid|
         Snotice.create!(
           notify_id: new_notify.id,
           user_id: uid,
@@ -288,7 +297,53 @@ class LeaveRequestController < ApplicationController
         end
       end
     end
+    def manager_leave_sub_users(user_id)
+      positionjob_ids = Work.where(user_id: user_id)
+                            .where.not(positionjob_id: nil)
+                            .pluck(:positionjob_id)
+      department_ids = Positionjob.where(id: positionjob_ids).pluck(:department_id)
+      departments = Department.where(id: department_ids, status: "0")
+                              .where.not(parents: [nil, ""])
+      leaf_departments =
+        if departments.present?
+          parent_ids = departments.pluck(:parents).compact.map(&:to_i)
+          departments.reject { |dept| parent_ids.include?(dept.id) }
+        else
+          Department.where(id: department_ids, status: "0").limit(1)
+        end
+      return [] if leaf_departments.blank?
+      start_department_id = leaf_departments.first.id
+      department_chain_ids = []
+      current_id = start_department_id
 
+      while current_id.present? && !department_chain_ids.include?(current_id)
+        department_chain_ids << current_id
+        current_id = Department.find_by(id: current_id)&.parents&.to_i
+      end
+      children_ids = []
+      queue = [start_department_id]
+      while queue.any?
+        parent_id = queue.shift
+
+        child_ids = Department.where(parents: parent_id).pluck(:id)
+        child_ids.each do |cid|
+          next if children_ids.include?(cid)
+          children_ids << cid
+          queue << cid
+        end
+      end
+      all_department_ids = (department_chain_ids + children_ids).uniq
+      user_ids_from_department =
+        Work.joins(:positionjob)
+            .where(positionjobs: { department_id: all_department_ids })
+            .pluck(:user_id)
+      manager_user_ids =
+        Work.joins(stask: [accesses: :resource])
+            .where(resources: { scode: "MANAGER-LEAVE-SUB" })
+            .where(accesses: { permision: "READ" })
+            .pluck(:user_id)
+      (user_ids_from_department & manager_user_ids).uniq
+    end
     def check_urgent_leave
       # user_id = session[:user_id]
     
